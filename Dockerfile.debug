@@ -1,0 +1,13 @@
+FROM microsoft/dotnet:1.1.2-sdk
+
+ENV DOTNET_USE_POLLING_FILE_WATCHER 1
+
+COPY ./src/Voidwell.DaybreakGames/Voidwell.DaybreakGames.csproj /tmp/Voidwell.DaybreakGames.csproj
+
+WORKDIR /tmp
+
+RUN dotnet restore
+
+WORKDIR /Voidwell.DaybreakGames
+
+ENTRYPOINT dotnet watch run
