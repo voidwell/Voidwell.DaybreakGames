@@ -34,13 +34,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task RefreshStore()
         {
-            var itemTask = CensusItem.GetAllItems();
-            var itemCategoryTask = CensusItemCategory.GetAllItemCategories();
-
-            await Task.WhenAll(itemTask, itemCategoryTask);
-
-            var items = itemTask.Result;
-            var itemCategories = itemCategoryTask.Result;
+            var items = await CensusItem.GetAllItems();
+            var itemCategories = await CensusItemCategory.GetAllItemCategories();
 
             if (items != null)
             {
