@@ -14,6 +14,9 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbCharacterWeaponStat> CharacterWeaponStats { get; set; }
         public DbSet<DbCharacterWeaponStatByFaction> CharacterWeaponStatByFactions { get; set; }
         public DbSet<DbItem> Items { get; set; }
+        public DbSet<DbMapRegion> MapRegions { get; set; }
+        public DbSet<DbMapHex> MapHexs { get; set; }
+        public DbSet<DbFacilityLink> FacilityLinks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
