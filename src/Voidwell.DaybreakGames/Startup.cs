@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Voidwell.DaybreakGames.Census;
+using Newtonsoft.Json;
+using Voidwell.DaybreakGames.Data;
+using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames
 {
@@ -24,11 +27,23 @@ namespace Voidwell.DaybreakGames
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvcCore()
-                .AddDataAnnotations();
+                .AddDataAnnotations()
+                .AddJsonFormatters(options =>
+                {
+                    options.NullValueHandling = NullValueHandling.Ignore;
+                });
+
+            services.AddEntityFrameworkContext();
 
             services.AddOptions();
             services.Configure<DaybreakAPIOptions>(Configuration);
             services.AddTransient(a => a.GetRequiredService<IOptions<DaybreakAPIOptions>>().Value);
+
+            services.AddSingleton<ICharacterService, CharacterService>();
+            services.AddSingleton<IOutfitService, OutfitService>();
+
+            CensusQuery.GlobalApiKey = "example";
+            CensusQuery.GlobalNamespace = "ps2";
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
