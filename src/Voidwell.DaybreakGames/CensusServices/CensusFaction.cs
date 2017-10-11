@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
+using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public static class CensusFaction
     {
-        public static async Task<IEnumerable<JToken>> GetAllFactions()
+        public static async Task<IEnumerable<CensusFactionModel>> GetAllFactions()
         {
             var query = new CensusQuery.Query("faction");
             query.SetLanguage("en");
@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "user_selectable"
             });
 
-            return await query.GetBatch();
+            return await query.GetBatch<CensusFactionModel>();
         }
     }
 }
