@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
+using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public static class CensusProfile
     {
-        public static async Task<IEnumerable<JToken>> GetAllProfiles()
+        public static async Task<IEnumerable<CensusProfileModel>> GetAllProfiles()
         {
             var query = new CensusQuery.Query("profile");
             query.SetLanguage("en");
@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "image_id"
             });
 
-            return await query.GetBatch();
+            return await query.GetBatch<CensusProfileModel>();
         }
     }
 }
