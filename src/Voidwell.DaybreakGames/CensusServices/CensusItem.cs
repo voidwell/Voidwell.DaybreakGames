@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
+using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public static class CensusItem
     {
-        public static async Task<IEnumerable<JToken>> GetAllItems()
+        public static async Task<IEnumerable<CensusItemModel>> GetAllItems()
         {
             var query = new CensusQuery.Query("item");
             query.SetLanguage("en");
@@ -25,7 +26,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "image_id"
             });
 
-            return await query.GetBatch();
+            return await query.GetBatch<CensusItemModel>();
         }
 
         public static async Task<JToken> GetWeaponInfo(string weaponItemId)
