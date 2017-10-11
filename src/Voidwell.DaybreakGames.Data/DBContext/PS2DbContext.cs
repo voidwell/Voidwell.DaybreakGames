@@ -17,6 +17,7 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbMapRegion> MapRegions { get; set; }
         public DbSet<DbMapHex> MapHexs { get; set; }
         public DbSet<DbFacilityLink> FacilityLinks { get; set; }
+        public DbSet<DbFaction> Factions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
