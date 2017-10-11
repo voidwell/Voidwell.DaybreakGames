@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
   </ItemGroup>
 
 </Project>

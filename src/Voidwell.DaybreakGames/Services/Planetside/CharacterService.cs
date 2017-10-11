@@ -57,7 +57,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
             }
 
-            await Task.WhenAll(UpdateCharacterStats(characterId, lastLoginDate),
+            await Task.WhenAll(UpdateCharacterTimes(characterId),
+                               UpdateCharacterStats(characterId, lastLoginDate),
                                UpdateCharacterWeaponStats(characterId, lastLoginDate),
                                UpdateCharacterOutfitMembership(characterId));
         }
