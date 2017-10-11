@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Reflection;
+using Voidwell.DaybreakGames.Census.JsonConverters;
 
 namespace Voidwell.DaybreakGames.Census
 {
@@ -14,6 +15,22 @@ namespace Voidwell.DaybreakGames.Census
     {
         public static string GlobalNamespace { get; set; }
         public static string GlobalApiKey { get; set; }
+
+        private static JsonSerializer JsonCensusDeserializer { get; set; }
+
+        static CensusQuery()
+        {
+            var settings = new JsonSerializerSettings
+            {
+                ContractResolver = new UnderscorePropertyNamesContractResolver(),
+                Converters = new JsonConverter[]
+                {
+                    new BooleanJsonConverter(),
+                    new DateTimeJsonConverter()
+                }
+            };
+            JsonCensusDeserializer = JsonSerializer.Create(settings);
+        }
 
         public class Query : CensusObject
         {
@@ -179,28 +196,19 @@ namespace Voidwell.DaybreakGames.Census
             public async Task<T> Get<T>()
             {
                 var result = await ExecuteQuery("get", this);
-                return result.First.ToObject<T>(new JsonSerializer
-                {
-                    ContractResolver = new UnderscorePropertyNamesContractResolver()
-                });
+                return result.ToObject<T>(JsonCensusDeserializer);
             }
 
             public async Task<IEnumerable<T>> GetList<T>()
             {
                 var result = await ExecuteQuery("get", this);
-                return result.ToObject<IEnumerable<T>>(new JsonSerializer
-                {
-                    ContractResolver = new UnderscorePropertyNamesContractResolver()
-                });
+                return result.ToObject<IEnumerable<T>>(JsonCensusDeserializer);
             }
 
             public async Task<IEnumerable<T>> GetBatch<T>()
             {
                 var result = await ExecuteQueryBatch("get", this);
-                return result.ToObject<IEnumerable<T>>(new JsonSerializer
-                {
-                    ContractResolver = new UnderscorePropertyNamesContractResolver()
-                });
+                return result.ToObject<IEnumerable<T>>(JsonCensusDeserializer);
             }
 
             public Task<JToken> Get()

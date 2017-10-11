@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
   </ItemGroup>
 
 </Project>
