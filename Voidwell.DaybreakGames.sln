@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Cens
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Census.Test", "Voidwell.DaybreakGames.Census.Test\Voidwell.DaybreakGames.Census.Test.csproj", "{7B9F9A62-FEE3-451B-A39F-F2DB4A332DC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Census.Test", "test\Voidwell.DaybreakGames.Census.Test\Voidwell.DaybreakGames.Census.Test.csproj", "{7B9F9A62-FEE3-451B-A39F-F2DB4A332DC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Data", "src\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj", "{D982D254-B957-4EA4-A076-A27DFAFB4781}"
 EndProject
