@@ -47,6 +47,8 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IProfileService, ProfileService>();
             services.AddSingleton<ITitleService, TitleService>();
             services.AddSingleton<IVehicleService, VehicleService>();
+            services.AddSingleton<IWorldService, WorldService>();
+            services.AddSingleton<IZoneService, ZoneService>();
 
             CensusQuery.GlobalApiKey = "example";
             CensusQuery.GlobalNamespace = "ps2";
