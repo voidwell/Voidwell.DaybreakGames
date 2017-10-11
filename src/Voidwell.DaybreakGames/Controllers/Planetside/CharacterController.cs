@@ -24,7 +24,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         [HttpGet("{characterId}")]
         public async Task<ActionResult> GetCharacterById(string characterId)
         {
-            var result = await _characterService.GetCharacterById(characterId);
+            var result = await _characterService.GetCharacter(characterId);
             return Ok(result);
         }
     }
