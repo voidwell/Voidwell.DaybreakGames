@@ -8,7 +8,7 @@ namespace Voidwell.DaybreakGames.Data
         public static IServiceCollection AddEntityFrameworkContext(this IServiceCollection services)
         {
             services.AddEntityFrameworkNpgsql();
-            services.AddDbContext<PS2CharacterDbContext>();
+            services.AddDbContext<PS2DbContext>();
 
             return services;
         }
