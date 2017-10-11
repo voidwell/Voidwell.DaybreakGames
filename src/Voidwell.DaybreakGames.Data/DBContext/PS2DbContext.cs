@@ -20,6 +20,8 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbFaction> Factions { get; set; }
         public DbSet<DbProfile> Profiles { get; set; }
         public DbSet<DbTitle> Titles { get; set; }
+        public DbSet<DbVehicle> Vehicles { get; set; }
+        public DbSet<DbVehicleFaction> VehicleFactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
