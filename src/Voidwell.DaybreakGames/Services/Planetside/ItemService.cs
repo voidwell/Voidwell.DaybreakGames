@@ -19,7 +19,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _ps2DbContext = ps2DbContext;
         }
 
-        public async Task<IEnumerable<DbItem>> FindItems(params string[] itemIds)
+        public async Task<IEnumerable<DbItem>> FindItems(IEnumerable<string> itemIds)
         {
             return await _ps2DbContext.Items.Where(i => itemIds.Contains(i.Id))
                 .ToListAsync();

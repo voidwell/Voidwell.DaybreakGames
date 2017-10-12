@@ -24,5 +24,12 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string AttackerWeaponId { get; set; }
         public string AttackerOutfitId { get; set; }
         public bool IsHeadshot { get; set; }
+
+        public DbCharacter Character { get; set; }
+        public DbCharacter AttackerCharacter { get; set; }
+        public DbOutfit CharacterOutfit { get; set; }
+        public DbOutfit AttackerOutfit { get; set; }
+        public DbVehicle AttackerVehicle { get; set; }
+        public DbItem AttackerWeapon { get; set; }
     }
 }

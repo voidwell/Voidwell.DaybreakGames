@@ -27,6 +27,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return characterList.Select(c => CharacterSearchResult.LoadFromCensusCharacter(c));
         }
 
+        public async Task<IEnumerable<DbCharacter>> FindCharacters(IEnumerable<string> characterIds)
+        {
+            return await _ps2DbContext.Characters.Where(c => characterIds.Contains(c.Id))
+                .ToListAsync();
+        }
+
         public async Task<DbCharacter> GetCharacter(string characterId)
         {
             var character = await _ps2DbContext.Characters.SingleAsync(c => c.Id == characterId);
@@ -596,6 +602,60 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await _ps2DbContext.SaveChangesAsync();
 
             return dataModel;
+        }
+
+        public async Task<IEnumerable<DbPlayerSession>> GetSessions(string characterId)
+        {
+            return await _ps2DbContext.PlayerSessions.Where(s => s.CharacterId == characterId && s.LogoutDate != null)
+                .OrderBy("LoginDate", SortDirection.Descending)
+                .Take(25)
+                .ToArrayAsync();
+        }
+
+        public async Task<PlayerSession> GetSession(string characterId, string sessionId)
+        {
+            var session = await _ps2DbContext.PlayerSessions.Where(s => s.Id == sessionId && s.CharacterId == characterId)
+                .SingleOrDefaultAsync();
+
+            if (session == null)
+            {
+                return null;
+            }
+
+            var sessionDeaths = await _ps2DbContext.EventDeaths.Where(d => d.AttackerCharacterId == characterId || d.CharacterId == characterId && d.Timestamp > session.LoginDate && d.Timestamp < session.LogoutDate)
+                .Include(i => i.AttackerCharacter)
+                .Include(i => i.Character)
+                .Include(i => i.AttackerWeapon)
+                .ToArrayAsync();
+
+            var sessionEvents = sessionDeaths.Select(d => new PlayerSessionEvent
+            {
+                Attacker = new CombatReportItemDetail { Id = d.AttackerCharacterId, Name = d.AttackerCharacter.Name, FactionId = d.AttackerCharacter.FactionId },
+                Victim = new CombatReportItemDetail { Id = d.CharacterId, Name = d.Character.Name, FactionId = d.Character.FactionId },
+                Weapon = new PlayerSessionWeapon { Id = d.AttackerWeaponId, ImageId = d.AttackerWeapon.ImageId, Name = d.AttackerWeapon.Name },
+                Timestamp = d.Timestamp,
+                ZoneId = d.ZoneId,
+                IsHeadshot = d.IsHeadshot,
+                AttackerFireModeId = d.AttackerFireModeId,
+                AttackerLoadoutId = d.AttackerLoadoutId,
+                AttackerOutfitId = d.AttackerOutfitId,
+                AttackerVehicleId = d.AttackerVehicleId,
+                CharacterLoadoutId = d.CharacterLoadoutId,
+                CharacterOutfitId = d.CharacterOutfitId
+            });
+
+            return new PlayerSession
+            {
+                Events = sessionEvents,
+                Session = new PlayerSessionInfo
+                {
+                    CharacterId = session.CharacterId,
+                    Id = session.Id,
+                    Duration = session.Duration,
+                    LoginDate = session.LoginDate,
+                    LogoutDate = session.LogoutDate
+                }
+            };
         }
 
         public void Dispose()

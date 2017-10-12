@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
@@ -14,5 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int Cost { get; set; }
         public string CostResourceId { get; set; }
         public string ImageId { get; set; }
+
+        public IEnumerable<DbVehicleFaction> Faction { get; set; }
     }
 }
