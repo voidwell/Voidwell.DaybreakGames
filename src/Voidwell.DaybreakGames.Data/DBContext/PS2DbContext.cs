@@ -31,6 +31,7 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbPlayerSession> PlayerSessions { get; set; }
         public DbSet<DbMetagameEventCategory> MetagameEventCategories { get; set; }
         public DbSet<DbMetagameEventState> MetagameEventStates { get; set; }
+        public DbSet<DbCharacterUpdateQueue> CharacterUpdateQueue { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
