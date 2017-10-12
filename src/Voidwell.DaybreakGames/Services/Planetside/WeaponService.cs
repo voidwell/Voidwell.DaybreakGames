@@ -20,14 +20,54 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _ps2DbContext = ps2DbContext;
         }
 
-        public async Task GetWeaponInfo(string weaponItemId)
+        public async Task<WeaponInfoResult> GetWeaponInfo(string weaponItemId)
         {
             var info = await CensusItem.GetWeaponInfo(weaponItemId);
 
-            // ToDo: create data sheet model
+            var hipModes = info.FireMode.Where(m => m.Type == "primary");
+            var aimModes = info.FireMode.Where(m => m.Type == "secondary");
+
+            return new WeaponInfoResult
+            {
+                Name = info.Name.English,
+                Category = info.Category.Name.English,
+                FactionId = info.FactionId,
+                ImageId = info.ImageId,
+                Description = info.Description.English,
+                MaxStackSize = info.MaxStackSize,
+                Range = info.Datasheet.Range.English,
+                FireRateMs = info.Datasheet.FireRateMs,
+                ClipSize = info.Datasheet.ClipSize,
+                Capacity = info.Datasheet.Capacity,
+                MuzzleVelocity = info.FireMode.First().Speed,
+                MinDamage = info.FireMode.Min(m => m.DamageMin),
+                MaxDamage = info.FireMode.Max(m => m.DamageMax),
+                MinDamageRange = info.FireMode.Min(m => m.DamageMinRange),
+                MaxDamageRange = info.FireMode.Min(m => m.DamageMaxRange),
+                MinReloadSpeed = info.FireMode.Min(m => m.ReloadTimeMs + m.ReloadChamberTimeMs),
+                MaxReloadSpeed = info.FireMode.Max(m => m.ReloadTimeMs),
+                HipAcc = new AccuracyState
+                {
+                    Crouching = hipModes.First().States.First(s => s.PlayerState == "Crouching").MinConeOfFire,
+                    CrouchWalking = hipModes.First().States.First(s => s.PlayerState == "CrouchWalking").MinConeOfFire,
+                    Standing = hipModes.First().States.First(s => s.PlayerState == "Standing").MinConeOfFire,
+                    Running = hipModes.First().States.First(s => s.PlayerState == "Running").MinConeOfFire,
+                    Cof = hipModes.First().CofRecoil
+                },
+                AimAcc = new AccuracyState
+                {
+                    Crouching = aimModes.First().States.First(s => s.PlayerState == "Crouching").MinConeOfFire,
+                    CrouchWalking = aimModes.First().States.First(s => s.PlayerState == "CrouchWalking").MinConeOfFire,
+                    Standing = aimModes.First().States.First(s => s.PlayerState == "Standing").MinConeOfFire,
+                    Running = aimModes.First().States.First(s => s.PlayerState == "Running").MinConeOfFire,
+                    Cof = aimModes.First().CofRecoil
+                },
+                IronSightZoom = aimModes.First().DefaultZoom,
+                FireModes = hipModes.Select(m => m.Description.English)
+            };
         }
 
-        public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(string weaponItemId, string sortColumn, SortDirection sortDirection, int rowStart, int limit)
+        public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(string weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250)
         {
             var weaponStats = await _ps2DbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId)
                 .Include(i => i.Character)
