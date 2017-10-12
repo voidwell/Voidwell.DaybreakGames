@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
+using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public static class CensusMetagameEvent
     {
-        public static async Task<IEnumerable<JToken>> GetAllCategories()
+        public static async Task<IEnumerable<CensusMetagameEventCategoryModel>> GetAllCategories()
         {
             var query = new CensusQuery.Query("metagame_event");
             query.SetLanguage("en");
@@ -21,10 +21,10 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "experience_bonus"
             });
 
-            return await query.GetBatch();
+            return await query.GetBatch<CensusMetagameEventCategoryModel>();
         }
 
-        public static async Task<IEnumerable<JToken>> GetAllStates()
+        public static async Task<IEnumerable<CensusMetagameEventStateModel>> GetAllStates()
         {
             var query = new CensusQuery.Query("metagame_event_state");
             query.SetLanguage("en");
@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "name"
             });
 
-            return await query.GetBatch();
+            return await query.GetBatch<CensusMetagameEventStateModel>();
         }
     }
 }

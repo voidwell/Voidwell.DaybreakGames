@@ -29,6 +29,8 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbEventVehicleDestroy> EventVehicleDestroys { get; set; }
         public DbSet<DbEventFacilityControl> EventFacilityControls { get; set; }
         public DbSet<DbPlayerSession> PlayerSessions { get; set; }
+        public DbSet<DbMetagameEventCategory> MetagameEventCategories { get; set; }
+        public DbSet<DbMetagameEventState> MetagameEventStates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

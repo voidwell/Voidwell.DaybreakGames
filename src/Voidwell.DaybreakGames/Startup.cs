@@ -52,6 +52,7 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IWeaponService, WeaponService>();
             services.AddSingleton<IAlertService, AlertService>();
             services.AddSingleton<ICombatReportService, CombatReportService>();
+            services.AddSingleton<IMetagameEventService, MetagameEventService>();
 
             CensusQuery.GlobalApiKey = "example";
             CensusQuery.GlobalNamespace = "ps2";
