@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
@@ -29,7 +28,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusItemModel>();
         }
 
-        public static async Task<JToken> GetWeaponInfo(string weaponItemId)
+        public static async Task<CensusWeaponInfoModel> GetWeaponInfo(string weaponItemId)
         {
             var query = new CensusQuery.Query("item");
             query.SetLanguage("en");
@@ -91,7 +90,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             query.Where("item_id").Equals(weaponItemId);
 
-            return (await query.Get()).First;
+            return await query.Get<CensusWeaponInfoModel>();
         }
     }
 }
