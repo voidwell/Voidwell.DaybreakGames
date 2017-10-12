@@ -1,17 +1,12 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Models
 {
-    [Table("Alert")]
-    public class DbAlert
+    public class AlertResult
     {
-        [Required]
         public string WorldId { get; set; }
-        [Required]
         public string MetagameInstanceId { get; set; }
-
         public string ZoneId { get; set; }
         public string MetagameEventId { get; set; }
         public DateTime StartDate { get; set; }
@@ -22,7 +17,16 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public float LastFactionVS { get; set; }
         public float LastFactionNC { get; set; }
         public float LastFactionTR { get; set; }
+        public AlertResultMetagameEvent MetagameEvent { get; set; }
+        public CombatReport Log { get; set; }
+        public IEnumerable<float> Score { get; set; }
+        public string ServerId { get; set; }
+        public string MapId { get; set; }
+    }
 
-        public DbMetagameEventCategory MetagameEvent { get; set; }
+    public class AlertResultMetagameEvent
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

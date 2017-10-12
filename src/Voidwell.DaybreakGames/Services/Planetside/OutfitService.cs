@@ -18,10 +18,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _ps2DbContext = ps2DbContext;
         }
 
-        public IEnumerable<DbOutfit> FindOutfits(params string[] outfitIds)
+        public async Task<IEnumerable<DbOutfit>> FindOutfits(IEnumerable<string> outfitIds)
         {
-            return _ps2DbContext.Outfits.Where(o => outfitIds.Contains(o.Id))
-                .ToList();
+            return await _ps2DbContext.Outfits.Where(o => outfitIds.Contains(o.Id))
+                .ToListAsync();
         }
 
         public async Task<DbOutfit> GetOutfit(string outfitId)
@@ -57,11 +57,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 .ToList();
         }
 
-        public IEnumerable<DbOutfit> LookupOutfitsByName(string name, int limit = 12)
+        public async Task<IEnumerable<DbOutfit>> LookupOutfitsByName(string name, int limit = 12)
         {
-            return _ps2DbContext.Outfits.Where(o => o.Name.Contains(name))
+            return await _ps2DbContext.Outfits.Where(o => o.Name.Contains(name))
                 .Take(12)
-                .ToList();
+                .ToListAsync();
         }
 
         public async Task<DbOutfit> UpdateOutfit(string outfitId)

@@ -22,6 +22,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public async Task<IEnumerable<DbVehicle>> GetAllVehicles()
         {
             return await _ps2DbContext.Vehicles.Where(p => p != null)
+                .Include(i => i.Faction)
                 .ToListAsync();
         }
 

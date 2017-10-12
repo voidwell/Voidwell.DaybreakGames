@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
@@ -23,8 +24,9 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public DbFaction Faction { get; set; }
         public DbCharacterTime Time { get; set; }
         public DbOutfitMember OutfitMembership { get; set; }
-        public DbCharacterStat Stats { get; set; }
-        public DbCharacterStatByFaction StatsByFaction { get; set; }
-        public DbCharacterWeaponStat WeaponStats { get; set; }
+        public IEnumerable<DbCharacterStat> Stats { get; set; }
+        public IEnumerable<DbCharacterStatByFaction> StatsByFaction { get; set; }
+        public IEnumerable<DbCharacterWeaponStat> WeaponStats { get; set; }
+        public IEnumerable<DbCharacterWeaponStatByFaction> WeaponStatsByFaction { get; set; }
     }
 }

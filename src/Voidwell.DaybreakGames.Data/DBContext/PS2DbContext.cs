@@ -24,6 +24,11 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbVehicleFaction> VehicleFactions { get; set; }
         public DbSet<DbWorld> Worlds { get; set; }
         public DbSet<DbZone> Zones { get; set; }
+        public DbSet<DbAlert> Alerts { get; set; }
+        public DbSet<DbEventDeath> EventDeaths { get; set; }
+        public DbSet<DbEventVehicleDestroy> EventVehicleDestroys { get; set; }
+        public DbSet<DbEventFacilityControl> EventFacilityControls { get; set; }
+        public DbSet<DbPlayerSession> PlayerSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
