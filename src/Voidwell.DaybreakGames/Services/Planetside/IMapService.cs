@@ -7,7 +7,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public interface IMapService
     {
-        Task<IEnumerable<MapOwnershipModel>> GetMapOwnership(string worldId, string zoneId);
+        Task<IEnumerable<MapOwnership>> GetMapOwnership(string worldId, string zoneId);
         Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId);
         Task<IEnumerable<DbFacilityLink>> GetFacilityLinks(string zoneId);
         Task<IEnumerable<DbMapRegion>> FindRegions(params string[] facilityIds);
