@@ -237,9 +237,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var logRows = facilityControls.Select(c => new CaptureLogRow
             {
-                FactionVs = c.ZoneControlVS,
-                FactionNc = c.ZoneControlNC,
-                FactionTr = c.ZoneControlTR,
+                FactionVs = c.ZoneControlVs,
+                FactionNc = c.ZoneControlNc,
+                FactionTr = c.ZoneControlTr,
                 NewFactionId = c.NewFactionId,
                 OldFactionId = c.OldFactionId,
                 OutfitId = c.OutfitId,

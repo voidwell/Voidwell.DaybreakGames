@@ -54,6 +54,7 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<ICombatReportService, CombatReportService>();
             services.AddSingleton<IMetagameEventService, MetagameEventService>();
             services.AddSingleton<IOnlineCharacterService, OnlineCharacterService>();
+            services.AddSingleton<IWorldMonitor, WorldMonitor>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
 
             CensusQuery.GlobalApiKey = "example";

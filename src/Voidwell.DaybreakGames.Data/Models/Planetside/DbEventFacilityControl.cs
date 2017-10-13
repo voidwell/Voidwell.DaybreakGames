@@ -19,8 +19,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string OldFactionId { get; set; }
         public int DurationHeld { get; set; }
         public string OutfitId { get; set; }
-        public float ZoneControlVS { get; set; }
-        public float ZoneControlNC { get; set; }
-        public float ZoneControlTR { get; set; }
+        public float ZoneControlVs { get; set; }
+        public float ZoneControlNc { get; set; }
+        public float ZoneControlTr { get; set; }
     }
 }

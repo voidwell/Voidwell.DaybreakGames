@@ -1,8 +1,8 @@
 ﻿namespace Voidwell.DaybreakGames.Models
 {
-    public class MapOwnershipModel
+    public class MapOwnership
     {
-        public MapOwnershipModel(string regionId, string factionId)
+        public MapOwnership(string regionId, string factionId)
         {
             RegionId = regionId;
             FactionId = factionId;

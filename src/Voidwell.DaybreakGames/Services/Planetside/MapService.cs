@@ -20,7 +20,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _ps2DbContext = ps2DbContext;
         }
 
-        public async Task<IEnumerable<MapOwnershipModel>> GetMapOwnership(string worldId, string zoneId)
+        public async Task<IEnumerable<MapOwnership>> GetMapOwnership(string worldId, string zoneId)
         {
             var ownership = await CensusMap.GetMapOwnership(worldId, zoneId);
 
@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            return ownership.Regions.Row.Select(o => new MapOwnershipModel(o.RowData.RegionId, o.RowData.FactionId));
+            return ownership.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
         }
 
         public async Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId)
