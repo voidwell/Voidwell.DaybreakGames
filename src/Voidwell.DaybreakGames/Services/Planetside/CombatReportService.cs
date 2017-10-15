@@ -6,22 +6,25 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class CombatReportService : ICombatReportService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly ICache _cache;
         private readonly ICharacterService _characterService;
         private readonly IOutfitService _outfitService;
         private readonly IItemService _itemService;
         private readonly IVehicleService _vehicleService;
         private readonly IMapService _mapService;
 
-        public CombatReportService(PS2DbContext ps2DbContext, ICharacterService characterService,
+        public CombatReportService(PS2DbContext ps2DbContext, ICache cache, ICharacterService characterService,
             IOutfitService outfitService, IItemService itemService, IVehicleService vehicleService, IMapService mapService)
         {
             _ps2DbContext = ps2DbContext;
+            _cache = cache;
             _characterService = characterService;
             _outfitService = outfitService;
             _itemService = itemService;
@@ -31,16 +34,32 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<CombatReport> GetCombatReport(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
+            var cachedReport = await _cache.GetAsync<CombatReport>(GetCacheKey(worldId, zoneId));
+
+            if (cachedReport != null)
+            {
+                return cachedReport;
+            }
+
             var combatStatsTask = GetCombatStats(worldId, zoneId, startDate, endDate);
             var captureLogTask = GetCaptureLog(worldId, zoneId, startDate, endDate);
 
             await Task.WhenAll(combatStatsTask, captureLogTask);
 
-            return new CombatReport
+            var combatReport = new CombatReport
             {
                 Stats = combatStatsTask.Result,
                 CaptureLog = captureLogTask.Result
             };
+
+            await _cache.SetAsync(GetCacheKey(worldId, zoneId), combatReport);
+
+            return combatReport;
+        }
+
+        private string GetCacheKey(string worldId, string zoneId)
+        {
+            return $"combatreport_{worldId}_{zoneId}";
         }
 
         private async Task<CombatReportStats> GetCombatStats(string worldId, string zoneId, DateTime startDate, DateTime endDate)

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Websocket.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -54,20 +55,58 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MetagameEventId = alert.MetagameEventId,
                 StartDate = alert.StartDate,
                 EndDate = alert.EndDate,
-                StartFactionVS = alert.StartFactionVS,
-                StartFactionNC = alert.StartFactionNC,
-                StartFactionTR = alert.StartFactionTR,
-                LastFactionVS = alert.LastFactionVS,
-                LastFactionNC = alert.LastFactionNC,
-                LastFactionTR = alert.LastFactionTR,
+                StartFactionVS = alert.StartFactionVs,
+                StartFactionNC = alert.StartFactionNc,
+                StartFactionTR = alert.StartFactionTr,
+                LastFactionVS = alert.LastFactionVs,
+                LastFactionNC = alert.LastFactionNc,
+                LastFactionTR = alert.LastFactionTr,
                 MetagameEvent = new AlertResultMetagameEvent { Name = alert.MetagameEvent.Name, Description = alert.MetagameEvent.Description },
                 Log = combatReport,
-                Score = new[] { 0, alert.LastFactionVS, alert.LastFactionNC, alert.LastFactionTR },
+                Score = new[] { 0, alert.LastFactionVs, alert.LastFactionNc, alert.LastFactionTr },
                 ServerId = alert.WorldId,
                 MapId = alert.ZoneId
             };
 
             return alertResult;
+        }
+
+        public Task CreateAlert(MetagameEvent metagameEvent)
+        {
+            var dataModel = new DbAlert
+            {
+                WorldId = metagameEvent.WorldId,
+                ZoneId = metagameEvent.ZoneId,
+                MetagameInstanceId = metagameEvent.InstanceId,
+                MetagameEventId = metagameEvent.MetagameEventId,
+                StartDate = metagameEvent.Timestamp,
+                StartFactionVs = metagameEvent.FactionVs,
+                StartFactionNc = metagameEvent.FactionNc,
+                StartFactionTr = metagameEvent.FactionTr,
+                LastFactionVs = metagameEvent.FactionVs,
+                LastFactionNc = metagameEvent.FactionNc,
+                LastFactionTr = metagameEvent.FactionTr
+            };
+            _ps2DbContext.Alerts.Add(dataModel);
+            return _ps2DbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateAlert(MetagameEvent metagameEvent)
+        {
+            var alert = await _ps2DbContext.Alerts
+                    .AsTracking()
+                    .SingleOrDefaultAsync(a => a.WorldId == metagameEvent.WorldId && a.MetagameInstanceId == metagameEvent.InstanceId);
+
+            if (alert != null)
+            {
+                alert.EndDate = metagameEvent.Timestamp;
+                alert.LastFactionVs = metagameEvent.FactionVs;
+                alert.LastFactionNc = metagameEvent.FactionNc;
+                alert.LastFactionTr = metagameEvent.FactionTr;
+
+                _ps2DbContext.Alerts.Update(alert);
+                await _ps2DbContext.SaveChangesAsync();
+            }
         }
 
         public void Dispose()
