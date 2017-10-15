@@ -13,10 +13,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class ProfileService : IProfileService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusProfile _censusProfile;
 
-        public ProfileService(PS2DbContext ps2DbContext)
+        public ProfileService(PS2DbContext ps2DbContext, CensusProfile censusProfile)
         {
             _ps2DbContext = ps2DbContext;
+            _censusProfile = censusProfile;
         }
 
         public async Task<IEnumerable<DbProfile>> GetAllProfiles()
@@ -27,7 +29,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task RefreshStore()
         {
-            var profiles = await CensusProfile.GetAllProfiles();
+            var profiles = await _censusProfile.GetAllProfiles();
 
             if (profiles != null)
             {

@@ -12,10 +12,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class OutfitService : IOutfitService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusOutfit _censusOutfit;
+        private readonly CensusCharacter _censusCharacter;
 
-        public OutfitService(PS2DbContext ps2DbContext)
+        public OutfitService(PS2DbContext ps2DbContext, CensusOutfit censusOutfit, CensusCharacter censusCharacter)
         {
             _ps2DbContext = ps2DbContext;
+            _censusOutfit = censusOutfit;
+            _censusCharacter = censusCharacter;
         }
 
         public async Task<IEnumerable<DbOutfit>> FindOutfits(IEnumerable<string> outfitIds)
@@ -66,14 +70,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<DbOutfit> UpdateOutfit(string outfitId)
         {
-            var outfit = await CensusOutfit.GetOutfit(outfitId);
+            var outfit = await _censusOutfit.GetOutfit(outfitId);
 
             if (outfit == null)
             {
                 return null;
             }
 
-            var leader = await CensusCharacter.GetCharacter(outfit.LeaderCharacterId);
+            var leader = await _censusCharacter.GetCharacter(outfit.LeaderCharacterId);
 
             var dataModel = new DbOutfit
             {

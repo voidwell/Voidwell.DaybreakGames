@@ -14,15 +14,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class WeaponService : IWeaponService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusItem _censusItem;
 
-        public WeaponService(PS2DbContext ps2DbContext)
+        public WeaponService(PS2DbContext ps2DbContext, CensusItem censusItem)
         {
             _ps2DbContext = ps2DbContext;
+            _censusItem = censusItem;
         }
 
         public async Task<WeaponInfoResult> GetWeaponInfo(string weaponItemId)
         {
-            var info = await CensusItem.GetWeaponInfo(weaponItemId);
+            var info = await _censusItem.GetWeaponInfo(weaponItemId);
 
             var hipModes = info.FireMode.Where(m => m.Type == "primary");
             var aimModes = info.FireMode.Where(m => m.Type == "secondary");

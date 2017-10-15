@@ -5,11 +5,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public static class CensusMap
+    public class CensusMap
     {
-        public static async Task<CensusMapModel> GetMapOwnership(string worldId, string zoneId)
+        private readonly ICensusClient _censusClient;
+
+        public CensusMap(ICensusClient censusClient)
         {
-            var query = new CensusQuery.Query("map");
+            _censusClient = censusClient;
+        }
+
+        public async Task<CensusMapModel> GetMapOwnership(string worldId, string zoneId)
+        {
+            var query = _censusClient.CreateQuery("map");
             query.SetLanguage("en");
 
             query.Where("world_id").Equals(worldId);
@@ -18,9 +25,9 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.Get<CensusMapModel>();
         }
 
-        public static async Task<IEnumerable<CensusMapHexModel>> GetAllMapHexs()
+        public async Task<IEnumerable<CensusMapHexModel>> GetAllMapHexs()
         {
-            var query = new CensusQuery.Query("map_hex");
+            var query = _censusClient.CreateQuery("map_hex");
 
             query.ShowFields(new[]
             {
@@ -35,9 +42,9 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusMapHexModel>();
         }
 
-        public static async Task<IEnumerable<CensusMapRegionModel>> GetAllMapRegions()
+        public async Task<IEnumerable<CensusMapRegionModel>> GetAllMapRegions()
         {
-            var query = new CensusQuery.Query("map_region");
+            var query = _censusClient.CreateQuery("map_region");
 
             query.ShowFields(new[]
             {
@@ -55,9 +62,9 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusMapRegionModel>();
         }
 
-        public static async Task<IEnumerable<CensusFacilityLinkModel>> GetAllFacilityLinks()
+        public async Task<IEnumerable<CensusFacilityLinkModel>> GetAllFacilityLinks()
         {
-            var query = new CensusQuery.Query("facility_link");
+            var query = _censusClient.CreateQuery("facility_link");
 
             query.ShowFields(new[]
             {

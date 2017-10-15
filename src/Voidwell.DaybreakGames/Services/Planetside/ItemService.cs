@@ -13,10 +13,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class ItemService : IItemService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusItem _censusItem;
+        private readonly CensusItemCategory _censusItemCategory;
 
-        public ItemService(PS2DbContext ps2DbContext)
+        public ItemService(PS2DbContext ps2DbContext, CensusItem censusItem, CensusItemCategory censusItemCategory)
         {
             _ps2DbContext = ps2DbContext;
+            _censusItem = censusItem;
+            _censusItemCategory = censusItemCategory;
         }
 
         public async Task<IEnumerable<DbItem>> FindItems(IEnumerable<string> itemIds)
@@ -34,8 +38,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task RefreshStore()
         {
-            var items = await CensusItem.GetAllItems();
-            var itemCategories = await CensusItemCategory.GetAllItemCategories();
+            var items = await _censusItem.GetAllItems();
+            var itemCategories = await _censusItemCategory.GetAllItemCategories();
 
             if (items != null)
             {

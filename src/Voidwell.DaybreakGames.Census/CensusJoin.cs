@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Voidwell.DaybreakGames.Census
 {
-    public class CensusJoin : CensusObject
+    public sealed class CensusJoin : CensusObject
     {
         [UriQueryProperty]
         private bool List { get; set; } = false;

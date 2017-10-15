@@ -11,16 +11,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class MetagameEventService : IMetagameEventService , IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusMetagameEvent _censusMetagameEvent;
 
-        public MetagameEventService(PS2DbContext ps2DbContext)
+        public MetagameEventService(PS2DbContext ps2DbContext, CensusMetagameEvent censusMetagameEvent)
         {
             _ps2DbContext = ps2DbContext;
+            _censusMetagameEvent = censusMetagameEvent;
         }
 
         public async Task RefreshStore()
         {
-            var categories = await CensusMetagameEvent.GetAllCategories();
-            var states = await CensusMetagameEvent.GetAllStates();
+            var categories = await _censusMetagameEvent.GetAllCategories();
+            var states = await _censusMetagameEvent.GetAllStates();
 
             if (categories != null)
             {

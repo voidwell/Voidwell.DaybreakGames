@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Voidwell.DaybreakGames.Census
 {
-    public static class HttpExtensions
+    internal static class HttpExtensions
     {
         public static async Task<T> ReadAsObjectAsync<T>(this HttpContent content)
         {

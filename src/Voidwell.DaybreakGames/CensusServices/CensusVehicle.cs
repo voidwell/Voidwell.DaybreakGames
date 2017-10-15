@@ -5,11 +5,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public static class CensusVehicle
+    public class CensusVehicle
     {
-        public static async Task<IEnumerable<CensusVehicleModel>> GetAllVehicles()
+        private readonly ICensusClient _censusClient;
+
+        public CensusVehicle(ICensusClient censusClient)
         {
-            var query = new CensusQuery.Query("vehicle");
+            _censusClient = censusClient;
+        }
+
+        public async Task<IEnumerable<CensusVehicleModel>> GetAllVehicles()
+        {
+            var query = _censusClient.CreateQuery("vehicle");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -25,9 +32,9 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusVehicleModel>();
         }
 
-        public static async Task<IEnumerable<CensusVehicleFactionModel>> GetAllVehicleFactions()
+        public async Task<IEnumerable<CensusVehicleFactionModel>> GetAllVehicleFactions()
         {
-            var query = new CensusQuery.Query("vehicle_faction");
+            var query = _censusClient.CreateQuery("vehicle_faction");
             query.SetLanguage("en");
 
             query.ShowFields(new[]

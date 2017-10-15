@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             var censusUri = query.GetUri();
 
@@ -31,7 +31,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").Equals("12345");
 
@@ -49,7 +49,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=<12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").IsLessThan("12345");
 
@@ -67,7 +67,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=[12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").IsLessThanOrEquals("12345");
 
@@ -85,7 +85,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=>12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").IsGreaterThan("12345");
 
@@ -103,7 +103,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=]12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").IsGreaterThanOrEquals("12345");
 
@@ -121,7 +121,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=^12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").StartsWith("12345");
 
@@ -139,7 +139,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=*12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").Contains("12345");
 
@@ -157,7 +157,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field=!12345");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field").NotEquals("12345");
 
@@ -175,7 +175,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?field1=12&field2=34&field3=56");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.Where("field1").Equals("12");
             query.Where("field2").Equals("34");
@@ -195,7 +195,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:resolve=items");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.AddResolve("items");
 
@@ -213,7 +213,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:resolve=items,stuff");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.AddResolve(new[] { "items", "stuff" });
 
@@ -231,7 +231,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:lang=en");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.SetLanguage("en");
 
@@ -249,7 +249,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:join=joinedservice^terms:field1=12'field2=34^on:ontestfield^to:totestfield^inject_at:testinject");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             var joinedService = query.JoinService("joinedservice");
             joinedService.ToField("totestfield");
@@ -272,7 +272,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:join=joinedservice^on:testfield(subjoined^list:true)");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             var joinedService = query.JoinService("joinedservice");
             joinedService.OnField("testfield");
@@ -294,7 +294,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:tree=treefield^prefix:someprefix^start:treestart");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             var treeField = query.TreeField("treefield");
             treeField.StartField("treestart");
@@ -314,7 +314,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:tree=treefield^start:treestart(subtreefield^start:subtreestart)");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             var treeField = query.TreeField("treefield");
             treeField.StartField("treestart");
@@ -336,7 +336,7 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:show=field1,field2,field3");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.ShowFields(new[] { "field1", "field2", "field3" });
 
@@ -354,13 +354,23 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var expectedUri = new Uri($"http://{Constants.CensusEndpoint}/s:{key}/get/{ns}/{service}/?c:hide=field1,field2,field3");
 
-            var query = new CensusQuery.Query(service, ns, key);
+            var query = GetCensusClient().CreateQuery(service);
 
             query.HideFields(new[] { "field1", "field2", "field3" });
 
             var censusUri = query.GetUri();
 
             Assert.AreEqual(expectedUri, censusUri);
+        }
+
+        private CensusClient GetCensusClient()
+        {
+            var options = new CensusOptions
+            {
+                ServiceKey = "testkey",
+                ServiceNamespace = "ps2"
+            };
+            return new CensusClient(options);
         }
     }
 }

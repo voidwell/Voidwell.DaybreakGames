@@ -11,15 +11,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class FactionService : IFactionService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusFaction _censusFaction;
 
-        public FactionService(PS2DbContext ps2DbContext)
+        public FactionService(PS2DbContext ps2DbContext, CensusFaction censusFaction)
         {
             _ps2DbContext = ps2DbContext;
+            _censusFaction = censusFaction;
         }
 
         public async Task RefreshStore()
         {
-            var factions = await CensusFaction.GetAllFactions();
+            var factions = await _censusFaction.GetAllFactions();
 
             if (factions != null)
             {
