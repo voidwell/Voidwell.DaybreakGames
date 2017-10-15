@@ -17,8 +17,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string MetagameEventId { get; set; }
         public string MetagameEventState { get; set; }
         public int ExperienceBonus { get; set; }
-        public float ZoneControlVS { get; set; }
-        public float ZoneControlNC { get; set; }
-        public float ZoneControlTR { get; set; }
+        public float ZoneControlVs { get; set; }
+        public float ZoneControlNc { get; set; }
+        public float ZoneControlTr { get; set; }
     }
 }

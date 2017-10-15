@@ -8,6 +8,9 @@ using Voidwell.DaybreakGames.Census;
 using Newtonsoft.Json;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Websocket;
+using Newtonsoft.Json.Serialization;
+using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames
 {
@@ -31,13 +34,17 @@ namespace Voidwell.DaybreakGames
                 .AddJsonFormatters(options =>
                 {
                     options.NullValueHandling = NullValueHandling.Ignore;
+                    options.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 });
 
+            services.AddCache("DaybreakGames");
             services.AddEntityFrameworkContext();
 
             services.AddOptions();
             services.Configure<DaybreakAPIOptions>(Configuration);
             services.AddTransient(a => a.GetRequiredService<IOptions<DaybreakAPIOptions>>().Value);
+
+            services.AddTransient<IConfiguration>(sp => Configuration);
 
             services.AddSingleton<ICharacterService, CharacterService>();
             services.AddSingleton<IOutfitService, OutfitService>();
@@ -53,18 +60,24 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IAlertService, AlertService>();
             services.AddSingleton<ICombatReportService, CombatReportService>();
             services.AddSingleton<IMetagameEventService, MetagameEventService>();
-            services.AddSingleton<IOnlineCharacterService, OnlineCharacterService>();
             services.AddSingleton<IWorldMonitor, WorldMonitor>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
+            services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
+            services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
 
-            CensusQuery.GlobalApiKey = "example";
-            CensusQuery.GlobalNamespace = "ps2";
+            CensusQuery.GlobalApiKey = Configuration.GetValue<string>("CensusKey");
+            CensusQuery.GlobalNamespace = Configuration.GetValue<string>("CensusNamespace");
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            loggerFactory
+                .WithFilter(new FilterLoggerSettings
+                {
+                    { "Microsoft", LogLevel.Error }
+                })
+                .AddConsole(Configuration.GetSection("Logging"))
+                .AddDebug();
 
             app.UseMvc();
         }

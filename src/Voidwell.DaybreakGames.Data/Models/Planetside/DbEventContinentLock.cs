@@ -16,8 +16,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
 
         public string MetagameEventId { get; set; }
         public string TriggeringFaction { get; set; }
-        public float PopulationVS { get; set; }
-        public float PopulationNC { get; set; }
-        public float PopulationTR { get; set; }
+        public float PopulationVs { get; set; }
+        public float PopulationNc { get; set; }
+        public float PopulationTr { get; set; }
     }
 }

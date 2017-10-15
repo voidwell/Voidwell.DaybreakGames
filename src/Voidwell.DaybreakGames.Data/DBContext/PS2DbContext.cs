@@ -25,13 +25,24 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbWorld> Worlds { get; set; }
         public DbSet<DbZone> Zones { get; set; }
         public DbSet<DbAlert> Alerts { get; set; }
-        public DbSet<DbEventDeath> EventDeaths { get; set; }
-        public DbSet<DbEventVehicleDestroy> EventVehicleDestroys { get; set; }
-        public DbSet<DbEventFacilityControl> EventFacilityControls { get; set; }
         public DbSet<DbPlayerSession> PlayerSessions { get; set; }
         public DbSet<DbMetagameEventCategory> MetagameEventCategories { get; set; }
         public DbSet<DbMetagameEventState> MetagameEventStates { get; set; }
         public DbSet<DbCharacterUpdateQueue> CharacterUpdateQueue { get; set; }
+
+        public DbSet<DbEventAchievementEarned> AchievementEarnedEvents { get; set; }
+        public DbSet<DbEventBattlerankUp> BattleRankUpEvents { get; set; }
+        public DbSet<DbEventContinentLock> ContinentLockEvents { get; set; }
+        public DbSet<DbEventContinentUnlock> ContinentUnlockEvents { get; set; }
+        public DbSet<DbEventDeath> EventDeaths { get; set; }
+        public DbSet<DbEventFacilityControl> EventFacilityControls { get; set; }
+        public DbSet<DbEventGainExperience> GainExperienceEvents { get; set; }
+        public DbSet<DbEventMetagameEvent> MetagameEventEvents { get; set; }
+        public DbSet<DbEventPlayerFacilityCapture> PlayerFacilityCaptureEvents { get; set; }
+        public DbSet<DbEventPlayerFacilityDefend> PlayerFacilityDefendEvents { get; set; }
+        public DbSet<DbEventPlayerLogin> PlayerLoginEvents { get; set; }
+        public DbSet<DbEventPlayerLogout> PlayerLogoutEvents { get; set; }
+        public DbSet<DbEventVehicleDestroy> EventVehicleDestroys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

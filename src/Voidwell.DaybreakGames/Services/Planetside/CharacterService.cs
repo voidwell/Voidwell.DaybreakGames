@@ -7,17 +7,20 @@ using Voidwell.DaybreakGames.Data.DBContext;
 using System;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore;
+using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class CharacterService : ICharacterService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly ICache _cache;
         private readonly IOutfitService _outfitService;
 
-        public CharacterService(PS2DbContext ps2DbContext, IOutfitService outfitService)
+        public CharacterService(PS2DbContext ps2DbContext, ICache cache, IOutfitService outfitService)
         {
             _ps2DbContext = ps2DbContext;
+            _cache = cache;
             _outfitService = outfitService;
         }
 

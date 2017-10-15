@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Websocket.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -14,14 +15,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly PS2DbContext _ps2DbContext;
         private readonly IZoneService _zoneService;
         private readonly IMapService _mapService;
+        private readonly ICharacterService _characterService;
+        private readonly IUpdaterService _updaterService;
 
         public Dictionary<string, WorldState> WorldStates { get; private set; }
 
-        public WorldMonitor(PS2DbContext ps2DbContext, IZoneService zoneService, IMapService mapService)
+        public WorldMonitor(PS2DbContext ps2DbContext, IZoneService zoneService, IMapService mapService, ICharacterService characterService, IUpdaterService updaterService)
         {
             _ps2DbContext = ps2DbContext;
             _zoneService = zoneService;
             _mapService = mapService;
+            _characterService = characterService;
+            _updaterService = updaterService;
         }
 
         public async Task SetWorldState(string worldId, string worldName, bool isOnline)
@@ -39,6 +44,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             if (!isOnline)
             {
                 WorldStates[worldId].ZoneStates.Clear();
+                WorldStates[worldId].OnlinePlayers.Clear();
             }
             else if (isOnline && !WorldStates[worldId].IsOnline)
             {
@@ -50,6 +56,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public async Task<bool> TryResetWorld(string worldId)
         {
             WorldStates[worldId].ZoneStates.Clear();
+            WorldStates[worldId].OnlinePlayers.Clear();
 
             var zones = await _zoneService.GetAllZones();
 
@@ -75,7 +82,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return true;
         }
 
-        public FacilityControlChange UpdateFacilityControl(DbEventFacilityControl facilityControl)
+        public FacilityControlChange UpdateFacilityControl(FacilityControl facilityControl)
         {
             WorldZoneState zoneState;
             if (!TryGetZoneState(facilityControl.WorldId, facilityControl.ZoneId, out zoneState))
@@ -144,6 +151,69 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             zoneState = WorldStates[worldId].ZoneStates[zoneId];
             return true;
+        }
+
+        public IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(string worldId)
+        {
+            if (!WorldStates.ContainsKey(worldId))
+            {
+                return null;
+            }
+
+            return WorldStates[worldId].OnlinePlayers.Values;
+        }
+
+        public async Task SetPlayerOnlineState(string characterId, DateTime timestamp, bool isOnline)
+        {
+            var character = await _characterService.GetCharacter(characterId);
+            var worldId = character.WorldId;
+
+            if (character == null || !WorldStates.ContainsKey(worldId))
+            {
+                return;
+            }
+
+            if (isOnline)
+            {
+                WorldStates[worldId].OnlinePlayers.Add(characterId, new OnlineCharacter
+                {
+                    Character = new OnlineCharacterProfile
+                    {
+                        CharacterId = character.Id,
+                        FactionId = character.FactionId,
+                        Name = character.Name,
+                        WorldId = worldId
+                    },
+                    LoginDate = timestamp
+                });
+                return;
+            }
+
+            if (!WorldStates[worldId].OnlinePlayers.ContainsKey(characterId))
+            {
+                return;
+            }
+
+            var onlineCharacter = WorldStates[worldId].OnlinePlayers[characterId];
+
+            var duration = timestamp - onlineCharacter.LoginDate;
+            if (duration.Minutes >= 300000)
+            {
+                await _updaterService.AddToQueue(characterId);
+            }
+
+            var dataModel = new DbPlayerSession
+            {
+                CharacterId = characterId,
+                LoginDate = onlineCharacter.LoginDate,
+                LogoutDate = timestamp,
+                Duration = duration.Milliseconds
+            };
+
+            _ps2DbContext.PlayerSessions.Add(dataModel);
+            await _ps2DbContext.SaveChangesAsync();
+
+            WorldStates[worldId].OnlinePlayers.Remove(characterId);
         }
 
         public void Dispose()

@@ -16,12 +16,12 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string MetagameEventId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public float StartFactionVS { get; set; }
-        public float StartFactionNC { get; set; }
-        public float StartFactionTR { get; set; }
-        public float LastFactionVS { get; set; }
-        public float LastFactionNC { get; set; }
-        public float LastFactionTR { get; set; }
+        public float StartFactionVs { get; set; }
+        public float StartFactionNc { get; set; }
+        public float StartFactionTr { get; set; }
+        public float LastFactionVs { get; set; }
+        public float LastFactionNc { get; set; }
+        public float LastFactionTr { get; set; }
 
         public DbMetagameEventCategory MetagameEvent { get; set; }
     }

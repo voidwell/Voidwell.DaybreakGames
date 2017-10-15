@@ -54,9 +54,9 @@ namespace Voidwell.DaybreakGames.Models
         private class OwnershipCalculator
         {
             public int[] Territories { get; private set; } = new[] { 0, 0, 0, 0 };
-            public double[] Percent { get; private set; } = new[] { 0.0, 0.0, 0.0, 0.0 };
+            public float[] Percent { get; private set; } = new[] { 0f, 0f, 0f, 0f };
             public int[] ConnectedTerritories { get; private set; } = new[] { 0, 0, 0, 0 };
-            public double[] ConnectedPercent { get; private set; } = new[] { 0.0, 0.0, 0.0, 0.0 };
+            public float[] ConnectedPercent { get; private set; } = new[] { 0f, 0f, 0f, 0f };
 
             private Dictionary<int, bool> _factionsChecked;
             private Dictionary<string, bool> _checkedRegions;
