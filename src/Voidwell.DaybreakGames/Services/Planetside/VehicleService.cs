@@ -13,10 +13,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class VehicleService : IVehicleService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusVehicle _censusVehicle;
 
-        public VehicleService(PS2DbContext ps2DbContext)
+        public VehicleService(PS2DbContext ps2DbContext, CensusVehicle censusVehicle)
         {
             _ps2DbContext = ps2DbContext;
+            _censusVehicle = censusVehicle;
         }
 
         public async Task<IEnumerable<DbVehicle>> GetAllVehicles()
@@ -28,8 +30,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task RefreshStore()
         {
-            var vehicles = await CensusVehicle.GetAllVehicles();
-            var vehicleFactions = await CensusVehicle.GetAllVehicleFactions();
+            var vehicles = await _censusVehicle.GetAllVehicles();
+            var vehicleFactions = await _censusVehicle.GetAllVehicleFactions();
 
             if (vehicles != null)
             {

@@ -13,10 +13,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class ZoneService : IZoneService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusZone _censusZone;
 
-        public ZoneService(PS2DbContext ps2DbContext)
+        public ZoneService(PS2DbContext ps2DbContext, CensusZone censusZone)
         {
             _ps2DbContext = ps2DbContext;
+            _censusZone = censusZone;
         }
 
         public async Task<IEnumerable<DbZone>> GetAllZones()
@@ -26,7 +28,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task RefreshStore()
         {
-            var zones = await CensusZone.GetAllZones();
+            var zones = await _censusZone.GetAllZones();
 
             if (zones != null)
             {

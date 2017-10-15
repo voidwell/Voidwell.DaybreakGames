@@ -13,10 +13,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class WorldService : IWorldService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusWorld _censusWorld;
 
-        public WorldService(PS2DbContext ps2DbContext)
+        public WorldService(PS2DbContext ps2DbContext, CensusWorld censusWorld)
         {
             _ps2DbContext = ps2DbContext;
+            _censusWorld = censusWorld;
         }
 
         public async Task<IEnumerable<DbWorld>> GetAllWorlds()
@@ -26,7 +28,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task RefreshStore()
         {
-            var worlds = await CensusWorld.GetAllWorlds();
+            var worlds = await _censusWorld.GetAllWorlds();
 
             if (worlds != null)
             {

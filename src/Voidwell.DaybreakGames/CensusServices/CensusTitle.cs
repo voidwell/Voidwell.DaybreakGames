@@ -5,11 +5,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public static class CensusTitle
+    public class CensusTitle
     {
-        public static async Task<IEnumerable<CensusTitleModel>> GetAllTitles()
+        private readonly ICensusClient _censusClient;
+
+        public CensusTitle(ICensusClient censusClient)
         {
-            var query = new CensusQuery.Query("title");
+            _censusClient = censusClient;
+        }
+
+        public async Task<IEnumerable<CensusTitleModel>> GetAllTitles()
+        {
+            var query = _censusClient.CreateQuery("title");
             query.SetLanguage("en");
 
             query.ShowFields(new[]

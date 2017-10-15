@@ -11,15 +11,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class TitleService : ITitleService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusTitle _censusTitle;
 
-        public TitleService(PS2DbContext ps2DbContext)
+        public TitleService(PS2DbContext ps2DbContext, CensusTitle censusTitle)
         {
             _ps2DbContext = ps2DbContext;
+            _censusTitle = censusTitle;
         }
 
         public async Task RefreshStore()
         {
-            var profiles = await CensusTitle.GetAllTitles();
+            var profiles = await _censusTitle.GetAllTitles();
 
             if (profiles != null)
             {

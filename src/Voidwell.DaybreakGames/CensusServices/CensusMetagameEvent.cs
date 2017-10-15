@@ -5,11 +5,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public static class CensusMetagameEvent
+    public class CensusMetagameEvent
     {
-        public static async Task<IEnumerable<CensusMetagameEventCategoryModel>> GetAllCategories()
+        private readonly ICensusClient _censusClient;
+
+        public CensusMetagameEvent(ICensusClient censusClient)
         {
-            var query = new CensusQuery.Query("metagame_event");
+            _censusClient = censusClient;
+        }
+
+        public async Task<IEnumerable<CensusMetagameEventCategoryModel>> GetAllCategories()
+        {
+            var query = _censusClient.CreateQuery("metagame_event");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -24,9 +31,9 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusMetagameEventCategoryModel>();
         }
 
-        public static async Task<IEnumerable<CensusMetagameEventStateModel>> GetAllStates()
+        public async Task<IEnumerable<CensusMetagameEventStateModel>> GetAllStates()
         {
-            var query = new CensusQuery.Query("metagame_event_state");
+            var query = _censusClient.CreateQuery("metagame_event_state");
             query.SetLanguage("en");
 
             query.ShowFields(new[]

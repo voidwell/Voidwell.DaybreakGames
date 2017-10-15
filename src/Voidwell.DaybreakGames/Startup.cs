@@ -11,6 +11,7 @@ using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Websocket;
 using Newtonsoft.Json.Serialization;
 using Voidwell.Cache;
+using Voidwell.DaybreakGames.CensusServices;
 
 namespace Voidwell.DaybreakGames
 {
@@ -39,6 +40,8 @@ namespace Voidwell.DaybreakGames
 
             services.AddCache("DaybreakGames");
             services.AddEntityFrameworkContext();
+            services.AddCensusClient(Configuration.GetSection("Census"));
+            services.AddCensusServices();
 
             services.AddOptions();
             services.Configure<DaybreakAPIOptions>(Configuration);
@@ -64,9 +67,6 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IUpdaterService, UpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
-
-            CensusQuery.GlobalApiKey = Configuration.GetValue<string>("CensusKey");
-            CensusQuery.GlobalNamespace = Configuration.GetValue<string>("CensusNamespace");
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

@@ -14,19 +14,21 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class CharacterService : ICharacterService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusCharacter _censusCharacter;
         private readonly ICache _cache;
         private readonly IOutfitService _outfitService;
 
-        public CharacterService(PS2DbContext ps2DbContext, ICache cache, IOutfitService outfitService)
+        public CharacterService(PS2DbContext ps2DbContext, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService)
         {
             _ps2DbContext = ps2DbContext;
+            _censusCharacter = censusCharacter;
             _cache = cache;
             _outfitService = outfitService;
         }
 
         public async Task<IEnumerable<CharacterSearchResult>> LookupCharactersByName(string query, int limit = 12)
         {
-            var characterList = await CensusCharacter.LookupCharactersByName(query, limit);
+            var characterList = await _censusCharacter.LookupCharactersByName(query, limit);
             return characterList.Select(c => CharacterSearchResult.LoadFromCensusCharacter(c));
         }
 
@@ -101,7 +103,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<DbCharacter> UpdateCharacter(string characterId)
         {
-            var character = await CensusCharacter.GetCharacter(characterId);
+            var character = await _censusCharacter.GetCharacter(characterId);
 
             if (character == null)
             {
@@ -130,7 +132,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task UpdateCharacterTimes(string characterId)
         {
-            var times = await CensusCharacter.GetCharacterTimes(characterId);
+            var times = await _censusCharacter.GetCharacterTimes(characterId);
 
             if (times == null)
             {
@@ -152,8 +154,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task UpdateCharacterStats(string characterId, DateTime? LastLoginDate)
         {
-            var characterStatsTask = CensusCharacter.GetCharacterStats(characterId, LastLoginDate);
-            var characterStatsByFactionTask = CensusCharacter.GetCharacterFactionStats(characterId, LastLoginDate);
+            var characterStatsTask = _censusCharacter.GetCharacterStats(characterId, LastLoginDate);
+            var characterStatsByFactionTask = _censusCharacter.GetCharacterFactionStats(characterId, LastLoginDate);
 
             await Task.WhenAll(characterStatsTask, characterStatsByFactionTask);
 
@@ -402,8 +404,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task UpdateCharacterWeaponStats(string characterId, DateTime? LastLoginDate)
         {
-            var characterWepStatsTask = CensusCharacter.GetCharacterWeaponStats(characterId, LastLoginDate);
-            var characterWepStatsByFactionTask = CensusCharacter.GetCharacterWeaponStatsByFaction(characterId, LastLoginDate);
+            var characterWepStatsTask = _censusCharacter.GetCharacterWeaponStats(characterId, LastLoginDate);
+            var characterWepStatsByFactionTask = _censusCharacter.GetCharacterWeaponStatsByFaction(characterId, LastLoginDate);
 
             await Task.WhenAll(characterWepStatsTask, characterWepStatsByFactionTask);
 
@@ -577,7 +579,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<DbOutfitMember> UpdateCharacterOutfitMembership(string characterId)
         {
-            var membership = await CensusCharacter.GetCharacterOutfitMembership(characterId);
+            var membership = await _censusCharacter.GetCharacterOutfitMembership(characterId);
 
             if (membership == null)
             {

@@ -4,11 +4,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public static class CensusOutfit
+    public class CensusOutfit
     {
-        public static async Task<CensusOutfitModel> GetOutfit(string outfitId)
+        private readonly ICensusClient _censusClient;
+
+        public CensusOutfit(ICensusClient censusClient)
         {
-            var query = new CensusQuery.Query("outfit");
+            _censusClient = censusClient;
+        }
+
+        public async Task<CensusOutfitModel> GetOutfit(string outfitId)
+        {
+            var query = _censusClient.CreateQuery("outfit");
 
             query.ShowFields(new[]
             {

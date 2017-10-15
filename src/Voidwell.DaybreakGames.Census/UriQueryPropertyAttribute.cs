@@ -3,7 +3,7 @@
 namespace Voidwell.DaybreakGames.Census
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class UriQueryPropertyAttribute : Attribute
+    internal class UriQueryPropertyAttribute : Attribute
     {
         private string _name;
 

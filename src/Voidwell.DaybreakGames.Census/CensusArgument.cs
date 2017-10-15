@@ -1,6 +1,6 @@
 ﻿namespace Voidwell.DaybreakGames.Census
 {
-    public class CensusArgument
+    public sealed class CensusArgument
     {
         public CensusOperand Operand { get; set; }
 

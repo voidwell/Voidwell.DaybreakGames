@@ -5,11 +5,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public static class CensusItem
+    public class CensusItem
     {
-        public static async Task<IEnumerable<CensusItemModel>> GetAllItems()
+        private readonly ICensusClient _censusClient;
+
+        public CensusItem(ICensusClient censusClient)
         {
-            var query = new CensusQuery.Query("item");
+            _censusClient = censusClient;
+        }
+
+        public async Task<IEnumerable<CensusItemModel>> GetAllItems()
+        {
+            var query = _censusClient.CreateQuery("item");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -28,9 +35,9 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusItemModel>();
         }
 
-        public static async Task<CensusWeaponInfoModel> GetWeaponInfo(string weaponItemId)
+        public async Task<CensusWeaponInfoModel> GetWeaponInfo(string weaponItemId)
         {
-            var query = new CensusQuery.Query("item");
+            var query = _censusClient.CreateQuery("item");
             query.SetLanguage("en");
 
             query.ShowFields(new[]

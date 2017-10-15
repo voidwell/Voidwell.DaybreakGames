@@ -2,7 +2,7 @@
 
 namespace Voidwell.DaybreakGames.Census
 {
-    public class CensusTree : CensusObject
+    public sealed class CensusTree : CensusObject
     {
         private string TreeFieldName { get; set; }
         private List<CensusTree> Tree { get; set; }

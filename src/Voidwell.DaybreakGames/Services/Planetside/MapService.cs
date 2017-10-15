@@ -14,15 +14,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class MapService : IMapService, IDisposable
     {
         private readonly PS2DbContext _ps2DbContext;
+        private readonly CensusMap _censusMap;
 
-        public MapService(PS2DbContext ps2DbContext)
+        public MapService(PS2DbContext ps2DbContext, CensusMap censusMap)
         {
             _ps2DbContext = ps2DbContext;
+            _censusMap = censusMap;
         }
 
         public async Task<IEnumerable<MapOwnership>> GetMapOwnership(string worldId, string zoneId)
         {
-            var ownership = await CensusMap.GetMapOwnership(worldId, zoneId);
+            var ownership = await _censusMap.GetMapOwnership(worldId, zoneId);
 
             if (ownership == null)
             {
@@ -52,9 +54,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task RefreshStore()
         {
-            var mapHexs = await CensusMap.GetAllMapHexs();
-            var mapRegions = await CensusMap.GetAllMapRegions();
-            var facilityLinks = await CensusMap.GetAllFacilityLinks();
+            var mapHexs = await _censusMap.GetAllMapHexs();
+            var mapRegions = await _censusMap.GetAllMapRegions();
+            var facilityLinks = await _censusMap.GetAllFacilityLinks();
 
             if (mapHexs != null)
             {
