@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     [Table("CharacterStatByFaction")]
-    public class DbCharacterStatByFaction
+    public class DbCharacterStatByFaction : IDbModel<DbCharacterStatByFaction>
     {
         [Required]
         public string CharacterId { get; set; }
@@ -49,5 +51,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public DbProfile Profile { get; set; }
         [ForeignKey("CharacterId")]
         public DbCharacter Character { get; set; }
+
+        public Expression<Func<DbCharacterStatByFaction, bool>> Predicate { get => (a => a.CharacterId == CharacterId && a.ProfileId == ProfileId); }
     }
 }

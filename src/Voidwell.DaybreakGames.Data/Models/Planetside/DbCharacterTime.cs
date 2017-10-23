@@ -1,11 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     [Table("CharacterTime")]
-    public class DbCharacterTime
+    public class DbCharacterTime : IDbModel<DbCharacterTime>
     {
         [Key]
         [Required]
@@ -17,5 +18,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
 
         [ForeignKey("CharacterId")]
         public DbCharacter Character { get; set; }
+
+        public Expression<Func<DbCharacterTime, bool>> Predicate { get => (a => a.CharacterId == CharacterId); }
     }
 }
