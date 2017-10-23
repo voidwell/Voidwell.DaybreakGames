@@ -1,6 +1,6 @@
-﻿using System.IO;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace Voidwell.DaybreakGames
 {
@@ -8,14 +8,19 @@ namespace Voidwell.DaybreakGames
     {
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseStartup<Startup>()
-                .UseUrls("http://0.0.0.0:5000")
-                .Build();
-
-            host.Run();
+            BuildWebHost(args).Run();
         }
+
+        public static IWebHost BuildWebHost(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .UseSetting(WebHostDefaults.PreventHostingStartupKey, "true")
+                .ConfigureAppConfiguration((hostContext, config) =>
+                {
+                    config.Sources.Clear();
+                    config.AddJsonFile("appsettings.json", true);
+                    config.AddJsonFile("testsettings.json", true);
+                })
+                .Build();
     }
 }

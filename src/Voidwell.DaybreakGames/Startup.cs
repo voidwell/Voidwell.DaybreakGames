@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Voidwell.DaybreakGames.Census;
 using Newtonsoft.Json;
 using Voidwell.DaybreakGames.Data;
@@ -12,21 +11,18 @@ using Voidwell.DaybreakGames.Websocket;
 using Newtonsoft.Json.Serialization;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.CensusServices;
+using Microsoft.Extensions.Options;
 
 namespace Voidwell.DaybreakGames
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -39,34 +35,32 @@ namespace Voidwell.DaybreakGames
                 });
 
             services.AddCache("DaybreakGames");
-            services.AddEntityFrameworkContext();
-            services.AddCensusClient(Configuration.GetSection("Census"));
+            services.AddEntityFrameworkContext(Configuration);
+            services.AddCensusClient(Configuration);
             services.AddCensusServices();
 
             services.AddOptions();
-            services.Configure<DaybreakAPIOptions>(Configuration);
-            services.AddTransient(a => a.GetRequiredService<IOptions<DaybreakAPIOptions>>().Value);
+            services.AddSingleton(impl => impl.GetRequiredService<IOptions<DaybreakGamesOptions>>().Value);
+            services.Configure<DaybreakGamesOptions>(Configuration);
 
-            services.AddTransient<IConfiguration>(sp => Configuration);
-
-            services.AddSingleton<ICharacterService, CharacterService>();
-            services.AddSingleton<IOutfitService, OutfitService>();
-            services.AddSingleton<IItemService, ItemService>();
-            services.AddSingleton<IMapService, MapService>();
-            services.AddSingleton<IFactionService, FactionService>();
-            services.AddSingleton<IProfileService, ProfileService>();
-            services.AddSingleton<ITitleService, TitleService>();
-            services.AddSingleton<IVehicleService, VehicleService>();
-            services.AddSingleton<IWorldService, WorldService>();
-            services.AddSingleton<IZoneService, ZoneService>();
-            services.AddSingleton<IWeaponService, WeaponService>();
-            services.AddSingleton<IAlertService, AlertService>();
-            services.AddSingleton<ICombatReportService, CombatReportService>();
-            services.AddSingleton<IMetagameEventService, MetagameEventService>();
-            services.AddSingleton<IWorldMonitor, WorldMonitor>();
-            services.AddSingleton<IUpdaterService, UpdaterService>();
-            services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
-            services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
+            services.AddScoped<ICharacterService, CharacterService>();
+            services.AddScoped<IOutfitService, OutfitService>();
+            services.AddScoped<IItemService, ItemService>();
+            services.AddScoped<IMapService, MapService>();
+            services.AddScoped<IFactionService, FactionService>();
+            services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<ITitleService, TitleService>();
+            services.AddScoped<IVehicleService, VehicleService>();
+            services.AddScoped<IWorldService, WorldService>();
+            services.AddScoped<IZoneService, ZoneService>();
+            services.AddScoped<IWeaponService, WeaponService>();
+            services.AddScoped<IAlertService, AlertService>();
+            services.AddScoped<ICombatReportService, CombatReportService>();
+            services.AddScoped<IMetagameEventService, MetagameEventService>();
+            services.AddScoped<IWorldMonitor, WorldMonitor>();
+            services.AddScoped<IUpdaterService, UpdaterService>();
+            services.AddScoped<IWebsocketEventHandler, WebsocketEventHandler>();
+            services.AddScoped<IWebsocketMonitor, WebsocketMonitor>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

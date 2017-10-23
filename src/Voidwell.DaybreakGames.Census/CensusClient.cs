@@ -105,7 +105,7 @@ namespace Voidwell.DaybreakGames.Census
         internal Uri CreateRequestUri(string queryType, CensusQuery query)
         {
             var encArgs = query.ToString();
-            return new Uri($"http://{Constants.CensusEndpoint}/s:{_options.ServiceKey}/{queryType}/{_options.ServiceNamespace}/{encArgs}");
+            return new Uri($"http://{Constants.CensusEndpoint}/s:{_options.CensusServiceKey}/{queryType}/{_options.CensusServiceNamespace}/{encArgs}");
         }
 
         private object GetDefault(Type type)

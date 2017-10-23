@@ -18,6 +18,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int MaxStackSize { get; set; }
         public string ImageId { get; set; }
 
+        [ForeignKey("ItemCategoryId")]
         public DbItemCategory ItemCategory { get; set; }
     }
 }

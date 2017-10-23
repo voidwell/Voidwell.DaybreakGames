@@ -8,9 +8,10 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
     public class DbPlayerSession
     {
         [Required]
-        public string Id { get; set; }
-        [Required]
         public string CharacterId { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
         
         public DateTime LoginDate { get; set; }
         public DateTime LogoutDate { get; set; }

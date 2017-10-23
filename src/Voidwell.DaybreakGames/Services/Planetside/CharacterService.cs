@@ -40,7 +40,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<DbCharacter> GetCharacter(string characterId)
         {
-            var character = await _ps2DbContext.Characters.SingleAsync(c => c.Id == characterId);
+            var character = await _ps2DbContext.Characters.SingleOrDefaultAsync(c => c.Id == characterId);
 
             return character ?? await UpdateCharacter(characterId);
         }
@@ -122,7 +122,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 TitleId = character.TitleId
             };
 
-            _ps2DbContext.Update(dataModel);
+            await _ps2DbContext.Characters.UpsertAsync(dataModel);
             await _ps2DbContext.SaveChangesAsync();
 
             await UpdateCharacterOutfitMembership(characterId);
@@ -148,7 +148,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MinutesPlayed = times.MinutesPlayed
             };
 
-            _ps2DbContext.Update(dataModel);
+            await _ps2DbContext.CharacterTimes.UpsertAsync(dataModel);
             await _ps2DbContext.SaveChangesAsync();
         }
 
@@ -250,8 +250,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 newModelsByFaction.Add(dbModel);
             }
 
-            _ps2DbContext.AddRange(newModels);
-            _ps2DbContext.AddRange(newModelsByFaction);
+            await _ps2DbContext.CharacterStats.UpsertRangeAsync(newModels);
+            await _ps2DbContext.CharacterStatByFactions.UpsertRangeAsync(newModelsByFaction);
             await _ps2DbContext.SaveChangesAsync();
         }
 
@@ -503,8 +503,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 newModelsByFaction.Add(dbModel);
             }
 
-            _ps2DbContext.AddRange(newModels);
-            _ps2DbContext.AddRange(newModelsByFaction);
+            await _ps2DbContext.CharacterWeaponStats.UpsertRangeAsync(newModels);
+            await _ps2DbContext.CharacterWeaponStatByFactions.UpsertRangeAsync(newModelsByFaction);
             await _ps2DbContext.SaveChangesAsync();
         }
 
@@ -603,7 +603,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 RankOrdinal = membership.RankOrdinal
             };
 
-            _ps2DbContext.Update(dataModel);
+            await _ps2DbContext.OutfitMembers.UpsertAsync(dataModel);
             await _ps2DbContext.SaveChangesAsync();
 
             return dataModel;

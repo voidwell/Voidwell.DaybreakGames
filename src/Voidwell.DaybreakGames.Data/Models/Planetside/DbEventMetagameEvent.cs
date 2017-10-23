@@ -7,7 +7,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
     [Table("EventMetagameEvent")]
     public class DbEventMetagameEvent
     {
-        [Required]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string MetagameId{ get; set; }
 
         public DateTime Timestamp { get; set; }

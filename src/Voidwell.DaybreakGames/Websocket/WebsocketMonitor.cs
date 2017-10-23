@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
@@ -8,95 +9,78 @@ using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Websocket
 {
-    public class WebsocketMonitor : IWebsocketMonitor, IDisposable
+    public class WebsocketMonitor : HostedService, IWebsocketMonitor, IDisposable
     {
         private readonly IWebsocketEventHandler _handler;
         private readonly IWorldMonitor _worldMonitor;
+        private readonly DaybreakGamesOptions _options;
         private readonly ILogger<WebsocketMonitor> _logger;
         private readonly CensusWebSocketClient _client;
 
-        private CancellationTokenSource _connectToken;
-
-        public WebsocketMonitor(IWebsocketEventHandler handler, IWorldMonitor worldMonitor, IConfiguration config, ILogger<WebsocketMonitor> logger)
+        public WebsocketMonitor(IWebsocketEventHandler handler, IWorldMonitor worldMonitor, DaybreakGamesOptions options, ILogger<WebsocketMonitor> logger)
         {
             _handler = handler;
             _worldMonitor = worldMonitor;
+            _options = options;
             _logger = logger;
 
-            _client = new CensusWebSocketClient(config.GetValue<string>("CensusKey"));
-        }
-
-        public string GetStatus()
-        {
-            return _client.GetState().ToString();
+            _client = new CensusWebSocketClient(_options.CensusServiceKey);
         }
         
-        public async Task StartMonitor()
+        protected override Task ExecuteAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting websocket monitor...");
 
             if (_client.IsConnecting() || _client.IsConnected())
             {
-                return;
+
             }
 
-            _connectToken = new CancellationTokenSource();
+            var connectTask = _client.ConnectAsync(cancellationToken);
+            connectTask.ContinueWith((task) => {
+                _logger.LogInformation("Started websocket monitor.");
 
-            await _client.ConnectAsync(_connectToken.Token);
+                Task.WhenAll(Receive(cancellationToken), Subscribe(cancellationToken));
+            });
 
-            _logger.LogInformation("Started websocket monitor.");
-
-            Task.Run(() => Task.WhenAll(Receive(), Subscribe()));
+            return connectTask;
         }
 
-        public async Task StopMonitor()
+        public override Task ForceStopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Force stopping websocket monitor...");
+
+            _client.Abort();
+
+            _logger.LogInformation("Force stopped websocket monitor.");
+
+            return Task.CompletedTask;
+        }
+
+        protected override async Task CleanupAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping websocket monitor...");
-
-            if (_client.IsConnecting())
-            {
-                _connectToken.Cancel();
-            }
 
             if (!_client.IsConnected())
             {
                 return;
             }
 
-            await _client.CloseAsync();
+            await _client.CloseAsync(cancellationToken);
 
             _logger.LogInformation("Stopped websocket monitor.");
         }
 
-        public async Task ResetMonitor()
+        private async Task Subscribe(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Resetting websocket monitor...");
-
-            if (_client.IsConnecting())
-            {
-                _connectToken.Cancel();
-            }
-
-            if (_client.IsConnected())
-            {
-                await _client.CloseAsync();
-            }
-
-            await _client.ConnectAsync();
-
-            _logger.LogInformation("Reset websocket monitor.");
+            await _client.Subscribe(_options.CensusWebsocketWorlds, _options.CensusWebsocketServices.ToArray());
         }
 
-        private async Task Subscribe()
-        {
-            await _client.Subscribe(new[] { "17" }, "PlayerLogin", "PlayerLogout");
-        }
-
-        private async Task Receive()
+        private async Task Receive(CancellationToken cancellationToken)
         {
             while (_client.IsConnected())
             {
-                var message = await _client.ReceiveAsync();
+                var message = await _client.ReceiveAsync(cancellationToken);
 
                 if (message.Result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
                 {

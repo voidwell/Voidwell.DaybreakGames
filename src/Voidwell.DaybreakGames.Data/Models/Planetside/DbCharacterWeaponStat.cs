@@ -25,8 +25,11 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int DamageGiven { get; set; }
         public int DamageTakenBy { get; set; }
 
+        [ForeignKey("ItemId")]
         public DbItem Item { get; set; }
+        [ForeignKey("CharacterId")]
         public DbCharacter Character { get; set; }
+        [ForeignKey("VehicleId")]
         public DbVehicle Vehicle { get; set; }
     }
 }

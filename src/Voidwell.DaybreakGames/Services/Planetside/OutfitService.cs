@@ -91,7 +91,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 WorldId = leader.WorldId
             };
 
-            _ps2DbContext.Outfits.Update(dataModel);
+            await _ps2DbContext.Outfits.UpsertAsync(dataModel);
             await _ps2DbContext.SaveChangesAsync();
 
             return dataModel;

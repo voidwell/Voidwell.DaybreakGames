@@ -7,6 +7,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
     [Table("OutfitMember")]
     public class DbOutfitMember
     {
+        [Key]
         [Required]
         public string CharacterId { get; set; }
         [Required]
@@ -16,7 +17,9 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string Rank { get; set; }
         public int RankOrdinal { get; set; }
 
+        [ForeignKey("CharacterId")]
         public DbCharacter Character { get; set; }
+        [ForeignKey("OutfitId")]
         public DbOutfit Outfit { get; set; }
     }
 }
