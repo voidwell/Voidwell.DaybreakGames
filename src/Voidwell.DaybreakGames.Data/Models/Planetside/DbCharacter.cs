@@ -19,14 +19,23 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int BattleRankPercentToNext { get; set; }
         public int CertsEarned { get; set; }
 
+        [ForeignKey("TitleId")]
         public DbTitle Title { get; set; }
+        [ForeignKey("WorldId")]
         public DbWorld World { get; set; }
+        [ForeignKey("FactionId")]
         public DbFaction Faction { get; set; }
+        [ForeignKey("Id")]
         public DbCharacterTime Time { get; set; }
+        [ForeignKey("Id")]
         public DbOutfitMember OutfitMembership { get; set; }
+        [ForeignKey("Id")]
         public IEnumerable<DbCharacterStat> Stats { get; set; }
+        [ForeignKey("Id")]
         public IEnumerable<DbCharacterStatByFaction> StatsByFaction { get; set; }
+        [ForeignKey("Id")]
         public IEnumerable<DbCharacterWeaponStat> WeaponStats { get; set; }
+        [ForeignKey("Id")]
         public IEnumerable<DbCharacterWeaponStatByFaction> WeaponStatsByFaction { get; set; }
     }
 }

@@ -7,6 +7,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
     [Table("CharacterUpdateQueue")]
     public class DbCharacterUpdateQueue
     {
+        [Key]
         [Required]
         public string CharacterId { get; set; }
 

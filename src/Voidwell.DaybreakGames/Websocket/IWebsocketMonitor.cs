@@ -1,12 +1,6 @@
-﻿using System.Threading.Tasks;
-
-namespace Voidwell.DaybreakGames.Websocket
+﻿namespace Voidwell.DaybreakGames.Websocket
 {
-    public interface IWebsocketMonitor
+    public interface IWebsocketMonitor : IHostedService
     {
-        string GetStatus();
-        Task StartMonitor();
-        Task StopMonitor();
-        Task ResetMonitor();
     }
 }

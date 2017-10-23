@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Websocket;
 
@@ -15,30 +16,30 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("status")]
-        public async Task<ActionResult> GetStatus()
+        public async Task<ActionResult> IsRunning()
         {
-            var status = _websocketMonitor.GetStatus();
+            var status = _websocketMonitor.IsRunning();
             return Ok(status);
         }
 
         [HttpPost("start")]
         public async Task<ActionResult> PostStart()
         {
-            await _websocketMonitor.StartMonitor();
+            await _websocketMonitor.StartAsync(CancellationToken.None);
             return NoContent();
         }
 
         [HttpPost("stop")]
         public async Task<ActionResult> PostStop()
         {
-            await _websocketMonitor.StopMonitor();
+            await _websocketMonitor.StopAsync(CancellationToken.None);
             return NoContent();
         }
 
-        [HttpPost("reset")]
-        public async Task<ActionResult> PostReset()
+        [HttpPost("stop/force")]
+        public async Task<ActionResult> PostForceStop()
         {
-            await _websocketMonitor.ResetMonitor();
+            await _websocketMonitor.ForceStopAsync(CancellationToken.None);
             return NoContent();
         }
     }

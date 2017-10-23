@@ -9,9 +9,6 @@ namespace Voidwell.DaybreakGames.Census
 {
     public sealed class CensusQuery : CensusObject
     {
-        public string Namespace { get; set; }
-        public string ApiKey { get; set; }
-
         private readonly CensusClient _censusClient;
 
         public string ServiceName { get; private set; }
@@ -171,9 +168,10 @@ namespace Voidwell.DaybreakGames.Census
             Language = language;
         }
 
-        public Task<T> Get<T>()
+        public async Task<T> Get<T>()
         {
-            return _censusClient.ExecuteQuery<T>("get", this);
+            var result = await _censusClient.ExecuteQuery<IEnumerable<T>>("get", this);
+            return result.FirstOrDefault();
         }
 
         public Task<IEnumerable<T>> GetList<T>()

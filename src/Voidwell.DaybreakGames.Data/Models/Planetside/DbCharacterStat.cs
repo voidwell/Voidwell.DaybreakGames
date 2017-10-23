@@ -38,7 +38,9 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int WeaponDamageTakenBy { get; set; }
         public int WeaponDamageGiven { get; set; }
 
+        [ForeignKey("ProfileId")]
         public DbProfile Profile { get; set; }
+        [ForeignKey("CharacterId")]
         public DbCharacter Character { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class CensusOptions
     {
-        public string ServiceKey { get; set; }
-        public string ServiceNamespace { get; set; }
+        public string CensusServiceKey { get; set; }
+        public string CensusServiceNamespace { get; set; }
     }
 }

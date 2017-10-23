@@ -23,6 +23,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public float LastFactionNc { get; set; }
         public float LastFactionTr { get; set; }
 
+        [ForeignKey("MetagameEventId")]
         public DbMetagameEventCategory MetagameEvent { get; set; }
     }
 }

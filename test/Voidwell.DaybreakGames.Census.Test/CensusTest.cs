@@ -367,8 +367,8 @@ namespace Voidwell.DaybreakGames.Census.Test
         {
             var options = new CensusOptions
             {
-                ServiceKey = "testkey",
-                ServiceNamespace = "ps2"
+                CensusServiceKey = "testkey",
+                CensusServiceNamespace = "ps2"
             };
             return new CensusClient(options);
         }

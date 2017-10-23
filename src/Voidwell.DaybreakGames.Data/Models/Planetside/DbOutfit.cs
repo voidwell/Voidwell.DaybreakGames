@@ -15,8 +15,11 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string FactionId { get; set; }
         public string WorldId { get; set; }
 
+        [ForeignKey("FactionId")]
         public DbFaction Faction { get; set; }
+        [ForeignKey("WorldId")]
         public DbWorld World { get; set; }
+        [ForeignKey("LeaderCharacterId")]
         public DbCharacter Leader { get; set; }
     }
 }

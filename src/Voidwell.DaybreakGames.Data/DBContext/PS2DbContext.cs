@@ -3,8 +3,15 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Data.DBContext
 {
-    public class PS2DbContext : DbContextBase
+    public class PS2DbContext : DbContext
     {
+        private readonly DatabaseOptions _options;
+
+        public PS2DbContext (DatabaseOptions options)
+        {
+            _options = options;
+        }
+
         public DbSet<DbCharacter> Characters { get; set; }
         public DbSet<DbOutfitMember> OutfitMembers { get; set; }
         public DbSet<DbCharacterTime> CharacterTimes { get; set; }
@@ -29,7 +36,6 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbMetagameEventCategory> MetagameEventCategories { get; set; }
         public DbSet<DbMetagameEventState> MetagameEventStates { get; set; }
         public DbSet<DbCharacterUpdateQueue> CharacterUpdateQueue { get; set; }
-
         public DbSet<DbEventAchievementEarned> AchievementEarnedEvents { get; set; }
         public DbSet<DbEventBattlerankUp> BattleRankUpEvents { get; set; }
         public DbSet<DbEventContinentLock> ContinentLockEvents { get; set; }
@@ -44,8 +50,88 @@ namespace Voidwell.DaybreakGames.Data.DBContext
         public DbSet<DbEventPlayerLogout> PlayerLogoutEvents { get; set; }
         public DbSet<DbEventVehicleDestroy> EventVehicleDestroys { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql(_options.DBConnectionString, b => b.MigrationsAssembly("Voidwell.DaybreakGames.Data"));
+
+            base.OnConfiguring(optionsBuilder);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("public");
+
+            modelBuilder.Entity<DbCharacterStat>()
+                .HasKey(a => new { a.CharacterId, a.ProfileId });
+
+            modelBuilder.Entity<DbCharacterStatByFaction>()
+                .HasKey(a => new { a.CharacterId, a.ProfileId });
+
+            modelBuilder.Entity<DbCharacterWeaponStat>()
+                .HasKey(a => new { a.CharacterId, a.ItemId, a.VehicleId });
+            modelBuilder.Entity<DbCharacterWeaponStat>()
+                .HasIndex(a => a.Kills);
+
+            modelBuilder.Entity<DbCharacterWeaponStatByFaction>()
+                .HasKey(a => new { a.CharacterId, a.ItemId, a.VehicleId });
+
+            modelBuilder.Entity<DbPlayerSession>()
+                .HasIndex(a => new { a.CharacterId, a.LoginDate, a.LogoutDate });
+
+            modelBuilder.Entity<DbFacilityLink>()
+                .HasKey(a => new { a.ZoneId, a.FacilityIdA, a.FacilityIdB });
+
+            modelBuilder.Entity<DbMapHex>()
+                .HasKey(a => new { a.ZoneId, a.MapRegionId });
+
+            modelBuilder.Entity<DbVehicleFaction>()
+                .HasKey(a => new { a.VehicleId, a.FactionId });
+
+            modelBuilder.Entity<DbAlert>()
+                .HasKey(a => new { a.WorldId, a.MetagameInstanceId });
+
+            modelBuilder.Entity<DbEventAchievementEarned>()
+                .HasKey(a => new { a.Timestamp, a.CharacterId });
+
+            modelBuilder.Entity<DbEventBattlerankUp>()
+                .HasKey(a => new { a.Timestamp, a.CharacterId });
+
+            modelBuilder.Entity<DbEventContinentLock>()
+                .HasKey(a => new { a.Timestamp, a.WorldId, a.ZoneId });
+
+            modelBuilder.Entity<DbEventContinentUnlock>()
+                .HasKey(a => new { a.Timestamp, a.WorldId, a.ZoneId });
+
+            modelBuilder.Entity<DbEventDeath>()
+                .HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId });
+
+            modelBuilder.Entity<DbEventFacilityControl>()
+                .HasKey(a => new { a.Timestamp, a.WorldId, a.FacilityId });
+
+            modelBuilder.Entity<DbEventFacilityControl>()
+                .HasKey(a => new { a.Timestamp, a.WorldId, a.FacilityId });
+
+            modelBuilder.Entity<DbEventGainExperience>()
+                .HasKey(a => new { a.Timestamp, a.CharacterId, a.ExperienceId });
+
+            modelBuilder.Entity<DbEventMetagameEvent>()
+                .HasKey(a => new { a.MetagameId });
+
+            modelBuilder.Entity<DbEventPlayerFacilityCapture>()
+                .HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
+
+            modelBuilder.Entity<DbEventPlayerFacilityDefend>()
+                .HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
+
+            modelBuilder.Entity<DbEventPlayerLogin>()
+                .HasKey(a => new { a.Timestamp, a.CharacterId });
+
+            modelBuilder.Entity<DbEventPlayerLogout>()
+                .HasKey(a => new { a.Timestamp, a.CharacterId });
+
+            modelBuilder.Entity<DbEventVehicleDestroy>()
+                .HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId });
+
             base.OnModelCreating(modelBuilder);
         }
     }

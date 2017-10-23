@@ -164,12 +164,17 @@ namespace Voidwell.DaybreakGames.Census
 
         public Task CloseAsync()
         {
-            return _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client requested close", CancellationToken.None);
+            return CloseAsync(CancellationToken.None);
+        }
+
+        public Task CloseAsync(CancellationToken cancellationToken)
+        {
+            return CloseAsync(WebSocketCloseStatus.NormalClosure, "Client requested close", cancellationToken);
         }
 
         public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription)
         {
-            return _client.CloseAsync(closeStatus, statusDescription, CancellationToken.None);
+            return CloseAsync(closeStatus, statusDescription, CancellationToken.None);
         }
 
         public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken)
