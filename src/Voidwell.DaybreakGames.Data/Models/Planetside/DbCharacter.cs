@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     [Table("Character")]
-    public class DbCharacter
+    public class DbCharacter : IDbModel<DbCharacter>
     {
         [Required]
         public string Id { get; set; }
@@ -37,5 +39,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public IEnumerable<DbCharacterWeaponStat> WeaponStats { get; set; }
         [ForeignKey("Id")]
         public IEnumerable<DbCharacterWeaponStatByFaction> WeaponStatsByFaction { get; set; }
+
+        public Expression<Func<DbCharacter, bool>> Predicate { get => (a => a.Id == Id); }
     }
 }
