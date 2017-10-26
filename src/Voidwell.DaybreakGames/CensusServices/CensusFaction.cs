@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             query.ShowFields(new[]
             {
-                "factiion_id",
+                "faction_id",
                 "name",
                 "image_id",
                 "code_tag",

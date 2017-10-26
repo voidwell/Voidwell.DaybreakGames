@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 
 namespace Voidwell.DaybreakGames
 {
-    public abstract class HostedService : IHostedService
+    public abstract class HostedService : IHostedServiceExtended
     {
         private Task _executingTask;
         private CancellationTokenSource _cts;
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public virtual Task StartAsync(CancellationToken cancellationToken)
         {
             _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames
             return _executingTask.IsCompleted ? _executingTask : Task.CompletedTask;
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public virtual async Task StopAsync(CancellationToken cancellationToken)
         {
             if (_executingTask == null)
             {

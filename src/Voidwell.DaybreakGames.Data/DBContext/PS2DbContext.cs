@@ -12,6 +12,7 @@ namespace Voidwell.DaybreakGames.Data.DBContext
             _options = options;
         }
 
+        public DbSet<DbPS2UpdaterScheduler> UpdaterScheduler { get; set; }
         public DbSet<DbCharacter> Characters { get; set; }
         public DbSet<DbOutfitMember> OutfitMembers { get; set; }
         public DbSet<DbCharacterTime> CharacterTimes { get; set; }

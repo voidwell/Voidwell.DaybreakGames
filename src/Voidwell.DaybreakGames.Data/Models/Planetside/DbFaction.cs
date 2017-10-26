@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     [Table("Faction")]
-    public class DbFaction
+    public class DbFaction : IDbModel<DbFaction>
     {
         [Required]
         public string Id { get; set; }
@@ -13,5 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string ImageId { get; set; }
         public string CodeTag { get; set; }
         public bool UserSelectable { get; set; }
+
+        public Expression<Func<DbFaction, bool>> Predicate { get => (a => a.Id == Id); }
     }
 }

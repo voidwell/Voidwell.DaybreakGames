@@ -8,14 +8,17 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class FactionService : IFactionService, IDisposable
+    public class FactionService : IFactionService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        public readonly Func<PS2DbContext> _dbContextFactory;
         private readonly CensusFaction _censusFaction;
 
-        public FactionService(PS2DbContext ps2DbContext, CensusFaction censusFaction)
+        public string ServiceName => "FactionService";
+        public TimeSpan UpdateInterval => TimeSpan.FromMinutes(10);
+
+        public FactionService(Func<PS2DbContext> dbContextFactory, CensusFaction censusFaction)
         {
-            _ps2DbContext = ps2DbContext;
+            _dbContextFactory = dbContextFactory;
             _censusFaction = censusFaction;
         }
 
@@ -25,10 +28,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (factions != null)
             {
-                _ps2DbContext.UpdateRange(factions.Select(i => ConvertToDbModel(i)));
+                var dbContext = _dbContextFactory();
+                await dbContext.Factions.UpsertRangeAsync(factions.Select(i => ConvertToDbModel(i)));
+                await dbContext.SaveChangesAsync();
             }
-
-            await _ps2DbContext.SaveChangesAsync();
         }
 
         private DbFaction ConvertToDbModel(CensusFactionModel censusModel)
@@ -41,11 +44,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 CodeTag = censusModel.CodeTag,
                 UserSelectable = censusModel.UserSelectable
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }
