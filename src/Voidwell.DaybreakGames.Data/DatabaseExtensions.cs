@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System;
 using Voidwell.DaybreakGames.Data.DBContext;
 
 namespace Voidwell.DaybreakGames.Data
@@ -15,6 +16,7 @@ namespace Voidwell.DaybreakGames.Data
 
             services.AddEntityFrameworkNpgsql();
             services.AddDbContext<PS2DbContext>(ServiceLifetime.Scoped);
+            services.AddTransient(sp => new Func<PS2DbContext>(() => new PS2DbContext(sp.GetRequiredService<DatabaseOptions>())));
 
             return services;
         }

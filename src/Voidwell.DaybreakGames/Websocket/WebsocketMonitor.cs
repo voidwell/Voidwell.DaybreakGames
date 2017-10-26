@@ -26,7 +26,17 @@ namespace Voidwell.DaybreakGames.Websocket
 
             _client = new CensusWebSocketClient(_options.CensusServiceKey);
         }
-        
+
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            if (_options.AutostartWebsocketMonitor)
+            {
+                return base.StartAsync(cancellationToken);
+            }
+
+            return Task.CompletedTask;
+        }
+
         protected override Task ExecuteAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting websocket monitor...");

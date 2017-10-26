@@ -1,6 +1,6 @@
 ﻿namespace Voidwell.DaybreakGames.Websocket
 {
-    public interface IWebsocketMonitor : IHostedService
+    public interface IWebsocketMonitor : IHostedServiceExtended
     {
     }
 }

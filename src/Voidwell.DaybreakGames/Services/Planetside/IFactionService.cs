@@ -2,8 +2,7 @@
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public interface IFactionService
+    public interface IFactionService : IUpdateable
     {
-        Task RefreshStore();
     }
 }
