@@ -13,6 +13,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly PS2DbContext _ps2DbContext;
         private readonly CensusTitle _censusTitle;
 
+        public string ServiceName => "TitleService";
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+
         public TitleService(PS2DbContext ps2DbContext, CensusTitle censusTitle)
         {
             _ps2DbContext = ps2DbContext;

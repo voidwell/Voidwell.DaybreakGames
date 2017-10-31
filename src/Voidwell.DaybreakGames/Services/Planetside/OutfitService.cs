@@ -55,10 +55,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return TryGetOutfitFull(outfitId);
         }
 
-        public IEnumerable<DbOutfitMember> GetOutfitMembers(string outfitId)
+        public async Task<IEnumerable<DbOutfitMember>> GetOutfitMembers(string outfitId)
         {
-            return _ps2DbContext.OutfitMembers.Where(o => o.OutfitId == outfitId)
-                .ToList();
+            return await _ps2DbContext.OutfitMembers.Where(o => o.OutfitId == outfitId)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<DbOutfit>> LookupOutfitsByName(string name, int limit = 12)

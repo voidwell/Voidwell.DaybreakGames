@@ -14,17 +14,24 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             _characterService = characterService;
         }
 
-        [HttpGet("search/{query}")]
-        public async Task<ActionResult> LookupCharactersByName(string query)
-        {
-            var result = await _characterService.LookupCharactersByName(query);
-            return Ok(result);
-        }
-
         [HttpGet("{characterId}")]
         public async Task<ActionResult> GetCharacterById(string characterId)
         {
             var result = await _characterService.GetCharacter(characterId);
+            return Ok(result);
+        }
+
+        [HttpGet("{characterId}/sessions")]
+        public async Task<ActionResult> GetCharacterSessionsById(string characterId)
+        {
+            var result = await _characterService.GetSessions(characterId);
+            return Ok(result);
+        }
+
+        [HttpGet("{characterId}/sessions/{sessionId}")]
+        public async Task<ActionResult> GetCharacterSessionsById(string characterId, string sessionId)
+        {
+            var result = await _characterService.GetSession(characterId, sessionId);
             return Ok(result);
         }
     }

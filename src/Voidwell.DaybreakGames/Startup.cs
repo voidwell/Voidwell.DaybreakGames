@@ -62,6 +62,7 @@ namespace Voidwell.DaybreakGames
             services.AddTransient<IWorldMonitor, WorldMonitor>();
             services.AddTransient<IUpdaterService, UpdaterService>();
             services.AddTransient<IFactionService, FactionService>();
+            services.AddTransient<IFeedService, FeedService>();
 
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();

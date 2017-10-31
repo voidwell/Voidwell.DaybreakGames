@@ -9,7 +9,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<IEnumerable<DbOutfit>> LookupOutfitsByName(string name, int limit = 12);
         Task<DbOutfit> GetOutfit(string outfitId);
         Task<DbOutfit> GetOutfitFull(string outfitId);
-        IEnumerable<DbOutfitMember> GetOutfitMembers(string outfitId);
+        Task<IEnumerable<DbOutfitMember>> GetOutfitMembers(string outfitId);
         Task<DbOutfit> UpdateOutfit(string outfitId);
         Task<IEnumerable<DbOutfit>> FindOutfits(IEnumerable<string> outfitIds);
     }

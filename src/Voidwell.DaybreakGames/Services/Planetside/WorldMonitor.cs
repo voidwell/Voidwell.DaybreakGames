@@ -216,6 +216,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             WorldStates[worldId].OnlinePlayers.Remove(characterId);
         }
 
+        public Dictionary<string, bool> GetWorldStates()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
         {
             _ps2DbContext?.Dispose();

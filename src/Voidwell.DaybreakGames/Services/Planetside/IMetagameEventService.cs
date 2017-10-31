@@ -2,7 +2,7 @@
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public interface IMetagameEventService
+    public interface IMetagameEventService : IUpdateable
     {
         Task RefreshStore();
     }

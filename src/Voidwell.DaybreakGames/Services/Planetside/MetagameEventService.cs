@@ -13,6 +13,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly PS2DbContext _ps2DbContext;
         private readonly CensusMetagameEvent _censusMetagameEvent;
 
+        public string ServiceName => "MetagameEventService";
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+
         public MetagameEventService(PS2DbContext ps2DbContext, CensusMetagameEvent censusMetagameEvent)
         {
             _ps2DbContext = ps2DbContext;
