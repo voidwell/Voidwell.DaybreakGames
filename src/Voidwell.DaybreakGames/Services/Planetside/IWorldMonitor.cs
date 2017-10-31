@@ -15,5 +15,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<IEnumerable<float>> GetTerritoryFromDate(string worldId, string zoneId, DateTime date);
         Task SetPlayerOnlineState(string characterId, DateTime timestamp, bool isOnline);
         IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(string worldId);
+        Dictionary<string, bool> GetWorldStates();
     }
 }

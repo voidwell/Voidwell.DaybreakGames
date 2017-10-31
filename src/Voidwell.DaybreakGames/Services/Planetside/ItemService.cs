@@ -16,6 +16,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly CensusItem _censusItem;
         private readonly CensusItemCategory _censusItemCategory;
 
+        public string ServiceName => "ItemService";
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+
         public ItemService(PS2DbContext ps2DbContext, CensusItem censusItem, CensusItemCategory censusItemCategory)
         {
             _ps2DbContext = ps2DbContext;

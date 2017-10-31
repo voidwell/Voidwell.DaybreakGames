@@ -5,7 +5,7 @@ using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public interface IMapService
+    public interface IMapService : IUpdateable
     {
         Task<IEnumerable<MapOwnership>> GetMapOwnership(string worldId, string zoneId);
         Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId);

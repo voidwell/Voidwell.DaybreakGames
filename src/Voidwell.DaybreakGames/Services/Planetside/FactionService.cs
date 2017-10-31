@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly CensusFaction _censusFaction;
 
         public string ServiceName => "FactionService";
-        public TimeSpan UpdateInterval => TimeSpan.FromMinutes(10);
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
         public FactionService(Func<PS2DbContext> dbContextFactory, CensusFaction censusFaction)
         {

@@ -15,6 +15,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly PS2DbContext _ps2DbContext;
         private readonly CensusVehicle _censusVehicle;
 
+        public string ServiceName => "VehicleService";
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+
         public VehicleService(PS2DbContext ps2DbContext, CensusVehicle censusVehicle)
         {
             _ps2DbContext = ps2DbContext;

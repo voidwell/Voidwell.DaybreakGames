@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public interface IProfileService
+    public interface IProfileService : IUpdateable
     {
         Task<IEnumerable<DbProfile>> GetAllProfiles();
         Task RefreshStore();
