@@ -1,12 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     [Table("OutfitMember")]
-    public class DbOutfitMember : IDbModel<DbOutfitMember>
+    public class DbOutfitMember
     {
         [Key]
         [Required]
@@ -22,7 +21,5 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public DbCharacter Character { get; set; }
         [ForeignKey("OutfitId")]
         public DbOutfit Outfit { get; set; }
-
-        public Expression<Func<DbOutfitMember, bool>> Predicate { get => (a => a.CharacterId == CharacterId && a.OutfitId == OutfitId); }
     }
 }

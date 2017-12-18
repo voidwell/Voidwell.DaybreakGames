@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class MetagameEventService : IMetagameEventService , IDisposable
+    public class MetagameEventService : IMetagameEventService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly IMetagameEventRepository _metagameEventRepository;
         private readonly CensusMetagameEvent _censusMetagameEvent;
 
         public string ServiceName => "MetagameEventService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public MetagameEventService(PS2DbContext ps2DbContext, CensusMetagameEvent censusMetagameEvent)
+        public MetagameEventService(IMetagameEventRepository metagameEventRepository, CensusMetagameEvent censusMetagameEvent)
         {
-            _ps2DbContext = ps2DbContext;
+            _metagameEventRepository = metagameEventRepository;
             _censusMetagameEvent = censusMetagameEvent;
         }
 
@@ -29,15 +29,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (categories != null)
             {
-                _ps2DbContext.MetagameEventCategories.UpdateRange(categories.Select(i => ConvertToDbModel(i)));
+                await _metagameEventRepository.UpsertRangeAsync(categories.Select(ConvertToDbModel));
             }
 
             if (states != null)
             {
-                _ps2DbContext.MetagameEventStates.UpdateRange(states.Select(i => ConvertToDbModel(i)));
+                await _metagameEventRepository.UpsertRangeAsync(states.Select(ConvertToDbModel));
             }
-
-            await _ps2DbContext.SaveChangesAsync();
         }
 
         private DbMetagameEventCategory ConvertToDbModel(CensusMetagameEventCategoryModel model)
@@ -59,11 +57,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Id = model.MetagameEventStateId,
                 Name = model.Name
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

@@ -16,10 +16,9 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("status")]
-        public async Task<ActionResult> IsRunning()
+        public bool IsRunning()
         {
-            var status = _websocketMonitor.IsRunning();
-            return Ok(status);
+            return _websocketMonitor.IsRunning();
         }
 
         [HttpPost("start")]

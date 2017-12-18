@@ -92,14 +92,17 @@ namespace Voidwell.DaybreakGames.Websocket
             {
                 var message = await _client.ReceiveAsync(cancellationToken);
 
+                #pragma warning disable CS4014
                 if (message.Result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
                 {
+                    
                     Task.Run(() => _client.CloseAsync());
                 }
                 else
                 {
                     Task.Run(() => _handler.Process(message.Content));
                 }
+                #pragma warning restore CS4014
             }
         }
 

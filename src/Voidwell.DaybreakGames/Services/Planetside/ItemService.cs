@@ -2,59 +2,54 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.CensusServices.Models;
-using Microsoft.EntityFrameworkCore;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class ItemService : IItemService, IDisposable
+    public class ItemService : IItemService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly IItemRepository _itemRepository;
         private readonly CensusItem _censusItem;
         private readonly CensusItemCategory _censusItemCategory;
 
         public string ServiceName => "ItemService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public ItemService(PS2DbContext ps2DbContext, CensusItem censusItem, CensusItemCategory censusItemCategory)
+        public ItemService(IItemRepository itemRepository, CensusItem censusItem, CensusItemCategory censusItemCategory)
         {
-            _ps2DbContext = ps2DbContext;
+            _itemRepository = itemRepository;
             _censusItem = censusItem;
             _censusItemCategory = censusItemCategory;
         }
 
-        public async Task<IEnumerable<DbItem>> FindItems(IEnumerable<string> itemIds)
+        public Task<IEnumerable<DbItem>> FindItems(IEnumerable<string> itemIds)
         {
-            return await _ps2DbContext.Items.Where(i => itemIds.Contains(i.Id))
-                .ToListAsync();
+            return _itemRepository.FindItemsByIdsAsync(itemIds);
         }
 
-        public async Task<IEnumerable<DbItem>> LookupItemsByName(string name, int limit = 12)
+        public Task<IEnumerable<DbItem>> LookupItemsByName(string name, int limit = 12)
         {
-            return await _ps2DbContext.Items.Where(i => i.Name.Contains(name))
-                .Take(limit)
-                .ToListAsync();
+            return _itemRepository.FindItemsByNameAsync(name, limit);
         }
 
         public async Task RefreshStore()
         {
-            var items = await _censusItem.GetAllItems();
             var itemCategories = await _censusItemCategory.GetAllItemCategories();
-
-            if (items != null)
-            {
-                _ps2DbContext.UpdateRange(items.Select(i => ConvertToDbModel(i)));
-            }
 
             if (itemCategories != null)
             {
-                _ps2DbContext.UpdateRange(itemCategories.Select(i => ConvertToDbModel(i)));
+                await _itemRepository.UpsertRangeAsync(itemCategories.Select(ConvertToDbModel));
             }
 
-            await _ps2DbContext.SaveChangesAsync();
+            var items = await _censusItem.GetAllItems();
+
+            if (items != null)
+            {
+                await _itemRepository.UpsertRangeAsync(items.Select(ConvertToDbModel));
+            }
         }
 
         private DbItem ConvertToDbModel(CensusItemModel item)
@@ -65,8 +60,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 ItemTypeId = item.ItemTypeId,
                 ItemCategoryId = item.ItemCategoryId,
                 IsVehicleWeapon = item.IsVehicleWeapon,
-                Name = item.Name.English,
-                Description = item.Description.English,
+                Name = item.Name?.English,
+                Description = item.Description?.English,
                 FactionId = item.FactionId,
                 MaxStackSize = item.MaxStackSize,
                 ImageId = item.ImageId
@@ -78,13 +73,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return new DbItemCategory
             {
                 Id = itemCat.ItemCategoryId,
-                Name = itemCat.Name.English
+                Name = itemCat.Name?.English
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

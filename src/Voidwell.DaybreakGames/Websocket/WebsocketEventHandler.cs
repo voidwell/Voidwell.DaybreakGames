@@ -9,16 +9,16 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.JsonConverters;
-using Voidwell.DaybreakGames.Data.DBContext;
+using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Websocket.Models;
 
 namespace Voidwell.DaybreakGames.Websocket
 {
-    public class WebsocketEventHandler : IWebsocketEventHandler, IDisposable
+    public class WebsocketEventHandler : IWebsocketEventHandler
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly Func<PS2DbContext> _ps2DbContextFactory;
         private readonly IWorldMonitor _worldMonitor;
         private readonly ICharacterService _characterService;
         private readonly IAlertService _alertService;
@@ -36,9 +36,9 @@ namespace Voidwell.DaybreakGames.Websocket
         };
         private JsonSerializer _payloadDeserializer;
 
-        public WebsocketEventHandler(PS2DbContext ps2DbContext, IWorldMonitor worldMonitor, ICharacterService characterService, IAlertService alertService, ILogger<WebsocketEventHandler> logger)
+        public WebsocketEventHandler(Func<PS2DbContext> ps2DbContextFactory, IWorldMonitor worldMonitor, ICharacterService characterService, IAlertService alertService, ILogger<WebsocketEventHandler> logger)
         {
-            _ps2DbContext = ps2DbContext;
+            _ps2DbContextFactory = ps2DbContextFactory;
             _worldMonitor = worldMonitor;
             _characterService = characterService;
             _alertService = alertService;
@@ -106,6 +106,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("AchievementEarned", typeof(AchievementEarned))]
         private Task Process(AchievementEarned payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventAchievementEarned
             {
                 AchievementId = payload.AchievementId,
@@ -114,13 +115,14 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.AchievementEarnedEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+            dbContext.AchievementEarnedEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("BattleRankUp", typeof(BattlerankUp))]
         private Task Process(BattlerankUp payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventBattlerankUp
             {
                 BattleRank = payload.BattleRank,
@@ -129,13 +131,14 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.BattleRankUpEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+            dbContext.BattleRankUpEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("ContinentLock", typeof(ContinentLock))]
         private Task Process(ContinentLock payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventContinentLock
             {
                 TriggeringFaction = payload.TriggeringFaction,
@@ -147,13 +150,14 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.ContinentLockEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+            dbContext.ContinentLockEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("ContinentUnlock", typeof(ContinentUnlock))]
         private Task Process(ContinentUnlock payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventContinentUnlock
             {
                 TriggeringFaction = payload.TriggeringFaction,
@@ -162,17 +166,20 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.ContinentUnlockEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+            dbContext.ContinentUnlockEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("Death", typeof(Death))]
         private async Task Process(Death payload)
         {
+            var dbContext = _ps2DbContextFactory();
+
             List<Task> characterWork = new List<Task>();
             List<Task> outfitWork = new List<Task>();
             Task<DbOutfitMember> AttackerOutfitTask = null;
             Task<DbOutfitMember> VictimOutfitTask = null;
+
             if (payload.AttackerCharacterId != null && payload.AttackerCharacterId.Length > 18)
             {
                 characterWork.Add(_characterService.GetCharacter(payload.AttackerCharacterId));
@@ -206,13 +213,16 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.EventDeaths.Add(dataModel);
-            await _ps2DbContext.SaveChangesAsync();
+
+            dbContext.EventDeaths.Add(dataModel);
+            await dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("FacilityControl", typeof(FacilityControl))]
         private async Task Process(FacilityControl payload)
         {
+            var dbContext = _ps2DbContextFactory();
+
             var mapUpdate = _worldMonitor.UpdateFacilityControl(payload);
             var territory = mapUpdate.Territory.ToArray();
 
@@ -231,12 +241,12 @@ namespace Voidwell.DaybreakGames.Websocket
                 ZoneControlTr = territory[3] * 100
             };
 
-            _ps2DbContext.EventFacilityControls.Add(dataModel);
-            await _ps2DbContext.SaveChangesAsync();
+            dbContext.EventFacilityControls.Add(dataModel);
+            await dbContext.SaveChangesAsync();
 
             if (dataModel.NewFactionId != dataModel.OldFactionId)
             {
-                var alert = await _ps2DbContext.Alerts
+                var alert = await dbContext.Alerts
                     .AsTracking()
                     .SingleOrDefaultAsync(a => a.WorldId == dataModel.WorldId && a.ZoneId == dataModel.ZoneId && a.EndDate == null);
 
@@ -249,14 +259,15 @@ namespace Voidwell.DaybreakGames.Websocket
                 alert.LastFactionNc = dataModel.ZoneControlNc;
                 alert.LastFactionTr = dataModel.ZoneControlTr;
 
-                _ps2DbContext.Alerts.Update(alert);
-                await _ps2DbContext.SaveChangesAsync();
+                dbContext.Alerts.Update(alert);
+                await dbContext.SaveChangesAsync();
             }
         }
 
         [CensusEventHandler("GainExperience", typeof(GainExperience))]
         private Task Process(GainExperience payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventGainExperience
             {
                 ExperienceId = payload.ExperienceId,
@@ -268,13 +279,16 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.GainExperienceEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+
+            dbContext.GainExperienceEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("MetagameEvent", typeof(MetagameEvent))]
         private async Task Process(MetagameEvent payload)
         {
+            var dbContext = _ps2DbContextFactory();
+
             payload.ZoneId = payload.ZoneId ?? (_metagameZones.TryGetValue(payload.MetagameEventId, out string metagameZone) ? metagameZone : null);
 
             var dataModel = new DbEventMetagameEvent
@@ -290,8 +304,9 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.MetagameEventEvents.Add(dataModel);
-            await _ps2DbContext.SaveChangesAsync();
+
+            dbContext.MetagameEventEvents.Add(dataModel);
+            await dbContext.SaveChangesAsync();
 
             var eventState = (METAGAME_EVENT_STATE)Enum.Parse(typeof(METAGAME_EVENT_STATE), dataModel.MetagameEventState);
             if (eventState == METAGAME_EVENT_STATE.STARTED || eventState == METAGAME_EVENT_STATE.RESTARTED)
@@ -307,6 +322,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("PlayerFacilityCapture", typeof(PlayerFacilityCapture))]
         private Task Proces(PlayerFacilityCapture payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventPlayerFacilityCapture
             {
                 FacilityId = payload.FacilityId,
@@ -316,13 +332,15 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.PlayerFacilityCaptureEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+
+            dbContext.PlayerFacilityCaptureEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("PlayerFacilityDefend", typeof(PlayerFacilityDefend))]
         private Task Process(PlayerFacilityDefend payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventPlayerFacilityDefend
             {
                 FacilityId = payload.FacilityId,
@@ -332,13 +350,16 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.PlayerFacilityDefendEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+
+            dbContext.PlayerFacilityDefendEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("PlayerLogin", typeof(PlayerLogin))]
         private Task Process(PlayerLogin payload)
         {
+            var dbContext = _ps2DbContextFactory();
+
             _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, true);
 
             var dataModel = new DbEventPlayerLogin
@@ -347,13 +368,16 @@ namespace Voidwell.DaybreakGames.Websocket
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId
             };
-            _ps2DbContext.PlayerLoginEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+
+            dbContext.PlayerLoginEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("PlayerLogout", typeof(PlayerLogout))]
         private Task Process(PlayerLogout payload)
         {
+            var dbContext = _ps2DbContextFactory();
+
             _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, false);
 
             var dataModel = new DbEventPlayerLogout
@@ -362,13 +386,15 @@ namespace Voidwell.DaybreakGames.Websocket
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId
             };
-            _ps2DbContext.PlayerLogoutEvents.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+
+            dbContext.PlayerLogoutEvents.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(VehicleDestroy))]
         private Task Process(VehicleDestroy payload)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbEventVehicleDestroy
             {
                 AttackerCharacterId = payload.AttackerCharacterId,
@@ -383,13 +409,9 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            _ps2DbContext.EventVehicleDestroys.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
-        }
 
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
+            dbContext.EventVehicleDestroys.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
     }
 }

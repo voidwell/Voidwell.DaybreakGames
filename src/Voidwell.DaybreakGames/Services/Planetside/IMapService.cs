@@ -11,6 +11,5 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId);
         Task<IEnumerable<DbFacilityLink>> GetFacilityLinks(string zoneId);
         Task<IEnumerable<DbMapRegion>> FindRegions(params string[] facilityIds);
-        Task RefreshStore();
     }
 }

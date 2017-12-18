@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.Models
                 BattleRank = censusCharacter.BattleRank.Value,
                 Id = censusCharacter.CharacterId,
                 FactionId = censusCharacter.FactionId,
-                LastLogin = censusCharacter.Times.LastLogin,
+                LastLogin = censusCharacter.Times.LastLoginDate,
                 WorldId = censusCharacter.WorldId,
                 OnlineStatus = censusCharacter.OnlineStatus
             };

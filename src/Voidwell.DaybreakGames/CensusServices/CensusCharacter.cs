@@ -52,7 +52,8 @@ namespace Voidwell.DaybreakGames.CensusServices
             });
             query.Where("character_id").Equals(characterId);
 
-            return await query.Get<CensusCharacterModel.CharacterTimes>();
+            var result = await query.Get<CensusCharacterModel>();
+            return result?.Times;
         }
 
         public async Task<IEnumerable<CensusCharacterStatModel>> GetCharacterStats(string characterId, DateTime? lastLogin = null)
@@ -74,7 +75,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
             }
 
-            return await query.GetList<CensusCharacterStatModel>();
+            return await query.GetBatch<CensusCharacterStatModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterFactionStatModel>> GetCharacterFactionStats(string characterId, DateTime? lastLogin = null)
@@ -99,7 +100,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
             }
 
-            return await query.GetList<CensusCharacterFactionStatModel>();
+            return await query.GetBatch<CensusCharacterFactionStatModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterWeaponStatModel>> GetCharacterWeaponStats(string characterId, DateTime? lastLogin = null)
@@ -122,7 +123,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
             }
 
-            return await query.GetList<CensusCharacterWeaponStatModel>();
+            return await query.GetBatch<CensusCharacterWeaponStatModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterWeaponFactionStatModel>> GetCharacterWeaponStatsByFaction(string characterId, DateTime? lastLogin = null)
@@ -147,7 +148,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
             }
 
-            return await query.GetList<CensusCharacterWeaponFactionStatModel>();
+            return await query.GetBatch<CensusCharacterWeaponFactionStatModel>();
         }
 
         public async Task<CensusOutfitMemberModel> GetCharacterOutfitMembership(string characterId)

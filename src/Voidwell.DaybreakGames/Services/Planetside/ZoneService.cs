@@ -1,32 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class ZoneService : IZoneService, IDisposable
+    public class ZoneService : IZoneService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly IZoneRepository _zoneRepository;
         private readonly CensusZone _censusZone;
 
         public string ServiceName => "ZoneService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public ZoneService(PS2DbContext ps2DbContext, CensusZone censusZone)
+        public ZoneService(IZoneRepository zoneRepository, CensusZone censusZone)
         {
-            _ps2DbContext = ps2DbContext;
+            _zoneRepository = zoneRepository;
             _censusZone = censusZone;
         }
 
-        public async Task<IEnumerable<DbZone>> GetAllZones()
+        public Task<IEnumerable<DbZone>> GetAllZones()
         {
-            return await _ps2DbContext.Zones.ToListAsync();
+            return _zoneRepository.GetAllZonesAsync();
         }
 
         public async Task RefreshStore()
@@ -35,10 +34,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (zones != null)
             {
-                _ps2DbContext.Zones.UpdateRange(zones.Select(i => ConvertToDbModel(i)));
+                await _zoneRepository.UpsertRangeAsync(zones.Select(ConvertToDbModel));
             }
-
-            await _ps2DbContext.SaveChangesAsync();
         }
 
         private DbZone ConvertToDbModel(CensusZoneModel censusModel)
@@ -51,11 +48,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Code = censusModel.Code,
                 HexSize = censusModel.HexSize
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

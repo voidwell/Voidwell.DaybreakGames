@@ -3,22 +3,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class TitleService : ITitleService, IDisposable
+    public class TitleService : ITitleService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly ITitleRepository _titleRepository;
         private readonly CensusTitle _censusTitle;
 
         public string ServiceName => "TitleService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public TitleService(PS2DbContext ps2DbContext, CensusTitle censusTitle)
+        public TitleService(ITitleRepository titleRepository, CensusTitle censusTitle)
         {
-            _ps2DbContext = ps2DbContext;
+            _titleRepository = titleRepository;
             _censusTitle = censusTitle;
         }
 
@@ -28,10 +28,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (profiles != null)
             {
-                _ps2DbContext.Titles.UpdateRange(profiles.Select(i => ConvertToDbModel(i)));
+                await _titleRepository.UpdateRangeAsync(profiles.Select(ConvertToDbModel));
             }
-
-            await _ps2DbContext.SaveChangesAsync();
         }
 
         private DbTitle ConvertToDbModel(CensusTitleModel censusModel)
@@ -41,11 +39,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Id = censusModel.TitleId,
                 Name = censusModel.Name.English,
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

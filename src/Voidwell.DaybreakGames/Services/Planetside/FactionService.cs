@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class FactionService : IFactionService
     {
-        public readonly Func<PS2DbContext> _dbContextFactory;
+        public readonly IFactionRepository _factionRepository;
         private readonly CensusFaction _censusFaction;
 
         public string ServiceName => "FactionService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public FactionService(Func<PS2DbContext> dbContextFactory, CensusFaction censusFaction)
+        public FactionService(IFactionRepository factionRepository, CensusFaction censusFaction)
         {
-            _dbContextFactory = dbContextFactory;
+            _factionRepository = factionRepository;
             _censusFaction = censusFaction;
         }
 
@@ -28,11 +28,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (factions != null)
             {
-                var dbContext = _dbContextFactory();
-                await dbContext.Factions.UpsertRangeAsync(factions.Select(i => ConvertToDbModel(i)));
-                await dbContext.SaveChangesAsync();
+                await _factionRepository.UpsertRangeAsync(factions.Select(ConvertToDbModel));
             }
-        }
+        }        
 
         private DbFaction ConvertToDbModel(CensusFactionModel censusModel)
         {

@@ -6,21 +6,20 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
-using Voidwell.DaybreakGames.Data.DBContext;
+using Voidwell.DaybreakGames.Data;
 
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    [Migration("20171022231001_testpg")]
-    partial class testpg
+    [Migration("20171218013838_initialPS2DbContext")]
+    partial class initialPS2DbContext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("public")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
-                .HasAnnotation("ProductVersion", "2.0.0-rtm-26452");
+                .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbAlert", b =>
                 {
@@ -57,7 +56,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", b =>
                 {
-                    b.Property<string>("Id");
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int>("BattleRank");
 
@@ -91,63 +91,59 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("ProfileId");
 
-                    b.Property<int>("AchievementCount");
+                    b.Property<int?>("AchievementCount");
 
-                    b.Property<int>("AssistCount");
+                    b.Property<int?>("AssistCount");
 
-                    b.Property<int>("Deaths");
+                    b.Property<int?>("Deaths");
 
-                    b.Property<int>("DominationCount");
+                    b.Property<int?>("DominationCount");
 
-                    b.Property<int>("FacilityCaptureCount");
+                    b.Property<int?>("FacilityCaptureCount");
 
-                    b.Property<int>("FacilityDefendedCount");
+                    b.Property<int?>("FacilityDefendedCount");
 
-                    b.Property<int>("FireCount");
+                    b.Property<int?>("FireCount");
 
-                    b.Property<int>("HitCount");
+                    b.Property<int?>("HitCount");
 
-                    b.Property<string>("Id");
+                    b.Property<int?>("KilledBy");
 
-                    b.Property<int>("KilledBy");
+                    b.Property<int?>("Kills");
 
-                    b.Property<int>("Kills");
+                    b.Property<int?>("MedalCount");
 
-                    b.Property<int>("MedalCount");
+                    b.Property<int?>("PlayTime");
 
-                    b.Property<int>("PlayTime");
+                    b.Property<int?>("RevengeCount");
 
-                    b.Property<int>("RevengeCount");
+                    b.Property<int?>("Score");
 
-                    b.Property<int>("Score");
+                    b.Property<int?>("SkillPoints");
 
-                    b.Property<int>("SkillPoints");
+                    b.Property<int?>("WeaponDamageGiven");
 
-                    b.Property<int>("WeaponDamageGiven");
+                    b.Property<int?>("WeaponDamageTakenBy");
 
-                    b.Property<int>("WeaponDamageTakenBy");
+                    b.Property<int?>("WeaponDeaths");
 
-                    b.Property<int>("WeaponDeaths");
+                    b.Property<int?>("WeaponFireCount");
 
-                    b.Property<int>("WeaponFireCount");
+                    b.Property<int?>("WeaponHeadshots");
 
-                    b.Property<int>("WeaponHeadshots");
+                    b.Property<int?>("WeaponHitCount");
 
-                    b.Property<int>("WeaponHitCount");
+                    b.Property<int?>("WeaponKilledBy");
 
-                    b.Property<int>("WeaponKilledBy");
+                    b.Property<int?>("WeaponKills");
 
-                    b.Property<int>("WeaponKills");
+                    b.Property<int?>("WeaponPlayTime");
 
-                    b.Property<int>("WeaponPlayTime");
+                    b.Property<int?>("WeaponScore");
 
-                    b.Property<int>("WeaponScore");
-
-                    b.Property<int>("WeaponVehicleKills");
+                    b.Property<int?>("WeaponVehicleKills");
 
                     b.HasKey("CharacterId", "ProfileId");
-
-                    b.HasIndex("Id");
 
                     b.HasIndex("ProfileId");
 
@@ -160,77 +156,73 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("ProfileId");
 
-                    b.Property<int>("DominationCountNC");
+                    b.Property<int?>("DominationCountNC");
 
-                    b.Property<int>("DominationCountTR");
+                    b.Property<int?>("DominationCountTR");
 
-                    b.Property<int>("DominationCountVS");
+                    b.Property<int?>("DominationCountVS");
 
-                    b.Property<int>("FacilityCaptureCountNC");
+                    b.Property<int?>("FacilityCaptureCountNC");
 
-                    b.Property<int>("FacilityCaptureCountTR");
+                    b.Property<int?>("FacilityCaptureCountTR");
 
-                    b.Property<int>("FacilityCaptureCountVS");
+                    b.Property<int?>("FacilityCaptureCountVS");
 
-                    b.Property<string>("Id");
+                    b.Property<int?>("KilledByNC");
 
-                    b.Property<int>("KilledByNC");
+                    b.Property<int?>("KilledByTR");
 
-                    b.Property<int>("KilledByTR");
+                    b.Property<int?>("KilledByVS");
 
-                    b.Property<int>("KilledByVS");
+                    b.Property<int?>("KillsNC");
 
-                    b.Property<int>("KillsNC");
+                    b.Property<int?>("KillsTR");
 
-                    b.Property<int>("KillsTR");
+                    b.Property<int?>("KillsVS");
 
-                    b.Property<int>("KillsVS");
+                    b.Property<int?>("RevengeCountNC");
 
-                    b.Property<int>("RevengeCountNC");
+                    b.Property<int?>("RevengeCountTR");
 
-                    b.Property<int>("RevengeCountTR");
+                    b.Property<int?>("RevengeCountVS");
 
-                    b.Property<int>("RevengeCountVS");
+                    b.Property<int?>("WeaponDamageGivenNC");
 
-                    b.Property<int>("WeaponDamageGivenNC");
+                    b.Property<int?>("WeaponDamageGivenTR");
 
-                    b.Property<int>("WeaponDamageGivenTR");
+                    b.Property<int?>("WeaponDamageGivenVS");
 
-                    b.Property<int>("WeaponDamageGivenVS");
+                    b.Property<int?>("WeaponDamageTakenByNC");
 
-                    b.Property<int>("WeaponDamageTakenByNC");
+                    b.Property<int?>("WeaponDamageTakenByTR");
 
-                    b.Property<int>("WeaponDamageTakenByTR");
+                    b.Property<int?>("WeaponDamageTakenByVS");
 
-                    b.Property<int>("WeaponDamageTakenByVS");
+                    b.Property<int?>("WeaponHeadshotsNC");
 
-                    b.Property<int>("WeaponHeadshotsNC");
+                    b.Property<int?>("WeaponHeadshotsTR");
 
-                    b.Property<int>("WeaponHeadshotsTR");
+                    b.Property<int?>("WeaponHeadshotsVS");
 
-                    b.Property<int>("WeaponHeadshotsVS");
+                    b.Property<int?>("WeaponKilledByNC");
 
-                    b.Property<int>("WeaponKilledByNC");
+                    b.Property<int?>("WeaponKilledByTR");
 
-                    b.Property<int>("WeaponKilledByTR");
+                    b.Property<int?>("WeaponKilledByVS");
 
-                    b.Property<int>("WeaponKilledByVS");
+                    b.Property<int?>("WeaponKillsNC");
 
-                    b.Property<int>("WeaponKillsNC");
+                    b.Property<int?>("WeaponKillsTR");
 
-                    b.Property<int>("WeaponKillsTR");
+                    b.Property<int?>("WeaponKillsVS");
 
-                    b.Property<int>("WeaponKillsVS");
+                    b.Property<int?>("WeaponVehicleKillsNC");
 
-                    b.Property<int>("WeaponVehicleKillsNC");
+                    b.Property<int?>("WeaponVehicleKillsTR");
 
-                    b.Property<int>("WeaponVehicleKillsTR");
-
-                    b.Property<int>("WeaponVehicleKillsVS");
+                    b.Property<int?>("WeaponVehicleKillsVS");
 
                     b.HasKey("CharacterId", "ProfileId");
-
-                    b.HasIndex("Id");
 
                     b.HasIndex("ProfileId");
 
@@ -274,33 +266,29 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("VehicleId");
 
-                    b.Property<int>("DamageGiven");
+                    b.Property<int?>("DamageGiven");
 
-                    b.Property<int>("DamageTakenBy");
+                    b.Property<int?>("DamageTakenBy");
 
-                    b.Property<int>("Deaths");
+                    b.Property<int?>("Deaths");
 
-                    b.Property<int>("FireCount");
+                    b.Property<int?>("FireCount");
 
-                    b.Property<int>("Headshots");
+                    b.Property<int?>("Headshots");
 
-                    b.Property<int>("HitCount");
+                    b.Property<int?>("HitCount");
 
-                    b.Property<string>("Id");
+                    b.Property<int?>("KilledBy");
 
-                    b.Property<int>("KilledBy");
+                    b.Property<int?>("Kills");
 
-                    b.Property<int>("Kills");
+                    b.Property<int?>("PlayTime");
 
-                    b.Property<int>("PlayTime");
+                    b.Property<int?>("Score");
 
-                    b.Property<int>("Score");
-
-                    b.Property<int>("VehicleKills");
+                    b.Property<int?>("VehicleKills");
 
                     b.HasKey("CharacterId", "ItemId", "VehicleId");
-
-                    b.HasIndex("Id");
 
                     b.HasIndex("ItemId");
 
@@ -319,47 +307,43 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("VehicleId");
 
-                    b.Property<int>("DamageGivenNC");
+                    b.Property<int?>("DamageGivenNC");
 
-                    b.Property<int>("DamageGivenTR");
+                    b.Property<int?>("DamageGivenTR");
 
-                    b.Property<int>("DamageGivenVS");
+                    b.Property<int?>("DamageGivenVS");
 
-                    b.Property<int>("DamageTakenByNC");
+                    b.Property<int?>("DamageTakenByNC");
 
-                    b.Property<int>("DamageTakenByTR");
+                    b.Property<int?>("DamageTakenByTR");
 
-                    b.Property<int>("DamageTakenByVS");
+                    b.Property<int?>("DamageTakenByVS");
 
-                    b.Property<int>("HeadshotsNC");
+                    b.Property<int?>("HeadshotsNC");
 
-                    b.Property<int>("HeadshotsTR");
+                    b.Property<int?>("HeadshotsTR");
 
-                    b.Property<int>("HeadshotsVS");
+                    b.Property<int?>("HeadshotsVS");
 
-                    b.Property<string>("Id");
+                    b.Property<int?>("KilledByNC");
 
-                    b.Property<int>("KilledByNC");
+                    b.Property<int?>("KilledByTR");
 
-                    b.Property<int>("KilledByTR");
+                    b.Property<int?>("KilledByVS");
 
-                    b.Property<int>("KilledByVS");
+                    b.Property<int?>("KillsNC");
 
-                    b.Property<int>("KillsNC");
+                    b.Property<int?>("KillsTR");
 
-                    b.Property<int>("KillsTR");
+                    b.Property<int?>("KillsVS");
 
-                    b.Property<int>("KillsVS");
+                    b.Property<int?>("VehicleKillsNC");
 
-                    b.Property<int>("VehicleKillsNC");
+                    b.Property<int?>("VehicleKillsTR");
 
-                    b.Property<int>("VehicleKillsTR");
-
-                    b.Property<int>("VehicleKillsVS");
+                    b.Property<int?>("VehicleKillsVS");
 
                     b.HasKey("CharacterId", "ItemId", "VehicleId");
-
-                    b.HasIndex("Id");
 
                     b.HasIndex("ItemId");
 
@@ -666,18 +650,18 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbFacilityLink", b =>
                 {
-                    b.Property<string>("ZoneId");
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Description");
 
                     b.Property<string>("FacilityIdA");
 
                     b.Property<string>("FacilityIdB");
 
-                    b.Property<string>("Description");
+                    b.Property<string>("ZoneId");
 
-                    b.Property<string>("Id")
-                        .IsRequired();
-
-                    b.HasKey("ZoneId", "FacilityIdA", "FacilityIdB");
+                    b.HasKey("Id");
 
                     b.ToTable("FacilityLink");
                 });
@@ -742,13 +726,12 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbMapHex", b =>
                 {
-                    b.Property<string>("ZoneId");
-
-                    b.Property<string>("MapRegionId");
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("HexType");
 
-                    b.Property<string>("Id")
+                    b.Property<string>("MapRegionId")
                         .IsRequired();
 
                     b.Property<string>("TypeName");
@@ -757,7 +740,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<int>("YPos");
 
-                    b.HasKey("ZoneId", "MapRegionId");
+                    b.Property<string>("ZoneId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
 
                     b.ToTable("MapHex");
                 });
@@ -907,6 +893,18 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.ToTable("Profile");
                 });
 
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbPS2UpdaterScheduler", b =>
+                {
+                    b.Property<string>("ServiceName")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("LastUpdateDate");
+
+                    b.HasKey("ServiceName");
+
+                    b.ToTable("PS2UpdaterScheduler");
+                });
+
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbTitle", b =>
                 {
                     b.Property<string>("Id")
@@ -997,16 +995,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .WithMany()
                         .HasForeignKey("FactionId");
 
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterTime", "Time")
-                        .WithMany()
-                        .HasForeignKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbOutfitMember", "OutfitMembership")
-                        .WithMany()
-                        .HasForeignKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbTitle", "Title")
                         .WithMany()
                         .HasForeignKey("TitleId");
@@ -1019,13 +1007,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterStat", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
-                        .WithMany()
+                        .WithMany("Stats")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter")
-                        .WithMany("Stats")
-                        .HasForeignKey("Id");
 
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbProfile", "Profile")
                         .WithMany()
@@ -1036,13 +1020,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterStatByFaction", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
-                        .WithMany()
+                        .WithMany("StatsByFaction")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter")
-                        .WithMany("StatsByFaction")
-                        .HasForeignKey("Id");
 
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbProfile", "Profile")
                         .WithMany()
@@ -1053,21 +1033,17 @@ namespace Voidwell.DaybreakGames.Data.Migrations
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterTime", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId")
+                        .WithOne("Time")
+                        .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterTime", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterWeaponStat", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
-                        .WithMany()
+                        .WithMany("WeaponStats")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter")
-                        .WithMany("WeaponStats")
-                        .HasForeignKey("Id");
 
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbItem", "Item")
                         .WithMany()
@@ -1083,13 +1059,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterWeaponStatByFaction", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
-                        .WithMany()
+                        .WithMany("WeaponStatsByFaction")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter")
-                        .WithMany("WeaponStatsByFaction")
-                        .HasForeignKey("Id");
 
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbItem", "Item")
                         .WithMany()
@@ -1144,7 +1116,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .WithMany()
                         .HasForeignKey("FactionId");
 
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Leader")
+                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "LeaderCharacter")
                         .WithMany()
                         .HasForeignKey("LeaderCharacterId");
 
@@ -1156,8 +1128,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbOutfitMember", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId")
+                        .WithOne("OutfitMembership")
+                        .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.DbOutfitMember", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbOutfit", "Outfit")

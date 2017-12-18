@@ -1,34 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class VehicleService : IVehicleService, IDisposable
+    public class VehicleService : IVehicleService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly IVehicleRepository _vehicleRepository;
         private readonly CensusVehicle _censusVehicle;
 
         public string ServiceName => "VehicleService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public VehicleService(PS2DbContext ps2DbContext, CensusVehicle censusVehicle)
+        public VehicleService(IVehicleRepository vehicleRepository, CensusVehicle censusVehicle)
         {
-            _ps2DbContext = ps2DbContext;
+            _vehicleRepository = vehicleRepository;
             _censusVehicle = censusVehicle;
         }
 
-        public async Task<IEnumerable<DbVehicle>> GetAllVehicles()
+        public Task<IEnumerable<DbVehicle>> GetAllVehicles()
         {
-            return await _ps2DbContext.Vehicles.Where(p => p != null)
-                .Include(i => i.Faction)
-                .ToListAsync();
+            return _vehicleRepository.GetAllVehiclesAsync();
         }
 
         public async Task RefreshStore()
@@ -38,15 +35,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (vehicles != null)
             {
-                _ps2DbContext.Vehicles.UpdateRange(vehicles.Select(i => ConvertToDbModel(i)));
+                await _vehicleRepository.UpsertRangeAsync(vehicles.Select(ConvertToDbModel));
             }
 
             if (vehicleFactions != null)
             {
-                _ps2DbContext.VehicleFactions.UpdateRange(vehicleFactions.Select(i => ConvertToDbModel(i)));
+                await _vehicleRepository.UpsertRangeAsync(vehicleFactions.Select(ConvertToDbModel));
             }
-
-            await _ps2DbContext.SaveChangesAsync();
         }
 
         private DbVehicle ConvertToDbModel(CensusVehicleModel censusModel)
@@ -54,11 +49,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return new DbVehicle
             {
                 Id = censusModel.VehicleId,
-                Name = censusModel.Name.English,
+                Name = censusModel.Name?.English,
                 ImageId = censusModel.ImageId,
                 Cost = censusModel.Cost,
                 CostResourceId = censusModel.CostResourceId,
-                Description = censusModel.Description.English
+                Description = censusModel.Description?.English
             };
         }
 
@@ -69,11 +64,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 VehicleId = censusModel.VehicleId,
                 FactionId = censusModel.FactionId
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }
