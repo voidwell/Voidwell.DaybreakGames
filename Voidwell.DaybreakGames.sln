@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames", "src\Voidwell.DaybreakGames\Voidwell.DaybreakGames.csproj", "{70DEC05A-24A9-474B-A954-6504AE2CD74C}"
 EndProject
@@ -11,8 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
 		Dockerfile = Dockerfile
 		Dockerfile.debug = Dockerfile.debug
+		init-migrate.bat = init-migrate.bat
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Census", "src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj", "{BF5870AC-AD8C-4DE8-800B-2C270DABA807}"
@@ -23,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Cens
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Data", "src\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj", "{D982D254-B957-4EA4-A076-A27DFAFB4781}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Cache", "src\Voidwell.Cache\Voidwell.Cache.csproj", "{20214CD9-BDBB-49B5-B38D-DDA29D9729B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Cache", "src\Voidwell.Cache\Voidwell.Cache.csproj", "{20214CD9-BDBB-49B5-B38D-DDA29D9729B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

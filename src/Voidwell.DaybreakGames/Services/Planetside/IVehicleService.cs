@@ -7,6 +7,5 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IVehicleService : IUpdateable
     {
         Task<IEnumerable<DbVehicle>> GetAllVehicles();
-        Task RefreshStore();
     }
 }

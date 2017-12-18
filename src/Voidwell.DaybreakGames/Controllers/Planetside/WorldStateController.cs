@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Controllers.Planetside
@@ -15,10 +15,9 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetWorldState()
+        public Dictionary<string, bool> GetWorldState()
         {
-            var result = _worldMonitor.GetWorldStates();
-            return Ok(result);
+            return _worldMonitor.GetWorldStates();
         }
     }
 }

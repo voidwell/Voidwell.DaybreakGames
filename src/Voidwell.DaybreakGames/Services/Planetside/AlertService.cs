@@ -3,27 +3,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
+using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Websocket.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class AlertService : IAlertService, IDisposable
+    public class AlertService : IAlertService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly Func<PS2DbContext> _ps2DbContextFactory;
         private readonly ICombatReportService _combatReportService;
 
-        public AlertService(PS2DbContext ps2DbContext, ICombatReportService combatReportService)
+        public AlertService(Func<PS2DbContext> ps2DbContextFactory, ICombatReportService combatReportService)
         {
-            _ps2DbContext = ps2DbContext;
+            _ps2DbContextFactory = ps2DbContextFactory;
             _combatReportService = combatReportService;
         }
 
         public async Task<IEnumerable<DbAlert>> GetAllAlerts(int limit = 25)
         {
-            return await _ps2DbContext.Alerts.Include(i => i.MetagameEvent)
+            var dbContext = _ps2DbContextFactory();
+            return await dbContext.Alerts.Include(i => i.MetagameEvent)
                 .Include(i => i.MetagameEvent)
                 .OrderBy("StartDate", SortDirection.Descending)
                 .Take(limit)
@@ -32,7 +33,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<DbAlert>> GetAlerts(string worldId, int limit = 25)
         {
-            return await _ps2DbContext.Alerts.Where(a => a.WorldId == worldId)
+            var dbContext = _ps2DbContextFactory();
+            return await dbContext.Alerts.Where(a => a.WorldId == worldId)
                 .Include(i => i.MetagameEvent)
                 .OrderBy("StartDate", SortDirection.Descending)
                 .Take(limit)
@@ -41,7 +43,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<AlertResult> GetAlert(string worldId, string instanceId)
         {
-            var alert = await _ps2DbContext.Alerts.Where(a => a.WorldId == worldId && a.MetagameInstanceId == instanceId)
+            var dbContext = _ps2DbContextFactory();
+            var alert = await dbContext.Alerts.Where(a => a.WorldId == worldId && a.MetagameInstanceId == instanceId)
                 .Include(i => i.MetagameEvent)
                 .FirstOrDefaultAsync();
 
@@ -73,6 +76,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public Task CreateAlert(MetagameEvent metagameEvent)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbAlert
             {
                 WorldId = metagameEvent.WorldId,
@@ -87,13 +91,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LastFactionNc = metagameEvent.FactionNc,
                 LastFactionTr = metagameEvent.FactionTr
             };
-            _ps2DbContext.Alerts.Add(dataModel);
-            return _ps2DbContext.SaveChangesAsync();
+            dbContext.Alerts.Add(dataModel);
+            return dbContext.SaveChangesAsync();
         }
 
         public async Task UpdateAlert(MetagameEvent metagameEvent)
         {
-            var alert = await _ps2DbContext.Alerts
+            var dbContext = _ps2DbContextFactory();
+            var alert = await dbContext.Alerts
                     .AsTracking()
                     .SingleOrDefaultAsync(a => a.WorldId == metagameEvent.WorldId && a.MetagameInstanceId == metagameEvent.InstanceId);
 
@@ -104,14 +109,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 alert.LastFactionNc = metagameEvent.FactionNc;
                 alert.LastFactionTr = metagameEvent.FactionTr;
 
-                _ps2DbContext.Alerts.Update(alert);
-                await _ps2DbContext.SaveChangesAsync();
+                dbContext.Alerts.Update(alert);
+                await dbContext.SaveChangesAsync();
             }
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

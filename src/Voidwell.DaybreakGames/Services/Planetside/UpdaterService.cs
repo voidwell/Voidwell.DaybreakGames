@@ -1,53 +1,50 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
+using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class UpdaterService : IUpdaterService, IDisposable
+    public class UpdaterService : IUpdaterService
     {
-        private readonly PS2DbContext _ps2DbContext;
-        private bool _isRunning;
+        private readonly Func<PS2DbContext> _ps2DbContextFactory;
 
-        public UpdaterService(PS2DbContext ps2DbContext)
+        public bool IsRunning { get; private set; }
+
+        public UpdaterService(Func<PS2DbContext> ps2DbContextFactory)
         {
-            _ps2DbContext = ps2DbContext;
+            _ps2DbContextFactory = ps2DbContextFactory;
 
-            _isRunning = false;
+            IsRunning = false;
         }
 
         public async Task AddToQueue(string characterId)
         {
+            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbCharacterUpdateQueue
             {
                 CharacterId = characterId,
                 Timestamp = DateTime.UtcNow
             };
 
-            _ps2DbContext.CharacterUpdateQueue.Update(dataModel);
-            await _ps2DbContext.SaveChangesAsync();
+            dbContext.CharacterUpdateQueue.Update(dataModel);
+            await dbContext.SaveChangesAsync();
         }
 
         public void StartUpdater()
         {
-            _isRunning = true;
+            IsRunning = true;
             CharacterQueueUpdater();
         }
 
         public void StopUpdater()
         {
-            _isRunning = false;
+            IsRunning = false;
         }
 
         private void CharacterQueueUpdater()
         {
 
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

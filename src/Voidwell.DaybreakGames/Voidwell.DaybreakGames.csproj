@@ -7,25 +7,28 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.1" />
+    <PackageReference Include="Microsoft.DotNet.Watcher.Tools" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Filter" Version="1.1.2" />
-    <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.0" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="2.0.0" />
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
-    <ProjectReference Include="..\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
-    <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
+    <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" Watch="false" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" Watch="false" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" Watch="false" />
   </ItemGroup>
 
+  <Import Project="$(_WatchTarget)" Condition="Exists('$(_WatchTarget)')" />
 </Project>

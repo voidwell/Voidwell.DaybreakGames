@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
@@ -40,7 +41,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _censusClient.CreateQuery("item");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
+            query.HideFields(new[]
             {
                 "image_set_id",
                 "image_path",
@@ -49,7 +50,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "is_vehicle_weapon",
                 "passive_ability_id",
                 "activatable_ability_id",
-                "item_type_id"
+                "item_type_id", 
             });
 
             var weapon = query.JoinService("weapon");

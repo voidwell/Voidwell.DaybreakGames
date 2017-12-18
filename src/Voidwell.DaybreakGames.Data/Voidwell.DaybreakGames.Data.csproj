@@ -5,12 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="testsettings.json">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
@@ -24,5 +31,11 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
   </ItemGroup>
+    
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <Import Project="$(_WatchTarget)" Condition="Exists('$(_WatchTarget)')" />
 
 </Project>

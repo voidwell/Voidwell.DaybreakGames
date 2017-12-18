@@ -16,16 +16,15 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("territory/{worldId}/{zoneId}")]
-        public async Task<ActionResult> GetWorldScore(string worldId, string zoneId)
+        public Models.MapScore GetWorldScore(string worldId, string zoneId)
         {
-            var result = _worldMonitor.GetTerritory(worldId, zoneId);
-            return Ok(result);
+            return _worldMonitor.GetTerritory(worldId, zoneId);
         }
 
         [HttpGet("territory/{worldId}/{zoneId}/{endDate}")]
         public async Task<ActionResult> GetWorldScoreFromDate(string worldId, string zoneId, DateTime endDate)
         {
-            var result = _worldMonitor.GetTerritoryFromDate(worldId, zoneId, endDate);
+            var result = await _worldMonitor.GetTerritoryFromDate(worldId, zoneId, endDate);
             return Ok(result);
         }
     }

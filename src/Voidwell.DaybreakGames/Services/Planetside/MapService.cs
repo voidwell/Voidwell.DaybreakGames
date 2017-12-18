@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.CensusServices.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class MapService : IMapService, IDisposable
+    public class MapService : IMapService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly IMapRepository _mapRepository;
         private readonly CensusMap _censusMap;
 
         public string ServiceName => "MapService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public MapService(PS2DbContext ps2DbContext, CensusMap censusMap)
+        public MapService(IMapRepository mapRepository, CensusMap censusMap)
         {
-            _ps2DbContext = ps2DbContext;
+            _mapRepository = mapRepository;
             _censusMap = censusMap;
         }
 
@@ -37,46 +36,44 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return ownership.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
         }
 
-        public async Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId)
+        public Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId)
         {
-            return await _ps2DbContext.MapRegions.Where(r=> r.ZoneId == zoneId)
-                .ToListAsync();
+            return _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
         }
 
-        public async Task<IEnumerable<DbFacilityLink>> GetFacilityLinks(string zoneId)
+        public Task<IEnumerable<DbFacilityLink>> GetFacilityLinks(string zoneId)
         {
-            return await _ps2DbContext.FacilityLinks.Where(l => l.ZoneId == zoneId)
-                .ToListAsync();
+            return _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
         }
 
-        public async Task<IEnumerable<DbMapRegion>> FindRegions(params string[] facilityIds)
+        public Task<IEnumerable<DbMapRegion>> FindRegions(params string[] facilityIds)
         {
-            return await _ps2DbContext.MapRegions.Where(r => facilityIds.Contains(r.FacilityId))
-                .ToListAsync();
+            return _mapRepository.GetMapRegionsByFacilityIdsAsync(facilityIds);
         }
 
         public async Task RefreshStore()
         {
             var mapHexs = await _censusMap.GetAllMapHexs();
-            var mapRegions = await _censusMap.GetAllMapRegions();
-            var facilityLinks = await _censusMap.GetAllFacilityLinks();
 
             if (mapHexs != null)
             {
-                _ps2DbContext.MapHexs.UpdateRange(mapHexs.Select(m => ConvertToDbModel(m)));
+                await _mapRepository.UpsertRangeAsync(mapHexs.Select(ConvertToDbModel));
             }
+
+            var mapRegions = await _censusMap.GetAllMapRegions();
 
             if (mapRegions != null)
             {
-                _ps2DbContext.MapRegions.UpdateRange(mapRegions.Select(m => ConvertToDbModel(m)));
+                mapRegions = mapRegions.Where(a => a.LocationX != 0);
+                await _mapRepository.UpsertRangeAsync(mapRegions.Select(ConvertToDbModel));
             }
+
+            var facilityLinks = await _censusMap.GetAllFacilityLinks();
 
             if (facilityLinks != null)
             {
-                _ps2DbContext.FacilityLinks.UpdateRange(facilityLinks.Select(m => ConvertToDbModel(m)));
+                await _mapRepository.UpsertRangeAsync(facilityLinks.Select(ConvertToDbModel));
             }
-
-            await _ps2DbContext.SaveChangesAsync();
         }
 
         private DbMapHex ConvertToDbModel(CensusMapHexModel censusModel)
@@ -117,11 +114,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 FacilityIdB = censusModel.FacilityIdB,
                 Description = censusModel.Description
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

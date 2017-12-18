@@ -1,11 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     [Table("Outfit")]
-    public class DbOutfit : IDbModel<DbOutfit>
+    public class DbOutfit
     {
         public string Id { get; set; }
         public string Name { get; set; }
@@ -16,13 +15,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string FactionId { get; set; }
         public string WorldId { get; set; }
 
-        [ForeignKey("FactionId")]
         public DbFaction Faction { get; set; }
-        [ForeignKey("WorldId")]
         public DbWorld World { get; set; }
-        [ForeignKey("LeaderCharacterId")]
-        public DbCharacter Leader { get; set; }
-
-        public Expression<Func<DbOutfit, bool>> Predicate { get => (a => a.Id == Id); }
+        public DbCharacter LeaderCharacter { get; set; }
     }
 }

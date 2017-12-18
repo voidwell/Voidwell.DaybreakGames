@@ -7,6 +7,5 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IWorldService : IUpdateable
     {
         Task<IEnumerable<DbWorld>> GetAllWorlds();
-        Task RefreshStore();
     }
 }

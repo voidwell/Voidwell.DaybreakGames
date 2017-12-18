@@ -3,16 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
+using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Websocket.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class WorldMonitor : IWorldMonitor, IDisposable
+    public class WorldMonitor : IWorldMonitor
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly Func<PS2DbContext> _ps2DbContextFactory;
         private readonly IZoneService _zoneService;
         private readonly IMapService _mapService;
         private readonly ICharacterService _characterService;
@@ -20,9 +20,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public Dictionary<string, WorldState> WorldStates { get; private set; }
 
-        public WorldMonitor(PS2DbContext ps2DbContext, IZoneService zoneService, IMapService mapService, ICharacterService characterService, IUpdaterService updaterService)
+        public WorldMonitor(Func<PS2DbContext> ps2DbContextFactory, IZoneService zoneService, IMapService mapService, ICharacterService characterService, IUpdaterService updaterService)
         {
-            _ps2DbContext = ps2DbContext;
+            _ps2DbContextFactory = ps2DbContextFactory;
             _zoneService = zoneService;
             _mapService = mapService;
             _characterService = characterService;
@@ -112,7 +112,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<float>> GetTerritoryFromDate(string worldId, string zoneId, DateTime date)
         {
-            var fcEvent = await _ps2DbContext.EventFacilityControls
+            var dbContext = _ps2DbContextFactory();
+            var fcEvent = await dbContext.EventFacilityControls
                 .OrderBy("Timestamp", SortDirection.Descending)
                 .SingleOrDefaultAsync(c => c.WorldId == worldId && c.ZoneId == zoneId && c.Timestamp <= date);
 
@@ -194,6 +195,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
             }
 
+            var dbContext = _ps2DbContextFactory();
+
             var onlineCharacter = WorldStates[worldId].OnlinePlayers[characterId];
 
             var duration = timestamp - onlineCharacter.LoginDate;
@@ -210,8 +213,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Duration = duration.Milliseconds
             };
 
-            _ps2DbContext.PlayerSessions.Add(dataModel);
-            await _ps2DbContext.SaveChangesAsync();
+            dbContext.PlayerSessions.Add(dataModel);
+            await dbContext.SaveChangesAsync();
 
             WorldStates[worldId].OnlinePlayers.Remove(characterId);
         }
@@ -219,11 +222,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public Dictionary<string, bool> GetWorldStates()
         {
             throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

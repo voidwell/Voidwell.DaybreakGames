@@ -1,0 +1,126 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
+
+namespace Voidwell.DaybreakGames.Data.Repositories
+{
+    public class MapRepository : IMapRepository
+    {
+        private readonly IDbContextHelper _dbContextHelper;
+        private readonly ILogger _logger;
+
+        public MapRepository(IDbContextHelper dbContextHelper, ILogger<MapRepository> logger)
+        {
+            _dbContextHelper = dbContextHelper;
+            _logger = logger;
+        }
+
+        public async Task<IEnumerable<DbFacilityLink>> GetFacilityLinksByZoneIdAsync(string zoneId)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                return await dbContext.FacilityLinks.Where(a => a.ZoneId == zoneId)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<DbMapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<string> facilityIds)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                return await dbContext.MapRegions.Where(a => facilityIds.Contains(a.FacilityId))
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<DbMapRegion>> GetMapRegionsByZoneIdAsync(string zoneId)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                return await dbContext.MapRegions.Where(a => a.ZoneId == zoneId)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task UpsertRangeAsync(IEnumerable<DbMapHex> entities)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                var dbSet = dbContext.MapHexs;
+
+                foreach (var entity in entities)
+                {
+                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.MapRegionId == entity.MapRegionId && a.ZoneId == entity.ZoneId && a.XPos == entity.XPos && a.YPos == entity.YPos);
+                    if (storeEntity == null)
+                    {
+                        entity.Id = Guid.NewGuid().ToString();
+                        await dbSet.AddAsync(entity);
+                    }
+                    else
+                    {
+                        entity.Id = storeEntity.Id;
+                        storeEntity = entity;
+                        dbSet.Update(storeEntity);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpsertRangeAsync(IEnumerable<DbMapRegion> entities)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                var dbSet = dbContext.MapRegions;
+
+                foreach (var entity in entities)
+                {
+                    _logger.LogInformation($"{entity.Id}");
+                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
+                    if (storeEntity == null)
+                    {
+                        dbSet.Add(entity);
+                    }
+                    else
+                    {
+                        storeEntity = entity;
+                        dbSet.Update(storeEntity);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpsertRangeAsync(IEnumerable<DbFacilityLink> entities)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                var dbSet = dbContext.FacilityLinks;
+
+                foreach (var entity in entities)
+                {
+                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.ZoneId == entity.ZoneId && a.FacilityIdA == entity.FacilityIdA && a.FacilityIdB == a.FacilityIdB);
+                    if (storeEntity == null)
+                    {
+                        entity.Id = Guid.NewGuid().ToString();
+                        dbSet.Add(entity);
+                    }
+                    else
+                    {
+                        entity.Id = storeEntity.Id;
+                        storeEntity = entity;
+                        dbSet.Update(storeEntity);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
+    }
+}

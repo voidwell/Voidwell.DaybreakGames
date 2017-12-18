@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     [Table("Faction")]
-    public class DbFaction : IDbModel<DbFaction>
+    public class DbFaction
     {
         [Required]
         public string Id { get; set; }
@@ -15,7 +15,5 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string ImageId { get; set; }
         public string CodeTag { get; set; }
         public bool UserSelectable { get; set; }
-
-        public Expression<Func<DbFaction, bool>> Predicate { get => (a => a.Id == Id); }
     }
 }

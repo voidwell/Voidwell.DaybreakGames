@@ -1,38 +1,38 @@
-﻿using System;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
+﻿using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.CensusServices;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Voidwell.DaybreakGames.Data.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class OutfitService : IOutfitService, IDisposable
+    public class OutfitService : IOutfitService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly IOutfitRepository _outfitRepository;
         private readonly CensusOutfit _censusOutfit;
         private readonly CensusCharacter _censusCharacter;
+        private readonly ILogger<OutfitService> _logger;
 
-        public OutfitService(PS2DbContext ps2DbContext, CensusOutfit censusOutfit, CensusCharacter censusCharacter)
+        public OutfitService(IOutfitRepository outfitRepository, CensusOutfit censusOutfit, CensusCharacter censusCharacter, ILogger<OutfitService> logger)
         {
-            _ps2DbContext = ps2DbContext;
+            _outfitRepository = outfitRepository;
             _censusOutfit = censusOutfit;
             _censusCharacter = censusCharacter;
+            _logger = logger;
         }
 
-        public async Task<IEnumerable<DbOutfit>> FindOutfits(IEnumerable<string> outfitIds)
+        public Task<IEnumerable<DbOutfit>> FindOutfits(IEnumerable<string> outfitIds)
         {
-            return await _ps2DbContext.Outfits.Where(o => outfitIds.Contains(o.Id))
-                .ToListAsync();
+            return _outfitRepository.GetOutfitsByIdsAsync(outfitIds);
         }
 
         public async Task<DbOutfit> GetOutfit(string outfitId)
         {
-            var outfit = _ps2DbContext.Outfits.Where(o => o.Id == outfitId)
-                .FirstOrDefault();
-
+            var outfit = await _outfitRepository.GetOutfitAsync(outfitId);
             if (outfit != null)
             {
                 return outfit;
@@ -43,7 +43,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<DbOutfit> GetOutfitFull(string outfitId)
         {
-            var outfit = TryGetOutfitFull(outfitId);
+            var outfit = await TryGetOutfitFull(outfitId);
 
             if (outfit != null)
             {
@@ -52,20 +52,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             await UpdateOutfit(outfitId);
 
-            return TryGetOutfitFull(outfitId);
+            return await TryGetOutfitFull(outfitId);
         }
 
-        public async Task<IEnumerable<DbOutfitMember>> GetOutfitMembers(string outfitId)
+        public Task<IEnumerable<DbOutfitMember>> GetOutfitMembers(string outfitId)
         {
-            return await _ps2DbContext.OutfitMembers.Where(o => o.OutfitId == outfitId)
-                .ToListAsync();
+            return _outfitRepository.GetOutfitMembersAsync(outfitId);
         }
 
-        public async Task<IEnumerable<DbOutfit>> LookupOutfitsByName(string name, int limit = 12)
+        public Task<IEnumerable<DbOutfit>> LookupOutfitsByName(string name, int limit = 12)
         {
-            return await _ps2DbContext.Outfits.Where(o => o.Name.Contains(name))
-                .Take(12)
-                .ToListAsync();
+            return _outfitRepository.GetOutfitsByNameAsync(name, limit);
         }
 
         public async Task<DbOutfit> UpdateOutfit(string outfitId)
@@ -91,24 +88,36 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 WorldId = leader.WorldId
             };
 
-            await _ps2DbContext.Outfits.UpsertAsync(dataModel);
-            await _ps2DbContext.SaveChangesAsync();
-
-            return dataModel;
+            return await _outfitRepository.UpsertAsync(dataModel);
         }
 
-        private DbOutfit TryGetOutfitFull(string outfitId)
+        public async Task<DbOutfitMember> UpdateCharacterOutfitMembership(string characterId)
         {
-            return _ps2DbContext.Outfits.Where(o => o.Id == outfitId)
-                .Include(i => i.World)
-                .Include(i => i.Faction)
-                .Include(i => i.Leader)
-                .FirstOrDefault();
+            var membership = await _censusCharacter.GetCharacterOutfitMembership(characterId);
+
+            if (membership == null)
+            {
+                await _outfitRepository.RemoveOutfitMemberAsync(characterId);
+                return null;
+            }
+
+            await GetOutfit(membership.OutfitId);
+
+            var dataModel = new DbOutfitMember
+            {
+                OutfitId = membership.OutfitId,
+                CharacterId = membership.CharacterId,
+                MemberSinceDate = membership.MemberSinceDate,
+                Rank = membership.Rank,
+                RankOrdinal = membership.RankOrdinal
+            };
+
+            return await _outfitRepository.UpsertAsync(dataModel);
         }
 
-        public void Dispose()
+        private Task<DbOutfit> TryGetOutfitFull(string outfitId)
         {
-            _ps2DbContext?.Dispose();
+            return _outfitRepository.GetOutfitDetailsAsync(outfitId);
         }
     }
 }

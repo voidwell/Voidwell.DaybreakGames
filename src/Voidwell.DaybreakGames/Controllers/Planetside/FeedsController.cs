@@ -17,14 +17,14 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         [HttpGet("news")]
         public async Task<ActionResult> GetNews()
         {
-            var result = _feedService.GetNewsFeed();
+            var result = await _feedService.GetNewsFeed();
             return Ok(result);
         }
 
         [HttpGet("updates")]
         public async Task<ActionResult> GetUpdates()
         {
-            var result = _feedService.GetUpdateFeed();
+            var result = await _feedService.GetUpdateFeed();
             return Ok(result);
         }
     }

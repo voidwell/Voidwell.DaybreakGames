@@ -1,13 +1,14 @@
-FROM microsoft/dotnet:1.1.2-sdk
+FROM microsoft/dotnet:2.0.0-sdk
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 
-COPY ./src/Voidwell.DaybreakGames/Voidwell.DaybreakGames.csproj /tmp/Voidwell.DaybreakGames.csproj
+COPY ./src/Voidwell.DaybreakGames/*.csproj /tmp/
+COPY ./Directory.Build.props /
 
 WORKDIR /tmp
 
 RUN dotnet restore
 
-WORKDIR /Voidwell.DaybreakGames
+WORKDIR /app/Voidwell.DaybreakGames
 
-ENTRYPOINT dotnet watch run
+ENTRYPOINT dotnet watch run --no-launch-profile

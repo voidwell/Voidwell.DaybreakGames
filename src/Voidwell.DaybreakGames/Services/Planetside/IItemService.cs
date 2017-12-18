@@ -8,6 +8,5 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         Task<IEnumerable<DbItem>> FindItems(IEnumerable<string> itemIds);
         Task<IEnumerable<DbItem>> LookupItemsByName(string name, int limit = 12);
-        Task RefreshStore();
     }
 }

@@ -20,19 +20,55 @@ namespace Voidwell.Cache
 
         public Task SetAsync(string key, object value)
         {
-            var sValue = JsonConvert.SerializeObject(value);
-            return _db.StringSetAsync(KeyFormatter(key), sValue);
+            try
+            {
+                var sValue = JsonConvert.SerializeObject(value);
+                return _db.StringSetAsync(KeyFormatter(key), sValue);
+            }
+            catch (Exception)
+            {
+                return Task.CompletedTask;
+            }
+            
+        }
+
+        public Task SetAsync(string key, object value, TimeSpan expires)
+        {
+            try
+            {
+                var sValue = JsonConvert.SerializeObject(value);
+                return _db.StringSetAsync(KeyFormatter(key), sValue, expiry: expires);
+            }
+            catch (Exception)
+            {
+                return Task.CompletedTask;
+            }
         }
 
         public async Task<T> GetAsync<T>(string key)
         {
-            var sValue = (string) await _db.StringGetAsync(KeyFormatter(key));
-            return JsonConvert.DeserializeObject<T>(sValue);
+            try
+            {
+                var value = await _db.StringGetAsync(KeyFormatter(key));
+
+                return JsonConvert.DeserializeObject<T>(value);
+            }
+            catch(Exception)
+            {
+                return default(T);
+            }
         }
 
         public Task RemoveAsync(string key)
         {
-            return _db.KeyDeleteAsync(KeyFormatter(key));
+            try
+            {
+                return _db.KeyDeleteAsync(KeyFormatter(key));
+            }
+            catch(Exception)
+            {
+                return Task.CompletedTask;
+            }
         }
 
         private async Task Connect()
@@ -43,7 +79,7 @@ namespace Voidwell.Cache
 
         private string KeyFormatter(string key)
         {
-            return $"{_options.KeyPrefix}_key";
+            return $"{_options.KeyPrefix}_{key}";
         }
 
         public void Dispose()

@@ -1,33 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class ProfileService : IProfileService, IDisposable
+    public class ProfileService : IProfileService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly IProfileRepository _profileRepository;
         private readonly CensusProfile _censusProfile;
 
         public string ServiceName => "ProfileService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public ProfileService(PS2DbContext ps2DbContext, CensusProfile censusProfile)
+        public ProfileService(IProfileRepository profileRepository, CensusProfile censusProfile)
         {
-            _ps2DbContext = ps2DbContext;
+            _profileRepository = profileRepository;
             _censusProfile = censusProfile;
         }
 
-        public async Task<IEnumerable<DbProfile>> GetAllProfiles()
+        public Task<IEnumerable<DbProfile>> GetAllProfiles()
         {
-            return await _ps2DbContext.Profiles.Where(p => p != null)
-                .ToListAsync();
+            return _profileRepository.GetAllProfilesAsync();
         }
 
         public async Task RefreshStore()
@@ -36,27 +34,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (profiles != null)
             {
-                _ps2DbContext.UpdateRange(profiles.Select(i => ConvertToDbModel(i)));
+                await _profileRepository.UpsertRangeAsync(profiles.Select(ConvertToDbModel));
             }
-
-            await _ps2DbContext.SaveChangesAsync();
         }
 
         private DbProfile ConvertToDbModel(CensusProfileModel censusModel)
         {
             return new DbProfile
             {
-                Id = censusModel.FactionId,
+                Id = censusModel.ProfileId,
                 Name = censusModel.Name.English,
                 ImageId = censusModel.ImageId,
                 ProfileTypeId = censusModel.ProfileTypeId,
                 FactionId = censusModel.FactionId
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

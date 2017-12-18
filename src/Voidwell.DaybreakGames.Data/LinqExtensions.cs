@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
-namespace Voidwell.DaybreakGames
+namespace Voidwell.DaybreakGames.Data
 {
     public static class LinqExtensions
     {

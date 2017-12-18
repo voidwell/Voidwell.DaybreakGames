@@ -1,35 +1,47 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
+using Voidwell.Cache;
 using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.Data.DBContext;
+using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class WeaponService : IWeaponService, IDisposable
+    public class WeaponService : IWeaponService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly ICharacterRepository _characterRepository;
         private readonly CensusItem _censusItem;
+        private readonly ICache _cache;
 
-        public WeaponService(PS2DbContext ps2DbContext, CensusItem censusItem)
+        private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(1);
+        private readonly string _weaponInfoCacheKey = "ps2.weaponinfo";
+
+        public WeaponService(ICharacterRepository characterRepository, CensusItem censusItem, ICache cache)
         {
-            _ps2DbContext = ps2DbContext;
+            _characterRepository = characterRepository;
             _censusItem = censusItem;
+            _cache = cache;
         }
 
         public async Task<WeaponInfoResult> GetWeaponInfo(string weaponItemId)
         {
+            var cachedInfo = await _cache.GetAsync<WeaponInfoResult>($"{_weaponInfoCacheKey}_{weaponItemId}");
+            if (cachedInfo != null)
+            {
+                return cachedInfo;
+            }
+
             var info = await _censusItem.GetWeaponInfo(weaponItemId);
 
             var hipModes = info.FireMode.Where(m => m.Type == "primary");
             var aimModes = info.FireMode.Where(m => m.Type == "secondary");
 
-            return new WeaponInfoResult
+            var weaponInfo = new WeaponInfoResult
             {
                 Name = info.Name.English,
                 Category = info.Category.Name.English,
@@ -67,17 +79,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 IronSightZoom = aimModes.First().DefaultZoom,
                 FireModes = hipModes.Select(m => m.Description.English)
             };
+
+            await _cache.SetAsync($"{_weaponInfoCacheKey}_{weaponItemId}", weaponInfo, _weaponInfoCacheExpiration);
+
+            return weaponInfo;
         }
 
         public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(string weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250)
         {
-            var weaponStats = await _ps2DbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId)
-                .Include(i => i.Character)
-                .OrderBy(sortColumn, sortDirection)
-                .Skip(rowStart)
-                .Take(limit)
-                .ToListAsync();
-
+            var weaponStats = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, sortColumn, sortDirection, rowStart, limit);
             return weaponStats.Select(s => ConvertToResult(s));
         }
 
@@ -89,26 +99,21 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Name = model.Character.Name,
                 FactionId = model.Character.FactionId,
                 WorldId = model.Character.WorldId,
-                Kills = model.Kills,
-                Deaths = model.Deaths,
-                Headshots = model.Headshots,
-                ShotsFired = model.FireCount,
-                ShotsHit = model.HitCount,
-                PlayTime = model.PlayTime,
-                Score = model.Score,
-                VehicleKills = model.VehicleKills,
-                KillDeathRatio = model.Kills / model.Deaths,
-                HeadshotRatio = model.Headshots / model.Kills,
-                Accuracy = model.HitCount / model.FireCount,
-                ScorePerMinute = model.Score / (model.PlayTime / 60),
-                KillsPerHour = model.Kills / (model.PlayTime / 3600),
-                VehicleKillsPerHour = model.VehicleKills / (model.PlayTime / 3600)
+                Kills = model.Kills.Value,
+                Deaths = model.Deaths.Value,
+                Headshots = model.Headshots.Value,
+                ShotsFired = model.FireCount.Value,
+                ShotsHit = model.HitCount.Value,
+                PlayTime = model.PlayTime.Value,
+                Score = model.Score.Value,
+                VehicleKills = model.VehicleKills.Value,
+                KillDeathRatio = model.Kills.Value / model.Deaths.Value,
+                HeadshotRatio = model.Headshots.Value / model.Kills.Value,
+                Accuracy = model.HitCount.Value / model.FireCount.Value,
+                ScorePerMinute = model.Score.Value / (model.PlayTime.Value / 60),
+                KillsPerHour = model.Kills.Value / (model.PlayTime.Value / 3600),
+                VehicleKillsPerHour = model.VehicleKills.Value / (model.PlayTime.Value / 3600)
             };
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

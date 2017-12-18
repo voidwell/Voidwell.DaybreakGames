@@ -22,9 +22,9 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
 
         public class CharacterTimes
         {
-            public DateTime Creation { get; set; }
-            public DateTime LastSave { get; set; }
-            public DateTime LastLogin { get; set; }
+            public DateTime CreationDate { get; set; }
+            public DateTime LastSaveDate { get; set; }
+            public DateTime LastLoginDate { get; set; }
             public int MinutesPlayed { get; set; }
         }
 

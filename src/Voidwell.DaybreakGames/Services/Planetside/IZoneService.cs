@@ -7,6 +7,5 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IZoneService : IUpdateable
     {
         Task<IEnumerable<DbZone>> GetAllZones();
-        Task RefreshStore();
     }
 }

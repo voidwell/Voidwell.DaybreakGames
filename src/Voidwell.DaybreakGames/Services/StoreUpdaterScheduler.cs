@@ -7,8 +7,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
-using Voidwell.DaybreakGames.Data.DBContext;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services
 {
@@ -16,12 +16,12 @@ namespace Voidwell.DaybreakGames.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<StoreUpdaterScheduler> _logger;
-        private readonly Func<PS2DbContext> _dbContextFactory;
+        private readonly IUpdaterSchedulerRepository _updaterSchedulerRepository;
         private Dictionary<string, Timer> _updaterTimers = new Dictionary<string, Timer>();
 
-        public StoreUpdaterScheduler(Func<PS2DbContext> dbContextFactory, IServiceProvider serviceProvider, ILogger<StoreUpdaterScheduler> logger)
+        public StoreUpdaterScheduler(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider, ILogger<StoreUpdaterScheduler> logger)
         {
-            _dbContextFactory = dbContextFactory;
+            _updaterSchedulerRepository = updaterSchedulerRepository;
             _serviceProvider = serviceProvider;
             _logger = logger;
         }
@@ -37,10 +37,9 @@ namespace Voidwell.DaybreakGames.Services
             var storeUpdaterMatches = storeUpdaterTypes.Select(t => new[] { t, storeUpdaterInterfaces.SingleOrDefault(i => i.IsAssignableFrom(t)) })
                 .Where(m => m[1] != null) ;
 
-            var dbContext = _dbContextFactory();
             foreach (var updaterPair in storeUpdaterMatches)
             {
-                RegisterUpdater(updaterPair, dbContext);
+                RegisterUpdater(updaterPair);
             }
 
             _logger.LogInformation("Updater scheduler ready.");
@@ -57,10 +56,10 @@ namespace Voidwell.DaybreakGames.Services
             return Task.CompletedTask;
         }
 
-        private void RegisterUpdater(Type[] updaterPair, PS2DbContext dbContext)
+        private void RegisterUpdater(Type[] updaterPair)
         {
             var updater = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdateable;
-            var updaterHistory = dbContext.UpdaterScheduler.SingleOrDefault(u => u.ServiceName == updater.ServiceName);
+            var updaterHistory = _updaterSchedulerRepository.GetUpdaterHistoryByServiceName(updater.ServiceName);
 
             if (_updaterTimers.ContainsKey(updater.ServiceName))
                 return;
@@ -68,7 +67,7 @@ namespace Voidwell.DaybreakGames.Services
             TimeSpan remainingInterval = TimeSpan.Zero;
             if (updaterHistory != null && updaterHistory.LastUpdateDate != null)
             {
-                var offset = updaterHistory.LastUpdateDate.Add(updater.UpdateInterval) - DateTime.Now;
+                var offset = updaterHistory.LastUpdateDate.Add(updater.UpdateInterval) - DateTime.UtcNow;
                 if (offset.TotalMilliseconds > 0)
                 {
                     remainingInterval = offset;
@@ -79,8 +78,19 @@ namespace Voidwell.DaybreakGames.Services
             _updaterTimers.Add(updater.ServiceName, timer);
         }
 
+        private List<Object> _pendingWork = new List<object>();
+        private bool _isWorking = false;
+
         private async void HandleTimer(Object stateInfo)
         {
+            if (_isWorking)
+            {
+                _pendingWork.Add(stateInfo);
+                return;
+            }
+
+            _isWorking = true;
+
             var updaterPair = stateInfo as Type[];
 
             var updaterService = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdateable;
@@ -91,10 +101,17 @@ namespace Voidwell.DaybreakGames.Services
 
             _logger.LogInformation($"Update complete for {updaterService.ServiceName}.");
 
-            var dbContext = _dbContextFactory();
-            var dataModel = new DbPS2UpdaterScheduler { ServiceName = updaterService.ServiceName, LastUpdateDate = DateTime.Now };
-            await dbContext.UpdaterScheduler.UpsertAsync(dataModel);
-            await dbContext.SaveChangesAsync();
+            var dataModel = new DbPS2UpdaterScheduler { ServiceName = updaterService.ServiceName, LastUpdateDate = DateTime.UtcNow };
+            await _updaterSchedulerRepository.UpsertAsync(dataModel);
+
+            _isWorking = false;
+
+            if (_pendingWork.Count > 0)
+            {
+                var pendingWork = _pendingWork[0];
+                _pendingWork.RemoveAt(0);
+                HandleTimer(pendingWork);
+            }
         }
     }
 }

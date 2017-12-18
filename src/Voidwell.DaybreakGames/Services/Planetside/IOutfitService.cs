@@ -12,5 +12,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<IEnumerable<DbOutfitMember>> GetOutfitMembers(string outfitId);
         Task<DbOutfit> UpdateOutfit(string outfitId);
         Task<IEnumerable<DbOutfit>> FindOutfits(IEnumerable<string> outfitIds);
+        Task<DbOutfitMember> UpdateCharacterOutfitMembership(string characterId);
     }
 }

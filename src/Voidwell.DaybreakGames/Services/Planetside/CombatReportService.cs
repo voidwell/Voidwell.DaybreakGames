@@ -3,16 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.DBContext;
+using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class CombatReportService : ICombatReportService, IDisposable
+    public class CombatReportService : ICombatReportService
     {
-        private readonly PS2DbContext _ps2DbContext;
+        private readonly Func<PS2DbContext> _ps2DbContextFactory;
         private readonly ICache _cache;
         private readonly ICharacterService _characterService;
         private readonly IOutfitService _outfitService;
@@ -20,10 +20,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IVehicleService _vehicleService;
         private readonly IMapService _mapService;
 
-        public CombatReportService(PS2DbContext ps2DbContext, ICache cache, ICharacterService characterService,
+        public CombatReportService(Func<PS2DbContext> ps2DbContextFactory, ICache cache, ICharacterService characterService,
             IOutfitService outfitService, IItemService itemService, IVehicleService vehicleService, IMapService mapService)
         {
-            _ps2DbContext = ps2DbContext;
+            _ps2DbContextFactory = ps2DbContextFactory;
             _cache = cache;
             _characterService = characterService;
             _outfitService = outfitService;
@@ -236,19 +236,22 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<IEnumerable<DbEventDeath>> GetCharacterDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
-            return await _ps2DbContext.EventDeaths.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
+            var dbContext = _ps2DbContextFactory();
+            return await dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
                 .ToListAsync();
         }
 
         private async Task<IEnumerable<DbEventVehicleDestroy>> GetVehicleDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
-            return await _ps2DbContext.EventVehicleDestroys.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
+            var dbContext = _ps2DbContextFactory();
+            return await dbContext.EventVehicleDestroys.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
                 .ToListAsync();
         }
 
         private async Task<IEnumerable<CaptureLogRow>> GetCaptureLog(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
-            var facilityControls = await _ps2DbContext.EventFacilityControls.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
+            var dbContext = _ps2DbContextFactory();
+            var facilityControls = await dbContext.EventFacilityControls.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
                 .ToListAsync();
 
             var facilityIds = facilityControls.Select(c => c.FacilityId).Distinct().ToArray();
@@ -277,11 +280,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return logRows;
-        }
-
-        public void Dispose()
-        {
-            _ps2DbContext?.Dispose();
         }
     }
 }

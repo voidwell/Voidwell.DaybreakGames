@@ -11,4 +11,6 @@
     <PackageReference Include="System.Net.WebSockets.Client" Version="4.3.1" />
   </ItemGroup>
 
+  <Import Project="$(_WatchTarget)" Condition="Exists('$(_WatchTarget)')" />
+
 </Project>

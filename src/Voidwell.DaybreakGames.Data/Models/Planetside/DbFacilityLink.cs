@@ -6,7 +6,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
     [Table("FacilityLink")]
     public class DbFacilityLink
     {
-        [Required]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
         public string ZoneId { get; set; }
