@@ -45,24 +45,184 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public static T ClientMethod<T>(T element) => element;
+
         public async Task<DbCharacter> GetCharacterWithDetailsAsync(string characterId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return await dbContext.Characters
-                    .Include(c => c.Title)
-                    .Include(c => c.World)
-                    .Include(c => c.Faction)
-                    .Include(c => c.Time)
-                    .Include(c => c.OutfitMembership)
-                        .ThenInclude(m => m.Outfit)
-                    .Include(c => c.Stats)
-                    .Include(c => c.StatsByFaction)
-                    .Include(c => c.WeaponStats)
-                        .ThenInclude(s => s.Item)
-                            .ThenInclude(i => i.ItemCategory)
-                    .Include(c => c.WeaponStats)
-                    .FirstOrDefaultAsync(c => c.Id == characterId);
+                var result = from c in dbContext.Characters
+                             join world in dbContext.Worlds on c.WorldId equals world.Id
+                             join title in dbContext.Titles on c.TitleId equals title.Id
+                             join time in dbContext.CharacterTimes on c.Id equals time.CharacterId
+                             join faction in dbContext.Factions on c.FactionId equals faction.Id
+                             join outfitMembership in (from om in dbContext.OutfitMembers
+                                                       join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
+                                                       where om.CharacterId == characterId
+                                                       select new DbOutfitMember
+                                                       {
+                                                           CharacterId = om.CharacterId,
+                                                           MemberSinceDate = om.MemberSinceDate,
+                                                           OutfitId = om.OutfitId,
+                                                           Rank = om.Rank,
+                                                           RankOrdinal = om.RankOrdinal,
+                                                           Outfit = outfit
+                                                       }) on c.Id equals outfitMembership.CharacterId
+                             where c.Id == characterId
+                             select new DbCharacter
+                             {
+                                 Id = c.Id,
+                                 Name = c.Name,
+                                 BattleRank = c.BattleRank,
+                                 BattleRankPercentToNext = c.BattleRankPercentToNext,
+                                 CertsEarned = c.CertsEarned,
+                                 FactionId = c.FactionId,
+                                 WorldId = c.WorldId,
+                                 TitleId = c.TitleId,
+                                 Time = time,
+                                 World = world,
+                                 Title = title,
+                                 Faction = faction,
+                                 OutfitMembership = outfitMembership,
+                                 Stats = (from s in dbContext.CharacterStats
+                                          join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
+                                          from profile in profileQ.DefaultIfEmpty()
+                                          where s.CharacterId == c.Id
+                                          select new DbCharacterStat
+                                          {
+                                              CharacterId = s.CharacterId,
+                                              ProfileId = s.ProfileId,
+                                              AchievementCount = s.AchievementCount,
+                                              AssistCount = s.AssistCount,
+                                              DominationCount = s.DominationCount,
+                                              Deaths = s.Deaths,
+                                              FacilityCaptureCount = s.FacilityCaptureCount,
+                                              FacilityDefendedCount = s.FacilityDefendedCount,
+                                              FireCount = s.FireCount,
+                                              HitCount = s.HitCount,
+                                              KilledBy = s.KilledBy,
+                                              Kills = s.Kills,
+                                              MedalCount = s.MedalCount,
+                                              PlayTime = s.PlayTime,
+                                              RevengeCount = s.RevengeCount,
+                                              Score = s.Score,
+                                              SkillPoints = s.SkillPoints,
+                                              WeaponDamageGiven = s.WeaponDamageGiven,
+                                              WeaponDamageTakenBy = s.WeaponDamageTakenBy,
+                                              WeaponDeaths = s.WeaponDeaths,
+                                              WeaponFireCount = s.WeaponFireCount,
+                                              WeaponHeadshots = s.WeaponHeadshots,
+                                              WeaponHitCount = s.WeaponHitCount,
+                                              WeaponKilledBy = s.WeaponKilledBy,
+                                              WeaponKills = s.WeaponKills,
+                                              WeaponPlayTime = s.WeaponPlayTime,
+                                              WeaponScore = s.WeaponScore,
+                                              WeaponVehicleKills = s.WeaponVehicleKills,
+                                              Profile = profile
+                                          }).ToList(),
+                                 StatsByFaction = (from s in dbContext.CharacterStatByFactions
+                                                   join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
+                                                   from profile in profileQ.DefaultIfEmpty()
+                                                   where s.CharacterId == c.Id
+                                                   select new DbCharacterStatByFaction
+                                                   {
+                                                       CharacterId = s.CharacterId,
+                                                       ProfileId = s.ProfileId,
+                                                       DominationCountVS = s.DominationCountVS,
+                                                       DominationCountNC = s.DominationCountNC,
+                                                       DominationCountTR = s.DominationCountTR,
+                                                       FacilityCaptureCountVS = s.FacilityCaptureCountVS,
+                                                       FacilityCaptureCountNC = s.FacilityCaptureCountNC,
+                                                       FacilityCaptureCountTR = s.FacilityCaptureCountTR,
+                                                       KilledByVS = s.KilledByVS,
+                                                       KilledByNC = s.KilledByNC,
+                                                       KilledByTR = s.KilledByTR,
+                                                       KillsVS = s.KillsVS,
+                                                       KillsNC = s.KillsNC,
+                                                       KillsTR = s.KillsTR,
+                                                       RevengeCountVS = s.RevengeCountVS,
+                                                       RevengeCountNC = s.RevengeCountNC,
+                                                       RevengeCountTR = s.RevengeCountTR,
+                                                       WeaponDamageGivenVS = s.WeaponDamageGivenVS,
+                                                       WeaponDamageGivenNC = s.WeaponDamageGivenNC,
+                                                       WeaponDamageGivenTR = s.WeaponDamageGivenTR,
+                                                       WeaponDamageTakenByVS = s.WeaponDamageTakenByVS,
+                                                       WeaponDamageTakenByNC = s.WeaponDamageTakenByNC,
+                                                       WeaponDamageTakenByTR = s.WeaponDamageTakenByTR,
+                                                       WeaponHeadshotsVS = s.WeaponHeadshotsVS,
+                                                       WeaponHeadshotsNC = s.WeaponHeadshotsNC,
+                                                       WeaponHeadshotsTR = s.WeaponHeadshotsTR,
+                                                       WeaponKilledByVS = s.WeaponKilledByVS,
+                                                       WeaponKilledByNC = s.WeaponKilledByNC,
+                                                       WeaponKilledByTR = s.WeaponKilledByTR,
+                                                       WeaponKillsVS = s.WeaponKillsVS,
+                                                       WeaponKillsNC = s.WeaponKillsNC,
+                                                       WeaponKillsTR = s.WeaponKillsTR,
+                                                       WeaponVehicleKillsVS = s.WeaponVehicleKillsVS,
+                                                       WeaponVehicleKillsNC = s.WeaponVehicleKillsNC,
+                                                       WeaponVehicleKillsTR = s.WeaponVehicleKillsTR,
+                                                       Profile = profile
+                                                   }).ToList(),
+                                 WeaponStats = (from s in dbContext.CharacterWeaponStats
+                                                join item in dbContext.Items on s.ItemId equals item.Id into itemQ
+                                                from item in itemQ.DefaultIfEmpty()
+                                                join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
+                                                from vehicle in vehicleQ.DefaultIfEmpty()
+                                                where s.CharacterId == c.Id
+                                                select new DbCharacterWeaponStat
+                                                {
+                                                    CharacterId = s.CharacterId,
+                                                    ItemId = s.ItemId,
+                                                    VehicleId = s.VehicleId,
+                                                    DamageGiven = s.DamageGiven,
+                                                    DamageTakenBy = s.DamageTakenBy,
+                                                    Headshots = s.Headshots,
+                                                    Deaths = s.Deaths,
+                                                    VehicleKills = s.VehicleKills,
+                                                    FireCount = s.FireCount,
+                                                    HitCount = s.HitCount,
+                                                    KilledBy = s.KilledBy,
+                                                    Kills = s.Kills,
+                                                    PlayTime = s.PlayTime,
+                                                    Score = s.Score,
+                                                    Item = item,
+                                                    Vehicle = vehicle
+                                                }).ToList(),
+                                 WeaponStatsByFaction = (from s in dbContext.CharacterWeaponStatByFactions
+                                                         join item in dbContext.Items on s.ItemId equals item.Id into itemQ
+                                                         from item in itemQ.DefaultIfEmpty()
+                                                         join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
+                                                         from vehicle in vehicleQ.DefaultIfEmpty()
+                                                         where s.CharacterId == c.Id
+                                                         select new DbCharacterWeaponStatByFaction
+                                                         {
+                                                             CharacterId = s.CharacterId,
+                                                             ItemId = s.ItemId,
+                                                             VehicleId = s.VehicleId,
+                                                             DamageGivenVS = s.DamageGivenVS,
+                                                             DamageGivenNC = s.DamageGivenNC,
+                                                             DamageGivenTR = s.DamageGivenTR,
+                                                             DamageTakenByVS = s.DamageTakenByVS,
+                                                             DamageTakenByNC = s.DamageTakenByNC,
+                                                             DamageTakenByTR = s.DamageTakenByTR,
+                                                             HeadshotsVS = s.HeadshotsVS,
+                                                             HeadshotsNC = s.HeadshotsNC,
+                                                             HeadshotsTR = s.HeadshotsTR,
+                                                             KilledByVS = s.KilledByVS,
+                                                             KilledByNC = s.KilledByNC,
+                                                             KilledByTR = s.KilledByTR,
+                                                             KillsVS = s.KillsVS,
+                                                             KillsNC = s.KillsNC,
+                                                             KillsTR = s.KillsTR,
+                                                             VehicleKillsVS = s.VehicleKillsVS,
+                                                             VehicleKillsNC = s.VehicleKillsNC,
+                                                             VehicleKillsTR = s.VehicleKillsTR,
+                                                             Item = item,
+                                                             Vehicle = vehicle
+                                                         }).ToList(),
+                             };
+
+                return result.ToList().FirstOrDefault();
             }
         }
 
