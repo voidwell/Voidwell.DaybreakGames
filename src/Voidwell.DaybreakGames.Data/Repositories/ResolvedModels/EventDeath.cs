@@ -1,17 +1,12 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Data.Repositories.ResolvedModels
 {
-    [Table("EventDeath")]
-    public class DbEventDeath
+    public class EventDeath
     {
-        [Required]
         public string CharacterId { get; set; }
-        [Required]
         public string AttackerCharacterId { get; set; }
-        [Required]
         public DateTime Timestamp { get; set; }
 
         public string WorldId { get; set; }
@@ -24,5 +19,12 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string AttackerWeaponId { get; set; }
         public string AttackerOutfitId { get; set; }
         public bool IsHeadshot { get; set; }
+
+        public DbCharacter Character { get; set; }
+        public DbCharacter AttackerCharacter { get; set; }
+        public DbOutfit CharacterOutfit { get; set; }
+        public DbOutfit AttackerOutfit { get; set; }
+        public DbVehicle AttackerVehicle { get; set; }
+        public DbItem AttackerWeapon { get; set; }
     }
 }

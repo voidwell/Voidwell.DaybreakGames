@@ -40,6 +40,8 @@ namespace Voidwell.DaybreakGames.Data
             services.AddSingleton<IOutfitRepository, OutfitRepository>();
             services.AddSingleton<IPlayerSessionRepository, PlayerSessionRepository>();
             services.AddSingleton<IEventRepository, EventRepository>();
+            services.AddSingleton<IAlertRepository, AlertRepository>();
+            services.AddSingleton<ICharacterUpdaterRepository, CharacterUpdaterRepository>();
 
             return services;
         }

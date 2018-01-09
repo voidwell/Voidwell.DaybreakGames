@@ -29,6 +29,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             using (var dbContext = _dbContextHelper.Create())
             {
                 return await dbContext.Items.Where(i => i.Name.ToLower().Contains(name.ToLower()))
+                    .Where(a => a.ItemCategoryId < 99 )
                     .Take(limit)
                     .ToListAsync();
             }

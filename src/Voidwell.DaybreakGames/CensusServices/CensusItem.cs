@@ -47,7 +47,6 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "image_path",
                 "skill_set_id",
                 "is_default_attachment",
-                "is_vehicle_weapon",
                 "passive_ability_id",
                 "activatable_ability_id",
                 "item_type_id", 

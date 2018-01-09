@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Controllers.Planetside
 {
-    [Route("ps2/alert")]
+    [Route("ps2/profile")]
     public class ProfileController : Controller
     {
         private readonly IProfileService _profileService;

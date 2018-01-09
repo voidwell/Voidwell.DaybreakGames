@@ -84,7 +84,7 @@ namespace Voidwell.Cache
 
         public void Dispose()
         {
-            _redis.Dispose();
+            _redis?.Dispose();
         }
     }
 }

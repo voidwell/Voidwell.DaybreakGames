@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Websocket.Models;
 
@@ -12,41 +12,28 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class AlertService : IAlertService
     {
-        private readonly Func<PS2DbContext> _ps2DbContextFactory;
+        private readonly IAlertRepository _alertRepository;
         private readonly ICombatReportService _combatReportService;
 
-        public AlertService(Func<PS2DbContext> ps2DbContextFactory, ICombatReportService combatReportService)
+        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService)
         {
-            _ps2DbContextFactory = ps2DbContextFactory;
+            _alertRepository = alertRepository;
             _combatReportService = combatReportService;
         }
 
-        public async Task<IEnumerable<DbAlert>> GetAllAlerts(int limit = 25)
+        public Task<IEnumerable<DbAlert>> GetAllAlerts(int limit = 25)
         {
-            var dbContext = _ps2DbContextFactory();
-            return await dbContext.Alerts.Include(i => i.MetagameEvent)
-                .Include(i => i.MetagameEvent)
-                .OrderBy("StartDate", SortDirection.Descending)
-                .Take(limit)
-                .ToListAsync();
+            return _alertRepository.GetAllAlerts(limit);
         }
 
-        public async Task<IEnumerable<DbAlert>> GetAlerts(string worldId, int limit = 25)
+        public Task<IEnumerable<DbAlert>> GetAlerts(string worldId, int limit = 25)
         {
-            var dbContext = _ps2DbContextFactory();
-            return await dbContext.Alerts.Where(a => a.WorldId == worldId)
-                .Include(i => i.MetagameEvent)
-                .OrderBy("StartDate", SortDirection.Descending)
-                .Take(limit)
-                .ToListAsync();
+            return _alertRepository.GetAlertsByWorldId(worldId, limit);
         }
 
         public async Task<AlertResult> GetAlert(string worldId, string instanceId)
         {
-            var dbContext = _ps2DbContextFactory();
-            var alert = await dbContext.Alerts.Where(a => a.WorldId == worldId && a.MetagameInstanceId == instanceId)
-                .Include(i => i.MetagameEvent)
-                .FirstOrDefaultAsync();
+            var alert = await _alertRepository.GetAlert(worldId, instanceId);
 
             var combatReport = await _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId, alert.StartDate, alert.EndDate);
 
@@ -76,7 +63,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public Task CreateAlert(MetagameEvent metagameEvent)
         {
-            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbAlert
             {
                 WorldId = metagameEvent.WorldId,
@@ -91,16 +77,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LastFactionNc = metagameEvent.FactionNc,
                 LastFactionTr = metagameEvent.FactionTr
             };
-            dbContext.Alerts.Add(dataModel);
-            return dbContext.SaveChangesAsync();
+            return _alertRepository.AddAsync(dataModel);
         }
 
         public async Task UpdateAlert(MetagameEvent metagameEvent)
         {
-            var dbContext = _ps2DbContextFactory();
-            var alert = await dbContext.Alerts
-                    .AsTracking()
-                    .SingleOrDefaultAsync(a => a.WorldId == metagameEvent.WorldId && a.MetagameInstanceId == metagameEvent.InstanceId);
+            var alert = await _alertRepository.GetActiveAlert(metagameEvent.WorldId, metagameEvent.InstanceId);
 
             if (alert != null)
             {
@@ -109,8 +91,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 alert.LastFactionNc = metagameEvent.FactionNc;
                 alert.LastFactionTr = metagameEvent.FactionTr;
 
-                dbContext.Alerts.Update(alert);
-                await dbContext.SaveChangesAsync();
+                await _alertRepository.UpdateAsync(alert);
             }
         }
     }

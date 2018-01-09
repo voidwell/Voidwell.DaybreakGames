@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string Id { get; set; }
 
         public string ItemTypeId { get; set; }
-        public string ItemCategoryId { get; set; }
+        public int? ItemCategoryId { get; set; }
         public bool IsVehicleWeapon { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -18,6 +18,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int MaxStackSize { get; set; }
         public string ImageId { get; set; }
 
+        [ForeignKey("ItemCategoryId")]
         public DbItemCategory ItemCategory { get; set; }
     }
 }

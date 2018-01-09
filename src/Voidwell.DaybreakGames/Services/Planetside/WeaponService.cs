@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
@@ -60,25 +61,34 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MaxDamageRange = info.FireMode.Min(m => m.DamageMaxRange),
                 MinReloadSpeed = info.FireMode.Min(m => m.ReloadTimeMs + m.ReloadChamberTimeMs),
                 MaxReloadSpeed = info.FireMode.Max(m => m.ReloadTimeMs),
-                HipAcc = new AccuracyState
-                {
-                    Crouching = hipModes.First().States.First(s => s.PlayerState == "Crouching").MinConeOfFire,
-                    CrouchWalking = hipModes.First().States.First(s => s.PlayerState == "CrouchWalking").MinConeOfFire,
-                    Standing = hipModes.First().States.First(s => s.PlayerState == "Standing").MinConeOfFire,
-                    Running = hipModes.First().States.First(s => s.PlayerState == "Running").MinConeOfFire,
-                    Cof = hipModes.First().CofRecoil
-                },
-                AimAcc = new AccuracyState
-                {
-                    Crouching = aimModes.First().States.First(s => s.PlayerState == "Crouching").MinConeOfFire,
-                    CrouchWalking = aimModes.First().States.First(s => s.PlayerState == "CrouchWalking").MinConeOfFire,
-                    Standing = aimModes.First().States.First(s => s.PlayerState == "Standing").MinConeOfFire,
-                    Running = aimModes.First().States.First(s => s.PlayerState == "Running").MinConeOfFire,
-                    Cof = aimModes.First().CofRecoil
-                },
                 IronSightZoom = aimModes.First().DefaultZoom,
-                FireModes = hipModes.Select(m => m.Description.English)
+                FireModes = hipModes.Select(m => m.Description.English),
+                IsVehicleWeapon = info.IsVehicleWeapon
             };
+
+            if (hipModes != null)
+            {
+                weaponInfo.HipAcc = new AccuracyState
+                {
+                    Crouching = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "Crouching")?.MinConeOfFire,
+                    CrouchWalking = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "CrouchWalking")?.MinConeOfFire,
+                    Standing = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "Standing")?.MinConeOfFire,
+                    Running = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "Running")?.MinConeOfFire,
+                    Cof = hipModes.First().CofRecoil
+                };
+            }
+
+            if (aimModes != null)
+            {
+                weaponInfo.AimAcc = new AccuracyState
+                {
+                    Crouching = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "Crouching")?.MinConeOfFire,
+                    CrouchWalking = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "CrouchWalking")?.MinConeOfFire,
+                    Standing = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "Standing")?.MinConeOfFire,
+                    Running = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "Running")?.MinConeOfFire,
+                    Cof = aimModes.First().CofRecoil
+                };
+            }
 
             await _cache.SetAsync($"{_weaponInfoCacheKey}_{weaponItemId}", weaponInfo, _weaponInfoCacheExpiration);
 

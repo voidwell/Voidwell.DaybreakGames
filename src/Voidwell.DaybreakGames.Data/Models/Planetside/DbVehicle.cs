@@ -16,6 +16,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string CostResourceId { get; set; }
         public string ImageId { get; set; }
 
+        [InverseProperty("Vehicle")]
         public IEnumerable<DbVehicleFaction> Faction { get; set; }
     }
 }

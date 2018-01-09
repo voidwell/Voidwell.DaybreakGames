@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
@@ -256,7 +257,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "ItemCategory",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -433,7 +435,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     FactionId = table.Column<string>(nullable: true),
                     ImageId = table.Column<string>(nullable: true),
                     IsVehicleWeapon = table.Column<bool>(nullable: false),
-                    ItemCategoryId = table.Column<string>(nullable: true),
+                    ItemCategoryId = table.Column<int>(nullable: true),
                     ItemTypeId = table.Column<string>(nullable: true),
                     MaxStackSize = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true)
@@ -482,18 +484,17 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     VehicleId = table.Column<string>(nullable: false),
-                    FactionId = table.Column<string>(nullable: false),
-                    DbVehicleId = table.Column<string>(nullable: true)
+                    FactionId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_VehicleFaction", x => new { x.VehicleId, x.FactionId });
                     table.ForeignKey(
-                        name: "FK_VehicleFaction_Vehicle_DbVehicleId",
-                        column: x => x.DbVehicleId,
+                        name: "FK_VehicleFaction_Vehicle_VehicleId",
+                        column: x => x.VehicleId,
                         principalTable: "Vehicle",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -533,37 +534,97 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CharacterLifetimeStat",
+                columns: table => new
+                {
+                    CharacterId = table.Column<string>(nullable: false),
+                    AchievementCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    AssistCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    DominationCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    FacilityCaptureCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    FacilityDefendedCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    MedalCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    RevengeCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    SkillPoints = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageGiven = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageTakenBy = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDeaths = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponFireCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponHeadshots = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponHitCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponKills = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponPlayTime = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponScore = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponVehicleKills = table.Column<int>(nullable: true, defaultValue: 0)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterLifetimeStat", x => x.CharacterId);
+                    table.ForeignKey(
+                        name: "FK_CharacterLifetimeStat_Character_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Character",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CharacterLifetimeStatByFaction",
+                columns: table => new
+                {
+                    CharacterId = table.Column<string>(nullable: false),
+                    DominationCountNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    DominationCountTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    DominationCountVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    FacilityCaptureCountNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    FacilityCaptureCountTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    FacilityCaptureCountVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    RevengeCountNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    RevengeCountTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    RevengeCountVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageGivenNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageGivenTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageGivenVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageTakenByNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageTakenByTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponDamageTakenByVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponHeadshotsNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponHeadshotsTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponHeadshotsVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponKilledByNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponKilledByTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponKilledByVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponKillsNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponKillsTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponKillsVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponVehicleKillsNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponVehicleKillsTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    WeaponVehicleKillsVS = table.Column<int>(nullable: true, defaultValue: 0)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterLifetimeStatByFaction", x => x.CharacterId);
+                    table.ForeignKey(
+                        name: "FK_CharacterLifetimeStatByFaction_Character_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Character",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CharacterStat",
                 columns: table => new
                 {
                     CharacterId = table.Column<string>(nullable: false),
                     ProfileId = table.Column<string>(nullable: false),
-                    AchievementCount = table.Column<int>(nullable: true),
-                    AssistCount = table.Column<int>(nullable: true),
-                    Deaths = table.Column<int>(nullable: true),
-                    DominationCount = table.Column<int>(nullable: true),
-                    FacilityCaptureCount = table.Column<int>(nullable: true),
-                    FacilityDefendedCount = table.Column<int>(nullable: true),
-                    FireCount = table.Column<int>(nullable: true),
-                    HitCount = table.Column<int>(nullable: true),
-                    KilledBy = table.Column<int>(nullable: true),
-                    Kills = table.Column<int>(nullable: true),
-                    MedalCount = table.Column<int>(nullable: true),
-                    PlayTime = table.Column<int>(nullable: true),
-                    RevengeCount = table.Column<int>(nullable: true),
-                    Score = table.Column<int>(nullable: true),
-                    SkillPoints = table.Column<int>(nullable: true),
-                    WeaponDamageGiven = table.Column<int>(nullable: true),
-                    WeaponDamageTakenBy = table.Column<int>(nullable: true),
-                    WeaponDeaths = table.Column<int>(nullable: true),
-                    WeaponFireCount = table.Column<int>(nullable: true),
-                    WeaponHeadshots = table.Column<int>(nullable: true),
-                    WeaponHitCount = table.Column<int>(nullable: true),
-                    WeaponKilledBy = table.Column<int>(nullable: true),
-                    WeaponKills = table.Column<int>(nullable: true),
-                    WeaponPlayTime = table.Column<int>(nullable: true),
-                    WeaponScore = table.Column<int>(nullable: true),
-                    WeaponVehicleKills = table.Column<int>(nullable: true)
+                    Deaths = table.Column<int>(nullable: true, defaultValue: 0),
+                    FireCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    HitCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    KilledBy = table.Column<int>(nullable: true, defaultValue: 0),
+                    Kills = table.Column<int>(nullable: true, defaultValue: 0),
+                    PlayTime = table.Column<int>(nullable: true, defaultValue: 0),
+                    Score = table.Column<int>(nullable: true, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -588,39 +649,12 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     CharacterId = table.Column<string>(nullable: false),
                     ProfileId = table.Column<string>(nullable: false),
-                    DominationCountNC = table.Column<int>(nullable: true),
-                    DominationCountTR = table.Column<int>(nullable: true),
-                    DominationCountVS = table.Column<int>(nullable: true),
-                    FacilityCaptureCountNC = table.Column<int>(nullable: true),
-                    FacilityCaptureCountTR = table.Column<int>(nullable: true),
-                    FacilityCaptureCountVS = table.Column<int>(nullable: true),
-                    KilledByNC = table.Column<int>(nullable: true),
-                    KilledByTR = table.Column<int>(nullable: true),
-                    KilledByVS = table.Column<int>(nullable: true),
-                    KillsNC = table.Column<int>(nullable: true),
-                    KillsTR = table.Column<int>(nullable: true),
-                    KillsVS = table.Column<int>(nullable: true),
-                    RevengeCountNC = table.Column<int>(nullable: true),
-                    RevengeCountTR = table.Column<int>(nullable: true),
-                    RevengeCountVS = table.Column<int>(nullable: true),
-                    WeaponDamageGivenNC = table.Column<int>(nullable: true),
-                    WeaponDamageGivenTR = table.Column<int>(nullable: true),
-                    WeaponDamageGivenVS = table.Column<int>(nullable: true),
-                    WeaponDamageTakenByNC = table.Column<int>(nullable: true),
-                    WeaponDamageTakenByTR = table.Column<int>(nullable: true),
-                    WeaponDamageTakenByVS = table.Column<int>(nullable: true),
-                    WeaponHeadshotsNC = table.Column<int>(nullable: true),
-                    WeaponHeadshotsTR = table.Column<int>(nullable: true),
-                    WeaponHeadshotsVS = table.Column<int>(nullable: true),
-                    WeaponKilledByNC = table.Column<int>(nullable: true),
-                    WeaponKilledByTR = table.Column<int>(nullable: true),
-                    WeaponKilledByVS = table.Column<int>(nullable: true),
-                    WeaponKillsNC = table.Column<int>(nullable: true),
-                    WeaponKillsTR = table.Column<int>(nullable: true),
-                    WeaponKillsVS = table.Column<int>(nullable: true),
-                    WeaponVehicleKillsNC = table.Column<int>(nullable: true),
-                    WeaponVehicleKillsTR = table.Column<int>(nullable: true),
-                    WeaponVehicleKillsVS = table.Column<int>(nullable: true)
+                    KilledByNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    KilledByTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    KilledByVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    KillsNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    KillsTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    KillsVS = table.Column<int>(nullable: true, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -667,17 +701,17 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     CharacterId = table.Column<string>(nullable: false),
                     ItemId = table.Column<string>(nullable: false),
                     VehicleId = table.Column<string>(nullable: false),
-                    DamageGiven = table.Column<int>(nullable: true),
-                    DamageTakenBy = table.Column<int>(nullable: true),
-                    Deaths = table.Column<int>(nullable: true),
-                    FireCount = table.Column<int>(nullable: true),
-                    Headshots = table.Column<int>(nullable: true),
-                    HitCount = table.Column<int>(nullable: true),
-                    KilledBy = table.Column<int>(nullable: true),
-                    Kills = table.Column<int>(nullable: true),
-                    PlayTime = table.Column<int>(nullable: true),
-                    Score = table.Column<int>(nullable: true),
-                    VehicleKills = table.Column<int>(nullable: true)
+                    DamageGiven = table.Column<int>(nullable: true, defaultValue: 0),
+                    DamageTakenBy = table.Column<int>(nullable: true, defaultValue: 0),
+                    Deaths = table.Column<int>(nullable: true, defaultValue: 0),
+                    FireCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    Headshots = table.Column<int>(nullable: true, defaultValue: 0),
+                    HitCount = table.Column<int>(nullable: true, defaultValue: 0),
+                    KilledBy = table.Column<int>(nullable: true, defaultValue: 0),
+                    Kills = table.Column<int>(nullable: true, defaultValue: 0),
+                    PlayTime = table.Column<int>(nullable: true, defaultValue: 0),
+                    Score = table.Column<int>(nullable: true, defaultValue: 0),
+                    VehicleKills = table.Column<int>(nullable: true, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -709,24 +743,24 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     CharacterId = table.Column<string>(nullable: false),
                     ItemId = table.Column<string>(nullable: false),
                     VehicleId = table.Column<string>(nullable: false),
-                    DamageGivenNC = table.Column<int>(nullable: true),
-                    DamageGivenTR = table.Column<int>(nullable: true),
-                    DamageGivenVS = table.Column<int>(nullable: true),
-                    DamageTakenByNC = table.Column<int>(nullable: true),
-                    DamageTakenByTR = table.Column<int>(nullable: true),
-                    DamageTakenByVS = table.Column<int>(nullable: true),
-                    HeadshotsNC = table.Column<int>(nullable: true),
-                    HeadshotsTR = table.Column<int>(nullable: true),
-                    HeadshotsVS = table.Column<int>(nullable: true),
-                    KilledByNC = table.Column<int>(nullable: true),
-                    KilledByTR = table.Column<int>(nullable: true),
-                    KilledByVS = table.Column<int>(nullable: true),
-                    KillsNC = table.Column<int>(nullable: true),
-                    KillsTR = table.Column<int>(nullable: true),
-                    KillsVS = table.Column<int>(nullable: true),
-                    VehicleKillsNC = table.Column<int>(nullable: true),
-                    VehicleKillsTR = table.Column<int>(nullable: true),
-                    VehicleKillsVS = table.Column<int>(nullable: true)
+                    DamageGivenNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    DamageGivenTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    DamageGivenVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    DamageTakenByNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    DamageTakenByTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    DamageTakenByVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    HeadshotsNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    HeadshotsTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    HeadshotsVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    KilledByNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    KilledByTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    KilledByVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    KillsNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    KillsTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    KillsVS = table.Column<int>(nullable: true, defaultValue: 0),
+                    VehicleKillsNC = table.Column<int>(nullable: true, defaultValue: 0),
+                    VehicleKillsTR = table.Column<int>(nullable: true, defaultValue: 0),
+                    VehicleKillsVS = table.Column<int>(nullable: true, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -987,17 +1021,18 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "IX_PlayerSession_CharacterId_LoginDate_LogoutDate",
                 table: "PlayerSession",
                 columns: new[] { "CharacterId", "LoginDate", "LogoutDate" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VehicleFaction_DbVehicleId",
-                table: "VehicleFaction",
-                column: "DbVehicleId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Alert");
+
+            migrationBuilder.DropTable(
+                name: "CharacterLifetimeStat");
+
+            migrationBuilder.DropTable(
+                name: "CharacterLifetimeStatByFaction");
 
             migrationBuilder.DropTable(
                 name: "CharacterStat");

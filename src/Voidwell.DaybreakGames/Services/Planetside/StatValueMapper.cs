@@ -4,7 +4,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public static class StatValueMapper
     {
-        public static void AssignStatValue(ref DbCharacterStat dbModel, string statName, int value)
+        public static void AssignStatValue(ref DbCharacterLifetimeStat dbModel, string statName, int value)
         {
             switch (statName)
             {
@@ -14,26 +14,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 case "assist_count":
                     dbModel.AssistCount = value;
                     break;
-                case "deaths":
-                    dbModel.Deaths = value;
-                    break;
                 case "facility_defended_count":
                     dbModel.FacilityDefendedCount = value;
                     break;
-                case "fire_count":
-                    dbModel.FireCount = value;
-                    break;
-                case "hit_count":
-                    dbModel.HitCount = value;
-                    break;
                 case "medal_count":
                     dbModel.MedalCount = value;
-                    break;
-                case "play_time":
-                    dbModel.PlayTime = value;
-                    break;
-                case "score":
-                    dbModel.Score = value;
                     break;
                 case "skill_points":
                     dbModel.SkillPoints = value;
@@ -59,12 +44,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 case "facility_capture_count":
                     dbModel.FacilityCaptureCount = value;
                     break;
-                case "killed_by":
-                    dbModel.KilledBy = value;
-                    break;
-                case "kills":
-                    dbModel.Kills = value;
-                    break;
                 case "revenge_count":
                     dbModel.RevengeCount = value;
                     break;
@@ -77,11 +56,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 case "weapon_headshots":
                     dbModel.WeaponHeadshots = value;
                     break;
-                case "weapon_killed_by":
-                    dbModel.WeaponKilledBy = value;
-                    break;
                 case "weapon_kills":
-                    dbModel.Kills = value;
+                    dbModel.WeaponKills = value;
                     break;
                 case "weapon_vehicle_kills":
                     dbModel.WeaponVehicleKills = value;
@@ -89,7 +65,35 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public static void AssignStatValue(ref DbCharacterStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
+        public static void AssignStatValue(ref DbCharacterStat dbModel, string statName, int value)
+        {
+            switch (statName)
+            {
+                case "deaths":
+                    dbModel.Deaths = value;
+                    break;
+                case "fire_count":
+                    dbModel.FireCount = value;
+                    break;
+                case "hit_count":
+                    dbModel.HitCount = value;
+                    break;
+                case "play_time":
+                    dbModel.PlayTime = value;
+                    break;
+                case "score":
+                    dbModel.Score = value;
+                    break;
+                case "killed_by":
+                    dbModel.KilledBy = value;
+                    break;
+                case "kills":
+                    dbModel.Kills = value;
+                    break;
+            }
+        }
+
+        public static void AssignStatValue(ref DbCharacterLifetimeStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
         {
             switch (statName)
             {
@@ -102,16 +106,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     dbModel.FacilityCaptureCountVS = valueVs;
                     dbModel.FacilityCaptureCountNC = valueNc;
                     dbModel.FacilityCaptureCountTR = valueTr;
-                    break;
-                case "killed_by":
-                    dbModel.KilledByVS = valueVs;
-                    dbModel.KilledByNC = valueNc;
-                    dbModel.KilledByTR = valueTr;
-                    break;
-                case "kills":
-                    dbModel.KillsVS = valueVs;
-                    dbModel.KillsNC = valueNc;
-                    dbModel.KillsTR = valueTr;
                     break;
                 case "revenge_count":
                     dbModel.RevengeCountVS = valueVs;
@@ -147,6 +141,23 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     dbModel.WeaponVehicleKillsVS = valueVs;
                     dbModel.WeaponVehicleKillsNC = valueNc;
                     dbModel.WeaponVehicleKillsTR = valueTr;
+                    break;
+            }
+        }
+
+        public static void AssignStatValue(ref DbCharacterStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
+        {
+            switch (statName)
+            {
+                case "killed_by":
+                    dbModel.KilledByVS = valueVs;
+                    dbModel.KilledByNC = valueNc;
+                    dbModel.KilledByTR = valueTr;
+                    break;
+                case "kills":
+                    dbModel.KillsVS = valueVs;
+                    dbModel.KillsNC = valueNc;
+                    dbModel.KillsTR = valueTr;
                     break;
             }
         }

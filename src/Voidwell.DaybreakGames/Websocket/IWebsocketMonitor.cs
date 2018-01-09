@@ -1,6 +1,11 @@
-﻿namespace Voidwell.DaybreakGames.Websocket
+﻿using System.Threading.Tasks;
+
+namespace Voidwell.DaybreakGames.Websocket
 {
-    public interface IWebsocketMonitor : IHostedServiceExtended
+    public interface IWebsocketMonitor
     {
+        Task StartAsync();
+        Task StopAsync();
+        bool IsRunning();
     }
 }

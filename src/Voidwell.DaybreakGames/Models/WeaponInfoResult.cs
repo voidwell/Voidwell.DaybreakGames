@@ -25,14 +25,15 @@ namespace Voidwell.DaybreakGames.Models
         public IEnumerable<string> FireModes { get; set; }
         public AccuracyState HipAcc { get; set; }
         public AccuracyState AimAcc { get; set; }
+        public bool IsVehicleWeapon { get; set; }
     }
 
     public class AccuracyState
     {
-        public float Crouching { get; set; }
-        public float CrouchWalking { get; set; }
-        public float Standing { get; set; }
-        public float Running { get; set; }
-        public float Cof { get; set; }
+        public float? Crouching { get; set; }
+        public float? CrouchWalking { get; set; }
+        public float? Standing { get; set; }
+        public float? Running { get; set; }
+        public float? Cof { get; set; }
     }
 }

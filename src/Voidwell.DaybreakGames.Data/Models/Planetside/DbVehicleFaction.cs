@@ -11,5 +11,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
 
         [Required]
         public string FactionId { get; set; }
+
+        public DbVehicle Vehicle { get; set; }
     }
 }

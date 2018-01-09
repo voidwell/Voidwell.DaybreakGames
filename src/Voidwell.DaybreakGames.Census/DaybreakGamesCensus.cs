@@ -1,36 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using Voidwell.DaybreakGames.Census.JsonConverters;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Exceptions;
 
 namespace Voidwell.DaybreakGames.Census
 {
-    public class CensusClient : ICensusClient
+    public class DaybreakGamesCensus : IDaybreakGamesCensus
     {
         private readonly CensusOptions _options;
-        private JsonSerializer _censusDeserializer { get; set; }
+        private readonly ILogger _logger;
 
-        public CensusClient(CensusOptions options)
+        public DaybreakGamesCensus(CensusOptions options, ILogger<DaybreakGamesCensus> logger)
         {
             _options = options;
-
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = new UnderscorePropertyNamesContractResolver(),
-                Converters = new JsonConverter[]
-                {
-                    new BooleanJsonConverter(),
-                    new DateTimeJsonConverter()
-                }
-            };
-            _censusDeserializer = JsonSerializer.Create(settings);
+            _logger = logger;
         }
+
+        /*
 
         public CensusQuery CreateQuery(string serviceName)
         {
@@ -57,14 +48,15 @@ namespace Voidwell.DaybreakGames.Census
             var requestUri = CreateRequestUri(queryType, query);
             var client = new HttpClient(new CensusRetryHandler(new HttpClientHandler()));
 
-            try {
+            try
+            {
                 var result = await client.GetAsync(requestUri);
                 var jResult = await result.GetContentAsync<JToken>();
 
                 var jBody = jResult.SelectToken($"{query.ServiceName}_list");
                 return jBody.ToObject<T>(_censusDeserializer);
             }
-            catch(HttpRequestException ex)
+            catch (HttpRequestException ex)
             {
                 var message = ex.InnerException?.Message ?? ex.Message;
                 throw new CensusConnectionException($"Census query failed for query: {requestUri}: {message}");
@@ -129,5 +121,7 @@ namespace Voidwell.DaybreakGames.Census
         {
             return content.ToObject<T>(_censusDeserializer);
         }
+
+        */
     }
 }
