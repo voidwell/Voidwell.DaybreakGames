@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,10 +53,18 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             using (var dbContext = _dbContextHelper.Create())
             {
                 var result = from c in dbContext.Characters
-                             join world in dbContext.Worlds on c.WorldId equals world.Id
-                             join title in dbContext.Titles on c.TitleId equals title.Id
-                             join time in dbContext.CharacterTimes on c.Id equals time.CharacterId
-                             join faction in dbContext.Factions on c.FactionId equals faction.Id
+                             join world in dbContext.Worlds on c.WorldId equals world.Id into worldQ
+                             from world in worldQ.DefaultIfEmpty()
+                             join title in dbContext.Titles on c.TitleId equals title.Id into titleQ
+                             from title in titleQ.DefaultIfEmpty()
+                             join time in dbContext.CharacterTimes on c.Id equals time.CharacterId into timeQ
+                             from time in timeQ.DefaultIfEmpty()
+                             join faction in dbContext.Factions on c.FactionId equals faction.Id into factionQ
+                             from faction in factionQ.DefaultIfEmpty()
+                             join lifetimeStats in dbContext.CharacterLifetimeStats on c.Id equals lifetimeStats.CharacterId into lifetimeStatsQ
+                             from lifetimeStats in lifetimeStatsQ.DefaultIfEmpty()
+                             join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
+                             from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
                              join outfitMembership in (from om in dbContext.OutfitMembers
                                                        join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
                                                        where om.CharacterId == characterId
@@ -67,7 +76,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                            Rank = om.Rank,
                                                            RankOrdinal = om.RankOrdinal,
                                                            Outfit = outfit
-                                                       }) on c.Id equals outfitMembership.CharacterId
+                                                       }) on c.Id equals outfitMembership.CharacterId into outfitMembershipQ
+                             from outfitMembership in outfitMembershipQ.DefaultIfEmpty()
                              where c.Id == characterId
                              select new DbCharacter
                              {
@@ -84,6 +94,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                  Title = title,
                                  Faction = faction,
                                  OutfitMembership = outfitMembership,
+                                 LifetimeStats = lifetimeStats,
+                                 LifetimeStatsByFaction = lifetimeStatsByFaction,
                                  Stats = (from s in dbContext.CharacterStats
                                           join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
                                           from profile in profileQ.DefaultIfEmpty()
@@ -92,32 +104,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                           {
                                               CharacterId = s.CharacterId,
                                               ProfileId = s.ProfileId,
-                                              AchievementCount = s.AchievementCount,
-                                              AssistCount = s.AssistCount,
-                                              DominationCount = s.DominationCount,
                                               Deaths = s.Deaths,
-                                              FacilityCaptureCount = s.FacilityCaptureCount,
-                                              FacilityDefendedCount = s.FacilityDefendedCount,
                                               FireCount = s.FireCount,
                                               HitCount = s.HitCount,
                                               KilledBy = s.KilledBy,
                                               Kills = s.Kills,
-                                              MedalCount = s.MedalCount,
                                               PlayTime = s.PlayTime,
-                                              RevengeCount = s.RevengeCount,
                                               Score = s.Score,
-                                              SkillPoints = s.SkillPoints,
-                                              WeaponDamageGiven = s.WeaponDamageGiven,
-                                              WeaponDamageTakenBy = s.WeaponDamageTakenBy,
-                                              WeaponDeaths = s.WeaponDeaths,
-                                              WeaponFireCount = s.WeaponFireCount,
-                                              WeaponHeadshots = s.WeaponHeadshots,
-                                              WeaponHitCount = s.WeaponHitCount,
-                                              WeaponKilledBy = s.WeaponKilledBy,
-                                              WeaponKills = s.WeaponKills,
-                                              WeaponPlayTime = s.WeaponPlayTime,
-                                              WeaponScore = s.WeaponScore,
-                                              WeaponVehicleKills = s.WeaponVehicleKills,
                                               Profile = profile
                                           }).ToList(),
                                  StatsByFaction = (from s in dbContext.CharacterStatByFactions
@@ -128,43 +121,31 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                    {
                                                        CharacterId = s.CharacterId,
                                                        ProfileId = s.ProfileId,
-                                                       DominationCountVS = s.DominationCountVS,
-                                                       DominationCountNC = s.DominationCountNC,
-                                                       DominationCountTR = s.DominationCountTR,
-                                                       FacilityCaptureCountVS = s.FacilityCaptureCountVS,
-                                                       FacilityCaptureCountNC = s.FacilityCaptureCountNC,
-                                                       FacilityCaptureCountTR = s.FacilityCaptureCountTR,
                                                        KilledByVS = s.KilledByVS,
                                                        KilledByNC = s.KilledByNC,
                                                        KilledByTR = s.KilledByTR,
                                                        KillsVS = s.KillsVS,
                                                        KillsNC = s.KillsNC,
                                                        KillsTR = s.KillsTR,
-                                                       RevengeCountVS = s.RevengeCountVS,
-                                                       RevengeCountNC = s.RevengeCountNC,
-                                                       RevengeCountTR = s.RevengeCountTR,
-                                                       WeaponDamageGivenVS = s.WeaponDamageGivenVS,
-                                                       WeaponDamageGivenNC = s.WeaponDamageGivenNC,
-                                                       WeaponDamageGivenTR = s.WeaponDamageGivenTR,
-                                                       WeaponDamageTakenByVS = s.WeaponDamageTakenByVS,
-                                                       WeaponDamageTakenByNC = s.WeaponDamageTakenByNC,
-                                                       WeaponDamageTakenByTR = s.WeaponDamageTakenByTR,
-                                                       WeaponHeadshotsVS = s.WeaponHeadshotsVS,
-                                                       WeaponHeadshotsNC = s.WeaponHeadshotsNC,
-                                                       WeaponHeadshotsTR = s.WeaponHeadshotsTR,
-                                                       WeaponKilledByVS = s.WeaponKilledByVS,
-                                                       WeaponKilledByNC = s.WeaponKilledByNC,
-                                                       WeaponKilledByTR = s.WeaponKilledByTR,
-                                                       WeaponKillsVS = s.WeaponKillsVS,
-                                                       WeaponKillsNC = s.WeaponKillsNC,
-                                                       WeaponKillsTR = s.WeaponKillsTR,
-                                                       WeaponVehicleKillsVS = s.WeaponVehicleKillsVS,
-                                                       WeaponVehicleKillsNC = s.WeaponVehicleKillsNC,
-                                                       WeaponVehicleKillsTR = s.WeaponVehicleKillsTR,
                                                        Profile = profile
                                                    }).ToList(),
                                  WeaponStats = (from s in dbContext.CharacterWeaponStats
-                                                join item in dbContext.Items on s.ItemId equals item.Id into itemQ
+                                                join item in (from item in dbContext.Items
+                                                              join category in dbContext.ItemCategories on item.ItemCategoryId equals category.Id into categoryQ
+                                                              from category in categoryQ.DefaultIfEmpty()
+                                                              select new DbItem
+                                                              {
+                                                                  Id = item.Id,
+                                                                  Name = item.Name,
+                                                                  Description = item.Description,
+                                                                  FactionId = item.FactionId,
+                                                                  ImageId = item.ImageId,
+                                                                  IsVehicleWeapon = item != null ? item.IsVehicleWeapon : false,
+                                                                  ItemTypeId = item.ItemTypeId,
+                                                                  MaxStackSize = item != null ? item.MaxStackSize : 0,
+                                                                  ItemCategoryId = item.ItemCategoryId,
+                                                                  ItemCategory = category != null ? category : null
+                                                              }) on s.ItemId equals item.Id into itemQ
                                                 from item in itemQ.DefaultIfEmpty()
                                                 join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
                                                 from vehicle in vehicleQ.DefaultIfEmpty()
@@ -270,6 +251,50 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<DbCharacterLifetimeStat> UpsertAsync(DbCharacterLifetimeStat entity)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                var dbSet = dbContext.CharacterLifetimeStats;
+
+                var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
+                if (storeEntity == null)
+                {
+                    dbSet.Add(entity);
+                }
+                else
+                {
+                    storeEntity = entity;
+                    dbSet.Update(storeEntity);
+                }
+
+                await dbContext.SaveChangesAsync();
+                return entity;
+            }
+        }
+
+        public async Task<DbCharacterLifetimeStatByFaction> UpsertAsync(DbCharacterLifetimeStatByFaction entity)
+        {
+            using (var dbContext = _dbContextHelper.Create())
+            {
+                var dbSet = dbContext.CharacterLifetimeStatsByFaction;
+
+                var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
+                if (storeEntity == null)
+                {
+                    dbSet.Add(entity);
+                }
+                else
+                {
+                    storeEntity = entity;
+                    dbSet.Update(storeEntity);
+                }
+
+                await dbContext.SaveChangesAsync();
+                return entity;
+            }
+        }
+
         public async Task<IEnumerable<DbCharacterStat>> UpsertRangeAsync(IEnumerable<DbCharacterStat> entities)
         {
             var result = new List<DbCharacterStat>();
@@ -355,6 +380,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         public async Task<IEnumerable<DbCharacterWeaponStat>> UpsertRangeAsync(IEnumerable<DbCharacterWeaponStat> entities)
         {
             var result = new List<DbCharacterWeaponStat>();
+            var newEntities = new List<DbCharacterWeaponStat>();
 
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -367,7 +393,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId);
                     if (storeEntity == null)
                     {
-                        dbSet.Add(entity);
+                        newEntities.Add(entity);
                         result.Add(entity);
                     }
                     else
@@ -387,6 +413,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     }
                 }
 
+                if (newEntities.Count() > 0)
+                {
+                    await dbSet.AddRangeAsync(newEntities);
+                }
+
                 await dbContext.SaveChangesAsync();
             }
 
@@ -396,6 +427,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         public async Task<IEnumerable<DbCharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<DbCharacterWeaponStatByFaction> entities)
         {
             var result = new List<DbCharacterWeaponStatByFaction>();
+            var newEntities = new List<DbCharacterWeaponStatByFaction>();
 
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -408,7 +440,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId);
                     if (storeEntity == null)
                     {
-                        dbSet.Add(entity);
+                        newEntities.Add(entity);
                         result.Add(entity);
                     }
                     else
@@ -426,6 +458,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                         dbSet.Update(storeEntity);
                         result.Add(storeEntity);
                     }
+                }
+
+                if (newEntities.Count() > 0)
+                {
+                    await dbSet.AddRangeAsync(newEntities);
                 }
 
                 await dbContext.SaveChangesAsync();

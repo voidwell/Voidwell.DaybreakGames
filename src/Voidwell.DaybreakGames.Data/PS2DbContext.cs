@@ -15,7 +15,9 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<DbOutfitMember> OutfitMembers { get; set; }
         public DbSet<DbCharacterTime> CharacterTimes { get; set; }
         public DbSet<DbOutfit> Outfits { get; set; }
+        public DbSet<DbCharacterLifetimeStat> CharacterLifetimeStats { get; set; }
         public DbSet<DbCharacterStat> CharacterStats { get; set; }
+        public DbSet<DbCharacterLifetimeStatByFaction> CharacterLifetimeStatsByFaction { get; set; }
         public DbSet<DbCharacterStatByFaction> CharacterStatByFactions { get; set; }
         public DbSet<DbCharacterWeaponStat> CharacterWeaponStats { get; set; }
         public DbSet<DbCharacterWeaponStatByFaction> CharacterWeaponStatByFactions { get; set; }
@@ -54,70 +56,71 @@ namespace Voidwell.DaybreakGames.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.AchievementCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.AssistCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.DominationCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.FacilityCaptureCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.FacilityDefendedCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.MedalCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.RevengeCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.SkillPoints).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponDamageGiven).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponDamageTakenBy).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponDeaths).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponFireCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponHeadshots).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponHitCount).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponKills).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponPlayTime).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponScore).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStat>().Property(a => a.WeaponVehicleKills).HasDefaultValue(0);
+
             builder.Entity<DbCharacterStat>()
                 .HasKey(a => new { a.CharacterId, a.ProfileId });
-            builder.Entity<DbCharacterStat>().Property(a => a.AchievementCount).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.AssistCount).HasDefaultValue(0);
             builder.Entity<DbCharacterStat>().Property(a => a.Deaths).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.DominationCount).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.FacilityCaptureCount).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.FacilityDefendedCount).HasDefaultValue(0);
             builder.Entity<DbCharacterStat>().Property(a => a.FireCount).HasDefaultValue(0);
             builder.Entity<DbCharacterStat>().Property(a => a.HitCount).HasDefaultValue(0);
             builder.Entity<DbCharacterStat>().Property(a => a.KilledBy).HasDefaultValue(0);
             builder.Entity<DbCharacterStat>().Property(a => a.Kills).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.MedalCount).HasDefaultValue(0);
             builder.Entity<DbCharacterStat>().Property(a => a.PlayTime).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.RevengeCount).HasDefaultValue(0);
             builder.Entity<DbCharacterStat>().Property(a => a.Score).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.SkillPoints).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponDamageGiven).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponDamageTakenBy).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponDeaths).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponFireCount).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponHeadshots).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponHitCount).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponKilledBy).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponKills).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponPlayTime).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponScore).HasDefaultValue(0);
-            builder.Entity<DbCharacterStat>().Property(a => a.WeaponVehicleKills).HasDefaultValue(0);
+
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.DominationCountVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.DominationCountNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.DominationCountTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.FacilityCaptureCountVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.FacilityCaptureCountNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.FacilityCaptureCountTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.RevengeCountVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.RevengeCountNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.RevengeCountTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponDamageGivenVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponDamageGivenNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponDamageGivenTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponDamageTakenByVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponDamageTakenByNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponDamageTakenByTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponHeadshotsVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponHeadshotsNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponHeadshotsTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponKilledByVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponKilledByNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponKilledByTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponKillsVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponKillsNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponKillsTR).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponVehicleKillsVS).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponVehicleKillsNC).HasDefaultValue(0);
+            builder.Entity<DbCharacterLifetimeStatByFaction>().Property(a => a.WeaponVehicleKillsTR).HasDefaultValue(0);
 
             builder.Entity<DbCharacterStatByFaction>()
-                .HasKey(a => new { a.CharacterId, a.ProfileId });
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.DominationCountVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.DominationCountNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.DominationCountTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.FacilityCaptureCountVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.FacilityCaptureCountNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.FacilityCaptureCountTR).HasDefaultValue(0);
+                .HasKey(a => new { a.CharacterId, a.ProfileId });            
             builder.Entity<DbCharacterStatByFaction>().Property(a => a.KilledByVS).HasDefaultValue(0);
             builder.Entity<DbCharacterStatByFaction>().Property(a => a.KilledByNC).HasDefaultValue(0);
             builder.Entity<DbCharacterStatByFaction>().Property(a => a.KilledByTR).HasDefaultValue(0);
             builder.Entity<DbCharacterStatByFaction>().Property(a => a.KillsVS).HasDefaultValue(0);
             builder.Entity<DbCharacterStatByFaction>().Property(a => a.KillsNC).HasDefaultValue(0);
             builder.Entity<DbCharacterStatByFaction>().Property(a => a.KillsTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.RevengeCountVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.RevengeCountNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.RevengeCountTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponDamageGivenVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponDamageGivenNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponDamageGivenTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponDamageTakenByVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponDamageTakenByNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponDamageTakenByTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponHeadshotsVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponHeadshotsNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponHeadshotsTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponKilledByVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponKilledByNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponKilledByTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponKillsVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponKillsNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponKillsTR).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponVehicleKillsVS).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponVehicleKillsNC).HasDefaultValue(0);
-            builder.Entity<DbCharacterStatByFaction>().Property(a => a.WeaponVehicleKillsTR).HasDefaultValue(0);
 
             builder.Entity<DbCharacterWeaponStat>()
                 .HasKey(a => new { a.CharacterId, a.ItemId, a.VehicleId });

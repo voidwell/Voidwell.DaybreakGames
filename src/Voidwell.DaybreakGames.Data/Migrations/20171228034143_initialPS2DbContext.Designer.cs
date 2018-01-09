@@ -11,7 +11,7 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    [Migration("20171218013838_initialPS2DbContext")]
+    [Migration("20171228034143_initialPS2DbContext")]
     partial class initialPS2DbContext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -85,63 +85,237 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.ToTable("Character");
                 });
 
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterLifetimeStat", b =>
+                {
+                    b.Property<string>("CharacterId");
+
+                    b.Property<int?>("AchievementCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("AssistCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("DominationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("FacilityCaptureCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("FacilityDefendedCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("MedalCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("RevengeCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("SkillPoints")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageGiven")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageTakenBy")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDeaths")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponFireCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponHeadshots")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponHitCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponKills")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponPlayTime")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponScore")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponVehicleKills")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.HasKey("CharacterId");
+
+                    b.ToTable("CharacterLifetimeStat");
+                });
+
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterLifetimeStatByFaction", b =>
+                {
+                    b.Property<string>("CharacterId");
+
+                    b.Property<int?>("DominationCountNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("DominationCountTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("DominationCountVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("FacilityCaptureCountNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("FacilityCaptureCountTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("FacilityCaptureCountVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("RevengeCountNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("RevengeCountTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("RevengeCountVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageGivenNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageGivenTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageGivenVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageTakenByNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageTakenByTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponDamageTakenByVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponHeadshotsNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponHeadshotsTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponHeadshotsVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponKilledByNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponKilledByTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponKilledByVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponKillsNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponKillsTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponKillsVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponVehicleKillsNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponVehicleKillsTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("WeaponVehicleKillsVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.HasKey("CharacterId");
+
+                    b.ToTable("CharacterLifetimeStatByFaction");
+                });
+
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterStat", b =>
                 {
                     b.Property<string>("CharacterId");
 
                     b.Property<string>("ProfileId");
 
-                    b.Property<int?>("AchievementCount");
+                    b.Property<int?>("Deaths")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("AssistCount");
+                    b.Property<int?>("FireCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("Deaths");
+                    b.Property<int?>("HitCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DominationCount");
+                    b.Property<int?>("KilledBy")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("FacilityCaptureCount");
+                    b.Property<int?>("Kills")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("FacilityDefendedCount");
+                    b.Property<int?>("PlayTime")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("FireCount");
-
-                    b.Property<int?>("HitCount");
-
-                    b.Property<int?>("KilledBy");
-
-                    b.Property<int?>("Kills");
-
-                    b.Property<int?>("MedalCount");
-
-                    b.Property<int?>("PlayTime");
-
-                    b.Property<int?>("RevengeCount");
-
-                    b.Property<int?>("Score");
-
-                    b.Property<int?>("SkillPoints");
-
-                    b.Property<int?>("WeaponDamageGiven");
-
-                    b.Property<int?>("WeaponDamageTakenBy");
-
-                    b.Property<int?>("WeaponDeaths");
-
-                    b.Property<int?>("WeaponFireCount");
-
-                    b.Property<int?>("WeaponHeadshots");
-
-                    b.Property<int?>("WeaponHitCount");
-
-                    b.Property<int?>("WeaponKilledBy");
-
-                    b.Property<int?>("WeaponKills");
-
-                    b.Property<int?>("WeaponPlayTime");
-
-                    b.Property<int?>("WeaponScore");
-
-                    b.Property<int?>("WeaponVehicleKills");
+                    b.Property<int?>("Score")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
                     b.HasKey("CharacterId", "ProfileId");
 
@@ -156,71 +330,29 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("ProfileId");
 
-                    b.Property<int?>("DominationCountNC");
+                    b.Property<int?>("KilledByNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DominationCountTR");
+                    b.Property<int?>("KilledByTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DominationCountVS");
+                    b.Property<int?>("KilledByVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("FacilityCaptureCountNC");
+                    b.Property<int?>("KillsNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("FacilityCaptureCountTR");
+                    b.Property<int?>("KillsTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("FacilityCaptureCountVS");
-
-                    b.Property<int?>("KilledByNC");
-
-                    b.Property<int?>("KilledByTR");
-
-                    b.Property<int?>("KilledByVS");
-
-                    b.Property<int?>("KillsNC");
-
-                    b.Property<int?>("KillsTR");
-
-                    b.Property<int?>("KillsVS");
-
-                    b.Property<int?>("RevengeCountNC");
-
-                    b.Property<int?>("RevengeCountTR");
-
-                    b.Property<int?>("RevengeCountVS");
-
-                    b.Property<int?>("WeaponDamageGivenNC");
-
-                    b.Property<int?>("WeaponDamageGivenTR");
-
-                    b.Property<int?>("WeaponDamageGivenVS");
-
-                    b.Property<int?>("WeaponDamageTakenByNC");
-
-                    b.Property<int?>("WeaponDamageTakenByTR");
-
-                    b.Property<int?>("WeaponDamageTakenByVS");
-
-                    b.Property<int?>("WeaponHeadshotsNC");
-
-                    b.Property<int?>("WeaponHeadshotsTR");
-
-                    b.Property<int?>("WeaponHeadshotsVS");
-
-                    b.Property<int?>("WeaponKilledByNC");
-
-                    b.Property<int?>("WeaponKilledByTR");
-
-                    b.Property<int?>("WeaponKilledByVS");
-
-                    b.Property<int?>("WeaponKillsNC");
-
-                    b.Property<int?>("WeaponKillsTR");
-
-                    b.Property<int?>("WeaponKillsVS");
-
-                    b.Property<int?>("WeaponVehicleKillsNC");
-
-                    b.Property<int?>("WeaponVehicleKillsTR");
-
-                    b.Property<int?>("WeaponVehicleKillsVS");
+                    b.Property<int?>("KillsVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
                     b.HasKey("CharacterId", "ProfileId");
 
@@ -266,27 +398,49 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("VehicleId");
 
-                    b.Property<int?>("DamageGiven");
+                    b.Property<int?>("DamageGiven")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DamageTakenBy");
+                    b.Property<int?>("DamageTakenBy")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("Deaths");
+                    b.Property<int?>("Deaths")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("FireCount");
+                    b.Property<int?>("FireCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("Headshots");
+                    b.Property<int?>("Headshots")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("HitCount");
+                    b.Property<int?>("HitCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("KilledBy");
+                    b.Property<int?>("KilledBy")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("Kills");
+                    b.Property<int?>("Kills")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("PlayTime");
+                    b.Property<int?>("PlayTime")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("Score");
+                    b.Property<int?>("Score")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("VehicleKills");
+                    b.Property<int?>("VehicleKills")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
                     b.HasKey("CharacterId", "ItemId", "VehicleId");
 
@@ -307,41 +461,77 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("VehicleId");
 
-                    b.Property<int?>("DamageGivenNC");
+                    b.Property<int?>("DamageGivenNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DamageGivenTR");
+                    b.Property<int?>("DamageGivenTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DamageGivenVS");
+                    b.Property<int?>("DamageGivenVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DamageTakenByNC");
+                    b.Property<int?>("DamageTakenByNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DamageTakenByTR");
+                    b.Property<int?>("DamageTakenByTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("DamageTakenByVS");
+                    b.Property<int?>("DamageTakenByVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("HeadshotsNC");
+                    b.Property<int?>("HeadshotsNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("HeadshotsTR");
+                    b.Property<int?>("HeadshotsTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("HeadshotsVS");
+                    b.Property<int?>("HeadshotsVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("KilledByNC");
+                    b.Property<int?>("KilledByNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("KilledByTR");
+                    b.Property<int?>("KilledByTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("KilledByVS");
+                    b.Property<int?>("KilledByVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("KillsNC");
+                    b.Property<int?>("KillsNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("KillsTR");
+                    b.Property<int?>("KillsTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("KillsVS");
+                    b.Property<int?>("KillsVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("VehicleKillsNC");
+                    b.Property<int?>("VehicleKillsNC")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("VehicleKillsTR");
+                    b.Property<int?>("VehicleKillsTR")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
-                    b.Property<int?>("VehicleKillsVS");
+                    b.Property<int?>("VehicleKillsVS")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
                     b.HasKey("CharacterId", "ItemId", "VehicleId");
 
@@ -697,7 +887,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<bool>("IsVehicleWeapon");
 
-                    b.Property<string>("ItemCategoryId");
+                    b.Property<int?>("ItemCategoryId");
 
                     b.Property<string>("ItemTypeId");
 
@@ -714,7 +904,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbItemCategory", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Name");
@@ -943,11 +1133,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("FactionId");
 
-                    b.Property<string>("DbVehicleId");
-
                     b.HasKey("VehicleId", "FactionId");
-
-                    b.HasIndex("DbVehicleId");
 
                     b.ToTable("VehicleFaction");
                 });
@@ -1002,6 +1188,22 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbWorld", "World")
                         .WithMany()
                         .HasForeignKey("WorldId");
+                });
+
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterLifetimeStat", b =>
+                {
+                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
+                        .WithOne("LifetimeStats")
+                        .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterLifetimeStat", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterLifetimeStatByFaction", b =>
+                {
+                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
+                        .WithOne("LifetimeStatsByFaction")
+                        .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterLifetimeStatByFaction", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacterStat", b =>
@@ -1140,9 +1342,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbVehicleFaction", b =>
                 {
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbVehicle")
+                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbVehicle", "Vehicle")
                         .WithMany("Faction")
-                        .HasForeignKey("DbVehicleId");
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

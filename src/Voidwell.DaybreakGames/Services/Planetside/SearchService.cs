@@ -37,13 +37,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             var characterLookup = _characterService.LookupCharactersByName(query, 10);
-            //var outfitLookup = _outfitService.LookupOutfitsByName(query, 10);
+            var outfitLookup = _outfitService.LookupOutfitsByName(query, 10);
             var weaponLookup = _itemService.LookupItemsByName(query, 10);
 
             await Task.WhenAll(characterLookup, /*outfitLookup,*/ weaponLookup);
 
             var characters = characterLookup.Result;
-            //var outfits = outfitLookup.Result;
+            var outfits = outfitLookup.Result;
             var weapons = weaponLookup.Result;
 
             var searchResults = new List<SearchResult>();
@@ -61,7 +61,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 });
             }
 
-            /*
             foreach (var outfit in outfits)
             {
                 searchResults.Add(new SearchResult
@@ -75,7 +74,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     MemberCount = outfit.MemberCount
                 });
             }
-            */
 
             foreach (var weapon in weapons)
             {
@@ -83,9 +81,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 {
                     Type = "item",
                     Name = weapon.Name,
-                    Id = weapon.Id,
+                    Id = weapon.Id.ToString(),
                     FactionId = weapon.FactionId,
-                    CategoryId = weapon.ItemCategoryId
+                    CategoryId = weapon.ItemCategoryId.ToString()
                 });
             }
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Websocket;
 
@@ -24,21 +23,14 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         [HttpPost("start")]
         public async Task<ActionResult> PostStart()
         {
-            await _websocketMonitor.StartAsync(CancellationToken.None);
+            await _websocketMonitor.StartAsync();
             return NoContent();
         }
 
         [HttpPost("stop")]
         public async Task<ActionResult> PostStop()
         {
-            await _websocketMonitor.StopAsync(CancellationToken.None);
-            return NoContent();
-        }
-
-        [HttpPost("stop/force")]
-        public async Task<ActionResult> PostForceStop()
-        {
-            await _websocketMonitor.ForceStopAsync(CancellationToken.None);
+            await _websocketMonitor.StopAsync();
             return NoContent();
         }
     }

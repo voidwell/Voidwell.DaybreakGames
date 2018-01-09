@@ -2,33 +2,31 @@
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class UpdaterService : IUpdaterService
     {
-        private readonly Func<PS2DbContext> _ps2DbContextFactory;
+        private readonly ICharacterUpdaterRepository _characterUpdaterRepository;
 
         public bool IsRunning { get; private set; }
 
-        public UpdaterService(Func<PS2DbContext> ps2DbContextFactory)
+        public UpdaterService(ICharacterUpdaterRepository characterUpdaterRepository)
         {
-            _ps2DbContextFactory = ps2DbContextFactory;
+            _characterUpdaterRepository = characterUpdaterRepository;
 
             IsRunning = false;
         }
 
         public async Task AddToQueue(string characterId)
         {
-            var dbContext = _ps2DbContextFactory();
             var dataModel = new DbCharacterUpdateQueue
             {
                 CharacterId = characterId,
                 Timestamp = DateTime.UtcNow
             };
-
-            dbContext.CharacterUpdateQueue.Update(dataModel);
-            await dbContext.SaveChangesAsync();
+            await _characterUpdaterRepository.AddAsync(dataModel);
         }
 
         public void StartUpdater()

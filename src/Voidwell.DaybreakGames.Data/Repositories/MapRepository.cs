@@ -11,12 +11,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
     public class MapRepository : IMapRepository
     {
         private readonly IDbContextHelper _dbContextHelper;
-        private readonly ILogger _logger;
 
-        public MapRepository(IDbContextHelper dbContextHelper, ILogger<MapRepository> logger)
+        public MapRepository(IDbContextHelper dbContextHelper)
         {
             _dbContextHelper = dbContextHelper;
-            _logger = logger;
         }
 
         public async Task<IEnumerable<DbFacilityLink>> GetFacilityLinksByZoneIdAsync(string zoneId)
@@ -80,7 +78,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 foreach (var entity in entities)
                 {
-                    _logger.LogInformation($"{entity.Id}");
                     var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
                     if (storeEntity == null)
                     {

@@ -30,5 +30,11 @@
     <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" Watch="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <Import Project="$(_WatchTarget)" Condition="Exists('$(_WatchTarget)')" />
 </Project>

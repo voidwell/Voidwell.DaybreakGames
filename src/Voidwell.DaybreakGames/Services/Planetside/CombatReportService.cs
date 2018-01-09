@@ -7,12 +7,13 @@ using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.Cache;
+using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class CombatReportService : ICombatReportService
     {
-        private readonly Func<PS2DbContext> _ps2DbContextFactory;
+        private readonly IEventRepository _eventRepository;
         private readonly ICache _cache;
         private readonly ICharacterService _characterService;
         private readonly IOutfitService _outfitService;
@@ -20,10 +21,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IVehicleService _vehicleService;
         private readonly IMapService _mapService;
 
-        public CombatReportService(Func<PS2DbContext> ps2DbContextFactory, ICache cache, ICharacterService characterService,
+        public CombatReportService(IEventRepository eventRepository, ICache cache, ICharacterService characterService,
             IOutfitService outfitService, IItemService itemService, IVehicleService vehicleService, IMapService mapService)
         {
-            _ps2DbContextFactory = ps2DbContextFactory;
+            _eventRepository = eventRepository;
             _cache = cache;
             _characterService = characterService;
             _outfitService = outfitService;
@@ -162,9 +163,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             foreach(var vehicle in vehiclesTask.Result)
             {
                 vehicleHash[vehicle.Id].Vehicle.Name = vehicle.Name;
-                if (vehicle.Faction != null && vehicle.Faction.Count() == 1)
+                if (vehicle.Factions != null && vehicle.Factions.Count() == 1)
                 {
-                    vehicleHash[vehicle.Id].Vehicle.FactionId = vehicle.Faction.First().FactionId;
+                    vehicleHash[vehicle.Id].Vehicle.FactionId = vehicle.Factions.First();
                 }
             }
 
@@ -234,25 +235,19 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private async Task<IEnumerable<DbEventDeath>> GetCharacterDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<DbEventDeath>> GetCharacterDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
-            var dbContext = _ps2DbContextFactory();
-            return await dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
-                .ToListAsync();
+            return _eventRepository.GetDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
 
-        private async Task<IEnumerable<DbEventVehicleDestroy>> GetVehicleDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<DbEventVehicleDestroy>> GetVehicleDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
-            var dbContext = _ps2DbContextFactory();
-            return await dbContext.EventVehicleDestroys.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
-                .ToListAsync();
+            return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
 
         private async Task<IEnumerable<CaptureLogRow>> GetCaptureLog(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
-            var dbContext = _ps2DbContextFactory();
-            var facilityControls = await dbContext.EventFacilityControls.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
-                .ToListAsync();
+            var facilityControls = await _eventRepository.GetFacilityControlsByDateAsync(worldId, zoneId, startDate, endDate);
 
             var facilityIds = facilityControls.Select(c => c.FacilityId).Distinct().ToArray();
             var mapRegions = await _mapService.FindRegions(facilityIds);

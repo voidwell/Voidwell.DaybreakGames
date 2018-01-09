@@ -13,7 +13,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<DbCharacter> GetCharacter(string characterId);
         Task<CharacterDetails> GetCharacterDetails(string characterId);
         Task<DbOutfitMember> GetCharactersOutfit(string characterId);
-        Task UpdateCharacter(string characterId, DateTime? LastLoginDate = null);
+        Task UpdateAllCharacterInfo(string characterId, DateTime? LastLoginDate = null);
         Task<IEnumerable<DbPlayerSession>> GetSessions(string characterId);
         Task<PlayerSession> GetSession(string characterId, string sessionId);
     }

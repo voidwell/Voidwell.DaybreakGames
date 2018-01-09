@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
@@ -7,7 +8,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
     public class DbItemCategory
     {
         [Required]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         public string Name { get; set; }
     }

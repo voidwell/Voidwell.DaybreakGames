@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Controllers.Planetside
@@ -18,6 +19,12 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         public Dictionary<string, bool> GetWorldState()
         {
             return _worldMonitor.GetWorldStates();
+        }
+
+        [HttpGet("{worldId}/players")]
+        public IEnumerable<OnlineCharacter> GetOnlinePlayers(string worldId)
+        {
+            return _worldMonitor.GetOnlineCharactersByWorld(worldId);
         }
     }
 }

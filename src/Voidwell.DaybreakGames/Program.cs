@@ -19,12 +19,12 @@ namespace Voidwell.DaybreakGames
                 .ConfigureAppConfiguration((hostContext, config) =>
                 {
                     config.Sources.Clear();
-                    config.AddJsonFile("appsettings.json", true);
-                    config.AddJsonFile("testsettings.json", true, true);
+                    config.AddJsonFile("appsettings.json", false, true);
                     config.AddEnvironmentVariables();
                 })
                 .ConfigureLogging(builder =>
                 {
+                    builder.SetMinimumLevel(LogLevel.Information);
                     builder.AddFilter("Microsoft", LogLevel.Error);
                     builder.AddDebug();
                 })

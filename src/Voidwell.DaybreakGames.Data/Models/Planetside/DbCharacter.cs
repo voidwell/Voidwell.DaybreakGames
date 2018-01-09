@@ -25,7 +25,9 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public DbCharacterTime Time { get; set; }
         public DbOutfitMember OutfitMembership { get; set; }
         public IEnumerable<DbCharacterStat> Stats { get; set; }
+        public DbCharacterLifetimeStat LifetimeStats { get; set; }
         public IEnumerable<DbCharacterStatByFaction> StatsByFaction { get; set; }
+        public DbCharacterLifetimeStatByFaction LifetimeStatsByFaction { get; set; }
         public IEnumerable<DbCharacterWeaponStat> WeaponStats { get; set; }
         public IEnumerable<DbCharacterWeaponStatByFaction> WeaponStatsByFaction { get; set; }
     }

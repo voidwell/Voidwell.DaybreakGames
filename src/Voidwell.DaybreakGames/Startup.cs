@@ -39,6 +39,7 @@ namespace Voidwell.DaybreakGames
                     options.NullValueHandling = NullValueHandling.Ignore;
                     options.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
 
             services.AddCache(Configuration, "Voidwell.DaybreakGames");
@@ -92,8 +93,9 @@ namespace Voidwell.DaybreakGames
             services.AddTransient<ISearchService, SearchService>();
 
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
-            //services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
+            services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
             services.AddSingleton<IHostedService, StoreUpdaterScheduler>();
+            services.AddSingleton<IHostedService, HostedWebsocketMonitor>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -15,8 +15,8 @@ namespace Voidwell.DaybreakGames.Services
     {
         private readonly ICache _cache;
         private readonly ILogger<FeedService> _logger;
-        private readonly TimeSpan _newsCacheExpiration = TimeSpan.FromMinutes(30);
-        private readonly TimeSpan _updatesCacheExpiration = TimeSpan.FromMinutes(30);
+        private readonly TimeSpan _newsCacheExpiration = TimeSpan.FromHours(1);
+        private readonly TimeSpan _updatesCacheExpiration = TimeSpan.FromHours(1);
         private readonly string _newsCacheKey = "ps2.news";
         private readonly string _updatesCacheKey = "ps2.updates";
 

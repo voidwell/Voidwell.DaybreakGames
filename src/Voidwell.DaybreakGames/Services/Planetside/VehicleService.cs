@@ -6,6 +6,7 @@ using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -23,9 +24,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusVehicle = censusVehicle;
         }
 
-        public Task<IEnumerable<DbVehicle>> GetAllVehicles()
+        public async Task<IEnumerable<VehicleInfo>> GetAllVehicles()
         {
-            return _vehicleRepository.GetAllVehiclesAsync();
+            var vehicles = await _vehicleRepository.GetAllVehiclesAsync();
+
+            return vehicles.Select(a => new VehicleInfo
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Description = a.Description,
+                ImageId = a.ImageId,
+                Factions = a.Faction?.Select(b => b.FactionId)
+            });
         }
 
         public async Task RefreshStore()

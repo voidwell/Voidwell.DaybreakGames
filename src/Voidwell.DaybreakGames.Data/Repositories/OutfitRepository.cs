@@ -40,6 +40,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             using (var dbContext = _dbContextHelper.Create())
             {
                 return await dbContext.OutfitMembers.Where(a => a.OutfitId == outfitId)
+                    .Include(a => a.Character)
+                        .ThenInclude(a => a.Time)
+                    .Include(a => a.Character)
+                        .ThenInclude(a => a.LifetimeStats)
                     .ToListAsync();
             }
         }

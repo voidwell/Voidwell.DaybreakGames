@@ -17,8 +17,13 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         [HttpGet("{outfitId}")]
         public async Task<ActionResult> GetOutfit(string outfitId)
         {
-            var result = await _outfitService.GetOutfitFull(outfitId);
-            return Ok(result);
+            var details = await _outfitService.GetOutfitDetails(outfitId);
+            if (details == null)
+            {
+                return NotFound($"Unable to find outfit with id: '{outfitId}'");
+            }
+
+            return Ok(details);
         }
 
         [HttpGet("{outfitId}/members")]

@@ -14,20 +14,27 @@ namespace Voidwell.DaybreakGames.Services
 {
     public class StoreUpdaterScheduler : IHostedService
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<StoreUpdaterScheduler> _logger;
         private readonly IUpdaterSchedulerRepository _updaterSchedulerRepository;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly DaybreakGamesOptions _options;
+        private readonly ILogger<StoreUpdaterScheduler> _logger;
         private Dictionary<string, Timer> _updaterTimers = new Dictionary<string, Timer>();
 
-        public StoreUpdaterScheduler(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider, ILogger<StoreUpdaterScheduler> logger)
+        public StoreUpdaterScheduler(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider, DaybreakGamesOptions options, ILogger<StoreUpdaterScheduler> logger)
         {
             _updaterSchedulerRepository = updaterSchedulerRepository;
             _serviceProvider = serviceProvider;
+            _options = options;
             _logger = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            if (_options.DisableUpdater)
+            {
+                return Task.CompletedTask;
+            }
+
             var updatableTypes = typeof(IUpdateable).GetTypeInfo().Assembly.GetTypes()
                 .Where(a => typeof(IUpdateable).IsAssignableFrom(a));
 

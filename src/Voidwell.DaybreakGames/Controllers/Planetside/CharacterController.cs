@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Services.Planetside;
 
@@ -18,8 +17,13 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         [HttpGet("{characterId}")]
         public async Task<ActionResult> GetCharacterById(string characterId)
         {
-            var result = await _characterService.GetCharacterDetails(characterId);
-            return Ok(result);
+            var details = await _characterService.GetCharacterDetails(characterId);
+            if (details == null)
+            {
+                return NotFound($"Unable to find character with id: '{characterId}'");
+            }
+
+            return Ok(details);
         }
 
         [HttpGet("{characterId}/sessions")]

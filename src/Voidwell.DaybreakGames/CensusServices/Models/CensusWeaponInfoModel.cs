@@ -12,6 +12,7 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
         public int MaxStackSize { get; set; }
         public WeaponDatasheet Datasheet { get; set; }
         public IEnumerable<WeaponFireMode> FireMode { get; set; }
+        public bool IsVehicleWeapon { get; set; }
 
         public class WeaponCategory
         {
