@@ -27,7 +27,24 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
 
-        private Dictionary<string, string> _metagameZones = new Dictionary<string, string> { {"1", "2"}, {"2", "8"}, {"3", "6"}, {"4", "4"} };
+        private Dictionary<string, string> _metagameZones = new Dictionary<string, string> {
+            { "1", "2"},
+            { "2", "8"},
+            { "3", "6"},
+            { "4", "4"},
+            { "123", "2" },
+            { "124", "2" },
+            { "125", "2" },
+            { "126", "8" },
+            { "127", "8" },
+            { "128", "8" },
+            { "129", "6" },
+            { "130", "6" },
+            { "131", "6" },
+            { "132", "4" },
+            { "133", "4" },
+            { "134", "4" }
+        };
         private enum METAGAME_EVENT_STATE
         {
             STARTED = 135,

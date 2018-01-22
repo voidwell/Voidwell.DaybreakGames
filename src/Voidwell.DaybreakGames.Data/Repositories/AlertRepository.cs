@@ -43,7 +43,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             using (var dbContext = _dbContextHelper.Create())
             {
                 return await dbContext.Alerts.Include(i => i.MetagameEvent)
-                    .Include(i => i.MetagameEvent)
                     .OrderBy("StartDate", SortDirection.Descending)
                     .Take(limit)
                     .ToListAsync();

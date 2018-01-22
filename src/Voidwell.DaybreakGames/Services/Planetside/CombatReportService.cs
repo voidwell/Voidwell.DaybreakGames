@@ -1,12 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
-using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
@@ -14,18 +11,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class CombatReportService : ICombatReportService
     {
         private readonly IEventRepository _eventRepository;
-        private readonly ICache _cache;
         private readonly ICharacterService _characterService;
         private readonly IOutfitService _outfitService;
         private readonly IItemService _itemService;
         private readonly IVehicleService _vehicleService;
         private readonly IMapService _mapService;
 
-        public CombatReportService(IEventRepository eventRepository, ICache cache, ICharacterService characterService,
+        public CombatReportService(IEventRepository eventRepository, ICharacterService characterService,
             IOutfitService outfitService, IItemService itemService, IVehicleService vehicleService, IMapService mapService)
         {
             _eventRepository = eventRepository;
-            _cache = cache;
             _characterService = characterService;
             _outfitService = outfitService;
             _itemService = itemService;
@@ -35,13 +30,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<CombatReport> GetCombatReport(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
-            var cachedReport = await _cache.GetAsync<CombatReport>(GetCacheKey(worldId, zoneId));
-
-            if (cachedReport != null)
-            {
-                return cachedReport;
-            }
-
             var combatStatsTask = GetCombatStats(worldId, zoneId, startDate, endDate);
             var captureLogTask = GetCaptureLog(worldId, zoneId, startDate, endDate);
 
@@ -53,14 +41,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 CaptureLog = captureLogTask.Result
             };
 
-            await _cache.SetAsync(GetCacheKey(worldId, zoneId), combatReport);
-
             return combatReport;
-        }
-
-        private string GetCacheKey(string worldId, string zoneId)
-        {
-            return $"combatreport_{worldId}_{zoneId}";
         }
 
         private async Task<CombatReportStats> GetCombatStats(string worldId, string zoneId, DateTime startDate, DateTime endDate)
@@ -105,7 +86,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     weaponHash.Add(death.AttackerWeaponId, new CombatReportWeaponStats(death.AttackerWeaponId));
                 }
 
-                if (death.AttackerVehicleId != null && !vehicleHash.ContainsKey(death.AttackerVehicleId))
+                if (death.AttackerVehicleId != null && death.AttackerVehicleId != "0" && !vehicleHash.ContainsKey(death.AttackerVehicleId))
                 {
                     vehicleHash.Add(death.AttackerVehicleId, new CombatReportVehicleStats(death.AttackerVehicleId));
                 }
@@ -118,12 +99,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     participantHash.Add(death.AttackerCharacterId, new CombatReportParticipantStats(death.AttackerCharacterId));
                 }
 
-                if (death.VehicleId != null && death.VehicleId != "0")
+                if (death.VehicleId != null && death.VehicleId != "0" && !vehicleHash.ContainsKey(death.VehicleId))
                 {
-                    if (!vehicleHash.ContainsKey(death.VehicleId))
-                    {
-                        vehicleHash.Add(death.VehicleId, new CombatReportVehicleStats(death.VehicleId));
-                    }
+                    vehicleHash.Add(death.VehicleId, new CombatReportVehicleStats(death.VehicleId));
                 }
             }
 
@@ -162,21 +140,24 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             foreach(var vehicle in vehiclesTask.Result)
             {
-                vehicleHash[vehicle.Id].Vehicle.Name = vehicle.Name;
-                if (vehicle.Factions != null && vehicle.Factions.Count() == 1)
+                if (vehicleHash.ContainsKey(vehicle.Id))
                 {
-                    vehicleHash[vehicle.Id].Vehicle.FactionId = vehicle.Factions.First();
+                    vehicleHash[vehicle.Id].Vehicle.Name = vehicle.Name;
+                    if (vehicle.Factions != null && vehicle.Factions.Count() == 1)
+                    {
+                        vehicleHash[vehicle.Id].Vehicle.FactionId = vehicle.Factions.First();
+                    }
                 }
             }
 
             foreach(var death in deaths)
             {
-                var attacker = participantHash[death.AttackerCharacterId];
-                var victim = participantHash[death.CharacterId];
-                var attackerOutfit = outfitHash[death.AttackerOutfitId];
-                var victimOutfit = outfitHash[death.CharacterOutfitId];
-                var weapon = weaponHash[death.AttackerWeaponId];
-                var vehicle = vehicleHash[death.AttackerVehicleId];
+                participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
+                participantHash.TryGetValue(death.CharacterId, out var victim);
+                outfitHash.TryGetValue(death.AttackerOutfitId, out var attackerOutfit);
+                outfitHash.TryGetValue(death.CharacterOutfitId, out var victimOutfit);
+                weaponHash.TryGetValue(death.AttackerWeaponId, out var weapon);
+                vehicleHash.TryGetValue(death.AttackerVehicleId, out var vehicle);
 
                 if (attacker.Character.Id == victim.Character.Id || attacker.Character.Id == "0")
                 {
@@ -199,6 +180,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         attacker.Kills++;
 
                         if (attackerOutfit != null) { attackerOutfit.Kills++; }
+                        if (attackerOutfit != null) { attackerOutfit.VehicleKills++; }
                         if (weapon != null) { weapon.Kills++; }
                         if (vehicle != null) { vehicle.Kills++; }
 
@@ -219,11 +201,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             foreach(var death in vehicleDeaths)
             {
-                var attacker = participantHash[death.AttackerCharacterId];
-                var vehicle = vehicleHash[death.AttackerVehicleId];
+                participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
+                vehicleHash.TryGetValue(death.AttackerVehicleId, out var vehicle);
 
                 if (attacker != null) { attacker.VehicleKills++; }
                 if (vehicle != null) { vehicle.Deaths++; }
+            }
+
+            if (outfitHash.ContainsKey(""))
+            {
+                outfitHash[""].Outfit.Name = "No Outfit";
             }
 
             return new CombatReportStats
@@ -252,29 +239,44 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var facilityIds = facilityControls.Select(c => c.FacilityId).Distinct().ToArray();
             var mapRegions = await _mapService.FindRegions(facilityIds);
 
-            var logRows = facilityControls.Select(c => new CaptureLogRow
-            {
-                FactionVs = c.ZoneControlVs,
-                FactionNc = c.ZoneControlNc,
-                FactionTr = c.ZoneControlTr,
-                NewFactionId = c.NewFactionId,
-                OldFactionId = c.OldFactionId,
-                OutfitId = c.OutfitId,
-                Timestamp = c.Timestamp,
-                MapRegion = new CaptureLogRowMapRegion { Id = c.FacilityId }
-            });
+            var controlOutfitIds = facilityControls.Select(a => a.OutfitId);
+            var outfits = controlOutfitIds.Any() ? await _outfitService.FindOutfits(controlOutfitIds) : Enumerable.Empty<DbOutfit>();
 
-            foreach(var mapRegion in mapRegions)
-            {
-                var rows = logRows.Where(r => r.MapRegion.Id == mapRegion.FacilityId);
-                foreach (var row in rows)
+            return facilityControls.Select(control => {
+                var row = new CaptureLogRow
                 {
-                    row.MapRegion.FacilityName = mapRegion.FacilityName;
-                    row.MapRegion.FacilityType = mapRegion.FacilityType;
-                }
-            }
+                    FactionVs = control.ZoneControlVs,
+                    FactionNc = control.ZoneControlNc,
+                    FactionTr = control.ZoneControlTr,
+                    NewFactionId = control.NewFactionId,
+                    OldFactionId = control.OldFactionId,
+                    Timestamp = control.Timestamp,
+                    MapRegion = new CaptureLogRowMapRegion { Id = control.FacilityId }
+                };
 
-            return logRows;
+                var outfit = outfits.FirstOrDefault(a => a.Id == control.OutfitId);
+                if (outfit != null)
+                {
+                    row.Outfit = new CaptureLogRowOutfit {
+                        Id = outfit.Id,
+                        Alias = outfit.Alias,
+                        Name = outfit.Name
+                    };
+                }
+
+                var mapRegion = mapRegions.FirstOrDefault(a => a.FacilityId == control.FacilityId);
+                if (mapRegion != null)
+                {
+                    row.MapRegion = new CaptureLogRowMapRegion
+                    {
+                        Id = mapRegion.FacilityId,
+                        FacilityName = mapRegion.FacilityName,
+                        FacilityType = mapRegion.FacilityType
+                    };
+                }
+
+                return row;
+            });
         }
     }
 }

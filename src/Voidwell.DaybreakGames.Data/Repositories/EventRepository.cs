@@ -86,7 +86,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 return await dbContext.EventFacilityControls
                     .OrderBy("Timestamp", SortDirection.Descending)
-                    .SingleOrDefaultAsync(c => c.WorldId == worldId && c.ZoneId == zoneId && c.Timestamp <= date);
+                    .FirstOrDefaultAsync(c => c.WorldId == worldId && c.ZoneId == zoneId && c.Timestamp <= date);
             }
         }
 

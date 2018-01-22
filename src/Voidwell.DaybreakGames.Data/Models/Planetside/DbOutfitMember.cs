@@ -13,9 +13,9 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         [Required]
         public string OutfitId { get; set; }
 
-        public DateTime MemberSinceDate { get; set; }
+        public DateTime? MemberSinceDate { get; set; }
         public string Rank { get; set; }
-        public int RankOrdinal { get; set; }
+        public int? RankOrdinal { get; set; }
 
         [ForeignKey("CharacterId")]
         public DbCharacter Character { get; set; }

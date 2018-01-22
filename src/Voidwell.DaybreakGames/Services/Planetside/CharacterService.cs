@@ -230,7 +230,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     Alias = character.OutfitMembership.Outfit.Alias,
                     CreatedDate = character.OutfitMembership.Outfit.CreatedDate,
                     MemberCount = character.OutfitMembership.Outfit.MemberCount,
-                    MemberSinceDate = character.OutfitMembership.MemberSinceDate,
+                    MemberSinceDate = character.OutfitMembership.MemberSinceDate.Value,
                     Rank = character.OutfitMembership.Rank
                 };
             }

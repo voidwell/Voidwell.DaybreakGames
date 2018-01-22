@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data;
+using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
@@ -14,16 +14,37 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         private readonly IAlertRepository _alertRepository;
         private readonly ICombatReportService _combatReportService;
+        private readonly ICache _cache;
 
-        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService)
+        private readonly string _cacheKey = "ps2.alert";
+        private readonly TimeSpan _cacheAlertsExpiration = TimeSpan.FromMinutes(1);
+        private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(10);
+
+        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService, ICache cache)
         {
             _alertRepository = alertRepository;
             _combatReportService = combatReportService;
+            _cache = cache;
         }
 
-        public Task<IEnumerable<DbAlert>> GetAllAlerts(int limit = 25)
+        public async Task<IEnumerable<DbAlert>> GetAllAlerts(int limit = 25)
         {
-            return _alertRepository.GetAllAlerts(limit);
+            var cacheKey = $"{_cacheKey}_alerts";
+
+            var alerts = await _cache.GetAsync<IEnumerable<DbAlert>>(cacheKey);
+            if (alerts != null)
+            {
+                return alerts;
+            }
+
+            alerts = await _alertRepository.GetAllAlerts(limit);
+
+            if (alerts != null && alerts.Any())
+            {
+                await _cache.SetAsync(cacheKey, alerts, _cacheAlertsExpiration);
+            }
+
+            return alerts;
         }
 
         public Task<IEnumerable<DbAlert>> GetAlerts(string worldId, int limit = 25)
@@ -33,11 +54,27 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<AlertResult> GetAlert(string worldId, string instanceId)
         {
+            var cacheKey = $"{_cacheKey}_alert_{worldId}_{instanceId}";
+
+            var alertResult = await _cache.GetAsync<AlertResult>(cacheKey);
+            if (alertResult != null)
+            {
+                return alertResult;
+            }
+
             var alert = await _alertRepository.GetAlert(worldId, instanceId);
+            if (alert == null)
+            {
+                return null;
+            }
 
             var combatReport = await _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId, alert.StartDate, alert.EndDate);
+            if (combatReport == null)
+            {
+                return null;
+            }
 
-            var alertResult = new AlertResult
+            alertResult = new AlertResult
             {
                 WorldId = alert.WorldId,
                 ZoneId = alert.ZoneId,
@@ -57,6 +94,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 ServerId = alert.WorldId,
                 MapId = alert.ZoneId
             };
+
+            await _cache.SetAsync(cacheKey, alertResult, _cacheAlertExpiration);
 
             return alertResult;
         }
