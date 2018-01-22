@@ -138,9 +138,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return new OutfitMemberDetails
                 {
                     CharacterId = a.CharacterId,
-                    MemberSinceDate = a.MemberSinceDate,
+                    MemberSinceDate = a.MemberSinceDate.Value,
                     Rank = a.Rank,
-                    RankOrdinal = a.RankOrdinal,
+                    RankOrdinal = a.RankOrdinal.Value,
                     Name = a.Character?.Name,
                     BattleRank = a.Character?.BattleRank,
                     LastLoginDate = a.Character?.Time?.LastLoginDate,

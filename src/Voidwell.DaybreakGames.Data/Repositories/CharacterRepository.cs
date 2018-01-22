@@ -52,19 +52,26 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                var result = from c in dbContext.Characters
+                var query = from c in dbContext.Characters
+
                              join world in dbContext.Worlds on c.WorldId equals world.Id into worldQ
                              from world in worldQ.DefaultIfEmpty()
+
                              join title in dbContext.Titles on c.TitleId equals title.Id into titleQ
                              from title in titleQ.DefaultIfEmpty()
+
                              join time in dbContext.CharacterTimes on c.Id equals time.CharacterId into timeQ
                              from time in timeQ.DefaultIfEmpty()
+
                              join faction in dbContext.Factions on c.FactionId equals faction.Id into factionQ
                              from faction in factionQ.DefaultIfEmpty()
+
                              join lifetimeStats in dbContext.CharacterLifetimeStats on c.Id equals lifetimeStats.CharacterId into lifetimeStatsQ
                              from lifetimeStats in lifetimeStatsQ.DefaultIfEmpty()
+
                              join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
                              from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
+
                              join outfitMembership in (from om in dbContext.OutfitMembers
                                                        join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
                                                        where om.CharacterId == characterId
@@ -76,8 +83,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                            Rank = om.Rank,
                                                            RankOrdinal = om.RankOrdinal,
                                                            Outfit = outfit
-                                                       }) on c.Id equals outfitMembership.CharacterId into outfitMembershipQ
-                             from outfitMembership in outfitMembershipQ.DefaultIfEmpty()
+                                                       }).DefaultIfEmpty() on c.Id equals outfitMembership.CharacterId
+
                              where c.Id == characterId
                              select new DbCharacter
                              {
@@ -200,10 +207,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                              VehicleKillsTR = s.VehicleKillsTR,
                                                              Item = item,
                                                              Vehicle = vehicle
-                                                         }).ToList(),
+                                                         }).ToList()
                              };
 
-                return result.ToList().FirstOrDefault();
+                return await Task.FromResult(query.ToList().FirstOrDefault());
             }
         }
 

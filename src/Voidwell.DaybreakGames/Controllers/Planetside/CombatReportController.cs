@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Controllers.Planetside
@@ -15,10 +15,10 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             _combatReportService = combatReportService;
         }
 
-        [HttpGet("{worldId}/{zoneId}/{startDate}/{endDate}")]
-        public async Task<ActionResult> GetCombatReport(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        [HttpPost]
+        public async Task<ActionResult> GetCombatReport([FromBody]CombatReportRequest request)
         {
-            var result = await _combatReportService.GetCombatReport(worldId, zoneId, startDate, endDate);
+            var result = await _combatReportService.GetCombatReport(request.WorldId, request.ZoneId, request.StartDate, request.EndDate);
             return Ok(result);
         }
     }

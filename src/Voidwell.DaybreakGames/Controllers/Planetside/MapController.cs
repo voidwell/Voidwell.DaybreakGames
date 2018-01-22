@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Controllers.Planetside
@@ -21,10 +21,10 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             return _worldMonitor.GetTerritory(worldId, zoneId);
         }
 
-        [HttpGet("territory/{worldId}/{zoneId}/{endDate}")]
-        public async Task<ActionResult> GetWorldScoreFromDate(string worldId, string zoneId, DateTime endDate)
+        [HttpPost("territory")]
+        public async Task<ActionResult> GetWorldScoreFromDate([FromBody]CombatReportRequest request)
         {
-            var result = await _worldMonitor.GetTerritoryFromDate(worldId, zoneId, endDate);
+            var result = await _worldMonitor.GetTerritoryFromDate(request.WorldId, request.ZoneId, request.EndDate);
             return Ok(result);
         }
     }

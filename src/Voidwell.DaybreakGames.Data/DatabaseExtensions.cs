@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 using Voidwell.DaybreakGames.Data.Repositories;
+using System;
 
 namespace Voidwell.DaybreakGames.Data
 {
@@ -23,7 +24,10 @@ namespace Voidwell.DaybreakGames.Data
             services.AddEntityFrameworkNpgsql();
 
             services.AddDbContext<PS2DbContext>(builder =>
-                builder.UseNpgsql(options.DBConnectionString, b => b.MigrationsAssembly(_migrationAssembly)));
+                builder.UseNpgsql(options.DBConnectionString, b => {
+                    b.MigrationsAssembly(_migrationAssembly);
+                    b.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null);
+                }));
 
             services.AddSingleton<IDbContextHelper, DbContextHelper>();
             services.AddSingleton<IUpdaterSchedulerRepository, UpdaterSchedulerRepository>();
