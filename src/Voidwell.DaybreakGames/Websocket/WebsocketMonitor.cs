@@ -123,14 +123,6 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public void Dispose()
         {
-            if (_client != null)
-            {
-                Task.Run(DisposeAsync);
-            }
-        }
-
-        public async Task DisposeAsync()
-        {
             _client?.Dispose();
         }
     }
