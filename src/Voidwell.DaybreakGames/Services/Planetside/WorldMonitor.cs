@@ -60,7 +60,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public async Task<bool> TryResetWorld(string worldId)
+        public Task<bool> TryResetWorld(string worldId)
         {
             _worldStates[worldId].ZoneStates.Clear();
             _worldStates[worldId].OnlinePlayers.Clear();
@@ -87,10 +87,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 WorldStates[worldId].ZoneStates.Add(zoneState.ZoneId, zoneState);
             }
+            */
 
-    */
-
-            return true;
+            return Task.FromResult(true);
         }
 
         public FacilityControlChange UpdateFacilityControl(FacilityControl facilityControl)
