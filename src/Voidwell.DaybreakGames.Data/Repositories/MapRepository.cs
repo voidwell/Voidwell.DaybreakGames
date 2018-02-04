@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<IEnumerable<DbFacilityLink>> GetFacilityLinksByZoneIdAsync(string zoneId)
+        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(string zoneId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -26,7 +26,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbMapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<string> facilityIds)
+        public async Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<string> facilityIds)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbMapRegion>> GetMapRegionsByZoneIdAsync(string zoneId)
+        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(string zoneId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -44,7 +44,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbMapHex> entities)
+        public async Task UpsertRangeAsync(IEnumerable<MapHex> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -70,7 +70,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbMapRegion> entities)
+        public async Task UpsertRangeAsync(IEnumerable<MapRegion> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -94,7 +94,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbFacilityLink> entities)
+        public async Task UpsertRangeAsync(IEnumerable<FacilityLink> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<DbOutfit> GetOutfitAsync(string outfitId)
+        public async Task<Outfit> GetOutfitAsync(string outfitId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbOutfit> GetOutfitDetailsAsync(string outfitId)
+        public async Task<Outfit> GetOutfitDetailsAsync(string outfitId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbOutfitMember>> GetOutfitMembersAsync(string outfitId)
+        public async Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(string outfitId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -48,7 +48,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbOutfit>> GetOutfitsByIdsAsync(IEnumerable<string> outfitIds)
+        public async Task<IEnumerable<Outfit>> GetOutfitsByIdsAsync(IEnumerable<string> outfitIds)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -57,7 +57,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbOutfit>> GetOutfitsByNameAsync(string name, int limit)
+        public async Task<IEnumerable<Outfit>> GetOutfitsByNameAsync(string name, int limit)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -80,7 +80,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbOutfitMember> UpsertAsync(DbOutfitMember entity)
+        public async Task<OutfitMember> UpsertAsync(OutfitMember entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -102,9 +102,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbOutfit> UpsertAsync(DbOutfit entity)
+        public async Task<Outfit> UpsertAsync(Outfit entity)
         {
-            DbOutfit result = null;
+            Outfit result = null;
 
             using (var dbContext = _dbContextHelper.Create())
             {

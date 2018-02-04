@@ -143,7 +143,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("AchievementEarned", typeof(AchievementEarned))]
         private Task Process(AchievementEarned payload)
         {
-            var dataModel = new DbEventAchievementEarned
+            var dataModel = new EventAchievementEarned
             {
                 AchievementId = payload.AchievementId,
                 CharacterId = payload.CharacterId,
@@ -157,7 +157,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("BattleRankUp", typeof(BattlerankUp))]
         private Task Process(BattlerankUp payload)
         {
-            var dataModel = new DbEventBattlerankUp
+            var dataModel = new EventBattlerankUp
             {
                 BattleRank = payload.BattleRank,
                 CharacterId = payload.CharacterId,
@@ -171,7 +171,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("ContinentLock", typeof(ContinentLock))]
         private Task Process(ContinentLock payload)
         {
-            var dataModel = new DbEventContinentLock
+            var dataModel = new EventContinentLock
             {
                 TriggeringFaction = payload.TriggeringFaction,
                 MetagameEventId = payload.MetagameEventId,
@@ -188,7 +188,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("ContinentUnlock", typeof(ContinentUnlock))]
         private Task Process(ContinentUnlock payload)
         {
-            var dataModel = new DbEventContinentUnlock
+            var dataModel = new EventContinentUnlock
             {
                 TriggeringFaction = payload.TriggeringFaction,
                 MetagameEventId = payload.MetagameEventId,
@@ -203,8 +203,8 @@ namespace Voidwell.DaybreakGames.Websocket
         private async Task Process(Death payload)
         {
             List<Task> outfitWork = new List<Task>();
-            Task<DbOutfitMember> AttackerOutfitTask = null;
-            Task<DbOutfitMember> VictimOutfitTask = null;
+            Task<OutfitMember> AttackerOutfitTask = null;
+            Task<OutfitMember> VictimOutfitTask = null;
 
             if (payload.AttackerCharacterId != null && payload.AttackerCharacterId.Length > 18)
             {
@@ -222,7 +222,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
             await Task.WhenAll(outfitWork);
 
-            var dataModel = new DbEventDeath
+            var dataModel = new EventDeath
             {
                 AttackerCharacterId = payload.AttackerCharacterId,
                 AttackerFireModeId = payload.AttackerFireModeId,
@@ -248,7 +248,7 @@ namespace Voidwell.DaybreakGames.Websocket
             var mapUpdate = _worldMonitor.UpdateFacilityControl(payload);
             var territory = mapUpdate?.Territory.ToArray();
 
-            var dataModel = new DbEventFacilityControl
+            var dataModel = new EventFacilityControl
             {
                 FacilityId = payload.FacilityId,
                 NewFactionId = payload.NewFactionId,
@@ -285,7 +285,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("GainExperience", typeof(GainExperience))]
         private Task Process(GainExperience payload)
         {
-            var dataModel = new DbEventGainExperience
+            var dataModel = new EventGainExperience
             {
                 ExperienceId = payload.ExperienceId,
                 CharacterId = payload.CharacterId,
@@ -304,7 +304,7 @@ namespace Voidwell.DaybreakGames.Websocket
         {
             payload.ZoneId = payload.ZoneId ?? (_metagameZones.TryGetValue(payload.MetagameEventId, out string metagameZone) ? metagameZone : null);
 
-            var dataModel = new DbEventMetagameEvent
+            var dataModel = new EventMetagameEvent
             {
                 InstanceId = payload.InstanceId,
                 MetagameEventId = payload.MetagameEventId,
@@ -333,7 +333,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("PlayerFacilityCapture", typeof(PlayerFacilityCapture))]
         private Task Proces(PlayerFacilityCapture payload)
         {
-            var dataModel = new DbEventPlayerFacilityCapture
+            var dataModel = new EventPlayerFacilityCapture
             {
                 FacilityId = payload.FacilityId,
                 CharacterId = payload.CharacterId,
@@ -348,7 +348,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("PlayerFacilityDefend", typeof(PlayerFacilityDefend))]
         private Task Process(PlayerFacilityDefend payload)
         {
-            var dataModel = new DbEventPlayerFacilityDefend
+            var dataModel = new EventPlayerFacilityDefend
             {
                 FacilityId = payload.FacilityId,
                 CharacterId = payload.CharacterId,
@@ -365,7 +365,7 @@ namespace Voidwell.DaybreakGames.Websocket
         {
             await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, true);
 
-            var dataModel = new DbEventPlayerLogin
+            var dataModel = new EventPlayerLogin
             {
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
@@ -379,7 +379,7 @@ namespace Voidwell.DaybreakGames.Websocket
         {
             await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, false);
 
-            var dataModel = new DbEventPlayerLogout
+            var dataModel = new EventPlayerLogout
             {
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
@@ -391,7 +391,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("VehicleDestroy", typeof(VehicleDestroy))]
         private Task Process(VehicleDestroy payload)
         {
-            var dataModel = new DbEventVehicleDestroy
+            var dataModel = new EventVehicleDestroy
             {
                 AttackerCharacterId = payload.AttackerCharacterId,
                 AttackerLoadoutId = payload.AttackerLoadoutId,

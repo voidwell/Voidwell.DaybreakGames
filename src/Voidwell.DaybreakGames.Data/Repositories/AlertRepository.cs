@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<DbAlert> GetActiveAlert(string worldId, string zoneId)
+        public async Task<Alert> GetActiveAlert(int worldId, int zoneId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -26,40 +26,70 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbAlert>> GetAlertsByWorldId(string worldId, int limit)
+        public async Task<IEnumerable<Alert>> GetAlertsByWorldId(int worldId, int limit)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return await dbContext.Alerts.Where(a => a.WorldId == worldId)
-                    .Include(i => i.MetagameEvent)
-                    .OrderBy("StartDate", SortDirection.Descending)
-                    .Take(limit)
-                    .ToListAsync();
+                var query = from alert in dbContext.Alerts.Take(limit)
+                            join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                            from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                            where alert.WorldId == worldId
+                            orderby alert.StartDate descending
+                            select new { alert, metagameEvent };
+
+                var result = query.ToList().Select(a =>
+                {
+                    a.alert.MetagameEvent = a.metagameEvent;
+                    return a.alert;
+                });
+
+                return await Task.FromResult(result);
             }
         }
 
-        public async Task<IEnumerable<DbAlert>> GetAllAlerts(int limit)
+        public async Task<IEnumerable<Alert>> GetAllAlerts(int limit)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return await dbContext.Alerts.Include(i => i.MetagameEvent)
-                    .OrderBy("StartDate", SortDirection.Descending)
-                    .Take(limit)
-                    .ToListAsync();
+                var query = from alert in dbContext.Alerts.Take(limit)
+                            join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                            from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                            orderby alert.StartDate descending
+                            select new { alert, metagameEvent };
+
+                var result = query.ToList().Select(a =>
+                {
+                    a.alert.MetagameEvent = a.metagameEvent;
+                    return a.alert;
+                });
+
+                return await Task.FromResult(result);
             }
         }
 
-        public async Task<DbAlert> GetAlert(string worldId, string instanceId)
+        public async Task<Alert> GetAlert(int worldId, int instanceId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return await dbContext.Alerts.Where(a => a.WorldId == worldId && a.MetagameInstanceId == instanceId)
-                    .Include(i => i.MetagameEvent)
-                    .FirstOrDefaultAsync();
+                var query = from alert in dbContext.Alerts
+                            join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                            from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                            where alert.WorldId == worldId && alert.MetagameInstanceId == instanceId
+                            orderby alert.StartDate descending
+                            select new { alert, metagameEvent };
+
+                var result = query.ToList().Select(a =>
+                {
+                    a.alert.MetagameEvent = a.metagameEvent;
+                    return a.alert;
+                })
+                .First();
+
+                return await Task.FromResult(result);
             }
         }
 
-        public async Task AddAsync(DbAlert entity)
+        public async Task AddAsync(Alert entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -68,7 +98,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpdateAsync(DbAlert entity)
+        public async Task UpdateAsync(Alert entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

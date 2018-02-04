@@ -8,8 +8,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IVehicleRepository
     {
-        Task<IEnumerable<DbVehicle>> GetAllVehiclesAsync();
-        Task UpsertRangeAsync(IEnumerable<DbVehicle> entities);
-        Task UpsertRangeAsync(IEnumerable<DbVehicleFaction> entities);
+        Task<IEnumerable<Vehicle>> GetAllVehiclesAsync();
+        Task UpsertRangeAsync(IEnumerable<Vehicle> entities);
+        Task UpsertRangeAsync(IEnumerable<VehicleFaction> entities);
     }
 }

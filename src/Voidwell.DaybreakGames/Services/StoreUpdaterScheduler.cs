@@ -108,7 +108,7 @@ namespace Voidwell.DaybreakGames.Services
 
             _logger.LogInformation($"Update complete for {updaterService.ServiceName}.");
 
-            var dataModel = new DbPS2UpdaterScheduler { ServiceName = updaterService.ServiceName, LastUpdateDate = DateTime.UtcNow };
+            var dataModel = new UpdaterScheduler { ServiceName = updaterService.ServiceName, LastUpdateDate = DateTime.UtcNow };
             await _updaterSchedulerRepository.UpsertAsync(dataModel);
 
             _isWorking = false;

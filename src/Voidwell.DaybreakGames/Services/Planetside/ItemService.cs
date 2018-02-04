@@ -25,12 +25,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusItemCategory = censusItemCategory;
         }
 
-        public Task<IEnumerable<DbItem>> FindItems(IEnumerable<string> itemIds)
+        public Task<IEnumerable<Item>> FindItems(IEnumerable<string> itemIds)
         {
             return _itemRepository.FindItemsByIdsAsync(itemIds);
         }
 
-        public Task<IEnumerable<DbItem>> LookupItemsByName(string name, int limit = 12)
+        public Task<IEnumerable<Item>> LookupItemsByName(string name, int limit = 12)
         {
             return _itemRepository.FindItemsByNameAsync(name, limit);
         }
@@ -52,9 +52,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private DbItem ConvertToDbModel(CensusItemModel item)
+        private Item ConvertToDbModel(CensusItemModel item)
         {
-            return new DbItem
+            return new Item
             {
                 Id = item.ItemId,
                 ItemTypeId = item.ItemTypeId,
@@ -68,9 +68,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private DbItemCategory ConvertToDbModel(CensusItemCategoryModel itemCat)
+        private ItemCategory ConvertToDbModel(CensusItemCategoryModel itemCat)
         {
-            return new DbItemCategory
+            return new ItemCategory
             {
                 Id = itemCat.ItemCategoryId,
                 Name = itemCat.Name?.English

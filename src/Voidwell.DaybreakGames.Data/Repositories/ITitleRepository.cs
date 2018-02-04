@@ -6,6 +6,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface ITitleRepository
     {
-        Task UpdateRangeAsync(IEnumerable<DbTitle> entities);
+        Task UpdateRangeAsync(IEnumerable<Title> entities);
     }
 }

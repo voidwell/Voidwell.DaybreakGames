@@ -6,8 +6,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IPlayerSessionRepository
     {
-        Task<IEnumerable<DbPlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit);
-        Task<DbPlayerSession> GetPlayerSessionAsync(string sessionId);
-        Task AddAsync(DbPlayerSession entity);
+        Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit);
+        Task<PlayerSession> GetPlayerSessionAsync(string sessionId);
+        Task AddAsync(PlayerSession entity);
     }
 }

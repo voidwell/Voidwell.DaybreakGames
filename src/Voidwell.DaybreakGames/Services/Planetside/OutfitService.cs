@@ -36,16 +36,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _logger = logger;
         }
 
-        public Task<IEnumerable<DbOutfit>> FindOutfits(IEnumerable<string> outfitIds)
+        public Task<IEnumerable<Outfit>> FindOutfits(IEnumerable<string> outfitIds)
         {
             return _outfitRepository.GetOutfitsByIdsAsync(outfitIds);
         }
 
-        public async Task<DbOutfit> GetOutfit(string outfitId)
+        public async Task<Outfit> GetOutfit(string outfitId)
         {
             var cacheKey = $"{_cacheKey}_outfit_{outfitId}";
 
-            var outfit = await _cache.GetAsync<DbOutfit>(cacheKey);
+            var outfit = await _cache.GetAsync<Outfit>(cacheKey);
             if (outfit != null)
             {
                 return outfit;
@@ -107,7 +107,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return details;
         }
 
-        public async Task<DbOutfit> GetOutfitDetailsAsync(string outfitId)
+        public async Task<Outfit> GetOutfitDetailsAsync(string outfitId)
         {
             var outfit = await TryGetOutfitFull(outfitId);
 
@@ -168,12 +168,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return memberDetails;
         }
 
-        public Task<IEnumerable<DbOutfit>> LookupOutfitsByName(string name, int limit = 12)
+        public Task<IEnumerable<Outfit>> LookupOutfitsByName(string name, int limit = 12)
         {
             return _outfitRepository.GetOutfitsByNameAsync(name, limit);
         }
 
-        public async Task<DbOutfit> UpdateOutfit(string outfitId)
+        public async Task<Outfit> UpdateOutfit(string outfitId)
         {
             var outfit = await _censusOutfit.GetOutfit(outfitId);
 
@@ -184,7 +184,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var leader = await _censusCharacter.GetCharacter(outfit.LeaderCharacterId);
 
-            var dataModel = new DbOutfit
+            var dataModel = new Outfit
             {
                 Id = outfit.OutfitId,
                 Name = outfit.Name,
@@ -199,11 +199,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await _outfitRepository.UpsertAsync(dataModel);
         }
 
-        public async Task<DbOutfitMember> UpdateCharacterOutfitMembership(string characterId)
+        public async Task<OutfitMember> UpdateCharacterOutfitMembership(string characterId)
         {
             var cacheKey = $"{_cacheKey}_member_{characterId}";
 
-            var outfitMember = await _cache.GetAsync<DbOutfitMember>(cacheKey);
+            var outfitMember = await _cache.GetAsync<OutfitMember>(cacheKey);
             if (outfitMember != null)
             {
                 return outfitMember.OutfitId != null ? outfitMember : null;
@@ -224,7 +224,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             if (membership == null)
             {
                 await _outfitRepository.RemoveOutfitMemberAsync(characterId);
-                await _cache.SetAsync(cacheKey, new DbOutfitMember(), _cacheOutfitMemberExpiration);
+                await _cache.SetAsync(cacheKey, new OutfitMember(), _cacheOutfitMemberExpiration);
                 return null;
             }
 
@@ -235,7 +235,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            outfitMember = new DbOutfitMember
+            outfitMember = new OutfitMember
             {
                 OutfitId = membership.OutfitId,
                 CharacterId = membership.CharacterId,
@@ -249,7 +249,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await _outfitRepository.UpsertAsync(outfitMember);
         }
 
-        private Task<DbOutfit> TryGetOutfitFull(string outfitId)
+        private Task<Outfit> TryGetOutfitFull(string outfitId)
         {
             return _outfitRepository.GetOutfitDetailsAsync(outfitId);
         }

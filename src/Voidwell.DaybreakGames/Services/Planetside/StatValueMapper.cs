@@ -4,7 +4,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public static class StatValueMapper
     {
-        public static void AssignStatValue(ref DbCharacterLifetimeStat dbModel, string statName, int value)
+        public static void AssignStatValue(ref CharacterLifetimeStat dbModel, string statName, int value)
         {
             switch (statName)
             {
@@ -65,7 +65,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public static void AssignStatValue(ref DbCharacterStat dbModel, string statName, int value)
+        public static void AssignStatValue(ref CharacterStat dbModel, string statName, int value)
         {
             switch (statName)
             {
@@ -93,7 +93,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public static void AssignStatValue(ref DbCharacterLifetimeStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
+        public static void AssignStatValue(ref CharacterLifetimeStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
         {
             switch (statName)
             {
@@ -145,7 +145,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public static void AssignStatValue(ref DbCharacterStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
+        public static void AssignStatValue(ref CharacterStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
         {
             switch (statName)
             {
@@ -162,7 +162,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public static void AssignStatValue(ref DbCharacterWeaponStat dbModel, string statName, int value)
+        public static void AssignStatValue(ref CharacterWeaponStat dbModel, string statName, int value)
         {
             switch (statName)
             {
@@ -199,7 +199,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public static void AssignStatValue(ref DbCharacterWeaponStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
+        public static void AssignStatValue(ref CharacterWeaponStatByFaction dbModel, string statName, int valueVs, int valueNc, int valueTr)
         {
             switch (statName)
             {

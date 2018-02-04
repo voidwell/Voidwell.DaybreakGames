@@ -19,8 +19,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
 
-        private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(1);
         private readonly string _weaponInfoCacheKey = "ps2.weaponinfo";
+        private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(1);
+        private readonly TimeSpan _weaponLeaderboardCacheExpiration = TimeSpan.FromMinutes(30);
 
         public WeaponService(ICharacterRepository characterRepository, CensusItem censusItem, ICache cache)
         {
@@ -45,6 +46,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var weaponInfo = new WeaponInfoResult
             {
                 Name = info.Name.English,
+                ItemId = weaponItemId,
                 Category = info.Category.Name.English,
                 FactionId = info.FactionId,
                 ImageId = info.ImageId,
@@ -97,11 +99,23 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(string weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250)
         {
+            var cacheKey = $"{_weaponInfoCacheKey}_leaderboard_{weaponItemId}";
+
+            var weaponRows = await _cache.GetAsync<IEnumerable<WeaponLeaderboardRow>>(cacheKey);
+            if (weaponRows != null)
+            {
+                return weaponRows;
+            }
+
             var weaponStats = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, sortColumn, sortDirection, rowStart, limit);
-            return weaponStats.Select(s => ConvertToResult(s));
+            weaponRows = weaponStats.Select(s => ConvertToResult(s));
+
+            await _cache.SetAsync(cacheKey, weaponRows, _weaponLeaderboardCacheExpiration);
+
+            return weaponRows;
         }
 
-        private WeaponLeaderboardRow ConvertToResult(DbCharacterWeaponStat model)
+        private WeaponLeaderboardRow ConvertToResult(CharacterWeaponStat model)
         {
             return new WeaponLeaderboardRow
             {
@@ -109,20 +123,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Name = model.Character.Name,
                 FactionId = model.Character.FactionId,
                 WorldId = model.Character.WorldId,
-                Kills = model.Kills.Value,
-                Deaths = model.Deaths.Value,
-                Headshots = model.Headshots.Value,
-                ShotsFired = model.FireCount.Value,
-                ShotsHit = model.HitCount.Value,
-                PlayTime = model.PlayTime.Value,
-                Score = model.Score.Value,
-                VehicleKills = model.VehicleKills.Value,
-                KillDeathRatio = model.Kills.Value / model.Deaths.Value,
-                HeadshotRatio = model.Headshots.Value / model.Kills.Value,
-                Accuracy = model.HitCount.Value / model.FireCount.Value,
-                ScorePerMinute = model.Score.Value / (model.PlayTime.Value / 60),
-                KillsPerHour = model.Kills.Value / (model.PlayTime.Value / 3600),
-                VehicleKillsPerHour = model.VehicleKills.Value / (model.PlayTime.Value / 3600)
+                Kills = model.Kills.GetValueOrDefault(),
+                Deaths = model.Deaths.GetValueOrDefault(),
+                Headshots = model.Headshots.GetValueOrDefault(),
+                ShotsFired = model.FireCount.GetValueOrDefault(),
+                ShotsHit = model.HitCount.GetValueOrDefault(),
+                PlayTime = model.PlayTime.GetValueOrDefault(),
+                Score = model.Score.GetValueOrDefault(),
+                VehicleKills = model.VehicleKills.GetValueOrDefault()
             };
         }
     }

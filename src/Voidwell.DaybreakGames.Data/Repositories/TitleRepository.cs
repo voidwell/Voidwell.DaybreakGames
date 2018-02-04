@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task UpdateRangeAsync(IEnumerable<DbTitle> entities)
+        public async Task UpdateRangeAsync(IEnumerable<Title> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

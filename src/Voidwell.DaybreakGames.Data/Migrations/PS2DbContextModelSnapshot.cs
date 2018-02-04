@@ -20,7 +20,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
 
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbAlert", b =>
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Alert", b =>
                 {
                     b.Property<string>("WorldId");
 
@@ -36,6 +36,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<string>("MetagameEventId");
 
+                    b.Property<string>("ShadowMetagameEventId");
+
                     b.Property<DateTime>("StartDate");
 
                     b.Property<float>("StartFactionNc");
@@ -48,7 +50,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.HasKey("WorldId", "MetagameInstanceId");
 
-                    b.HasIndex("MetagameEventId");
+                    b.HasIndex("ShadowMetagameEventId");
 
                     b.ToTable("Alert");
                 });
@@ -645,18 +647,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId");
 
-                    b.HasIndex("AttackerCharacterId");
-
-                    b.HasIndex("AttackerOutfitId");
-
-                    b.HasIndex("AttackerVehicleId");
-
-                    b.HasIndex("AttackerWeaponId");
-
-                    b.HasIndex("CharacterId");
-
-                    b.HasIndex("CharacterOutfitId");
-
                     b.ToTable("EventDeath");
                 });
 
@@ -1027,14 +1017,14 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     b.Property<string>("CharacterId");
 
-                    b.Property<DateTime>("MemberSinceDate");
+                    b.Property<DateTime?>("MemberSinceDate");
 
                     b.Property<string>("OutfitId")
                         .IsRequired();
 
                     b.Property<string>("Rank");
 
-                    b.Property<int>("RankOrdinal");
+                    b.Property<int?>("RankOrdinal");
 
                     b.HasKey("CharacterId");
 
@@ -1045,7 +1035,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbPlayerSession", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("CharacterId")
@@ -1167,11 +1157,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.ToTable("Zone");
                 });
 
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbAlert", b =>
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Alert", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbMetagameEventCategory", "MetagameEvent")
                         .WithMany()
-                        .HasForeignKey("MetagameEventId");
+                        .HasForeignKey("ShadowMetagameEventId");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", b =>
@@ -1273,35 +1263,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .WithMany()
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbEventDeath", b =>
-                {
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "AttackerCharacter")
-                        .WithMany()
-                        .HasForeignKey("AttackerCharacterId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbOutfit", "AttackerOutfit")
-                        .WithMany()
-                        .HasForeignKey("AttackerOutfitId");
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbVehicle", "AttackerVehicle")
-                        .WithMany()
-                        .HasForeignKey("AttackerVehicleId");
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbItem", "AttackerWeapon")
-                        .WithMany()
-                        .HasForeignKey("AttackerWeaponId");
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbCharacter", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.DbOutfit", "CharacterOutfit")
-                        .WithMany()
-                        .HasForeignKey("CharacterOutfitId");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DbItem", b =>

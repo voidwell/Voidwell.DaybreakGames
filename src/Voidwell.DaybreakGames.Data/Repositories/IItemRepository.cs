@@ -4,11 +4,11 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
-    public interface IItemRepository : IRepository<DbItem>
+    public interface IItemRepository : IRepository<Item>
     {
-        Task UpsertRangeAsync(IEnumerable<DbItem> entities);
-        Task UpsertRangeAsync(IEnumerable<DbItemCategory> entities);
-        Task<IEnumerable<DbItem>> FindItemsByIdsAsync(IEnumerable<string> itemIds);
-        Task<IEnumerable<DbItem>> FindItemsByNameAsync(string name, int limit);
+        Task UpsertRangeAsync(IEnumerable<Item> entities);
+        Task UpsertRangeAsync(IEnumerable<ItemCategory> entities);
+        Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<string> itemIds);
+        Task<IEnumerable<Item>> FindItemsByNameAsync(string name, int limit);
     }
 }

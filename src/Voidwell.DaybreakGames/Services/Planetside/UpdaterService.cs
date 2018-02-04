@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task AddToQueue(string characterId)
         {
-            var dataModel = new DbCharacterUpdateQueue
+            var dataModel = new CharacterUpdateQueue
             {
                 CharacterId = characterId,
                 Timestamp = DateTime.UtcNow

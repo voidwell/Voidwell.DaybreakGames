@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusWorld = censusWorld;
         }
 
-        public Task<IEnumerable<DbWorld>> GetAllWorlds()
+        public Task<IEnumerable<World>> GetAllWorlds()
         {
             return _worldRepository.GetAllWorldsAsync();
         }
@@ -38,9 +38,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private DbWorld ConvertToDbModel(CensusWorldModel censusModel)
+        private World ConvertToDbModel(CensusWorldModel censusModel)
         {
-            return new DbWorld
+            return new World
             {
                 Id = censusModel.WorldId,
                 Name = censusModel.Name.English

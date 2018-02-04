@@ -20,11 +20,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories.ResolvedModels
         public string AttackerOutfitId { get; set; }
         public bool IsHeadshot { get; set; }
 
-        public DbCharacter Character { get; set; }
-        public DbCharacter AttackerCharacter { get; set; }
-        public DbOutfit CharacterOutfit { get; set; }
-        public DbOutfit AttackerOutfit { get; set; }
-        public DbVehicle AttackerVehicle { get; set; }
-        public DbItem AttackerWeapon { get; set; }
+        public Character Character { get; set; }
+        public Character AttackerCharacter { get; set; }
+        public Outfit CharacterOutfit { get; set; }
+        public Outfit AttackerOutfit { get; set; }
+        public Vehicle AttackerVehicle { get; set; }
+        public Item AttackerWeapon { get; set; }
     }
 }

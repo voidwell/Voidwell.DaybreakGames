@@ -26,7 +26,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbEventDeath>> GetDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<Models.Planetside.EventDeath>> GetDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<EventDeath>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+        public async Task<IEnumerable<ResolvedModels.EventDeath>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -47,7 +47,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join victimCharacter in dbContext.Characters on e.CharacterId equals victimCharacter.Id into victimCharacterQ
                              from victimCharacter in victimCharacterQ.DefaultIfEmpty()
                              where e.AttackerCharacterId == characterId || e.CharacterId == characterId && e.Timestamp > lower && e.Timestamp < upper
-                             select new EventDeath
+                             select new ResolvedModels.EventDeath
                              {
                                  Timestamp = e.Timestamp,
                                  WorldId = e.WorldId,
@@ -71,7 +71,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbEventFacilityControl>> GetFacilityControlsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<EventFacilityControl>> GetFacilityControlsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -80,7 +80,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbEventFacilityControl> GetLatestFacilityControl(string worldId, string zoneId, DateTime date)
+        public async Task<EventFacilityControl> GetLatestFacilityControl(string worldId, string zoneId, DateTime date)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -90,7 +90,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbEventVehicleDestroy>> GetVehicleDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<EventVehicleDestroy>> GetVehicleDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

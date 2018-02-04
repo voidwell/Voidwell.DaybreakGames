@@ -100,7 +100,7 @@ namespace Voidwell.DaybreakGames
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            //app.InitializeDatabases();
+            app.InitializeDatabases();
 
             app.UseAuthentication();
 

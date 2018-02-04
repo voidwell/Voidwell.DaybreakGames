@@ -5,6 +5,7 @@ namespace Voidwell.DaybreakGames.Models
     public class WeaponInfoResult
     {
         public string Name { get; set; }
+        public string ItemId { get; set; }
         public string Category { get; set; }
         public string FactionId { get; set; }
         public string ImageId { get; set; }

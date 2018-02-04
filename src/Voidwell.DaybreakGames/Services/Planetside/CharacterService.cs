@@ -9,6 +9,7 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Census.Exceptions;
+using Newtonsoft.Json;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -46,16 +47,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return characterList.Select(c => CharacterSearchResult.LoadFromCensusCharacter(c));
         }
 
-        public Task<IEnumerable<DbCharacter>> FindCharacters(IEnumerable<string> characterIds)
+        public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)
         {
             return _characterRepository.GetCharactersByIdsAsync(characterIds);
         }
 
-        public async Task<DbCharacter> GetCharacter(string characterId)
+        public async Task<Character> GetCharacter(string characterId)
         {
             var cacheKey = $"{_cacheKey}_character_{characterId}";
 
-            var character = await _cache.GetAsync<DbCharacter>(cacheKey);
+            var character = await _cache.GetAsync<Character>(cacheKey);
             if (character != null)
             {
                 return character;
@@ -120,57 +121,57 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 },
                 LifetimeStats = new CharacterDetailsLifetimeStats
                 {
-                    AchievementCount = character.LifetimeStats.AchievementCount.Value,
-                    AssistCount = character.LifetimeStats.AssistCount.Value,
-                    DominationCount = character.LifetimeStats.DominationCount.Value,
-                    FacilityCaptureCount = character.LifetimeStats.FacilityCaptureCount.Value,
-                    FacilityDefendedCount = character.LifetimeStats.FacilityDefendedCount.Value,
-                    MedalCount = character.LifetimeStats.MedalCount.Value,
-                    RevengeCount = character.LifetimeStats.RevengeCount.Value,
-                    SkillPoints = character.LifetimeStats.SkillPoints.Value,
-                    Kills = character.LifetimeStats.WeaponKills.Value,
-                    PlayTime = character.LifetimeStats.WeaponPlayTime.Value,
-                    VehicleKills = character.LifetimeStats.WeaponVehicleKills.Value,
-                    DamageGiven = character.LifetimeStats.WeaponDamageGiven.Value,
-                    DamageTakenBy = character.LifetimeStats.WeaponDamageTakenBy.Value,
-                    FireCount = character.LifetimeStats.WeaponFireCount.Value,
-                    HitCount = character.LifetimeStats.WeaponHitCount.Value,
-                    Score = character.LifetimeStats.WeaponScore.Value,
-                    Deaths = character.LifetimeStats.WeaponDeaths.Value,
-                    Headshots = character.LifetimeStats.WeaponHeadshots.Value
+                    AchievementCount = character.LifetimeStats.AchievementCount.GetValueOrDefault(),
+                    AssistCount = character.LifetimeStats.AssistCount.GetValueOrDefault(),
+                    DominationCount = character.LifetimeStats.DominationCount.GetValueOrDefault(),
+                    FacilityCaptureCount = character.LifetimeStats.FacilityCaptureCount.GetValueOrDefault(),
+                    FacilityDefendedCount = character.LifetimeStats.FacilityDefendedCount.GetValueOrDefault(),
+                    MedalCount = character.LifetimeStats.MedalCount.GetValueOrDefault(),
+                    RevengeCount = character.LifetimeStats.RevengeCount.GetValueOrDefault(),
+                    SkillPoints = character.LifetimeStats.SkillPoints.GetValueOrDefault(),
+                    Kills = character.LifetimeStats.WeaponKills.GetValueOrDefault(),
+                    PlayTime = character.LifetimeStats.WeaponPlayTime.GetValueOrDefault(),
+                    VehicleKills = character.LifetimeStats.WeaponVehicleKills.GetValueOrDefault(),
+                    DamageGiven = character.LifetimeStats.WeaponDamageGiven.GetValueOrDefault(),
+                    DamageTakenBy = character.LifetimeStats.WeaponDamageTakenBy.GetValueOrDefault(),
+                    FireCount = character.LifetimeStats.WeaponFireCount.GetValueOrDefault(),
+                    HitCount = character.LifetimeStats.WeaponHitCount.GetValueOrDefault(),
+                    Score = character.LifetimeStats.WeaponScore.GetValueOrDefault(),
+                    Deaths = character.LifetimeStats.WeaponDeaths.GetValueOrDefault(),
+                    Headshots = character.LifetimeStats.WeaponHeadshots.GetValueOrDefault()
                 },
-                ProfileStats = character.Stats.Select(s => new CharacterDetailsProfileStat
+                ProfileStats = character.Stats?.Select(s => new CharacterDetailsProfileStat
                 {
                     ProfileId = s.ProfileId,
                     ProfileName = s.Profile?.Name,
                     ImageId = s.Profile?.ImageId,
-                    Deaths = s.Deaths.Value,
-                    FireCount = s.FireCount.Value,
-                    HitCount = s.HitCount.Value,
-                    KilledBy = s.KilledBy.Value,
-                    Kills = s.Kills.Value,
-                    PlayTime = s.PlayTime.Value,
-                    Score = s.Score.Value
+                    Deaths = s.Deaths.GetValueOrDefault(),
+                    FireCount = s.FireCount.GetValueOrDefault(),
+                    HitCount = s.HitCount.GetValueOrDefault(),
+                    KilledBy = s.KilledBy.GetValueOrDefault(),
+                    Kills = s.Kills.GetValueOrDefault(),
+                    PlayTime = s.PlayTime.GetValueOrDefault(),
+                    Score = s.Score.GetValueOrDefault()
                 }),
-                ProfileStatsByFaction = character.StatsByFaction.Select(s => new CharacterDetailsProfileStatByFaction
+                ProfileStatsByFaction = character.StatsByFaction?.Select(s => new CharacterDetailsProfileStatByFaction
                 {
                     ProfileId = s.ProfileId,
                     ProfileName = s.Profile?.Name,
                     ImageId = s.Profile?.ImageId,
                     Kills = new CharacterDetailsProfileStatByFactionValue
                     {
-                        Vs = s.KillsVS.Value,
-                        Nc = s.KillsNC.Value,
-                        Tr = s.KillsTR.Value
+                        Vs = s.KillsVS.GetValueOrDefault(),
+                        Nc = s.KillsNC.GetValueOrDefault(),
+                        Tr = s.KillsTR.GetValueOrDefault()
                     },
                     KilledBy = new CharacterDetailsProfileStatByFactionValue
                     {
-                        Vs = s.KilledByVS.Value,
-                        Nc = s.KilledByNC.Value,
-                        Tr = s.KilledByTR.Value
+                        Vs = s.KilledByVS.GetValueOrDefault(),
+                        Nc = s.KilledByNC.GetValueOrDefault(),
+                        Tr = s.KilledByTR.GetValueOrDefault()
                     }
                 }),
-                WeaponStats = character.WeaponStats.Select(s => new CharacterDetailsWeaponStat
+                WeaponStats = character.WeaponStats?.Select(s => new CharacterDetailsWeaponStat
                 {
                     ItemId = s.ItemId,
                     Name = s.Item?.Name,
@@ -204,7 +205,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         */
                     }
                 }),
-                VehicleStats = character.WeaponStats.GroupBy(a => a.VehicleId).Where(a => a.Key != null || a.Key != "0").Select(s => new CharacterDetailsVehicleStat
+                VehicleStats = character.WeaponStats?.GroupBy(a => a.VehicleId).Where(a => a.Key != null || a.Key != "0").Select(s => new CharacterDetailsVehicleStat
                 {
                     VehicleId = s.Key,
                     DamageGiven = s.Sum(a => a.DamageGiven.Value),
@@ -230,7 +231,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     Alias = character.OutfitMembership.Outfit.Alias,
                     CreatedDate = character.OutfitMembership.Outfit.CreatedDate,
                     MemberCount = character.OutfitMembership.Outfit.MemberCount,
-                    MemberSinceDate = character.OutfitMembership.MemberSinceDate.Value,
+                    MemberSinceDate = character.OutfitMembership.MemberSinceDate.GetValueOrDefault(),
                     Rank = character.OutfitMembership.Rank
                 };
             }
@@ -253,16 +254,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                                UpdateCharacterWeaponStats(characterId, lastLoginDate));
         }
 
-        public Task<DbOutfitMember> GetCharactersOutfit(string characterId)
+        public Task<OutfitMember> GetCharactersOutfit(string characterId)
         {
             return _outfitService.UpdateCharacterOutfitMembership(characterId);
         }
 
-        public async Task<IEnumerable<DbPlayerSession>> GetSessions(string characterId)
+        public async Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetSessions(string characterId)
         {
             var cacheKey = $"{_cacheKey}_sessions_{characterId}";
 
-            var sessions = await _cache.GetAsync<IEnumerable<DbPlayerSession>>(cacheKey);
+            var sessions = await _cache.GetAsync<IEnumerable<Data.Models.Planetside.PlayerSession>>(cacheKey);
             if (sessions != null)
             {
                 return sessions;
@@ -275,11 +276,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return sessions;
         }
 
-        public async Task<PlayerSession> GetSession(string characterId, string sessionId)
+        public async Task<Models.PlayerSession> GetSession(string characterId, string sessionId)
         {
             var cacheKey = $"{_cacheKey}_session_{characterId}_{sessionId}";
 
-            var sessionInfo = await _cache.GetAsync<PlayerSession>(cacheKey);
+            var sessionInfo = await _cache.GetAsync<Models.PlayerSession>(cacheKey);
             if (sessionInfo != null)
             {
                 return sessionInfo;
@@ -309,7 +310,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 CharacterOutfitId = d.CharacterOutfitId
             });
 
-            sessionInfo = new PlayerSession
+            sessionInfo = new Models.PlayerSession
             {
                 Events = sessionEvents,
                 Session = new PlayerSessionInfo
@@ -327,7 +328,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return sessionInfo;
         }
 
-        public async Task<DbCharacter> GetCharacterDetailsAsync(string characterId)
+        public async Task<Character> GetCharacterDetailsAsync(string characterId)
         {
             var character = await _characterRepository.GetCharacterWithDetailsAsync(characterId);
             if (character != null && character.Time != null)
@@ -340,7 +341,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await _characterRepository.GetCharacterWithDetailsAsync(characterId);
         }
 
-        private async Task<DbCharacter> UpdateCharacter(string characterId)
+        private async Task<Character> UpdateCharacter(string characterId)
         {
             var character = await _censusCharacter.GetCharacter(characterId);
 
@@ -349,7 +350,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            var dataModel = new DbCharacter
+            var dataModel = new Character
             {
                 Id = character.CharacterId,
                 Name = character.Name.First,
@@ -377,7 +378,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
             }
 
-            var dataModel = new DbCharacterTime
+            var dataModel = new CharacterTime
             {
                 CharacterId = characterId,
                 CreatedDate = times.CreationDate,
@@ -404,13 +405,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
             }
 
-            var statModels = new List<DbCharacterStat>();
-            var lifetimeStatModel = new DbCharacterLifetimeStat
+            var statModels = new List<CharacterStat>();
+            var lifetimeStatModel = new CharacterLifetimeStat
             {
                 CharacterId = characterId
             };
-            var statByFactionModels = new List<DbCharacterStatByFaction>();
-            var lifetimeStatByFactionModel = new DbCharacterLifetimeStatByFaction
+            var statByFactionModels = new List<CharacterStatByFaction>();
+            var lifetimeStatByFactionModel = new CharacterLifetimeStatByFaction
             {
                 CharacterId = characterId
             };
@@ -429,7 +430,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     continue;
                 }
 
-                var dbModel = new DbCharacterStat
+                var dbModel = new CharacterStat
                 {
                     CharacterId = characterId,
                     ProfileId = group.Key
@@ -455,7 +456,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     continue;
                 }
 
-                var dbModel = new DbCharacterStatByFaction
+                var dbModel = new CharacterStatByFaction
                 {
                     CharacterId = characterId,
                     ProfileId = group.Key
@@ -464,7 +465,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var statModel = statModels.SingleOrDefault(a => a.ProfileId == group.Key);
                 if (statModel == null)
                 {
-                    statModel = new DbCharacterStat
+                    statModel = new CharacterStat
                     {
                         CharacterId = characterId,
                         ProfileId = group.Key
@@ -503,15 +504,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
             }
 
-            var statModels = new List<DbCharacterWeaponStat>();
-            var statByFactionModels = new List<DbCharacterWeaponStatByFaction>();
+            var statModels = new List<CharacterWeaponStat>();
+            var statByFactionModels = new List<CharacterWeaponStatByFaction>();
 
             var statGroups = wepStats.GroupBy(a => a.ItemId);
             var statByFactionGroups = wepStatsByFaction.GroupBy(a => a.ItemId);
 
             foreach (var group in statGroups)
             {
-                var dbModel = new DbCharacterWeaponStat
+                var dbModel = new CharacterWeaponStat
                 {
                     CharacterId = characterId,
                     ItemId = group.Key,
@@ -528,7 +529,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             foreach (var group in statByFactionGroups)
             {
-                var dbModel = new DbCharacterWeaponStatByFaction
+                var dbModel = new CharacterWeaponStatByFaction
                 {
                     CharacterId = characterId,
                     ItemId = group.Key,
@@ -538,7 +539,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var statModel = statModels.SingleOrDefault(a => a.ItemId == group.Key);
                 if (statModel == null)
                 {
-                    statModel = new DbCharacterWeaponStat
+                    statModel = new CharacterWeaponStat
                     {
                         CharacterId = characterId,
                         ItemId = group.Key,

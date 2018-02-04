@@ -12,7 +12,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task AddAsync(DbCharacterUpdateQueue entity)
+        public async Task AddAsync(CharacterUpdateQueue entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

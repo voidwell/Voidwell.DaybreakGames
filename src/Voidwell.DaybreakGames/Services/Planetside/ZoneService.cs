@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusZone = censusZone;
         }
 
-        public Task<IEnumerable<DbZone>> GetAllZones()
+        public Task<IEnumerable<Zone>> GetAllZones()
         {
             return _zoneRepository.GetAllZonesAsync();
         }
@@ -38,9 +38,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private DbZone ConvertToDbModel(CensusZoneModel censusModel)
+        private Zone ConvertToDbModel(CensusZoneModel censusModel)
         {
-            return new DbZone
+            return new Zone
             {
                 Id = censusModel.ZoneId,
                 Name = censusModel.Name.English,

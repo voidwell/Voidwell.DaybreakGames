@@ -8,11 +8,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IEventRepository
     {
-        Task<IEnumerable<EventDeath>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper);
+        Task<IEnumerable<ResolvedModels.EventDeath>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper);
         Task AddAsync<T>(T entity) where T : class;
-        Task<DbEventFacilityControl> GetLatestFacilityControl(string worldId, string zoneId, DateTime date);
-        Task<IEnumerable<DbEventDeath>> GetDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate);
-        Task<IEnumerable<DbEventVehicleDestroy>> GetVehicleDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate);
-        Task<IEnumerable<DbEventFacilityControl>> GetFacilityControlsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate);
+        Task<EventFacilityControl> GetLatestFacilityControl(string worldId, string zoneId, DateTime date);
+        Task<IEnumerable<Models.Planetside.EventDeath>> GetDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate);
+        Task<IEnumerable<EventVehicleDestroy>> GetVehicleDeathEventsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate);
+        Task<IEnumerable<EventFacilityControl>> GetFacilityControlsByDateAsync(string worldId, string zoneId, DateTime startDate, DateTime endDate);
     }
 }
