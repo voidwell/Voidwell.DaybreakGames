@@ -36,17 +36,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return ownership.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
         }
 
-        public Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId)
+        public Task<IEnumerable<MapRegion>> GetMapRegions(string zoneId)
         {
             return _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
         }
 
-        public Task<IEnumerable<DbFacilityLink>> GetFacilityLinks(string zoneId)
+        public Task<IEnumerable<FacilityLink>> GetFacilityLinks(string zoneId)
         {
             return _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
         }
 
-        public Task<IEnumerable<DbMapRegion>> FindRegions(params string[] facilityIds)
+        public Task<IEnumerable<MapRegion>> FindRegions(params string[] facilityIds)
         {
             return _mapRepository.GetMapRegionsByFacilityIdsAsync(facilityIds);
         }
@@ -76,9 +76,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private DbMapHex ConvertToDbModel(CensusMapHexModel censusModel)
+        private MapHex ConvertToDbModel(CensusMapHexModel censusModel)
         {
-            return new DbMapHex
+            return new MapHex
             {
                 MapRegionId = censusModel.MapRegionId,
                 HexType = censusModel.HexType,
@@ -89,9 +89,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private DbMapRegion ConvertToDbModel(CensusMapRegionModel censusModel)
+        private MapRegion ConvertToDbModel(CensusMapRegionModel censusModel)
         {
-            return new DbMapRegion
+            return new MapRegion
             {
                 Id = censusModel.MapRegionId,
                 ZoneId = censusModel.ZoneId,
@@ -105,9 +105,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private DbFacilityLink ConvertToDbModel(CensusFacilityLinkModel censusModel)
+        private FacilityLink ConvertToDbModel(CensusFacilityLinkModel censusModel)
         {
-            return new DbFacilityLink
+            return new FacilityLink
             {
                 ZoneId = censusModel.ZoneId,
                 FacilityIdA = censusModel.FacilityIdA,

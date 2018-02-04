@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<IEnumerable<DbItem>> FindItemsByIdsAsync(IEnumerable<string> itemIds)
+        public async Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<string> itemIds)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -24,7 +24,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbItem>> FindItemsByNameAsync(string name, int limit)
+        public async Task<IEnumerable<Item>> FindItemsByNameAsync(string name, int limit)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbItem> entities)
+        public async Task UpsertRangeAsync(IEnumerable<Item> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -59,7 +59,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbItemCategory> entities)
+        public async Task UpsertRangeAsync(IEnumerable<ItemCategory> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

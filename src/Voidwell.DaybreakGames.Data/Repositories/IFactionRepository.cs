@@ -4,8 +4,8 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
-    public interface IFactionRepository: IRepository<DbFaction>
+    public interface IFactionRepository: IRepository<Faction>
     {
-        Task UpsertRangeAsync(IEnumerable<DbFaction> entities);
+        Task UpsertRangeAsync(IEnumerable<Faction> entities);
     }
 }

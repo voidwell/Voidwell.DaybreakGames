@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusProfile = censusProfile;
         }
 
-        public Task<IEnumerable<DbProfile>> GetAllProfiles()
+        public Task<IEnumerable<Profile>> GetAllProfiles()
         {
             return _profileRepository.GetAllProfilesAsync();
         }
@@ -38,9 +38,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private DbProfile ConvertToDbModel(CensusProfileModel censusModel)
+        private Profile ConvertToDbModel(CensusProfileModel censusModel)
         {
-            return new DbProfile
+            return new Profile
             {
                 Id = censusModel.ProfileId,
                 Name = censusModel.Name.English,

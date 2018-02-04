@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbMetagameEventCategory> entities)
+        public async Task UpsertRangeAsync(IEnumerable<MetagameEventCategory> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -38,7 +38,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbMetagameEventState> entities)
+        public async Task UpsertRangeAsync(IEnumerable<MetagameEventState> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

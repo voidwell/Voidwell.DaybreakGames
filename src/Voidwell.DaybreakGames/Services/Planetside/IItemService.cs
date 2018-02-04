@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public interface IItemService : IUpdateable
     {
-        Task<IEnumerable<DbItem>> FindItems(IEnumerable<string> itemIds);
-        Task<IEnumerable<DbItem>> LookupItemsByName(string name, int limit = 12);
+        Task<IEnumerable<Item>> FindItems(IEnumerable<string> itemIds);
+        Task<IEnumerable<Item>> LookupItemsByName(string name, int limit = 12);
     }
 }

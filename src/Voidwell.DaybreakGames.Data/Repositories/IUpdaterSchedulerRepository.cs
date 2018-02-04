@@ -5,7 +5,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IUpdaterSchedulerRepository
     {
-        DbPS2UpdaterScheduler GetUpdaterHistoryByServiceName(string serviceName);
-        Task UpsertAsync(DbPS2UpdaterScheduler entity);
+        UpdaterScheduler GetUpdaterHistoryByServiceName(string serviceName);
+        Task UpsertAsync(UpdaterScheduler entity);
     }
 }

@@ -6,13 +6,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IOutfitRepository
     {
-        Task<IEnumerable<DbOutfit>> GetOutfitsByIdsAsync(IEnumerable<string> outfitIds);
-        Task<DbOutfit> GetOutfitAsync(string outfitId);
-        Task<DbOutfit> GetOutfitDetailsAsync(string outfitId);
-        Task<IEnumerable<DbOutfitMember>> GetOutfitMembersAsync(string outfitId);
-        Task<IEnumerable<DbOutfit>> GetOutfitsByNameAsync(string name, int limit);
+        Task<IEnumerable<Outfit>> GetOutfitsByIdsAsync(IEnumerable<string> outfitIds);
+        Task<Outfit> GetOutfitAsync(string outfitId);
+        Task<Outfit> GetOutfitDetailsAsync(string outfitId);
+        Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(string outfitId);
+        Task<IEnumerable<Outfit>> GetOutfitsByNameAsync(string name, int limit);
         Task RemoveOutfitMemberAsync(string characterId);
-        Task<DbOutfitMember> UpsertAsync(DbOutfitMember entity);
-        Task<DbOutfit> UpsertAsync(DbOutfit entity);
+        Task<OutfitMember> UpsertAsync(OutfitMember entity);
+        Task<Outfit> UpsertAsync(Outfit entity);
     }
 }

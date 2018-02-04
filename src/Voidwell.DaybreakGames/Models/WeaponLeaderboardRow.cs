@@ -14,11 +14,5 @@
         public int PlayTime { get; set; }
         public int Score { get; set; }
         public int VehicleKills { get; set; }
-        public double KillDeathRatio { get; set; }
-        public double HeadshotRatio { get; set; }
-        public double Accuracy { get; set; }
-        public double ScorePerMinute { get; set; }
-        public double KillsPerHour { get; set; }
-        public double VehicleKillsPerHour { get; set; }
     }
 }

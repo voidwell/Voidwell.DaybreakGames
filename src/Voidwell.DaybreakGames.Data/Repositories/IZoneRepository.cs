@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IZoneRepository
     {
-        Task<IEnumerable<DbZone>> GetAllZonesAsync();
-        Task UpsertRangeAsync(IEnumerable<DbZone> entities);
+        Task<IEnumerable<Zone>> GetAllZonesAsync();
+        Task UpsertRangeAsync(IEnumerable<Zone> entities);
     }
 }

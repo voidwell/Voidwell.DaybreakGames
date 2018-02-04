@@ -9,12 +9,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface ICharacterService
     {
         Task<IEnumerable<CharacterSearchResult>> LookupCharactersByName(string query, int limit = 12);
-        Task<IEnumerable<DbCharacter>> FindCharacters(IEnumerable<string> characterIds);
-        Task<DbCharacter> GetCharacter(string characterId);
+        Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds);
+        Task<Character> GetCharacter(string characterId);
         Task<CharacterDetails> GetCharacterDetails(string characterId);
-        Task<DbOutfitMember> GetCharactersOutfit(string characterId);
+        Task<OutfitMember> GetCharactersOutfit(string characterId);
         Task UpdateAllCharacterInfo(string characterId, DateTime? LastLoginDate = null);
-        Task<IEnumerable<DbPlayerSession>> GetSessions(string characterId);
-        Task<PlayerSession> GetSession(string characterId, string sessionId);
+        Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetSessions(string characterId);
+        Task<Models.PlayerSession> GetSession(string characterId, string sessionId);
     }
 }

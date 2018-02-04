@@ -172,7 +172,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 await _updaterService.AddToQueue(characterId);
             }
 
-            var dataModel = new DbPlayerSession
+            var dataModel = new Data.Models.Planetside.PlayerSession
             {
                 CharacterId = characterId,
                 LoginDate = onlineCharacter.LoginDate,

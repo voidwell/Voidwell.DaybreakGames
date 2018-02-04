@@ -6,11 +6,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IAlertRepository
     {
-        Task<DbAlert> GetActiveAlert(string worldId, string zoneId);
-        Task UpdateAsync(DbAlert entity);
-        Task<IEnumerable<DbAlert>> GetAllAlerts(int limit);
-        Task<IEnumerable<DbAlert>> GetAlertsByWorldId(string worldId, int limit);
-        Task AddAsync(DbAlert dataModel);
-        Task<DbAlert> GetAlert(string worldId, string instanceId);
+        Task<Alert> GetActiveAlert(int worldId, int zoneId);
+        Task UpdateAsync(Alert entity);
+        Task<IEnumerable<Alert>> GetAllAlerts(int limit);
+        Task<IEnumerable<Alert>> GetAlertsByWorldId(int worldId, int limit);
+        Task AddAsync(Alert dataModel);
+        Task<Alert> GetAlert(int worldId, int instanceId);
     }
 }

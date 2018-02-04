@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbFaction> entities)
+        public async Task UpsertRangeAsync(IEnumerable<Faction> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

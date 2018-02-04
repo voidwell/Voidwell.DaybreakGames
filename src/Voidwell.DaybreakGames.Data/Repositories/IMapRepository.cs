@@ -6,11 +6,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IMapRepository
     {
-        Task<IEnumerable<DbMapRegion>> GetMapRegionsByZoneIdAsync(string zoneId);
-        Task<IEnumerable<DbFacilityLink>> GetFacilityLinksByZoneIdAsync(string zoneId);
-        Task<IEnumerable<DbMapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<string> facilityIds);
-        Task UpsertRangeAsync(IEnumerable<DbMapHex> entities);
-        Task UpsertRangeAsync(IEnumerable<DbMapRegion> entities);
-        Task UpsertRangeAsync(IEnumerable<DbFacilityLink> entities);
+        Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(string zoneId);
+        Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(string zoneId);
+        Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<string> facilityIds);
+        Task UpsertRangeAsync(IEnumerable<MapHex> entities);
+        Task UpsertRangeAsync(IEnumerable<MapRegion> entities);
+        Task UpsertRangeAsync(IEnumerable<FacilityLink> entities);
     }
 }

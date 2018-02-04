@@ -27,11 +27,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _cache = cache;
         }
 
-        public async Task<IEnumerable<DbAlert>> GetAllAlerts(int limit = 25)
+        public async Task<IEnumerable<Alert>> GetAllAlerts(int limit = 25)
         {
             var cacheKey = $"{_cacheKey}_alerts";
 
-            var alerts = await _cache.GetAsync<IEnumerable<DbAlert>>(cacheKey);
+            var alerts = await _cache.GetAsync<IEnumerable<Alert>>(cacheKey);
             if (alerts != null)
             {
                 return alerts;
@@ -47,7 +47,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return alerts;
         }
 
-        public Task<IEnumerable<DbAlert>> GetAlerts(string worldId, int limit = 25)
+        public Task<IEnumerable<Alert>> GetAlerts(string worldId, int limit = 25)
         {
             return _alertRepository.GetAlertsByWorldId(worldId, limit);
         }
@@ -102,7 +102,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public Task CreateAlert(MetagameEvent metagameEvent)
         {
-            var dataModel = new DbAlert
+            var dataModel = new Alert
             {
                 WorldId = metagameEvent.WorldId,
                 ZoneId = metagameEvent.ZoneId,

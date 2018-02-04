@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task AddAsync(DbPlayerSession entity)
+        public async Task AddAsync(PlayerSession entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -24,7 +24,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbPlayerSession> GetPlayerSessionAsync(string sessionId)
+        public async Task<PlayerSession> GetPlayerSessionAsync(string sessionId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -32,7 +32,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbPlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit)
+        public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

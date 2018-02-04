@@ -32,9 +32,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private DbTitle ConvertToDbModel(CensusTitleModel censusModel)
+        private Title ConvertToDbModel(CensusTitleModel censusModel)
         {
-            return new DbTitle
+            return new Title
             {
                 Id = censusModel.TitleId,
                 Name = censusModel.Name.English,

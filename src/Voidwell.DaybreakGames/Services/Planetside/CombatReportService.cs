@@ -222,12 +222,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private Task<IEnumerable<DbEventDeath>> GetCharacterDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<EventDeath>> GetCharacterDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
             return _eventRepository.GetDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
 
-        private Task<IEnumerable<DbEventVehicleDestroy>> GetVehicleDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<EventVehicleDestroy>> GetVehicleDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
         {
             return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
@@ -240,7 +240,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var mapRegions = await _mapService.FindRegions(facilityIds);
 
             var controlOutfitIds = facilityControls.Select(a => a.OutfitId);
-            var outfits = controlOutfitIds.Any() ? await _outfitService.FindOutfits(controlOutfitIds) : Enumerable.Empty<DbOutfit>();
+            var outfits = controlOutfitIds.Any() ? await _outfitService.FindOutfits(controlOutfitIds) : Enumerable.Empty<Outfit>();
 
             return facilityControls.Select(control => {
                 var row = new CaptureLogRow

@@ -25,7 +25,8 @@ namespace Voidwell.DaybreakGames
                 .ConfigureLogging(builder =>
                 {
                     builder.SetMinimumLevel(LogLevel.Information);
-                    builder.AddFilter("Microsoft", LogLevel.Error);
+                    builder.AddFilter("Microsoft.AspNetCore.Mvc", LogLevel.Error);
+                    builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
                     builder.AddDebug();
                 })
                 .Build();

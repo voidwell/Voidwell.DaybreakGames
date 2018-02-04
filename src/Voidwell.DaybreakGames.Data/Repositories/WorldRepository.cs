@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<IEnumerable<DbWorld>> GetAllWorldsAsync()
+        public async Task<IEnumerable<World>> GetAllWorldsAsync()
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbWorld> entities)
+        public async Task UpsertRangeAsync(IEnumerable<World> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

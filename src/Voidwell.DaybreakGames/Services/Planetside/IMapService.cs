@@ -8,8 +8,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IMapService : IUpdateable
     {
         Task<IEnumerable<MapOwnership>> GetMapOwnership(string worldId, string zoneId);
-        Task<IEnumerable<DbMapRegion>> GetMapRegions(string zoneId);
-        Task<IEnumerable<DbFacilityLink>> GetFacilityLinks(string zoneId);
-        Task<IEnumerable<DbMapRegion>> FindRegions(params string[] facilityIds);
+        Task<IEnumerable<MapRegion>> GetMapRegions(string zoneId);
+        Task<IEnumerable<FacilityLink>> GetFacilityLinks(string zoneId);
+        Task<IEnumerable<MapRegion>> FindRegions(params string[] facilityIds);
     }
 }

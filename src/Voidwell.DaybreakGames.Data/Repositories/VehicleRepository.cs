@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<IEnumerable<DbVehicle>> GetAllVehiclesAsync()
+        public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbVehicle> entities)
+        public async Task UpsertRangeAsync(IEnumerable<Vehicle> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -47,7 +47,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<DbVehicleFaction> entities)
+        public async Task UpsertRangeAsync(IEnumerable<VehicleFaction> entities)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

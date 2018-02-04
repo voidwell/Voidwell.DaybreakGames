@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IProfileRepository
     {
-        Task<IEnumerable<DbProfile>> GetAllProfilesAsync();
-        Task UpsertRangeAsync(IEnumerable<DbProfile> entities);
+        Task<IEnumerable<Profile>> GetAllProfilesAsync();
+        Task UpsertRangeAsync(IEnumerable<Profile> entities);
     }
 }

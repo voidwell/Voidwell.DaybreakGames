@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IMetagameEventRepository
     {
-        Task UpsertRangeAsync(IEnumerable<DbMetagameEventCategory> entities);
-        Task UpsertRangeAsync(IEnumerable<DbMetagameEventState> entities);
+        Task UpsertRangeAsync(IEnumerable<MetagameEventCategory> entities);
+        Task UpsertRangeAsync(IEnumerable<MetagameEventState> entities);
     }
 }

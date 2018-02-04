@@ -9,7 +9,7 @@ namespace Voidwell.DaybreakGames.Models
         public List<WorldZoneRegion> Warpgates { get; private set; }
         public List<WorldZoneRegion> Regions { get; private set; }
 
-        public WorldZone(IEnumerable<DbFacilityLink> facilityLinks, IEnumerable<DbMapRegion> mapRegions)
+        public WorldZone(IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions)
         {
             Warpgates = new List<WorldZoneRegion>();
             Regions = new List<WorldZoneRegion>();

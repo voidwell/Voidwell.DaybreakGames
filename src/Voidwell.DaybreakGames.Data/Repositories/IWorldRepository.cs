@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IWorldRepository
     {
-        Task UpsertRangeAsync(IEnumerable<DbWorld> entities);
-        Task<IEnumerable<DbWorld>> GetAllWorldsAsync();
+        Task UpsertRangeAsync(IEnumerable<World> entities);
+        Task<IEnumerable<World>> GetAllWorldsAsync();
     }
 }

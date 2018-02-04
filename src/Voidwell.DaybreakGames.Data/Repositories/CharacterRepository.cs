@@ -16,7 +16,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<DbCharacter> GetCharacterAsync(string characterId)
+        public async Task<Character> GetCharacterAsync(string characterId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -24,7 +24,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbCharacter>> GetCharactersByIdsAsync(IEnumerable<string> characterIds)
+        public async Task<IEnumerable<Character>> GetCharactersByIdsAsync(IEnumerable<string> characterIds)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -33,11 +33,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbCharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(string weaponItemId, string sortColumn, SortDirection sortDirection, int rowStart, int limit)
+        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(string weaponItemId, string sortColumn, SortDirection sortDirection, int rowStart, int limit)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return await dbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId)
+                return await dbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId && s.Kills > 1)
                     .Include(i => i.Character)
                     .OrderBy(sortColumn, sortDirection)
                     .Skip(rowStart)
@@ -48,7 +48,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public static T ClientMethod<T>(T element) => element;
 
-        public async Task<DbCharacter> GetCharacterWithDetailsAsync(string characterId)
+        public async Task<Character> GetCharacterWithDetailsAsync(string characterId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -72,21 +72,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
                              from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
 
-                             join outfitMembership in (from om in dbContext.OutfitMembers
-                                                       join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
-                                                       where om.CharacterId == characterId
-                                                       select new DbOutfitMember
-                                                       {
-                                                           CharacterId = om.CharacterId,
-                                                           MemberSinceDate = om.MemberSinceDate,
-                                                           OutfitId = om.OutfitId,
-                                                           Rank = om.Rank,
-                                                           RankOrdinal = om.RankOrdinal,
-                                                           Outfit = outfit
-                                                       }).DefaultIfEmpty() on c.Id equals outfitMembership.CharacterId
-
                              where c.Id == characterId
-                             select new DbCharacter
+                             select new Character
                              {
                                  Id = c.Id,
                                  Name = c.Name,
@@ -100,14 +87,25 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                  World = world,
                                  Title = title,
                                  Faction = faction,
-                                 OutfitMembership = outfitMembership,
                                  LifetimeStats = lifetimeStats,
                                  LifetimeStatsByFaction = lifetimeStatsByFaction,
-                                 Stats = (from s in dbContext.CharacterStats
+                                 OutfitMembership = (from om in dbContext.OutfitMembers
+                                                     join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
+                                                     where om.CharacterId == characterId
+                                                     select new OutfitMember
+                                                     {
+                                                         CharacterId = om.CharacterId,
+                                                         MemberSinceDate = om.MemberSinceDate,
+                                                         OutfitId = om.OutfitId,
+                                                         Rank = om.Rank,
+                                                         RankOrdinal = om.RankOrdinal,
+                                                         Outfit = outfit
+                                                     }).FirstOrDefault(),
+                               Stats = (from s in dbContext.CharacterStats
                                           join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
                                           from profile in profileQ.DefaultIfEmpty()
                                           where s.CharacterId == c.Id
-                                          select new DbCharacterStat
+                                          select new CharacterStat
                                           {
                                               CharacterId = s.CharacterId,
                                               ProfileId = s.ProfileId,
@@ -124,7 +122,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                    join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
                                                    from profile in profileQ.DefaultIfEmpty()
                                                    where s.CharacterId == c.Id
-                                                   select new DbCharacterStatByFaction
+                                                   select new CharacterStatByFaction
                                                    {
                                                        CharacterId = s.CharacterId,
                                                        ProfileId = s.ProfileId,
@@ -140,7 +138,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                 join item in (from item in dbContext.Items
                                                               join category in dbContext.ItemCategories on item.ItemCategoryId equals category.Id into categoryQ
                                                               from category in categoryQ.DefaultIfEmpty()
-                                                              select new DbItem
+                                                              select new Item
                                                               {
                                                                   Id = item.Id,
                                                                   Name = item.Name,
@@ -157,7 +155,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                 join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
                                                 from vehicle in vehicleQ.DefaultIfEmpty()
                                                 where s.CharacterId == c.Id
-                                                select new DbCharacterWeaponStat
+                                                select new CharacterWeaponStat
                                                 {
                                                     CharacterId = s.CharacterId,
                                                     ItemId = s.ItemId,
@@ -182,7 +180,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                          join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
                                                          from vehicle in vehicleQ.DefaultIfEmpty()
                                                          where s.CharacterId == c.Id
-                                                         select new DbCharacterWeaponStatByFaction
+                                                         select new CharacterWeaponStatByFaction
                                                          {
                                                              CharacterId = s.CharacterId,
                                                              ItemId = s.ItemId,
@@ -209,12 +207,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                              Vehicle = vehicle
                                                          }).ToList()
                              };
+                var result = query.AsNoTracking().FirstOrDefault();
 
-                return await Task.FromResult(query.ToList().FirstOrDefault());
+                return await Task.FromResult(result);
             }
         }
 
-        public async Task<DbCharacter> UpsertAsync(DbCharacter entity)
+        public async Task<Character> UpsertAsync(Character entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -236,7 +235,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbCharacterTime> UpsertAsync(DbCharacterTime entity)
+        public async Task<CharacterTime> UpsertAsync(CharacterTime entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -258,7 +257,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbCharacterLifetimeStat> UpsertAsync(DbCharacterLifetimeStat entity)
+        public async Task<CharacterLifetimeStat> UpsertAsync(CharacterLifetimeStat entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -280,7 +279,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<DbCharacterLifetimeStatByFaction> UpsertAsync(DbCharacterLifetimeStatByFaction entity)
+        public async Task<CharacterLifetimeStatByFaction> UpsertAsync(CharacterLifetimeStatByFaction entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -302,9 +301,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DbCharacterStat>> UpsertRangeAsync(IEnumerable<DbCharacterStat> entities)
+        public async Task<IEnumerable<CharacterStat>> UpsertRangeAsync(IEnumerable<CharacterStat> entities)
         {
-            var result = new List<DbCharacterStat>();
+            var result = new List<CharacterStat>();
 
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -322,9 +321,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     }
                     else
                     {
-                        foreach (var fromProp in typeof(DbCharacterStat).GetProperties())
+                        foreach (var fromProp in typeof(CharacterStat).GetProperties())
                         {
-                            var toProp = typeof(DbCharacterStat).GetProperty(fromProp.Name);
+                            var toProp = typeof(CharacterStat).GetProperty(fromProp.Name);
                             var toValue = toProp.GetValue(entity, null);
                             if (toValue != null)
                             {
@@ -343,9 +342,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             return result;
         }
 
-        public async Task<IEnumerable<DbCharacterStatByFaction>> UpsertRangeAsync(IEnumerable<DbCharacterStatByFaction> entities)
+        public async Task<IEnumerable<CharacterStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterStatByFaction> entities)
         {
-            var result = new List<DbCharacterStatByFaction>();
+            var result = new List<CharacterStatByFaction>();
 
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -363,9 +362,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     }
                     else
                     {
-                        foreach (var fromProp in typeof(DbCharacterStatByFaction).GetProperties())
+                        foreach (var fromProp in typeof(CharacterStatByFaction).GetProperties())
                         {
-                            var toProp = typeof(DbCharacterStatByFaction).GetProperty(fromProp.Name);
+                            var toProp = typeof(CharacterStatByFaction).GetProperty(fromProp.Name);
                             var toValue = toProp.GetValue(entity, null);
                             if (toValue != null)
                             {
@@ -384,10 +383,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             return result;
         }
 
-        public async Task<IEnumerable<DbCharacterWeaponStat>> UpsertRangeAsync(IEnumerable<DbCharacterWeaponStat> entities)
+        public async Task<IEnumerable<CharacterWeaponStat>> UpsertRangeAsync(IEnumerable<CharacterWeaponStat> entities)
         {
-            var result = new List<DbCharacterWeaponStat>();
-            var newEntities = new List<DbCharacterWeaponStat>();
+            var result = new List<CharacterWeaponStat>();
+            var newEntities = new List<CharacterWeaponStat>();
 
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -405,9 +404,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     }
                     else
                     {
-                        foreach (var fromProp in typeof(DbCharacterWeaponStat).GetProperties())
+                        foreach (var fromProp in typeof(CharacterWeaponStat).GetProperties())
                         {
-                            var toProp = typeof(DbCharacterWeaponStat).GetProperty(fromProp.Name);
+                            var toProp = typeof(CharacterWeaponStat).GetProperty(fromProp.Name);
                             var toValue = toProp.GetValue(entity, null);
                             if (toValue != null)
                             {
@@ -431,10 +430,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             return result;
         }
 
-        public async Task<IEnumerable<DbCharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<DbCharacterWeaponStatByFaction> entities)
+        public async Task<IEnumerable<CharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterWeaponStatByFaction> entities)
         {
-            var result = new List<DbCharacterWeaponStatByFaction>();
-            var newEntities = new List<DbCharacterWeaponStatByFaction>();
+            var result = new List<CharacterWeaponStatByFaction>();
+            var newEntities = new List<CharacterWeaponStatByFaction>();
 
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -452,9 +451,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     }
                     else
                     {
-                        foreach (var fromProp in typeof(DbCharacterWeaponStatByFaction).GetProperties())
+                        foreach (var fromProp in typeof(CharacterWeaponStatByFaction).GetProperties())
                         {
-                            var toProp = typeof(DbCharacterWeaponStatByFaction).GetProperty(fromProp.Name);
+                            var toProp = typeof(CharacterWeaponStatByFaction).GetProperty(fromProp.Name);
                             var toValue = toProp.GetValue(entity, null);
                             if (toValue != null)
                             {

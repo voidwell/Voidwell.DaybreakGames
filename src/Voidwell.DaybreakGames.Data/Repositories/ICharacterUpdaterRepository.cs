@@ -5,6 +5,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface ICharacterUpdaterRepository
     {
-        Task AddAsync(DbCharacterUpdateQueue entity);
+        Task AddAsync(CharacterUpdateQueue entity);
     }
 }

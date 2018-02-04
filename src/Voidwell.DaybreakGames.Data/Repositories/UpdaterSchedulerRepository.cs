@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public DbPS2UpdaterScheduler GetUpdaterHistoryByServiceName(string serviceName)
+        public UpdaterScheduler GetUpdaterHistoryByServiceName(string serviceName)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task UpsertAsync(DbPS2UpdaterScheduler entity)
+        public async Task UpsertAsync(UpdaterScheduler entity)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

@@ -12,7 +12,7 @@ namespace Voidwell.DaybreakGames.Models
         public MapScore MapScore { get; private set; }
         public Dictionary<string, int> MapRegionOwnership { get; private set; }
 
-        public WorldZoneState(string worldId, string zoneId, IEnumerable<DbFacilityLink> facilityLinks, IEnumerable<DbMapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
+        public WorldZoneState(string worldId, string zoneId, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
         {
             WorldId = worldId;
             ZoneId = zoneId;
