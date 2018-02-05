@@ -7,7 +7,7 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
         public string CharacterId { get; set; }
         public CharacterName Name { get; set; }
         public int FactionId { get; set; }
-        public int? TitleId { get; set; }
+        public int TitleId { get; set; }
         public CharacterTimes Times { get; set; }
         public CharacterBattleRank BattleRank { get; set; }
         public CharacterCerts Certs { get; set; }

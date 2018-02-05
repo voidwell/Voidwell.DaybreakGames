@@ -205,7 +205,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         */
                     }
                 }),
-                VehicleStats = character.WeaponStats?.GroupBy(a => a.VehicleId).Where(a => a.Key != null || a.Key != "0").Select(s => new CharacterDetailsVehicleStat
+                VehicleStats = character.WeaponStats?.Where(a => a.VehicleId.HasValue).GroupBy(a => a.VehicleId.Value).Where(a => a.Key != 0).Select(s => new CharacterDetailsVehicleStat
                 {
                     VehicleId = s.Key,
                     DamageGiven = s.Sum(a => a.DamageGiven.Value),
@@ -276,7 +276,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return sessions;
         }
 
-        public async Task<Models.PlayerSession> GetSession(string characterId, string sessionId)
+        public async Task<Models.PlayerSession> GetSession(string characterId, int sessionId)
         {
             var cacheKey = $"{_cacheKey}_session_{characterId}_{sessionId}";
 
@@ -298,7 +298,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 Attacker = new CombatReportItemDetail { Id = d.AttackerCharacterId, Name = d.AttackerCharacter?.Name ?? d.AttackerCharacterId, FactionId = d.AttackerCharacter?.FactionId },
                 Victim = new CombatReportItemDetail { Id = d.CharacterId, Name = d.Character?.Name ?? d.CharacterId, FactionId = d.Character?.FactionId },
-                Weapon = new PlayerSessionWeapon { Id = d.AttackerWeaponId, ImageId = d.AttackerWeapon?.ImageId, Name = d.AttackerWeapon?.Name ?? d.AttackerWeaponId },
+                Weapon = new PlayerSessionWeapon { Id = d.AttackerWeaponId.Value, ImageId = d.AttackerWeapon?.ImageId, Name = d.AttackerWeapon?.Name ?? d.AttackerWeaponId.Value.ToString() },
                 Timestamp = d.Timestamp,
                 ZoneId = d.ZoneId,
                 IsHeadshot = d.IsHeadshot,
@@ -421,7 +421,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             foreach (var group in statGroups)
             {
-                if (group.Key == "0")
+                if (group.Key == 0)
                 {
                     foreach (var stat in group)
                     {
@@ -446,7 +446,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             foreach (var group in statByFactionGroups)
             {
-                if (group.Key == "0")
+                if (group.Key == 0)
                 {
                     foreach (var stat in group)
                     {

@@ -4,8 +4,8 @@
     {
         public string CharacterId { get; set; }
         public string Name { get; set; }
-        public string FactionId { get; set; }
-        public string WorldId { get; set; }
+        public int FactionId { get; set; }
+        public int WorldId { get; set; }
         public int Kills { get; set; }
         public int Deaths { get; set; }
         public int Headshots { get; set; }

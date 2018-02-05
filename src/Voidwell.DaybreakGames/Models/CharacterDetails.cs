@@ -11,11 +11,11 @@ namespace Voidwell.DaybreakGames.Models
         public int BattleRankPercentToNext { get; set; }
         public int CertsEarned { get; set; }
         public string Faction { get; set; }
-        public string FactionId { get; set; }
-        public string FactionImageId { get; set; }
+        public int FactionId { get; set; }
+        public int? FactionImageId { get; set; }
         public string Title { get; set; }
         public string World { get; set; }
-        public string WorldId { get; set; }
+        public int WorldId { get; set; }
 
         public CharacterDetailsTimes Times { get; set; }
         public CharacterDetailsOutfit Outfit { get; set; }
@@ -70,9 +70,9 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CharacterDetailsProfileStat
     {
-        public string ProfileId { get; set; }
+        public int ProfileId { get; set; }
         public string ProfileName { get; set;}
-        public string ImageId { get; set; }
+        public int? ImageId { get; set; }
         public int Deaths { get; set; }
         public int FireCount { get; set; }
         public int HitCount { get; set; }
@@ -84,9 +84,9 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CharacterDetailsProfileStatByFaction
     {
-        public string ProfileId { get; set; }
+        public int ProfileId { get; set; }
         public string ProfileName { get; set; }
-        public string ImageId { get; set; }
+        public int? ImageId { get; set; }
         public CharacterDetailsProfileStatByFactionValue KilledBy { get; set; }
         public CharacterDetailsProfileStatByFactionValue Kills { get; set; }
     }
@@ -100,13 +100,13 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CharacterDetailsWeaponStat
     {
-        public string ItemId { get; set; }
+        public int ItemId { get; set; }
         public string Category { get; set; }
-        public string ImageId { get; set; }
+        public int? ImageId { get; set; }
         public string Name { get; set; }
-        public string VehicleId { get; set; }
+        public int? VehicleId { get; set; }
         public string VehicleName { get; set; }
-        public string VehicleImageId { get; set; }
+        public int? VehicleImageId { get; set; }
         public CharacterDetailsWeaponStatValue Stats { get; set; }
     }
 
@@ -135,7 +135,7 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CharacterDetailsVehicleStat
     {
-        public string VehicleId { get; set; }
+        public int VehicleId { get; set; }
         public int DamageTakenBy { get; set; }
         public int KilledBy { get; set; }
         public int Score { get; set; }
@@ -148,8 +148,4 @@ namespace Voidwell.DaybreakGames.Models
         public int Kills { get; set; }
         public int VehicleKills { get; set; }
     }
-
-
-
-
 }

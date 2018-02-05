@@ -27,23 +27,23 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
 
-        private Dictionary<string, string> _metagameZones = new Dictionary<string, string> {
-            { "1", "2"},
-            { "2", "8"},
-            { "3", "6"},
-            { "4", "4"},
-            { "123", "2" },
-            { "124", "2" },
-            { "125", "2" },
-            { "126", "8" },
-            { "127", "8" },
-            { "128", "8" },
-            { "129", "6" },
-            { "130", "6" },
-            { "131", "6" },
-            { "132", "4" },
-            { "133", "4" },
-            { "134", "4" }
+        private Dictionary<int, int> _metagameZones = new Dictionary<int, int> {
+            { 1, 2},
+            { 2, 8},
+            { 3, 6},
+            { 4, 4},
+            { 123, 2 },
+            { 124, 2 },
+            { 125, 2 },
+            { 126, 8 },
+            { 127, 8 },
+            { 128, 8 },
+            { 129, 6 },
+            { 130, 6 },
+            { 131, 6 },
+            { 132, 4 },
+            { 133, 4 },
+            { 134, 4 }
         };
         private enum METAGAME_EVENT_STATE
         {
@@ -93,10 +93,14 @@ namespace Voidwell.DaybreakGames.Websocket
                 Match m = r.Match(detail);
 
                 var worldName = m.Groups[1].Value;
-                var worldId = m.Groups[2].Value;
-                var isWorldOnline = message.SelectToken("online").Value<bool>();
 
-                await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
+                if (int.TryParse(m.Groups[2].Value, out var worldId))
+                {
+                    var isWorldOnline = message.SelectToken("online").Value<bool>();
+
+                    await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
+                };
+
                 return;
             }
 
@@ -118,13 +122,9 @@ namespace Voidwell.DaybreakGames.Websocket
                 return;
             }
 
-            if (payload.ZoneId != null)
+            if (payload.ZoneId.HasValue && payload.ZoneId.Value > 1000)
             {
-                int iZoneId = 0;
-                if (!int.TryParse(payload.ZoneId, out iZoneId) || iZoneId > 1000)
-                {
-                    return;
-                }
+                return;
             }
 
             try
@@ -143,13 +143,13 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("AchievementEarned", typeof(Models.AchievementEarned))]
         private Task Process(Models.AchievementEarned payload)
         {
-            var dataModel = new Data.Models.Planetside.AchievementEarned
+            var dataModel = new Data.Models.Planetside.Events.AchievementEarned
             {
                 AchievementId = payload.AchievementId,
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }
@@ -157,13 +157,13 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("BattleRankUp", typeof(BattlerankUp))]
         private Task Process(BattlerankUp payload)
         {
-            var dataModel = new EventBattlerankUp
+            var dataModel = new Data.Models.Planetside.Events.BattlerankUp
             {
                 BattleRank = payload.BattleRank,
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }
@@ -171,7 +171,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("ContinentLock", typeof(Models.ContinentLock))]
         private Task Process(Models.ContinentLock payload)
         {
-            var dataModel = new Data.Models.Planetside.ContinentLock
+            var dataModel = new Data.Models.Planetside.Events.ContinentLock
             {
                 TriggeringFaction = payload.TriggeringFaction,
                 MetagameEventId = payload.MetagameEventId,
@@ -180,7 +180,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 PopulationTr = payload.TrPopulation,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }
@@ -188,13 +188,13 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("ContinentUnlock", typeof(ContinentUnlock))]
         private Task Process(ContinentUnlock payload)
         {
-            var dataModel = new EventContinentUnlock
+            var dataModel = new Data.Models.Planetside.Events.ContinentUnlock
             {
                 TriggeringFaction = payload.TriggeringFaction,
                 MetagameEventId = payload.MetagameEventId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }
@@ -222,7 +222,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
             await Task.WhenAll(outfitWork);
 
-            var dataModel = new Data.Models.Planetside.Death
+            var dataModel = new Data.Models.Planetside.Events.Death
             {
                 AttackerCharacterId = payload.AttackerCharacterId,
                 AttackerFireModeId = payload.AttackerFireModeId,
@@ -236,7 +236,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 IsHeadshot = payload.IsHeadshot,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
 
             await _eventRepository.AddAsync(dataModel);
@@ -248,7 +248,7 @@ namespace Voidwell.DaybreakGames.Websocket
             var mapUpdate = _worldMonitor.UpdateFacilityControl(payload);
             var territory = mapUpdate?.Territory.ToArray();
 
-            var dataModel = new EventFacilityControl
+            var dataModel = new Data.Models.Planetside.Events.FacilityControl
             {
                 FacilityId = payload.FacilityId,
                 NewFactionId = payload.NewFactionId,
@@ -257,7 +257,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 OutfitId = payload.OutfitId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId,
+                ZoneId = payload.ZoneId.Value,
                 ZoneControlVs = territory != null ? territory[1] * 100 : 0,
                 ZoneControlNc = territory != null ? territory[2] * 100 : 0,
                 ZoneControlTr = territory != null ? territory[3] * 100 : 0
@@ -285,7 +285,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("GainExperience", typeof(Models.GainExperience))]
         private Task Process(Models.GainExperience payload)
         {
-            var dataModel = new Data.Models.Planetside.GainExperience
+            var dataModel = new Data.Models.Planetside.Events.GainExperience
             {
                 ExperienceId = payload.ExperienceId,
                 CharacterId = payload.CharacterId,
@@ -294,7 +294,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 OtherId = payload.OtherId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }
@@ -302,9 +302,9 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("MetagameEvent", typeof(MetagameEvent))]
         private async Task Process(MetagameEvent payload)
         {
-            payload.ZoneId = payload.ZoneId ?? (_metagameZones.TryGetValue(payload.MetagameEventId, out string metagameZone) ? metagameZone : null);
+            payload.ZoneId = payload.ZoneId ?? (_metagameZones.TryGetValue(payload.MetagameEventId, out int metagameZone) ? (int?)metagameZone : null);
 
-            var dataModel = new EventMetagameEvent
+            var dataModel = new Data.Models.Planetside.Events.MetagameEvent
             {
                 InstanceId = payload.InstanceId,
                 MetagameEventId = payload.MetagameEventId,
@@ -319,7 +319,7 @@ namespace Voidwell.DaybreakGames.Websocket
             };
             await _eventRepository.AddAsync(dataModel);
 
-            var eventState = (METAGAME_EVENT_STATE)Enum.Parse(typeof(METAGAME_EVENT_STATE), dataModel.MetagameEventState);
+            var eventState = Enum.Parse<METAGAME_EVENT_STATE>(dataModel.MetagameEventState);
             if (eventState == METAGAME_EVENT_STATE.STARTED || eventState == METAGAME_EVENT_STATE.RESTARTED)
             {
                 await _alertService.CreateAlert(payload);
@@ -333,14 +333,14 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("PlayerFacilityCapture", typeof(Models.PlayerFacilityCapture))]
         private Task Proces(Models.PlayerFacilityCapture payload)
         {
-            var dataModel = new Data.Models.Planetside.PlayerFacilityCapture
+            var dataModel = new Data.Models.Planetside.Events.PlayerFacilityCapture
             {
                 FacilityId = payload.FacilityId,
                 CharacterId = payload.CharacterId,
                 OutfitId = payload.OutfitId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }
@@ -348,14 +348,14 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("PlayerFacilityDefend", typeof(PlayerFacilityDefend))]
         private Task Process(PlayerFacilityDefend payload)
         {
-            var dataModel = new EventPlayerFacilityDefend
+            var dataModel = new Data.Models.Planetside.Events.PlayerFacilityDefend
             {
                 FacilityId = payload.FacilityId,
                 CharacterId = payload.CharacterId,
                 OutfitId = payload.OutfitId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }
@@ -365,7 +365,7 @@ namespace Voidwell.DaybreakGames.Websocket
         {
             await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, true);
 
-            var dataModel = new Data.Models.Planetside.PlayerLogin
+            var dataModel = new Data.Models.Planetside.Events.PlayerLogin
             {
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
@@ -379,7 +379,7 @@ namespace Voidwell.DaybreakGames.Websocket
         {
             await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, false);
 
-            var dataModel = new Data.Models.Planetside.PlayerLogout
+            var dataModel = new Data.Models.Planetside.Events.PlayerLogout
             {
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
@@ -391,7 +391,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]
         private Task Process(Models.VehicleDestroy payload)
         {
-            var dataModel = new Data.Models.Planetside.VehicleDestroy
+            var dataModel = new Data.Models.Planetside.Events.VehicleDestroy
             {
                 AttackerCharacterId = payload.AttackerCharacterId,
                 AttackerLoadoutId = payload.AttackerLoadoutId,
@@ -403,7 +403,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 FacilityId = payload.FacilityId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId.Value
             };
             return _eventRepository.AddAsync(dataModel);
         }

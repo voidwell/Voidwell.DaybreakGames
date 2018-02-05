@@ -97,6 +97,6 @@ namespace Voidwell.DaybreakGames.Models
 
         public string Id { get; set; }
         public string Name { get; set; }
-        public int FactionId { get; set; }
+        public int? FactionId { get; set; }
     }
 }

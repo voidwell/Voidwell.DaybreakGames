@@ -6,13 +6,13 @@ namespace Voidwell.DaybreakGames.Models
 {
     public class WorldZoneState
     {
-        public string WorldId { get; private set; }
-        public string ZoneId { get; private set; }
+        public int WorldId { get; private set; }
+        public int ZoneId { get; private set; }
         public WorldZone Map { get; private set; }
         public MapScore MapScore { get; private set; }
-        public Dictionary<string, int> MapRegionOwnership { get; private set; }
+        public Dictionary<int, int> MapRegionOwnership { get; private set; }
 
-        public WorldZoneState(string worldId, string zoneId, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
+        public WorldZoneState(int worldId, int zoneId, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
         {
             WorldId = worldId;
             ZoneId = zoneId;
@@ -21,18 +21,18 @@ namespace Voidwell.DaybreakGames.Models
 
             foreach(var own in ownership)
             {
-                MapRegionOwnership[own.RegionId] = int.TryParse(own.FactionId, out int iFaction) ? iFaction : 0;
+                MapRegionOwnership[own.RegionId] = own.FactionId;
             }
 
             CalculateOwnership();
         }
 
-        public void FacilityFactionChange(string facilityId, string factionId)
+        public void FacilityFactionChange(int facilityId, int factionId)
         {
             var region = Map.Regions.SingleOrDefault(r => r.FacilityId == facilityId);
             if (region != null)
             {
-                MapRegionOwnership[region.RegionId] = int.TryParse(factionId, out int iFaction) ? iFaction : 0;
+                MapRegionOwnership[region.RegionId] = factionId;
 
                 CalculateOwnership();
             }
@@ -59,11 +59,11 @@ namespace Voidwell.DaybreakGames.Models
             public float[] ConnectedPercent { get; private set; } = new[] { 0f, 0f, 0f, 0f };
 
             private Dictionary<int, bool> _factionsChecked;
-            private Dictionary<string, bool> _checkedRegions;
-            private Dictionary<string, int> _ownership;
+            private Dictionary<int, bool> _checkedRegions;
+            private Dictionary<int, int> _ownership;
             private int _focusFaction;
 
-            public OwnershipCalculator(WorldZone zoneMap, Dictionary<string, int> ownership)
+            public OwnershipCalculator(WorldZone zoneMap, Dictionary<int, int> ownership)
             {
                 _factionsChecked = new Dictionary<int, bool>();
                 _ownership = ownership;
@@ -80,7 +80,7 @@ namespace Voidwell.DaybreakGames.Models
                 
                 foreach (var warpgate in zoneMap.Warpgates)
                 {
-                    _checkedRegions = new Dictionary<string, bool>();
+                    _checkedRegions = new Dictionary<int, bool>();
                     _focusFaction = ownership[warpgate.RegionId];
 
                     if (!_factionsChecked.ContainsKey(_focusFaction))

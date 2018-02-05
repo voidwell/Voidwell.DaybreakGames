@@ -33,7 +33,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Id = a.Id,
                 Name = a.Name,
                 Description = a.Description,
-                ImageId = a.ImageId,
+                ImageId =   a.ImageId,
                 Factions = a.Faction?.Select(b => b.FactionId)
             });
         }
