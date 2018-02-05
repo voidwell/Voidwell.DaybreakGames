@@ -12,13 +12,11 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => new { a.CharacterId, a.OutfitId });
 
-            builder.HasOne(a => a.Character)
-                .WithOne()
-                .HasForeignKey<OutfitMember>(a => a.CharacterId);
+            builder.Ignore(a => a.Outfit);
 
-            builder.HasOne(a => a.Outfit)
-                .WithMany()
-                .HasForeignKey(a => a.OutfitId);
+            builder.HasOne(a => a.Character)
+                .WithOne(a => a.OutfitMembership)
+                .HasForeignKey<OutfitMember>(a => a.CharacterId);
         }
     }
 }

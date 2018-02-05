@@ -10,6 +10,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.ToTable("EventMetagameEvent");
 
             builder.HasKey(a => a.MetagameId);
+
+            builder.Property(a => a.MetagameId).ValueGeneratedOnAdd();
         }
     }
 }

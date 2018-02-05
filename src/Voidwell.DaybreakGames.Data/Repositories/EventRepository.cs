@@ -89,9 +89,12 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return await dbContext.EventFacilityControls
-                    .OrderBy("Timestamp", SortDirection.Descending)
-                    .FirstOrDefaultAsync(c => c.WorldId == worldId && c.ZoneId == zoneId && c.Timestamp <= date);
+                var query = from control in dbContext.EventFacilityControls
+                            where control.WorldId == worldId && control.ZoneId == zoneId && control.Timestamp <= date
+                            orderby control.Timestamp descending
+                            select control;
+
+                return await query.FirstOrDefaultAsync();
             }
         }
 

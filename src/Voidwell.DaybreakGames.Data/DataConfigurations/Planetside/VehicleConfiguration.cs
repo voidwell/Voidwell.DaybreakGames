@@ -12,9 +12,11 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => a.Id);
 
+            builder.Property(a => a.Id).ValueGeneratedNever();
+
             builder.HasMany(a => a.Faction)
                 .WithOne()
-                .HasForeignKey(a => a.Vehicle);
+                .HasForeignKey(a => a.VehicleId);
         }
     }
 }

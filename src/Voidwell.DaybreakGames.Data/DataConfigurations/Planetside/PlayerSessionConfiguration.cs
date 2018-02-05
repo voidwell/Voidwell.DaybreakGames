@@ -13,6 +13,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.HasKey(a => a.Id);
 
             builder.HasIndex(a => new { a.CharacterId, a.LoginDate, a.LogoutDate });
+
+            builder.Property(a => a.Id).ValueGeneratedOnAdd();
         }
     }
 }

@@ -11,6 +11,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.ToTable("MapHex");
 
             builder.HasKey(a => a.Id);
+
+            builder.Property(a => a.Id).ValueGeneratedOnAdd();
         }
     }
 }

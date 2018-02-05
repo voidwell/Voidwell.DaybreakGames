@@ -12,6 +12,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => a.Id);
 
+            builder.Property(a => a.Id).ValueGeneratedNever();
+
             builder.HasOne(a => a.ItemCategory)
                 .WithMany()
                 .HasForeignKey(a => a.ItemCategoryId);
