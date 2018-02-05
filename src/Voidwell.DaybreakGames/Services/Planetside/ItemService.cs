@@ -25,7 +25,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusItemCategory = censusItemCategory;
         }
 
-        public Task<IEnumerable<Item>> FindItems(IEnumerable<string> itemIds)
+        public Task<IEnumerable<Item>> FindItems(IEnumerable<int> itemIds)
         {
             return _itemRepository.FindItemsByIdsAsync(itemIds);
         }

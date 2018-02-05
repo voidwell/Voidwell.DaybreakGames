@@ -16,7 +16,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("territory/{worldId}/{zoneId}")]
-        public Models.MapScore GetWorldScore(string worldId, string zoneId)
+        public MapScore GetWorldScore(int worldId, int zoneId)
         {
             return _worldMonitor.GetTerritory(worldId, zoneId);
         }

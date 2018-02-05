@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class EventPlayerFacilityCaptureConfiguration : IEntityTypeConfiguration<EventPlayerFacilityCapture>
+    internal class PlayerFacilityCapture : IEntityTypeConfiguration<Models.Planetside.Events.PlayerFacilityCapture>
     {
-        public void Configure(EntityTypeBuilder<EventPlayerFacilityCapture> builder)
+        public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityCapture> builder)
         {
             builder.ToTable("EventPlayerFacilityCapture");
 

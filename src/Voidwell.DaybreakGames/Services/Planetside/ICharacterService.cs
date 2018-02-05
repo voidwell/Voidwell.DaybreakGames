@@ -15,6 +15,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<OutfitMember> GetCharactersOutfit(string characterId);
         Task UpdateAllCharacterInfo(string characterId, DateTime? LastLoginDate = null);
         Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetSessions(string characterId);
-        Task<Models.PlayerSession> GetSession(string characterId, string sessionId);
+        Task<Models.PlayerSession> GetSession(string characterId, int sessionId);
     }
 }

@@ -2,7 +2,7 @@
 {
     public class CensusVehicleFactionModel
     {
-        public string VehicleId { get; set; }
-        public string FactionId { get; set; }
+        public int VehicleId { get; set; }
+        public int FactionId { get; set; }
     }
 }

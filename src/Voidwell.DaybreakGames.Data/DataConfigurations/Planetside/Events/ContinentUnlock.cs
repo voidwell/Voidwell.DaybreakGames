@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class EventContinentUnlockConfiguration : IEntityTypeConfiguration<EventContinentUnlock>
+    internal class ContinentUnlock : IEntityTypeConfiguration<Models.Planetside.Events.ContinentUnlock>
     {
-        public void Configure(EntityTypeBuilder<EventContinentUnlock> builder)
+        public void Configure(EntityTypeBuilder<Models.Planetside.Events.ContinentUnlock> builder)
         {
             builder.ToTable("EventContinentUnlock");
 

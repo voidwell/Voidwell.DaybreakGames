@@ -34,7 +34,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("{characterId}/sessions/{sessionId}")]
-        public async Task<ActionResult> GetCharacterSessionsById(string characterId, string sessionId)
+        public async Task<ActionResult> GetCharacterSessionsById(string characterId, int sessionId)
         {
             var result = await _characterService.GetSession(characterId, sessionId);
             return Ok(result);

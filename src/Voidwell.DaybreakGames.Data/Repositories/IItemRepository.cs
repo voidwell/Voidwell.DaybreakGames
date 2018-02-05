@@ -8,7 +8,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
     {
         Task UpsertRangeAsync(IEnumerable<Item> entities);
         Task UpsertRangeAsync(IEnumerable<ItemCategory> entities);
-        Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<string> itemIds);
+        Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<int> itemIds);
         Task<IEnumerable<Item>> FindItemsByNameAsync(string name, int limit);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
 {
-    public class EventMetagameEvent
+    public class MetagameEvent
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MetagameId{ get; set; }

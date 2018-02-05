@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -28,7 +29,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _mapService = mapService;
         }
 
-        public async Task<CombatReport> GetCombatReport(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        public async Task<CombatReport> GetCombatReport(int worldId, int zoneId, DateTime startDate, DateTime endDate)
         {
             var combatStatsTask = GetCombatStats(worldId, zoneId, startDate, endDate);
             var captureLogTask = GetCaptureLog(worldId, zoneId, startDate, endDate);
@@ -44,7 +45,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return combatReport;
         }
 
-        private async Task<CombatReportStats> GetCombatStats(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private async Task<CombatReportStats> GetCombatStats(int worldId, int zoneId, DateTime startDate, DateTime endDate)
         {
             var characterDeathsTask = GetCharacterDeaths(worldId, zoneId, startDate, endDate);
             var vehicleDeathsTask = GetVehicleDeaths(worldId, zoneId, startDate, endDate);
@@ -56,8 +57,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var participantHash = new Dictionary<string, CombatReportParticipantStats>();
             var outfitHash = new Dictionary<string, CombatReportOutfitStats>();
-            var vehicleHash = new Dictionary<string, CombatReportVehicleStats>();
-            var weaponHash = new Dictionary<string, CombatReportWeaponStats>();
+            var vehicleHash = new Dictionary<int, CombatReportVehicleStats>();
+            var weaponHash = new Dictionary<int, CombatReportWeaponStats>();
 
             foreach (var death in deaths)
             {
@@ -81,14 +82,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     outfitHash.Add(death.CharacterOutfitId, new CombatReportOutfitStats(death.CharacterOutfitId));
                 }
 
-                if (death.AttackerWeaponId != "0" && !weaponHash.ContainsKey(death.AttackerWeaponId))
+                if (death.AttackerWeaponId != null && death.AttackerWeaponId != 0 && !weaponHash.ContainsKey(death.AttackerWeaponId.Value))
                 {
-                    weaponHash.Add(death.AttackerWeaponId, new CombatReportWeaponStats(death.AttackerWeaponId));
+                    weaponHash.Add(death.AttackerWeaponId.Value, new CombatReportWeaponStats(death.AttackerWeaponId.Value));
                 }
 
-                if (death.AttackerVehicleId != null && death.AttackerVehicleId != "0" && !vehicleHash.ContainsKey(death.AttackerVehicleId))
+                if (death.AttackerVehicleId != null && death.AttackerVehicleId != 0 && !vehicleHash.ContainsKey(death.AttackerVehicleId.Value))
                 {
-                    vehicleHash.Add(death.AttackerVehicleId, new CombatReportVehicleStats(death.AttackerVehicleId));
+                    vehicleHash.Add(death.AttackerVehicleId.Value, new CombatReportVehicleStats(death.AttackerVehicleId.Value));
                 }
             }
 
@@ -99,9 +100,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     participantHash.Add(death.AttackerCharacterId, new CombatReportParticipantStats(death.AttackerCharacterId));
                 }
 
-                if (death.VehicleId != null && death.VehicleId != "0" && !vehicleHash.ContainsKey(death.VehicleId))
+                if (death.VehicleId != null && death.VehicleId != 0 && !vehicleHash.ContainsKey(death.VehicleId.Value))
                 {
-                    vehicleHash.Add(death.VehicleId, new CombatReportVehicleStats(death.VehicleId));
+                    vehicleHash.Add(death.VehicleId.Value, new CombatReportVehicleStats(death.VehicleId.Value));
                 }
             }
 
@@ -115,7 +116,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             foreach (var outfit in outfitsTask.Result)
             {
                 outfitHash[outfit.Id].Outfit.Name = outfit.Name;
-                outfitHash[outfit.Id].Outfit.FactionId = outfit.FactionId;
+                outfitHash[outfit.Id].Outfit.FactionId = outfit.FactionId.HasValue ? outfit.FactionId.Value : 0;
                 outfitHash[outfit.Id].Outfit.Alias = outfit.Alias;
             }
 
@@ -135,7 +136,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             foreach (var weapon in weaponsTask.Result)
             {
                 weaponHash[weapon.Id].Item.Name = weapon.Name;
-                weaponHash[weapon.Id].Item.FactionId = weapon.FactionId;
+                weaponHash[weapon.Id].Item.FactionId = weapon.FactionId.HasValue ? weapon.FactionId.Value : 0;
             }
 
             foreach(var vehicle in vehiclesTask.Result)
@@ -156,8 +157,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 participantHash.TryGetValue(death.CharacterId, out var victim);
                 outfitHash.TryGetValue(death.AttackerOutfitId, out var attackerOutfit);
                 outfitHash.TryGetValue(death.CharacterOutfitId, out var victimOutfit);
-                weaponHash.TryGetValue(death.AttackerWeaponId, out var weapon);
-                vehicleHash.TryGetValue(death.AttackerVehicleId, out var vehicle);
+
+                CombatReportWeaponStats weapon = null;
+                if (death.AttackerWeaponId.HasValue && weaponHash.ContainsKey(death.AttackerWeaponId.Value))
+                {
+                    weapon = weaponHash[death.AttackerWeaponId.Value];
+                }
+
+                CombatReportVehicleStats vehicle = null;
+                if (death.AttackerVehicleId.HasValue && vehicleHash.ContainsKey(death.AttackerVehicleId.Value))
+                {
+                    vehicle = vehicleHash[death.AttackerVehicleId.Value];
+                }
 
                 if (attacker.Character.Id == victim.Character.Id || attacker.Character.Id == "0")
                 {
@@ -202,10 +213,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             foreach(var death in vehicleDeaths)
             {
                 participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
-                vehicleHash.TryGetValue(death.AttackerVehicleId, out var vehicle);
 
                 if (attacker != null) { attacker.VehicleKills++; }
-                if (vehicle != null) { vehicle.Deaths++; }
+
+                if (death.AttackerVehicleId.HasValue && vehicleHash.ContainsKey(death.AttackerVehicleId.Value))
+                {
+                    vehicleHash[death.AttackerVehicleId.Value].Deaths++;
+                }
             }
 
             if (outfitHash.ContainsKey(""))
@@ -222,17 +236,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private Task<IEnumerable<EventDeath>> GetCharacterDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<Death>> GetCharacterDeaths(int worldId, int zoneId, DateTime startDate, DateTime endDate)
         {
             return _eventRepository.GetDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
 
-        private Task<IEnumerable<EventVehicleDestroy>> GetVehicleDeaths(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<VehicleDestroy>> GetVehicleDeaths(int worldId, int zoneId, DateTime startDate, DateTime endDate)
         {
             return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
 
-        private async Task<IEnumerable<CaptureLogRow>> GetCaptureLog(string worldId, string zoneId, DateTime startDate, DateTime endDate)
+        private async Task<IEnumerable<CaptureLogRow>> GetCaptureLog(int worldId, int zoneId, DateTime startDate, DateTime endDate)
         {
             var facilityControls = await _eventRepository.GetFacilityControlsByDateAsync(worldId, zoneId, startDate, endDate);
 

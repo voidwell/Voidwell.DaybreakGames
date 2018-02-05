@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
 {
-    public class EventPlayerLogout
+    public class PlayerLogin
     {
         [Required]
         public string CharacterId { get; set; }

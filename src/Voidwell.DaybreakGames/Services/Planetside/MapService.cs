@@ -24,7 +24,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusMap = censusMap;
         }
 
-        public async Task<IEnumerable<MapOwnership>> GetMapOwnership(string worldId, string zoneId)
+        public async Task<IEnumerable<MapOwnership>> GetMapOwnership(int worldId, int zoneId)
         {
             var ownership = await _censusMap.GetMapOwnership(worldId, zoneId);
 
@@ -36,17 +36,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return ownership.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
         }
 
-        public Task<IEnumerable<MapRegion>> GetMapRegions(string zoneId)
+        public Task<IEnumerable<MapRegion>> GetMapRegions(int zoneId)
         {
             return _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
         }
 
-        public Task<IEnumerable<FacilityLink>> GetFacilityLinks(string zoneId)
+        public Task<IEnumerable<FacilityLink>> GetFacilityLinks(int zoneId)
         {
             return _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
         }
 
-        public Task<IEnumerable<MapRegion>> FindRegions(params string[] facilityIds)
+        public Task<IEnumerable<MapRegion>> FindRegions(params int[] facilityIds)
         {
             return _mapRepository.GetMapRegionsByFacilityIdsAsync(facilityIds);
         }

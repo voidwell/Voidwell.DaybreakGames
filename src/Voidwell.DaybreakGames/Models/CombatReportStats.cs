@@ -51,7 +51,7 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportWeaponStats
     {
-        public CombatReportWeaponStats(string weaponItemId)
+        public CombatReportWeaponStats(int weaponItemId)
         {
             Item = new CombatReportItemDetail(weaponItemId);
         }
@@ -64,7 +64,7 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportVehicleStats
     {
-        public CombatReportVehicleStats(string vehicleId)
+        public CombatReportVehicleStats(int vehicleId)
         {
             Vehicle = new CombatReportItemDetail(vehicleId);
         }
@@ -89,14 +89,14 @@ namespace Voidwell.DaybreakGames.Models
         {
         }
 
-        public CombatReportItemDetail(string id)
+        public CombatReportItemDetail(object id)
         {
-            Id = id;
-            Name = $"Unknown ({id})";
+            Id = id.ToString();
+            Name = $"Unknown ({Id})";
         }
 
         public string Id { get; set; }
         public string Name { get; set; }
-        public string FactionId { get; set; }
+        public int FactionId { get; set; }
     }
 }

@@ -33,7 +33,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(string weaponItemId, string sortColumn, SortDirection sortDirection, int rowStart, int limit)
+        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, string sortColumn, SortDirection sortDirection, int rowStart, int limit)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

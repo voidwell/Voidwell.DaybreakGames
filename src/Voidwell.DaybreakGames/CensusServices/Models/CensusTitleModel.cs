@@ -2,7 +2,7 @@
 {
     public class CensusTitleModel
     {
-        public string TitleId { get; set; }
+        public int TitleId { get; set; }
         public MultiLanguageString Name { get; set; }
     }
 }

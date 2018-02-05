@@ -5,8 +5,8 @@ namespace Voidwell.DaybreakGames.Websocket.Models
     public class PayloadBase
     {
         public string EventName { get; set; }
-        public string WorldId { get; set; }
-        public string ZoneId { get; set; }
+        public int WorldId { get; set; }
+        public int ZoneId { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

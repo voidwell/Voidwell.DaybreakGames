@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class EventPlayerLoginConfiguration : IEntityTypeConfiguration<EventPlayerLogin>
+    internal class PlayerLogin : IEntityTypeConfiguration<Models.Planetside.Events.PlayerLogin>
     {
-        public void Configure(EntityTypeBuilder<EventPlayerLogin> builder)
+        public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerLogin> builder)
         {
             builder.ToTable("EventPlayerLogin");
 

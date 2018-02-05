@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             _censusClient = censusClient;
         }
 
-        public async Task<CensusMapModel> GetMapOwnership(string worldId, string zoneId)
+        public async Task<CensusMapModel> GetMapOwnership(int worldId, int zoneId)
         {
             var query = _censusClient.CreateQuery("map");
             query.SetLanguage("en");

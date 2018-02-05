@@ -7,7 +7,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public interface IWeaponService
     {
-        Task<WeaponInfoResult> GetWeaponInfo(string weaponItemId);
-        Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(string weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250);
+        Task<WeaponInfoResult> GetWeaponInfo(int weaponItemId);
+        Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(int weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250);
     }
 }

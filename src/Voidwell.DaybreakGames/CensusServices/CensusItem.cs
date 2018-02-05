@@ -36,7 +36,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusItemModel>();
         }
 
-        public async Task<CensusWeaponInfoModel> GetWeaponInfo(string weaponItemId)
+        public async Task<CensusWeaponInfoModel> GetWeaponInfo(int weaponItemId)
         {
             var query = _censusClient.CreateQuery("item");
             query.SetLanguage("en");

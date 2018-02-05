@@ -1,14 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class EventDeathConfiguration : IEntityTypeConfiguration<EventDeath>
+    internal class EventVehicleDestroyConfiguration : IEntityTypeConfiguration<Models.Planetside.Events.VehicleDestroy>
     {
-        public void Configure(EntityTypeBuilder<EventDeath> builder)
+        public void Configure(EntityTypeBuilder<Models.Planetside.Events.VehicleDestroy> builder)
         {
-            builder.ToTable("EventDeath");
+            builder.ToTable("EventVehicleDestroy");
 
             builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId });
         }

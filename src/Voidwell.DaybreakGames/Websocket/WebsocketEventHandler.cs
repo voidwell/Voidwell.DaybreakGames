@@ -140,10 +140,10 @@ namespace Voidwell.DaybreakGames.Websocket
             }
         }
 
-        [CensusEventHandler("AchievementEarned", typeof(AchievementEarned))]
-        private Task Process(AchievementEarned payload)
+        [CensusEventHandler("AchievementEarned", typeof(Models.AchievementEarned))]
+        private Task Process(Models.AchievementEarned payload)
         {
-            var dataModel = new EventAchievementEarned
+            var dataModel = new Data.Models.Planetside.AchievementEarned
             {
                 AchievementId = payload.AchievementId,
                 CharacterId = payload.CharacterId,
@@ -168,10 +168,10 @@ namespace Voidwell.DaybreakGames.Websocket
             return _eventRepository.AddAsync(dataModel);
         }
 
-        [CensusEventHandler("ContinentLock", typeof(ContinentLock))]
-        private Task Process(ContinentLock payload)
+        [CensusEventHandler("ContinentLock", typeof(Models.ContinentLock))]
+        private Task Process(Models.ContinentLock payload)
         {
-            var dataModel = new EventContinentLock
+            var dataModel = new Data.Models.Planetside.ContinentLock
             {
                 TriggeringFaction = payload.TriggeringFaction,
                 MetagameEventId = payload.MetagameEventId,
@@ -199,8 +199,8 @@ namespace Voidwell.DaybreakGames.Websocket
             return _eventRepository.AddAsync(dataModel);
         }
 
-        [CensusEventHandler("Death", typeof(Death))]
-        private async Task Process(Death payload)
+        [CensusEventHandler("Death", typeof(Models.Death))]
+        private async Task Process(Models.Death payload)
         {
             List<Task> outfitWork = new List<Task>();
             Task<OutfitMember> AttackerOutfitTask = null;
@@ -222,7 +222,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
             await Task.WhenAll(outfitWork);
 
-            var dataModel = new EventDeath
+            var dataModel = new Data.Models.Planetside.Death
             {
                 AttackerCharacterId = payload.AttackerCharacterId,
                 AttackerFireModeId = payload.AttackerFireModeId,
@@ -282,10 +282,10 @@ namespace Voidwell.DaybreakGames.Websocket
             }
         }
 
-        [CensusEventHandler("GainExperience", typeof(GainExperience))]
-        private Task Process(GainExperience payload)
+        [CensusEventHandler("GainExperience", typeof(Models.GainExperience))]
+        private Task Process(Models.GainExperience payload)
         {
-            var dataModel = new EventGainExperience
+            var dataModel = new Data.Models.Planetside.GainExperience
             {
                 ExperienceId = payload.ExperienceId,
                 CharacterId = payload.CharacterId,
@@ -330,10 +330,10 @@ namespace Voidwell.DaybreakGames.Websocket
             }
         }
 
-        [CensusEventHandler("PlayerFacilityCapture", typeof(PlayerFacilityCapture))]
-        private Task Proces(PlayerFacilityCapture payload)
+        [CensusEventHandler("PlayerFacilityCapture", typeof(Models.PlayerFacilityCapture))]
+        private Task Proces(Models.PlayerFacilityCapture payload)
         {
-            var dataModel = new EventPlayerFacilityCapture
+            var dataModel = new Data.Models.Planetside.PlayerFacilityCapture
             {
                 FacilityId = payload.FacilityId,
                 CharacterId = payload.CharacterId,
@@ -360,12 +360,12 @@ namespace Voidwell.DaybreakGames.Websocket
             return _eventRepository.AddAsync(dataModel);
         }
 
-        [CensusEventHandler("PlayerLogin", typeof(PlayerLogin))]
-        private async Task Process(PlayerLogin payload)
+        [CensusEventHandler("PlayerLogin", typeof(Models.PlayerLogin))]
+        private async Task Process(Models.PlayerLogin payload)
         {
             await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, true);
 
-            var dataModel = new EventPlayerLogin
+            var dataModel = new Data.Models.Planetside.PlayerLogin
             {
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
@@ -374,12 +374,12 @@ namespace Voidwell.DaybreakGames.Websocket
             await _eventRepository.AddAsync(dataModel);
         }
 
-        [CensusEventHandler("PlayerLogout", typeof(PlayerLogout))]
-        private async Task Process(PlayerLogout payload)
+        [CensusEventHandler("PlayerLogout", typeof(Models.PlayerLogout))]
+        private async Task Process(Models.PlayerLogout payload)
         {
             await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, false);
 
-            var dataModel = new EventPlayerLogout
+            var dataModel = new Data.Models.Planetside.PlayerLogout
             {
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
@@ -388,10 +388,10 @@ namespace Voidwell.DaybreakGames.Websocket
             await _eventRepository.AddAsync(dataModel);
         }
 
-        [CensusEventHandler("VehicleDestroy", typeof(VehicleDestroy))]
-        private Task Process(VehicleDestroy payload)
+        [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]
+        private Task Process(Models.VehicleDestroy payload)
         {
-            var dataModel = new EventVehicleDestroy
+            var dataModel = new Data.Models.Planetside.VehicleDestroy
             {
                 AttackerCharacterId = payload.AttackerCharacterId,
                 AttackerLoadoutId = payload.AttackerLoadoutId,
