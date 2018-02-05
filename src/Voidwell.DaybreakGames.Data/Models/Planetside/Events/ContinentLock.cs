@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
 {
-    public class EventContinentLock
+    public class ContinentLock
     {
         [Required]
         public int WorldId { get; set; }

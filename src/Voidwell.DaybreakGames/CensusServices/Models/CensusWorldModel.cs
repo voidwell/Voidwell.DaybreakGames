@@ -2,7 +2,7 @@
 {
     public class CensusWorldModel
     {
-        public string WorldId { get; set; }
+        public int WorldId { get; set; }
         public MultiLanguageString Name { get; set; }
     }
 }

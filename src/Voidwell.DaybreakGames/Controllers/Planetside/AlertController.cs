@@ -15,14 +15,14 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("{worldId}/{instanceId}")]
-        public async Task<ActionResult> GetAlert(string worldId, string instanceId)
+        public async Task<ActionResult> GetAlert(int worldId, int instanceId)
         {
             var result = await _alertService.GetAlert(worldId, instanceId);
             return Ok(result);
         }
 
         [HttpGet("{worldId}")]
-        public async Task<ActionResult> GetAlertsByWorldId(string worldId)
+        public async Task<ActionResult> GetAlertsByWorldId(int worldId)
         {
             var result = await _alertService.GetAlerts(worldId);
             return Ok(result);

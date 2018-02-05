@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("{weaponItemId}")]
-        public async Task<ActionResult> GetWeaponInfo(string weaponItemId)
+        public async Task<ActionResult> GetWeaponInfo(int weaponItemId)
         {
             var result = await _weaponService.GetWeaponInfo(weaponItemId);
             return Ok(result);

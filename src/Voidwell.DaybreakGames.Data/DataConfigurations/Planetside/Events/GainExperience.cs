@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class EventGainExperienceConfiguration : IEntityTypeConfiguration<EventGainExperience>
+    internal class GainExperience : IEntityTypeConfiguration<Models.Planetside.Events.GainExperience>
     {
-        public void Configure(EntityTypeBuilder<EventGainExperience> builder)
+        public void Configure(EntityTypeBuilder<Models.Planetside.Events.GainExperience> builder)
         {
             builder.ToTable("EventGainExperience");
 

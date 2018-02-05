@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Models;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -18,7 +18,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return dbContext.UpdaterScheduler.SingleOrDefault(u => u.ServiceName == serviceName);
+                return dbContext.UpdaterScheduler.SingleOrDefault(u => u.Id == serviceName);
             }
         }
 
@@ -28,7 +28,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbSet = dbContext.UpdaterScheduler;
 
-                var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.ServiceName == entity.ServiceName);
+                var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
                 if (storeEntity == null)
                 {
                     dbSet.Add(entity);

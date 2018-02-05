@@ -2,7 +2,7 @@
 {
     public class CensusMetagameEventStateModel
     {
-        public string MetagameEventStateId { get; set; }
+        public int MetagameEventStateId { get; set; }
         public string Name { get; set; }
     }
 }

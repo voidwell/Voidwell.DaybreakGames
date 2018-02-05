@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             _censusClient = censusClient;
         }
 
-        public async Task<IEnumerable<CensusWorldModel>> GetAllWorlds ()
+        public async Task<IEnumerable<CensusWorldModel>> GetAllWorlds()
         {
             var query = _censusClient.CreateQuery("world");
             query.SetLanguage("en");

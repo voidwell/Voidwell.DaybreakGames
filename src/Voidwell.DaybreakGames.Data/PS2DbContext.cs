@@ -2,7 +2,9 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 namespace Voidwell.DaybreakGames.Data
 {
@@ -41,19 +43,19 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<World> Worlds { get; set; }
         public DbSet<Zone> Zones { get; set; }
 
-        public DbSet<EventAchievementEarned> AchievementEarnedEvents { get; set; }
-        public DbSet<EventBattlerankUp> BattleRankUpEvents { get; set; }
-        public DbSet<EventContinentLock> ContinentLockEvents { get; set; }
-        public DbSet<EventContinentUnlock> ContinentUnlockEvents { get; set; }
-        public DbSet<EventDeath> EventDeaths { get; set; }
-        public DbSet<EventFacilityControl> EventFacilityControls { get; set; }
-        public DbSet<EventGainExperience> GainExperienceEvents { get; set; }
-        public DbSet<EventMetagameEvent> MetagameEventEvents { get; set; }
-        public DbSet<EventPlayerFacilityCapture> PlayerFacilityCaptureEvents { get; set; }
-        public DbSet<EventPlayerFacilityDefend> PlayerFacilityDefendEvents { get; set; }
-        public DbSet<EventPlayerLogin> PlayerLoginEvents { get; set; }
-        public DbSet<EventPlayerLogout> PlayerLogoutEvents { get; set; }
-        public DbSet<EventVehicleDestroy> EventVehicleDestroys { get; set; }
+        public DbSet<AchievementEarned> AchievementEarnedEvents { get; set; }
+        public DbSet<BattlerankUp> BattleRankUpEvents { get; set; }
+        public DbSet<ContinentLock> ContinentLockEvents { get; set; }
+        public DbSet<ContinentUnlock> ContinentUnlockEvents { get; set; }
+        public DbSet<Death> EventDeaths { get; set; }
+        public DbSet<FacilityControl> EventFacilityControls { get; set; }
+        public DbSet<GainExperience> GainExperienceEvents { get; set; }
+        public DbSet<MetagameEvent> MetagameEventEvents { get; set; }
+        public DbSet<PlayerFacilityCapture> PlayerFacilityCaptureEvents { get; set; }
+        public DbSet<PlayerFacilityDefend> PlayerFacilityDefendEvents { get; set; }
+        public DbSet<PlayerLogin> PlayerLoginEvents { get; set; }
+        public DbSet<PlayerLogout> PlayerLogoutEvents { get; set; }
+        public DbSet<VehicleDestroy> EventVehicleDestroys { get; set; }
 
         public DbSet<UpdaterScheduler> UpdaterScheduler { get; set; }
 

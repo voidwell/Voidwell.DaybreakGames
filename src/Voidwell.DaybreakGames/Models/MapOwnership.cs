@@ -2,13 +2,13 @@
 {
     public class MapOwnership
     {
-        public MapOwnership(string regionId, string factionId)
+        public MapOwnership(int regionId, int factionId)
         {
             RegionId = regionId;
             FactionId = factionId;
         }
 
-        public string RegionId { get; set; }
-        public string FactionId { get; set; }
+        public int RegionId { get; set; }
+        public int FactionId { get; set; }
     }
 }

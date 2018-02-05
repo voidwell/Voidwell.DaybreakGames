@@ -12,6 +12,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => new { a.CharacterId, a.ItemId, a.VehicleId });
 
+            builder.HasIndex(a => a.Kills);
+
             builder
                 .Ignore(a => a.Item)
                 .Ignore(a => a.Vehicle);
@@ -19,8 +21,6 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.HasOne(a => a.Character)
                 .WithMany(a => a.WeaponStats)
                 .HasForeignKey(a => a.CharacterId);
-
-            builder.HasIndex(a => a.Kills);
 
             builder.Property(a => a.DamageGiven).HasDefaultValue(0);
             builder.Property(a => a.DamageTakenBy).HasDefaultValue(0);

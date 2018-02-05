@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
 {
-    public class EventBattlerankUp
+    public class AchievementEarned
     {
         [Required]
         public string CharacterId { get; set; }
@@ -12,6 +12,6 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
 
         public int WorldId { get; set; }
         public int ZoneId { get; set; }
-        public int BattleRank { get; set; }
+        public int AchievementId { get; set; }
     }
 }

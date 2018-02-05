@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(string zoneId)
+        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -26,7 +26,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<string> facilityIds)
+        public async Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<int> facilityIds)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(string zoneId)
+        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
@@ -55,7 +55,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.MapRegionId == entity.MapRegionId && a.ZoneId == entity.ZoneId && a.XPos == entity.XPos && a.YPos == entity.YPos);
                     if (storeEntity == null)
                     {
-                        entity.Id = Guid.NewGuid().ToString();
                         await dbSet.AddAsync(entity);
                     }
                     else

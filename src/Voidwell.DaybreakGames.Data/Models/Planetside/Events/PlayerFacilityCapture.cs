@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
 {
-    public class EventPlayerFacilityCapture
+    public class PlayerFacilityCapture
     {
         [Required]
         public string CharacterId { get; set; }

@@ -4,7 +4,7 @@
     {
         public string CharacterId { get; set; }
         public string StatName { get; set; }
-        public string ProfileId { get; set; }
+        public int ProfileId { get; set; }
         public int ValueForeverVs { get; set; }
         public int ValueForeverNc { get; set; }
         public int ValueForeverTr { get; set; }

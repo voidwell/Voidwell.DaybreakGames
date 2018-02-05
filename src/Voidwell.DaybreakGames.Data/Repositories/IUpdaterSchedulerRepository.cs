@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Models;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {

@@ -2,7 +2,7 @@
 {
     public class ContinentUnlock : PayloadBase
     {
-        public string TriggeringFaction { get; set; }
-        public string MetagameEventId { get; set; }
+        public int TriggeringFaction { get; set; }
+        public int MetagameEventId { get; set; }
     }
 }

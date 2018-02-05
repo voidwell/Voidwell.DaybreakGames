@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<string> itemIds)
+        public async Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<int> itemIds)
         {
             using (var dbContext = _dbContextHelper.Create())
             {

@@ -7,8 +7,8 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
         public MultiLanguageString Name { get; set; }
         public MultiLanguageString Description { get; set; }
         public WeaponCategory Category { get; set; }
-        public string FactionId { get; set; }
-        public string ImageId { get; set; }
+        public int FactionId { get; set; }
+        public int ImageId { get; set; }
         public int MaxStackSize { get; set; }
         public WeaponDatasheet Datasheet { get; set; }
         public IEnumerable<WeaponFireMode> FireMode { get; set; }
@@ -47,7 +47,6 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
         {
             public string PlayerState { get; set; }
             public float MinConeOfFire { get; set; }
-
         }
     }
 }

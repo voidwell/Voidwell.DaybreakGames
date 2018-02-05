@@ -6,6 +6,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public interface ICombatReportService
     {
-        Task<CombatReport> GetCombatReport(string worldId, string zoneId, DateTime startDate, DateTime endDate);
+        Task<CombatReport> GetCombatReport(int worldId, int zoneId, DateTime startDate, DateTime endDate);
     }
 }

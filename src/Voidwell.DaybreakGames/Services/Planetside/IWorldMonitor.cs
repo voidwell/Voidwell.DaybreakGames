@@ -8,13 +8,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public interface IWorldMonitor
     {
-        Task SetWorldState(string worldId, string worldName, bool isOnline);
-        Task<bool> TryResetWorld(string worldId);
+        Task SetWorldState(int worldId, string worldName, bool isOnline);
+        Task<bool> TryResetWorld(int worldId);
         FacilityControlChange UpdateFacilityControl(FacilityControl facilityControl);
-        MapScore GetTerritory(string worldId, string zoneId);
-        Task<IEnumerable<float>> GetTerritoryFromDate(string worldId, string zoneId, DateTime date);
+        MapScore GetTerritory(int worldId, int zoneId);
+        Task<IEnumerable<float>> GetTerritoryFromDate(int worldId, int zoneId, DateTime date);
         Task SetPlayerOnlineState(string characterId, DateTime timestamp, bool isOnline);
-        IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(string worldId);
-        Dictionary<string, bool> GetWorldStates();
+        IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(int worldId);
+        IEnumerable<WorldOnlineState> GetWorldStates();
     }
 }

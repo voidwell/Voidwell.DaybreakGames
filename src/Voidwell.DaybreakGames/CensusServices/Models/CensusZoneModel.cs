@@ -2,7 +2,7 @@
 {
     public class CensusZoneModel
     {
-        public string ZoneId { get; set; }
+        public int ZoneId { get; set; }
         public string Code { get; set; }
         public MultiLanguageString Name { get; set; }
         public int HexSize { get; set; }

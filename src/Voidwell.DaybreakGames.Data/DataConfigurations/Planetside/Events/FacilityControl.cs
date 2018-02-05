@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class EventFacilityControlConfiguration : IEntityTypeConfiguration<EventFacilityControl>
+    internal class FacilityControl : IEntityTypeConfiguration<Models.Planetside.Events.FacilityControl>
     {
-        public void Configure(EntityTypeBuilder<EventFacilityControl> builder)
+        public void Configure(EntityTypeBuilder<Models.Planetside.Events.FacilityControl> builder)
         {
             builder.ToTable("EventFacilityControl");
 

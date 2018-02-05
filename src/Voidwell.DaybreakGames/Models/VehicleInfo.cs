@@ -4,10 +4,10 @@ namespace Voidwell.DaybreakGames.Models
 {
     public class VehicleInfo
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string ImageId { get; set; }
-        public IEnumerable<string> Factions { get; set; }
+        public int ImageId { get; set; }
+        public IEnumerable<int> Factions { get; set; }
     }
 }

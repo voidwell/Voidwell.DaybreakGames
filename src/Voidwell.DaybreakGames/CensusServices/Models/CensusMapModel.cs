@@ -4,7 +4,7 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
 {
     public class CensusMapModel
     {
-        public string ZoneId { get; set; }
+        public int ZoneId { get; set; }
         public CensusMapRegionSet Regions { get; set; }
 
         public class CensusMapRegionSet
@@ -20,8 +20,8 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
 
         public class CensusMapRegionSetRowData
         {
-            public string RegionId { get; set; }
-            public string FactionId { get; set; }
+            public int RegionId { get; set; }
+            public int FactionId { get; set; }
         }
     }
 }

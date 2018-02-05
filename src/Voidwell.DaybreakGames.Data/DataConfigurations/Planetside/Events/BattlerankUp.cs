@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class EventBattlerankUpConfiguration : IEntityTypeConfiguration<EventBattlerankUp>
+    internal class BattlerankUp : IEntityTypeConfiguration<Models.Planetside.Events.BattlerankUp>
     {
-        public void Configure(EntityTypeBuilder<EventBattlerankUp> builder)
+        public void Configure(EntityTypeBuilder<Models.Planetside.Events.BattlerankUp> builder)
         {
             builder.ToTable("EventBattlerankUp");
 
