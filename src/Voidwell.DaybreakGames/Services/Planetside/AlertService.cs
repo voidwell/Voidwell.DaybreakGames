@@ -47,12 +47,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return alerts;
         }
 
-        public Task<IEnumerable<Alert>> GetAlerts(string worldId, int limit = 25)
+        public Task<IEnumerable<Alert>> GetAlerts(int worldId, int limit = 25)
         {
             return _alertRepository.GetAlertsByWorldId(worldId, limit);
         }
 
-        public async Task<AlertResult> GetAlert(string worldId, string instanceId)
+        public async Task<AlertResult> GetAlert(int worldId, int instanceId)
         {
             var cacheKey = $"{_cacheKey}_alert_{worldId}_{instanceId}";
 
@@ -63,12 +63,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             var alert = await _alertRepository.GetAlert(worldId, instanceId);
-            if (alert == null)
+            if (alert == null || !alert.ZoneId.HasValue)
             {
                 return null;
             }
 
-            var combatReport = await _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId, alert.StartDate, alert.EndDate);
+            var combatReport = await _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId.Value, alert.StartDate, alert.EndDate);
             if (combatReport == null)
             {
                 return null;
@@ -82,17 +82,22 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MetagameEventId = alert.MetagameEventId,
                 StartDate = alert.StartDate,
                 EndDate = alert.EndDate,
-                StartFactionVS = alert.StartFactionVs,
-                StartFactionNC = alert.StartFactionNc,
-                StartFactionTR = alert.StartFactionTr,
-                LastFactionVS = alert.LastFactionVs,
-                LastFactionNC = alert.LastFactionNc,
-                LastFactionTR = alert.LastFactionTr,
+                StartFactionVS = alert.StartFactionVs.GetValueOrDefault(),
+                StartFactionNC = alert.StartFactionNc.GetValueOrDefault(),
+                StartFactionTR = alert.StartFactionTr.GetValueOrDefault(),
+                LastFactionVS = alert.LastFactionVs.GetValueOrDefault(),
+                LastFactionNC = alert.LastFactionNc.GetValueOrDefault(),
+                LastFactionTR = alert.LastFactionTr.GetValueOrDefault(),
                 MetagameEvent = new AlertResultMetagameEvent { Name = alert.MetagameEvent.Name, Description = alert.MetagameEvent.Description },
                 Log = combatReport,
-                Score = new[] { 0, alert.LastFactionVs, alert.LastFactionNc, alert.LastFactionTr },
-                ServerId = alert.WorldId,
-                MapId = alert.ZoneId
+                Score = new[] {
+                    0,
+                    alert.LastFactionVs.GetValueOrDefault(),
+                    alert.LastFactionNc.GetValueOrDefault(),
+                    alert.LastFactionTr.GetValueOrDefault()
+                },
+                ServerId = alert.WorldId.ToString(),
+                MapId = alert.ZoneId.ToString()
             };
 
             await _cache.SetAsync(cacheKey, alertResult, _cacheAlertExpiration);

@@ -51,8 +51,8 @@ namespace Voidwell.DaybreakGames.Models
 
     public class WorldZoneRegion
     {
-        public string RegionId { get; set; }
-        public string FacilityId { get; set; }
+        public int RegionId { get; set; }
+        public int FacilityId { get; set; }
         public string FacilityName { get; set; }
         public string FacilityType { get; set; }
         public float XPos { get; set; }

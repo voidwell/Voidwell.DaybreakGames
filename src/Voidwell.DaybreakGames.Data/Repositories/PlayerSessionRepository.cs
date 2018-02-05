@@ -24,11 +24,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<PlayerSession> GetPlayerSessionAsync(string sessionId)
+        public async Task<PlayerSession> GetPlayerSessionAsync(int sessionId)
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id.ToString() == sessionId);
+                return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id == sessionId);
             }
         }
 

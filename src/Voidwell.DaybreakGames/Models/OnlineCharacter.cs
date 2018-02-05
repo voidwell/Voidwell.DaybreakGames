@@ -11,8 +11,8 @@ namespace Voidwell.DaybreakGames.Models
     public class OnlineCharacterProfile
     {
         public string CharacterId { get; set; }
-        public string FactionId { get; set; }
+        public int FactionId { get; set; }
         public string Name { get; set; }
-        public string WorldId { get; set; }
+        public int WorldId { get; set; }
     }
 }

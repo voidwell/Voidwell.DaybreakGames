@@ -5,10 +5,10 @@ namespace Voidwell.DaybreakGames.Models
 {
     public class AlertResult
     {
-        public string WorldId { get; set; }
-        public string MetagameInstanceId { get; set; }
-        public string ZoneId { get; set; }
-        public string MetagameEventId { get; set; }
+        public int WorldId { get; set; }
+        public int MetagameInstanceId { get; set; }
+        public int? ZoneId { get; set; }
+        public int MetagameEventId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public float StartFactionVS { get; set; }

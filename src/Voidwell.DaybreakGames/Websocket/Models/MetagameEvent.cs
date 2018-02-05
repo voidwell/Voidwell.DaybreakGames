@@ -4,7 +4,7 @@
     {
         public int InstanceId { get; set; }
         public int MetagameEventId { get; set; }
-        public int MetagameEventState { get; set; }
+        public string MetagameEventState { get; set; }
         public float FactionVs { get; set; }
         public float FactionNc { get; set; }
         public float FactionTr { get; set; }

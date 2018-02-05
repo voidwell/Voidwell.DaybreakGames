@@ -30,7 +30,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _cache = cache;
         }
 
-        public async Task<WeaponInfoResult> GetWeaponInfo(string weaponItemId)
+        public async Task<WeaponInfoResult> GetWeaponInfo(int weaponItemId)
         {
             var cachedInfo = await _cache.GetAsync<WeaponInfoResult>($"{_weaponInfoCacheKey}_{weaponItemId}");
             if (cachedInfo != null)
@@ -97,7 +97,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return weaponInfo;
         }
 
-        public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(string weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250)
+        public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(int weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250)
         {
             var cacheKey = $"{_weaponInfoCacheKey}_leaderboard_{weaponItemId}";
 

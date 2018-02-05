@@ -8,9 +8,9 @@ namespace Voidwell.DaybreakGames.Models
         public string Name { get; set; }
         public int BattleRank { get; set; }
         public string Id { get; set; }
-        public string FactionId { get; set; }
+        public int FactionId { get; set; }
         public DateTime LastLogin { get; set; }
-        public string WorldId { get; set; }
+        public int WorldId { get; set; }
         public bool OnlineStatus { get; set; }
 
         public static CharacterSearchResult LoadFromCensusCharacter(CensusCharacterModel censusCharacter)

@@ -15,12 +15,12 @@ namespace Voidwell.DaybreakGames.Models
         public CombatReportItemDetail Attacker { get; set; }
         public CombatReportItemDetail Victim { get; set; }
         public PlayerSessionWeapon Weapon { get; set; }
-        public string ZoneId { get; set; }
-        public string AttackerFireModeId { get; set; }
-        public string AttackerLoadoutId { get; set; }
+        public int? ZoneId { get; set; }
+        public int? AttackerFireModeId { get; set; }
+        public int? AttackerLoadoutId { get; set; }
         public string AttackerOutfitId { get; set; }
-        public string AttackerVehicleId { get; set; }
-        public string CharacterLoadoutId { get; set; }
+        public int? AttackerVehicleId { get; set; }
+        public int? CharacterLoadoutId { get; set; }
         public string CharacterOutfitId { get; set; }
         public bool IsHeadshot { get; set; }
     }
@@ -36,8 +36,8 @@ namespace Voidwell.DaybreakGames.Models
 
     public class PlayerSessionWeapon
     {
-        public string Id { get; set; }
-        public string ImageId { get; set; }
+        public int Id { get; set; }
+        public int? ImageId { get; set; }
         public string Name { get; set; }
     }
 }
