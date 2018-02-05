@@ -76,48 +76,6 @@ namespace Voidwell.DaybreakGames.Data
                     }
                 }
             }
-
-            /*
-            builder.ApplyConfiguration(new AlertConfiguration());
-            builder.ApplyConfiguration(new CharacterConfiguration());
-            builder.ApplyConfiguration(new CharacterLifetimeStatConfiguration());
-            builder.ApplyConfiguration(new CharacterLifetimeStatByFactionConfiguration());
-            builder.ApplyConfiguration(new CharacterStatConfiguration());
-            builder.ApplyConfiguration(new CharacterStatByFactionConfiguration());
-            builder.ApplyConfiguration(new CharacterTimeConfiguration());
-            builder.ApplyConfiguration(new CharacterWeaponStatConfiguration());
-            builder.ApplyConfiguration(new CharacterWeaponStatByFactionConfiguration());
-            builder.ApplyConfiguration(new EventAchievementEarnedConfiguration());
-            builder.ApplyConfiguration(new EventBattlerankUpConfiguration());
-            builder.ApplyConfiguration(new EventContinentLockConfiguration());
-            builder.ApplyConfiguration(new EventContinentUnlockConfiguration());
-            builder.ApplyConfiguration(new EventDeathConfiguration());
-            builder.ApplyConfiguration(new EventFacilityControlConfiguration());
-            builder.ApplyConfiguration(new EventGainExperienceConfiguration());
-            builder.ApplyConfiguration(new EventPlayerFacilityCaptureConfiguration());
-            builder.ApplyConfiguration(new EventPlayerFacilityDefendConfiguration());
-            builder.ApplyConfiguration(new EventMetagameEventConfiguration());
-            builder.ApplyConfiguration(new EventPlayerLoginConfiguration());
-            builder.ApplyConfiguration(new EventPlayerLogoutConfiguration());
-            builder.ApplyConfiguration(new EventVehicleDestroyConfiguration());
-            builder.ApplyConfiguration(new PlayerSessionConfiguration());
-            builder.ApplyConfiguration(new ProfileConfiguration());
-            builder.ApplyConfiguration(new TitleConfiguration());
-            builder.ApplyConfiguration(new FacilityLinkConfiguration());
-            builder.ApplyConfiguration(new FactionConfiguration());
-            builder.ApplyConfiguration(new ItemConfiguration());
-            builder.ApplyConfiguration(new ItemCategoryConfiguration());
-            builder.ApplyConfiguration(new MapHexConfiguration());
-            builder.ApplyConfiguration(new MapRegionConfiguration());
-            builder.ApplyConfiguration(new MetagameEventCategoryConfiguration());
-            builder.ApplyConfiguration(new MetagameEventStateConfiguration());
-            builder.ApplyConfiguration(new OutfitConfiguration());
-            builder.ApplyConfiguration(new OutfitMemberConfiguration());
-            builder.ApplyConfiguration(new VehicleConfiguration());
-            builder.ApplyConfiguration(new VehicleFactionConfiguration());
-            builder.ApplyConfiguration(new WorldConfiguration());
-            builder.ApplyConfiguration(new ZoneConfiguration());
-            */
         }
     }
 }

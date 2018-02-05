@@ -10,6 +10,46 @@ namespace Voidwell.DaybreakGames.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Alert",
+                columns: table => new
+                {
+                    WorldId = table.Column<int>(nullable: false),
+                    MetagameInstanceId = table.Column<int>(nullable: false),
+                    EndDate = table.Column<DateTime>(nullable: false),
+                    LastFactionNc = table.Column<float>(nullable: true),
+                    LastFactionTr = table.Column<float>(nullable: true),
+                    LastFactionVs = table.Column<float>(nullable: true),
+                    MetagameEventId = table.Column<int>(nullable: false),
+                    StartDate = table.Column<DateTime>(nullable: false),
+                    StartFactionNc = table.Column<float>(nullable: true),
+                    StartFactionTr = table.Column<float>(nullable: true),
+                    StartFactionVs = table.Column<float>(nullable: true),
+                    ZoneId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Alert", x => new { x.WorldId, x.MetagameInstanceId });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Character",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    BattleRank = table.Column<int>(nullable: false),
+                    BattleRankPercentToNext = table.Column<int>(nullable: false),
+                    CertsEarned = table.Column<int>(nullable: false),
+                    FactionId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    TitleId = table.Column<int>(nullable: false),
+                    WorldId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Character", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CharacterUpdateQueue",
                 columns: table => new
                 {
@@ -25,30 +65,30 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "EventAchievementEarned",
                 columns: table => new
                 {
-                    Timestamp = table.Column<DateTime>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    AchievementId = table.Column<string>(nullable: true),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    Timestamp = table.Column<DateTime>(nullable: false),
+                    AchievementId = table.Column<int>(nullable: false),
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EventAchievementEarned", x => new { x.Timestamp, x.CharacterId });
+                    table.PrimaryKey("PK_EventAchievementEarned", x => new { x.CharacterId, x.Timestamp });
                 });
 
             migrationBuilder.CreateTable(
                 name: "EventBattlerankUp",
                 columns: table => new
                 {
-                    Timestamp = table.Column<DateTime>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
+                    Timestamp = table.Column<DateTime>(nullable: false),
                     BattleRank = table.Column<int>(nullable: false),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EventBattlerankUp", x => new { x.Timestamp, x.CharacterId });
+                    table.PrimaryKey("PK_EventBattlerankUp", x => new { x.CharacterId, x.Timestamp });
                 });
 
             migrationBuilder.CreateTable(
@@ -56,13 +96,13 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    WorldId = table.Column<string>(nullable: false),
-                    ZoneId = table.Column<string>(nullable: false),
-                    MetagameEventId = table.Column<string>(nullable: true),
-                    PopulationNc = table.Column<float>(nullable: false),
-                    PopulationTr = table.Column<float>(nullable: false),
-                    PopulationVs = table.Column<float>(nullable: false),
-                    TriggeringFaction = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false),
+                    MetagameEventId = table.Column<int>(nullable: true),
+                    PopulationNc = table.Column<float>(nullable: true),
+                    PopulationTr = table.Column<float>(nullable: true),
+                    PopulationVs = table.Column<float>(nullable: true),
+                    TriggeringFaction = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -70,18 +110,18 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EventContinentUnkock",
+                name: "EventContinentUnlock",
                 columns: table => new
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    WorldId = table.Column<string>(nullable: false),
-                    ZoneId = table.Column<string>(nullable: false),
-                    MetagameEventId = table.Column<string>(nullable: true),
-                    TriggeringFaction = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false),
+                    MetagameEventId = table.Column<int>(nullable: true),
+                    TriggeringFaction = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EventContinentUnkock", x => new { x.Timestamp, x.WorldId, x.ZoneId });
+                    table.PrimaryKey("PK_EventContinentUnlock", x => new { x.Timestamp, x.WorldId, x.ZoneId });
                 });
 
             migrationBuilder.CreateTable(
@@ -91,16 +131,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     Timestamp = table.Column<DateTime>(nullable: false),
                     AttackerCharacterId = table.Column<string>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    AttackerFireModeId = table.Column<string>(nullable: true),
-                    AttackerLoadoutId = table.Column<string>(nullable: true),
+                    AttackerFireModeId = table.Column<int>(nullable: true),
+                    AttackerLoadoutId = table.Column<int>(nullable: true),
                     AttackerOutfitId = table.Column<string>(nullable: true),
-                    AttackerVehicleId = table.Column<string>(nullable: true),
-                    AttackerWeaponId = table.Column<string>(nullable: true),
-                    CharacterLoadoutId = table.Column<string>(nullable: true),
+                    AttackerVehicleId = table.Column<int>(nullable: true),
+                    AttackerWeaponId = table.Column<int>(nullable: true),
+                    CharacterLoadoutId = table.Column<int>(nullable: true),
                     CharacterOutfitId = table.Column<string>(nullable: true),
                     IsHeadshot = table.Column<bool>(nullable: false),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -112,16 +152,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    WorldId = table.Column<string>(nullable: false),
-                    FacilityId = table.Column<string>(nullable: false),
+                    WorldId = table.Column<int>(nullable: false),
+                    FacilityId = table.Column<int>(nullable: false),
                     DurationHeld = table.Column<int>(nullable: false),
-                    NewFactionId = table.Column<string>(nullable: true),
-                    OldFactionId = table.Column<string>(nullable: true),
+                    NewFactionId = table.Column<int>(nullable: true),
+                    OldFactionId = table.Column<int>(nullable: true),
                     OutfitId = table.Column<string>(nullable: true),
-                    ZoneControlNc = table.Column<float>(nullable: false),
-                    ZoneControlTr = table.Column<float>(nullable: false),
-                    ZoneControlVs = table.Column<float>(nullable: false),
-                    ZoneId = table.Column<string>(nullable: true)
+                    ZoneControlNc = table.Column<float>(nullable: true),
+                    ZoneControlTr = table.Column<float>(nullable: true),
+                    ZoneControlVs = table.Column<float>(nullable: true),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -134,12 +174,12 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    ExperienceId = table.Column<string>(nullable: false),
+                    ExperienceId = table.Column<int>(nullable: false),
                     Amount = table.Column<int>(nullable: false),
-                    LoadoutId = table.Column<string>(nullable: true),
+                    LoadoutId = table.Column<int>(nullable: true),
                     OtherId = table.Column<string>(nullable: true),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -150,17 +190,18 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "EventMetagameEvent",
                 columns: table => new
                 {
-                    MetagameId = table.Column<string>(nullable: false),
-                    ExperienceBonus = table.Column<int>(nullable: false),
-                    InstanceId = table.Column<string>(nullable: true),
-                    MetagameEventId = table.Column<string>(nullable: true),
+                    MetagameId = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    ExperienceBonus = table.Column<int>(nullable: true),
+                    InstanceId = table.Column<int>(nullable: true),
+                    MetagameEventId = table.Column<int>(nullable: true),
                     MetagameEventState = table.Column<string>(nullable: true),
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneControlNc = table.Column<float>(nullable: false),
-                    ZoneControlTr = table.Column<float>(nullable: false),
-                    ZoneControlVs = table.Column<float>(nullable: false),
-                    ZoneId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneControlNc = table.Column<float>(nullable: true),
+                    ZoneControlTr = table.Column<float>(nullable: true),
+                    ZoneControlVs = table.Column<float>(nullable: true),
+                    ZoneId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -173,10 +214,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    FacilityId = table.Column<string>(nullable: false),
+                    FacilityId = table.Column<int>(nullable: false),
                     OutfitId = table.Column<string>(nullable: true),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -189,10 +230,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    FacilityId = table.Column<string>(nullable: false),
+                    FacilityId = table.Column<int>(nullable: false),
                     OutfitId = table.Column<string>(nullable: true),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -205,7 +246,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    WorldId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -218,7 +259,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     Timestamp = table.Column<DateTime>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    WorldId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -232,14 +273,14 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     Timestamp = table.Column<DateTime>(nullable: false),
                     AttackerCharacterId = table.Column<string>(nullable: false),
                     CharacterId = table.Column<string>(nullable: false),
-                    AttackerLoadoutId = table.Column<string>(nullable: true),
-                    AttackerVehicleId = table.Column<string>(nullable: false),
-                    AttackerWeaponId = table.Column<string>(nullable: true),
-                    FacilityId = table.Column<string>(nullable: true),
-                    FactionId = table.Column<string>(nullable: true),
-                    VehicleId = table.Column<string>(nullable: false),
-                    WorldId = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    AttackerLoadoutId = table.Column<int>(nullable: true),
+                    AttackerVehicleId = table.Column<int>(nullable: false),
+                    AttackerWeaponId = table.Column<int>(nullable: true),
+                    FacilityId = table.Column<int>(nullable: true),
+                    FactionId = table.Column<int>(nullable: true),
+                    VehicleId = table.Column<int>(nullable: false),
+                    WorldId = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -252,9 +293,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     Description = table.Column<string>(nullable: true),
-                    FacilityIdA = table.Column<string>(nullable: true),
-                    FacilityIdB = table.Column<string>(nullable: true),
-                    ZoneId = table.Column<string>(nullable: true)
+                    FacilityIdA = table.Column<int>(nullable: false),
+                    FacilityIdB = table.Column<int>(nullable: false),
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -265,9 +306,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "Faction",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
                     CodeTag = table.Column<string>(nullable: true),
-                    ImageId = table.Column<string>(nullable: true),
+                    ImageId = table.Column<int>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     UserSelectable = table.Column<bool>(nullable: false)
                 },
@@ -280,8 +321,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "ItemCategory",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Id = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -293,13 +333,14 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "MapHex",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    HexType = table.Column<string>(nullable: true),
-                    MapRegionId = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    HexType = table.Column<int>(nullable: false),
+                    MapRegionId = table.Column<int>(nullable: false),
                     TypeName = table.Column<string>(nullable: true),
                     XPos = table.Column<int>(nullable: false),
                     YPos = table.Column<int>(nullable: false),
-                    ZoneId = table.Column<string>(nullable: false)
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -310,15 +351,15 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "MapRegion",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    FacilityId = table.Column<string>(nullable: true),
+                    Id = table.Column<int>(nullable: false),
+                    FacilityId = table.Column<int>(nullable: false),
                     FacilityName = table.Column<string>(nullable: true),
                     FacilityType = table.Column<string>(nullable: true),
-                    FacilityTypeId = table.Column<string>(nullable: true),
+                    FacilityTypeId = table.Column<int>(nullable: false),
                     XPos = table.Column<float>(nullable: false),
                     YPos = table.Column<float>(nullable: false),
                     ZPos = table.Column<float>(nullable: false),
-                    ZoneId = table.Column<string>(nullable: true)
+                    ZoneId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -329,11 +370,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "MetagameEventCategory",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
                     Description = table.Column<string>(nullable: true),
-                    ExperienceBonus = table.Column<int>(nullable: false),
+                    ExperienceBonus = table.Column<int>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    Type = table.Column<string>(nullable: true)
+                    Type = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -344,7 +385,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "MetagameEventState",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -372,11 +413,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "Profile",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    FactionId = table.Column<string>(nullable: true),
-                    ImageId = table.Column<string>(nullable: true),
+                    Id = table.Column<int>(nullable: false),
+                    FactionId = table.Column<int>(nullable: false),
+                    ImageId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    ProfileTypeId = table.Column<string>(nullable: true)
+                    ProfileTypeId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -384,22 +425,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PS2UpdaterScheduler",
-                columns: table => new
-                {
-                    ServiceName = table.Column<string>(nullable: false),
-                    LastUpdateDate = table.Column<DateTime>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PS2UpdaterScheduler", x => x.ServiceName);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Title",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -408,14 +437,26 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Vehicle",
+                name: "UpdaterScheduler",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
+                    LastUpdateDate = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UpdaterScheduler", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Vehicle",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false),
                     Cost = table.Column<int>(nullable: false),
-                    CostResourceId = table.Column<string>(nullable: true),
+                    CostResourceId = table.Column<int>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    ImageId = table.Column<string>(nullable: true),
+                    ImageId = table.Column<int>(nullable: true),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -427,7 +468,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "World",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -439,123 +480,15 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "Zone",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
                     Code = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    HexSize = table.Column<int>(nullable: false),
+                    HexSize = table.Column<int>(nullable: true),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Zone", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Item",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    FactionId = table.Column<string>(nullable: true),
-                    ImageId = table.Column<string>(nullable: true),
-                    IsVehicleWeapon = table.Column<bool>(nullable: false),
-                    ItemCategoryId = table.Column<int>(nullable: true),
-                    ItemTypeId = table.Column<string>(nullable: true),
-                    MaxStackSize = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Item", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Item_ItemCategory_ItemCategoryId",
-                        column: x => x.ItemCategoryId,
-                        principalTable: "ItemCategory",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Alert",
-                columns: table => new
-                {
-                    WorldId = table.Column<string>(nullable: false),
-                    MetagameInstanceId = table.Column<string>(nullable: false),
-                    EndDate = table.Column<DateTime>(nullable: false),
-                    LastFactionNc = table.Column<float>(nullable: false),
-                    LastFactionTr = table.Column<float>(nullable: false),
-                    LastFactionVs = table.Column<float>(nullable: false),
-                    MetagameEventId = table.Column<string>(nullable: true),
-                    ShadowMetagameEventId = table.Column<string>(nullable: true),
-                    StartDate = table.Column<DateTime>(nullable: false),
-                    StartFactionNc = table.Column<float>(nullable: false),
-                    StartFactionTr = table.Column<float>(nullable: false),
-                    StartFactionVs = table.Column<float>(nullable: false),
-                    ZoneId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Alert", x => new { x.WorldId, x.MetagameInstanceId });
-                    table.ForeignKey(
-                        name: "FK_Alert_MetagameEventCategory_ShadowMetagameEventId",
-                        column: x => x.ShadowMetagameEventId,
-                        principalTable: "MetagameEventCategory",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VehicleFaction",
-                columns: table => new
-                {
-                    VehicleId = table.Column<string>(nullable: false),
-                    FactionId = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VehicleFaction", x => new { x.VehicleId, x.FactionId });
-                    table.ForeignKey(
-                        name: "FK_VehicleFaction_Vehicle_VehicleId",
-                        column: x => x.VehicleId,
-                        principalTable: "Vehicle",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Character",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    BattleRank = table.Column<int>(nullable: false),
-                    BattleRankPercentToNext = table.Column<int>(nullable: false),
-                    CertsEarned = table.Column<int>(nullable: false),
-                    FactionId = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: false),
-                    TitleId = table.Column<string>(nullable: true),
-                    WorldId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Character", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Character_Faction_FactionId",
-                        column: x => x.FactionId,
-                        principalTable: "Faction",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Character_Title_TitleId",
-                        column: x => x.TitleId,
-                        principalTable: "Title",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Character_World_WorldId",
-                        column: x => x.WorldId,
-                        principalTable: "World",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -642,7 +575,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     CharacterId = table.Column<string>(nullable: false),
-                    ProfileId = table.Column<string>(nullable: false),
+                    ProfileId = table.Column<int>(nullable: false),
                     Deaths = table.Column<int>(nullable: true, defaultValue: 0),
                     FireCount = table.Column<int>(nullable: true, defaultValue: 0),
                     HitCount = table.Column<int>(nullable: true, defaultValue: 0),
@@ -660,12 +593,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         principalTable: "Character",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CharacterStat_Profile_ProfileId",
-                        column: x => x.ProfileId,
-                        principalTable: "Profile",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -673,7 +600,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     CharacterId = table.Column<string>(nullable: false),
-                    ProfileId = table.Column<string>(nullable: false),
+                    ProfileId = table.Column<int>(nullable: false),
                     KilledByNC = table.Column<int>(nullable: true, defaultValue: 0),
                     KilledByTR = table.Column<int>(nullable: true, defaultValue: 0),
                     KilledByVS = table.Column<int>(nullable: true, defaultValue: 0),
@@ -688,12 +615,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         name: "FK_CharacterStatByFaction_Character_CharacterId",
                         column: x => x.CharacterId,
                         principalTable: "Character",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CharacterStatByFaction_Profile_ProfileId",
-                        column: x => x.ProfileId,
-                        principalTable: "Profile",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -724,8 +645,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     CharacterId = table.Column<string>(nullable: false),
-                    ItemId = table.Column<string>(nullable: false),
-                    VehicleId = table.Column<string>(nullable: false),
+                    ItemId = table.Column<int>(nullable: false),
+                    VehicleId = table.Column<int>(nullable: false),
                     DamageGiven = table.Column<int>(nullable: true, defaultValue: 0),
                     DamageTakenBy = table.Column<int>(nullable: true, defaultValue: 0),
                     Deaths = table.Column<int>(nullable: true, defaultValue: 0),
@@ -747,18 +668,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         principalTable: "Character",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CharacterWeaponStat_Item_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "Item",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CharacterWeaponStat_Vehicle_VehicleId",
-                        column: x => x.VehicleId,
-                        principalTable: "Vehicle",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -766,8 +675,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     CharacterId = table.Column<string>(nullable: false),
-                    ItemId = table.Column<string>(nullable: false),
-                    VehicleId = table.Column<string>(nullable: false),
+                    ItemId = table.Column<int>(nullable: false),
+                    VehicleId = table.Column<int>(nullable: false),
                     DamageGivenNC = table.Column<int>(nullable: true, defaultValue: 0),
                     DamageGivenTR = table.Column<int>(nullable: true, defaultValue: 0),
                     DamageGivenVS = table.Column<int>(nullable: true, defaultValue: 0),
@@ -796,14 +705,66 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         principalTable: "Character",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OutfitMember",
+                columns: table => new
+                {
+                    CharacterId = table.Column<string>(nullable: false),
+                    OutfitId = table.Column<string>(nullable: false),
+                    MemberSinceDate = table.Column<DateTime>(nullable: true),
+                    Rank = table.Column<string>(nullable: true),
+                    RankOrdinal = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OutfitMember", x => new { x.CharacterId, x.OutfitId });
                     table.ForeignKey(
-                        name: "FK_CharacterWeaponStatByFaction_Item_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "Item",
+                        name: "FK_OutfitMember_Character_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Character",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Item",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    FactionId = table.Column<int>(nullable: true),
+                    ImageId = table.Column<int>(nullable: true),
+                    IsVehicleWeapon = table.Column<bool>(nullable: false),
+                    ItemCategoryId = table.Column<int>(nullable: true),
+                    ItemTypeId = table.Column<int>(nullable: true),
+                    MaxStackSize = table.Column<int>(nullable: true),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Item", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CharacterWeaponStatByFaction_Vehicle_VehicleId",
+                        name: "FK_Item_ItemCategory_ItemCategoryId",
+                        column: x => x.ItemCategoryId,
+                        principalTable: "ItemCategory",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VehicleFaction",
+                columns: table => new
+                {
+                    VehicleId = table.Column<int>(nullable: false),
+                    FactionId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VehicleFaction", x => new { x.VehicleId, x.FactionId });
+                    table.ForeignKey(
+                        name: "FK_VehicleFaction_Vehicle_VehicleId",
                         column: x => x.VehicleId,
                         principalTable: "Vehicle",
                         principalColumn: "Id",
@@ -817,11 +778,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     Id = table.Column<string>(nullable: false),
                     Alias = table.Column<string>(nullable: true),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    FactionId = table.Column<string>(nullable: true),
+                    FactionId = table.Column<int>(nullable: true),
                     LeaderCharacterId = table.Column<string>(nullable: true),
                     MemberCount = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    WorldId = table.Column<string>(nullable: true)
+                    WorldId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -846,87 +807,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "OutfitMember",
-                columns: table => new
-                {
-                    CharacterId = table.Column<string>(nullable: false),
-                    MemberSinceDate = table.Column<DateTime>(nullable: true),
-                    OutfitId = table.Column<string>(nullable: false),
-                    Rank = table.Column<string>(nullable: true),
-                    RankOrdinal = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OutfitMember", x => x.CharacterId);
-                    table.ForeignKey(
-                        name: "FK_OutfitMember_Character_CharacterId",
-                        column: x => x.CharacterId,
-                        principalTable: "Character",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OutfitMember_Outfit_OutfitId",
-                        column: x => x.OutfitId,
-                        principalTable: "Outfit",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Alert_ShadowMetagameEventId",
-                table: "Alert",
-                column: "ShadowMetagameEventId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Character_FactionId",
-                table: "Character",
-                column: "FactionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Character_TitleId",
-                table: "Character",
-                column: "TitleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Character_WorldId",
-                table: "Character",
-                column: "WorldId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CharacterStat_ProfileId",
-                table: "CharacterStat",
-                column: "ProfileId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CharacterStatByFaction_ProfileId",
-                table: "CharacterStatByFaction",
-                column: "ProfileId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CharacterWeaponStat_ItemId",
-                table: "CharacterWeaponStat",
-                column: "ItemId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_CharacterWeaponStat_Kills",
                 table: "CharacterWeaponStat",
                 column: "Kills");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CharacterWeaponStat_VehicleId",
-                table: "CharacterWeaponStat",
-                column: "VehicleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CharacterWeaponStatByFaction_ItemId",
-                table: "CharacterWeaponStatByFaction",
-                column: "ItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CharacterWeaponStatByFaction_VehicleId",
-                table: "CharacterWeaponStatByFaction",
-                column: "VehicleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Item_ItemCategoryId",
@@ -941,7 +825,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Outfit_LeaderCharacterId",
                 table: "Outfit",
-                column: "LeaderCharacterId");
+                column: "LeaderCharacterId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Outfit_WorldId",
@@ -949,9 +834,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 column: "WorldId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OutfitMember_OutfitId",
+                name: "IX_OutfitMember_CharacterId",
                 table: "OutfitMember",
-                column: "OutfitId");
+                column: "CharacterId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerSession_CharacterId_LoginDate_LogoutDate",
@@ -998,7 +884,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "EventContinentLock");
 
             migrationBuilder.DropTable(
-                name: "EventContinentUnkock");
+                name: "EventContinentUnlock");
 
             migrationBuilder.DropTable(
                 name: "EventDeath");
@@ -1031,13 +917,22 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "FacilityLink");
 
             migrationBuilder.DropTable(
+                name: "Item");
+
+            migrationBuilder.DropTable(
                 name: "MapHex");
 
             migrationBuilder.DropTable(
                 name: "MapRegion");
 
             migrationBuilder.DropTable(
+                name: "MetagameEventCategory");
+
+            migrationBuilder.DropTable(
                 name: "MetagameEventState");
+
+            migrationBuilder.DropTable(
+                name: "Outfit");
 
             migrationBuilder.DropTable(
                 name: "OutfitMember");
@@ -1046,7 +941,13 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "PlayerSession");
 
             migrationBuilder.DropTable(
-                name: "PS2UpdaterScheduler");
+                name: "Profile");
+
+            migrationBuilder.DropTable(
+                name: "Title");
+
+            migrationBuilder.DropTable(
+                name: "UpdaterScheduler");
 
             migrationBuilder.DropTable(
                 name: "VehicleFaction");
@@ -1055,34 +956,19 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "Zone");
 
             migrationBuilder.DropTable(
-                name: "MetagameEventCategory");
-
-            migrationBuilder.DropTable(
-                name: "Profile");
-
-            migrationBuilder.DropTable(
-                name: "Item");
-
-            migrationBuilder.DropTable(
-                name: "Outfit");
-
-            migrationBuilder.DropTable(
-                name: "Vehicle");
-
-            migrationBuilder.DropTable(
                 name: "ItemCategory");
-
-            migrationBuilder.DropTable(
-                name: "Character");
 
             migrationBuilder.DropTable(
                 name: "Faction");
 
             migrationBuilder.DropTable(
-                name: "Title");
+                name: "World");
 
             migrationBuilder.DropTable(
-                name: "World");
+                name: "Character");
+
+            migrationBuilder.DropTable(
+                name: "Vehicle");
         }
     }
 }
