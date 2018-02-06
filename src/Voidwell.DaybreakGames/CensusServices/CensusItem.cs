@@ -63,7 +63,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             var datasheet = query.JoinService("weapon_datasheet");
             datasheet.WithInjectAt("datasheet");
-            datasheet.Where("item_id").Equals(weaponItemId);
+            datasheet.Where("item_id").Equals(weaponItemId.ToString());
             datasheet.HideFields(new[]
             {
                 "show_clip_size",
@@ -95,7 +95,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             playerState.IsList(true);
             playerState.WithInjectAt("states");
 
-            query.Where("item_id").Equals(weaponItemId);
+            query.Where("item_id").Equals(weaponItemId.ToString());
 
             return await query.Get<CensusWeaponInfoModel>();
         }

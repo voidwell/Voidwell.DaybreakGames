@@ -61,6 +61,13 @@ namespace Voidwell.DaybreakGames.Census
                 var result = await client.GetAsync(requestUri);
                 var jResult = await result.GetContentAsync<JToken>();
 
+                var errorCode = jResult.Value<string>("errorCode");
+                if (errorCode != null)
+                {
+                    var errorMessage = jResult.Value<string>("errorMessage");
+                    throw new CensusServerException($"{errorCode}: {errorMessage}");
+                }
+
                 var jBody = jResult.SelectToken($"{query.ServiceName}_list");
                 return jBody.ToObject<T>(_censusDeserializer);
             }

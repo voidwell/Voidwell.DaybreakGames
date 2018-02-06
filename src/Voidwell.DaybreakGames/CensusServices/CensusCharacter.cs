@@ -72,7 +72,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             if (lastLogin != null)
             {
-                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
             return await query.GetBatch<CensusCharacterStatModel>();
@@ -97,7 +97,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             if (lastLogin != null)
             {
-                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
             return await query.GetBatch<CensusCharacterFactionStatModel>();
@@ -120,7 +120,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             if (lastLogin != null)
             {
-                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
             return await query.GetBatch<CensusCharacterWeaponStatModel>();
@@ -145,7 +145,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             if (lastLogin != null)
             {
-                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.ToString());
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
             return await query.GetBatch<CensusCharacterWeaponFactionStatModel>();

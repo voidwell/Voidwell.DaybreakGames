@@ -12,9 +12,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => a.Id);
 
-            builder.HasOne(a => a.LeaderCharacter)
-                .WithOne()
-                .HasForeignKey<Outfit>(a => a.LeaderCharacterId);
+            builder.Ignore(a => a.LeaderCharacter);
 
             builder.HasOne(a => a.World)
                 .WithMany()

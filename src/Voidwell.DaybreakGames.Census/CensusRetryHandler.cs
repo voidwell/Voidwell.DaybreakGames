@@ -35,6 +35,8 @@ namespace Voidwell.DaybreakGames.Census
 
             for (int i = 0; i < MaxRetries; i++)
             {
+                Thread.Sleep(2000);
+
                 response = await base.SendAsync(request, cancellationToken);
                 if (response.IsSuccessStatusCode)
                 {

@@ -1,53 +1,55 @@
-﻿namespace Voidwell.DaybreakGames.Census
+﻿using System;
+
+namespace Voidwell.DaybreakGames.Census
 {
     public sealed class CensusOperand
     {
-        private string _comparator { get; set; }
+        private object _comparator { get; set; }
         private OperatorType _operator { get; set; }
 
-        public void Equals(string value)
+        public new void Equals(object value)
         {
             _comparator = value;
             _operator = OperatorType.Equals;
         }
 
-        public void NotEquals(string value)
+        public void NotEquals(object value)
         {
             _comparator = value;
             _operator = OperatorType.NotEquals;
         }
 
-        public void IsLessThan(string value)
+        public void IsLessThan(object value)
         {
             _comparator = value;
             _operator = OperatorType.IsLessThan;
         }
 
-        public void IsLessThanOrEquals(string value)
+        public void IsLessThanOrEquals(object value)
         {
             _comparator = value;
             _operator = OperatorType.IsLessThanOrEquals;
         }
 
-        public void IsGreaterThan(string value)
+        public void IsGreaterThan(object value)
         {
             _comparator = value;
             _operator = OperatorType.IsGreaterThan;
         }
 
-        public void IsGreaterThanOrEquals(string value)
+        public void IsGreaterThanOrEquals(object value)
         {
             _comparator = value;
             _operator = OperatorType.IsGreaterThanOrEquals;
         }
 
-        public void StartsWith(string value)
+        public void StartsWith(object value)
         {
             _comparator = value;
             _operator = OperatorType.StartsWith;
         }
 
-        public void Contains(string value)
+        public void Contains(object value)
         {
             _comparator = value;
             _operator = OperatorType.Contains;
@@ -82,7 +84,17 @@
                     break;
             }
 
-            return $"={mod}{_comparator}";
+            return $"={mod}{GetComparatorString()}";
+        }
+
+        private string GetComparatorString()
+        {
+            if (_comparator is DateTime value)
+            {
+                return value.ToString("yyyy-MM-dd HH\\:mm\\:ss");
+            }
+
+            return _comparator.ToString();
         }
 
         internal enum OperatorType

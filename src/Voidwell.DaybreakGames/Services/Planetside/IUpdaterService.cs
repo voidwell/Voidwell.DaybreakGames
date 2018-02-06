@@ -5,7 +5,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IUpdaterService
     {
         Task AddToQueue(string characterId);
-        void StartUpdater();
-        void StopUpdater();
+        Task StartUpdater();
+        Task Startup();
+        Task StopUpdater();
     }
 }
