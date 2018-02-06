@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using System;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using Voidwell.DaybreakGames.Census.Stream;
 using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Websocket
@@ -11,68 +12,50 @@ namespace Voidwell.DaybreakGames.Websocket
     public class WebsocketMonitor : IWebsocketMonitor, IDisposable
     {
         private readonly IWebsocketEventHandler _handler;
-        private readonly IWorldMonitor _worldMonitor;
         private readonly DaybreakGamesOptions _options;
         private readonly ILogger<WebsocketMonitor> _logger;
 
-        private readonly CensusWebSocketClient _client;
+        private readonly CensusStreamClient _client;
+        private bool _isRunning = false;
 
-        public WebsocketMonitor(IWebsocketEventHandler handler, IWorldMonitor worldMonitor, IOptions<DaybreakGamesOptions> options, ILogger<WebsocketMonitor> logger)
+        public WebsocketMonitor(IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options, ILogger<WebsocketMonitor> logger)
         {
             _handler = handler;
-            _worldMonitor = worldMonitor;
             _options = options.Value;
             _logger = logger;
 
-            _client = new CensusWebSocketClient(_options.CensusServiceKey);
+            var subscription = new CensusStreamSubscription
+            {
+                Characters = _options.CensusWebsocketCharacters,
+                Worlds = _options.CensusWebsocketWorlds,
+                EventNames = _options.CensusWebsocketServices
+            };
+
+            _client = new CensusStreamClient(subscription, apiKey: _options.CensusServiceKey);
         }
 
-        public async Task StartAsync()
+        public async Task StartAsync(CancellationToken ct)
         {
-            await StartConnectionAsync();
+            _isRunning = true;
+            _logger.LogInformation("Starting census stream monitor");
+
+            await _client.ConnectAsync(ct);
+
+            StartListening();
         }
 
-        public async Task StopAsync()
+        public async Task StopAsync(CancellationToken ct)
         {
-            _logger.LogInformation("Stopping websocket monitor...");
+            _logger.LogInformation("Stopping census stream monitor");
 
-            if (_client.IsConnected())
-            {
-                await _client.CloseAsync();
-            }
+            await _client.CloseAsync(ct);
 
-            if (_client.IsConnecting())
-            {
-                _client.Abort();
-            }
-
-            _logger.LogInformation("Stopped websocket monitor.");
+            _isRunning = false;
         }
 
         public bool IsRunning()
         {
-            return _client != null && (_client.IsConnected() || _client.IsConnected());
-        }
-
-        private async Task StartConnectionAsync()
-        {
-            if (_client.IsConnected())
-            {
-                await _client.CloseAsync();
-            }
-            else if (_client.IsConnecting())
-            {
-                _client.Abort();
-            }
-
-            _logger.LogInformation("Starting websocket monitor...");
-
-            await _client.ConnectAsync();
-            await _client.Subscribe(_options.CensusWebsocketCharacters, _options.CensusWebsocketWorlds, _options.CensusWebsocketServices.ToArray());
-
-            StartListening();
-
-            _logger.LogInformation("Started websocket monitor.");
+            return _isRunning;
         }
 
         private void StartListening()
@@ -82,42 +65,28 @@ namespace Voidwell.DaybreakGames.Websocket
 
         private async Task StartListeningAsync()
         {
-            var failed = false;
-
-            while (_client.IsConnected())
+            while (_isRunning)
             {
-                CensusWebSocketReceiveResult message = null;
+                if (_client.GetState() != CensusStreamState.Open)
+                    continue;
+
+                JToken message = null;
 
                 try
                 {
-                    message = await _client.ReceiveAsync();
+                    message = await _client.ReceiveAsync(CancellationToken.None);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation($"Websocket receive failed. Attempting reconnect: {ex.Message}");
-                    failed = true;
-                    await _client.CloseAsync();
+                    _logger.LogInformation($"Websocket receive failed: {ex.Message}");
                 }
 
-                if (message != null)
+                if (message == null)
                 {
-                    if (message.Result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
-                    {
-                        await _client.CloseAsync();
-                    }
-                    else
-                    {
-                        await _handler.Process(message.Content);
-                    }
+                    continue;
                 }
-            }
 
-            if (failed)
-            {
-                await Task.Delay(5000);
-                #pragma warning disable CS4014
-                Task.Run(StartConnectionAsync);
-                #pragma warning restore CS4014
+                await _handler.Process(message);
             }
         }
 
