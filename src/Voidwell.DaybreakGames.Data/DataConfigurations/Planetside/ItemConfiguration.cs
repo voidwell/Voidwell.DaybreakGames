@@ -14,9 +14,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.Property(a => a.Id).ValueGeneratedNever();
 
-            builder.HasOne(a => a.ItemCategory)
-                .WithMany()
-                .HasForeignKey(a => a.ItemCategoryId);
+            builder.Ignore(a => a.ItemCategory);
         }
     }
 }

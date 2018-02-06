@@ -10,5 +10,6 @@ namespace Voidwell.DaybreakGames
         public IEnumerable<string> CensusWebsocketCharacters { get; set; }
         public bool AutostartWebsocketMonitor { get; set; } = false;
         public bool DisableUpdater { get; set; } = false;
+        public bool DisableCharacterUpdater { get; set; } = false;
     }
 }

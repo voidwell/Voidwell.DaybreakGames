@@ -96,6 +96,7 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
             services.AddSingleton<IHostedService, StoreUpdaterScheduler>();
             services.AddSingleton<IHostedService, HostedWebsocketMonitor>();
+            services.AddSingleton<IHostedService, UpdaterHostedService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
