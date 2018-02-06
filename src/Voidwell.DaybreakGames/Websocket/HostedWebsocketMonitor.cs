@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.Websocket
             if (_options.AutostartWebsocketMonitor)
             {
                 #pragma warning disable CS4014
-                Task.Run(() => _websocketMonitor.StartAsync());
+                Task.Run(() => _websocketMonitor.StartAsync(cancellationToken));
                 #pragma warning restore CS4014
             }
 
@@ -30,7 +30,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            return _websocketMonitor.StopAsync();
+            return _websocketMonitor.StopAsync(cancellationToken);
         }
     }
 }
