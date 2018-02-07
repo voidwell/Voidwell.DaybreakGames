@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("OutfitMember");
 
-            builder.HasKey(a => new { a.CharacterId, a.OutfitId });
+            builder.HasKey(a => a.CharacterId);
 
             builder.Ignore(a => a.Outfit);
 
