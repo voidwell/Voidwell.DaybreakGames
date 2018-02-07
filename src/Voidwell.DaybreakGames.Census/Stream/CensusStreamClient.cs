@@ -87,11 +87,14 @@ namespace Voidwell.DaybreakGames.Census.Stream
             return null;
         }
 
-        public Task CloseAsync(CancellationToken ct)
+        public async Task CloseAsync(CancellationToken ct)
         {
             _timer?.Dispose();
 
-            return _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close requested by client", ct);
+            if (_client.State == WebSocketState.Open || _client.State == WebSocketState.Connecting)
+            {
+                await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close requested by client", ct);
+            }
         }
 
         private Task SendAsync(object message, CancellationToken cancellationToken)
@@ -144,8 +147,7 @@ namespace Voidwell.DaybreakGames.Census.Stream
 
         private void SetupReconnect()
         {
-            if (_timer != null)
-                _timer.Dispose();
+            _timer?.Dispose();
 
             _timer = new Timer(ReconnectClientAsync, null, (int)_stateCheckInterval.TotalMilliseconds, (int)_stateCheckInterval.TotalMilliseconds);
         }
@@ -164,7 +166,7 @@ namespace Voidwell.DaybreakGames.Census.Stream
 
         public void Dispose()
         {
-            _timer.Dispose();
+            _timer?.Dispose();
             _client.Dispose();
         }
     }

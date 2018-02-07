@@ -136,16 +136,27 @@ namespace Voidwell.DaybreakGames.Models
     public class CharacterDetailsVehicleStat
     {
         public int VehicleId { get; set; }
-        public int DamageTakenBy { get; set; }
-        public int KilledBy { get; set; }
-        public int Score { get; set; }
-        public int Deaths { get; set; }
-        public int FireCount { get; set; }
-        public int HitCount { get; set; }
-        public int PlayTime { get; set; }
-        public int DamageGiven { get; set; }
-        public int Headshots { get; set; }
-        public int Kills { get; set; }
-        public int VehicleKills { get; set; }
+        public int? DamageTakenBy { get; set; }
+        public int? KilledBy { get; set; }
+        public int? Score { get; set; }
+        public int? Deaths { get; set; }
+        public int? FireCount { get; set; }
+        public int? HitCount { get; set; }
+        public int? PlayTime { get; set; }
+        public int? DamageGiven { get; set; }
+        public int? Headshots { get; set; }
+        public int? Kills { get; set; }
+        public int? VehicleKills { get; set; }
+        public int? PilotKills { get; set; }
+        public int? PilotDeaths { get; set; }
+        public int? PilotVehicleKills { get; set; }
+        public int? PilotPlayTime { get; set; }
+        public int? PilotDamageGiven { get; set; }
+        public int? PilotDamageTakenBy { get; set; }
+        public int? PilotScore { get; set; }
+        public int? PilotKilledBy { get; set; }
+        public int? PilotFireCount { get; set; }
+        public int? PilotHitCount { get; set; }
+        public int? PilotHeadshots { get; set; }
     }
 }
