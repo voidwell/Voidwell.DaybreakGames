@@ -18,7 +18,17 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         {
             using (var dbContext = _dbContextHelper.Create())
             {
-                dbContext.CharacterUpdateQueue.Add(entity);
+                var storeEntity = await dbContext.CharacterUpdateQueue.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
+                if (storeEntity == null)
+                {
+                    dbContext.CharacterUpdateQueue.Add(entity);
+                }
+                else
+                {
+                    storeEntity = entity;
+                    dbContext.CharacterUpdateQueue.Update(storeEntity);
+                }
+
                 await dbContext.SaveChangesAsync();
             }
         }
