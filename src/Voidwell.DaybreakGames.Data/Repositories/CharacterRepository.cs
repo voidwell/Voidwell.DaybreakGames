@@ -392,11 +392,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbSet = dbContext.CharacterWeaponStats;
 
-                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId)).ToListAsync();
+                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId)).ToListAsync();
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId);
+                    var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId && a.VehicleId == entity.VehicleId);
                     if (storeEntity == null)
                     {
                         newEntities.Add(entity);
@@ -439,11 +439,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbSet = dbContext.CharacterWeaponStatByFactions;
 
-                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId)).ToListAsync();
+                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId)).ToListAsync();
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId);
+                    var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId && a.VehicleId == entity.VehicleId);
                     if (storeEntity == null)
                     {
                         newEntities.Add(entity);

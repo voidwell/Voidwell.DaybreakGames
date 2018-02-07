@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
@@ -9,7 +8,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string CharacterId { get; set; }
         [Required]
         public int ItemId { get; set; }
-        public int? VehicleId { get; set; }
+        [Required]
+        public int VehicleId { get; set; }
 
         public int? DamageGivenVS { get; set; }
         public int? DamageGivenNC { get; set; }

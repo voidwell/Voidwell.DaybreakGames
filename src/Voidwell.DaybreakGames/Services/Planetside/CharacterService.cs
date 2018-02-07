@@ -171,7 +171,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         Tr = s.KilledByTR.GetValueOrDefault()
                     }
                 }),
-                WeaponStats = character.WeaponStats?.Select(s => new CharacterDetailsWeaponStat
+                WeaponStats = character.WeaponStats?.Where(a => a.ItemId != 0).Select(s => new CharacterDetailsWeaponStat
                 {
                     ItemId = s.ItemId,
                     Name = s.Item?.Name,
@@ -205,22 +205,55 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         */
                     }
                 }),
-                VehicleStats = character.WeaponStats?.Where(a => a.VehicleId.HasValue).GroupBy(a => a.VehicleId.Value).Where(a => a.Key != 0).Select(s => new CharacterDetailsVehicleStat
+                VehicleStats = character.WeaponStats?.Where(a => a.VehicleId != 0).GroupBy(a => a.VehicleId).Select(s =>
                 {
-                    VehicleId = s.Key,
-                    DamageGiven = s.Sum(a => a.DamageGiven.Value),
-                    DamageTakenBy = s.Sum(a => a.DamageTakenBy.Value),
-                    Deaths = s.Sum(a => a.Deaths.Value),
-                    FireCount = s.Sum(a => a.FireCount.Value),
-                    VehicleKills = s.Sum(a => a.VehicleKills.Value),
-                    Headshots = s.Sum(a => a.Headshots.Value),
-                    HitCount = s.Sum(a => a.HitCount.Value),
-                    KilledBy = s.Sum(a => a.KilledBy.Value),
-                    Kills = s.Sum(a => a.Kills.Value),
-                    PlayTime = s.Sum(a => a.PlayTime.Value),
-                    Score = s.Sum(a => a.Score.Value)
+                    var vehicleWeaponStats = s.Where(a => a.ItemId != 0);
+                    var vehicleStats = s.Where(a => a.ItemId == 0).FirstOrDefault();
+
+                    return new CharacterDetailsVehicleStat
+                    {
+                        // Gunner stats
+                        VehicleId = s.Key,
+                        DamageGiven = vehicleWeaponStats.Sum(a => a.DamageGiven.GetValueOrDefault()),
+                        DamageTakenBy = vehicleWeaponStats.Sum(a => a.DamageTakenBy.GetValueOrDefault()),
+                        Deaths = vehicleWeaponStats.Sum(a => a.Deaths.GetValueOrDefault()),
+                        FireCount = vehicleWeaponStats.Sum(a => a.FireCount.GetValueOrDefault()),
+                        HitCount = vehicleWeaponStats.Sum(a => a.HitCount.GetValueOrDefault()),
+                        VehicleKills = vehicleWeaponStats.Sum(a => a.VehicleKills.GetValueOrDefault()),
+                        Headshots = vehicleWeaponStats.Sum(a => a.Headshots.GetValueOrDefault()),
+                        KilledBy = vehicleWeaponStats.Sum(a => a.KilledBy.GetValueOrDefault()),
+                        Kills = vehicleWeaponStats.Sum(a => a.Kills.GetValueOrDefault()),
+                        PlayTime = vehicleWeaponStats.Sum(a => a.PlayTime.GetValueOrDefault()),
+                        Score = vehicleWeaponStats.Sum(a => a.Score.GetValueOrDefault()),
+
+                        // Pilot stats
+                        PilotDamageGiven = vehicleStats?.DamageGiven.Value,
+                        PilotDamageTakenBy = vehicleStats?.DamageTakenBy.Value,
+                        PilotDeaths = vehicleStats?.Deaths.Value,
+                        PilotFireCount = vehicleStats?.FireCount.Value,
+                        PilotHitCount = vehicleStats?.HitCount.Value,
+                        PilotVehicleKills = vehicleStats?.VehicleKills.Value,
+                        PilotHeadshots = vehicleStats?.Headshots.Value,
+                        PilotKilledBy = vehicleStats?.KilledBy.Value,
+                        PilotKills = vehicleStats?.Kills.Value,
+                        PilotPlayTime = vehicleStats?.PlayTime.Value,
+                        PilotScore = vehicleStats?.Score.Value
+                    };
                 })
             };
+
+            character.WeaponStats?.Where(a => a.VehicleId != 0 && a.ItemId == 0).GroupBy(a => a.VehicleId).ToList().ForEach(item =>
+            {
+                var vehicleStats = item.FirstOrDefault();
+
+                var stat = details.VehicleStats.Where(a => a.VehicleId == item.Key).FirstOrDefault();
+                if (stat != null)
+                {
+                    stat.PilotKills = vehicleStats.Kills.GetValueOrDefault();
+                    stat.PilotPlayTime = vehicleStats.PlayTime.GetValueOrDefault();
+                    stat.PilotVehicleKills = vehicleStats.VehicleKills.GetValueOrDefault();
+                }
+            });
 
             if (character.OutfitMembership != null)
             {
@@ -498,7 +531,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var wepStats = characterWepStatsTask.Result;
             var wepStatsByFaction = characterWepStatsByFactionTask.Result;
 
-
             if (wepStats == null && wepStatsByFaction == null)
             {
                 return;
@@ -507,16 +539,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var statModels = new List<CharacterWeaponStat>();
             var statByFactionModels = new List<CharacterWeaponStatByFaction>();
 
-            var statGroups = wepStats.GroupBy(a => a.ItemId);
-            var statByFactionGroups = wepStatsByFaction.GroupBy(a => a.ItemId);
+            var statGroups = wepStats.GroupBy(a => new { a.ItemId, a.VehicleId });
+            var statByFactionGroups = wepStatsByFaction.GroupBy(a => new { a.ItemId, a.VehicleId });
 
             foreach (var group in statGroups)
             {
                 var dbModel = new CharacterWeaponStat
                 {
                     CharacterId = characterId,
-                    ItemId = group.Key,
-                    VehicleId = group.First().VehicleId
+                    ItemId = group.Key.ItemId,
+                    VehicleId = group.Key.VehicleId
                 };
 
                 foreach (var stat in group)
@@ -532,18 +564,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var dbModel = new CharacterWeaponStatByFaction
                 {
                     CharacterId = characterId,
-                    ItemId = group.Key,
-                    VehicleId = group.First().VehicleId
+                    ItemId = group.Key.ItemId,
+                    VehicleId = group.Key.VehicleId
                 };
 
-                var statModel = statModels.SingleOrDefault(a => a.ItemId == group.Key);
+                var statModel = statModels.SingleOrDefault(a => a.ItemId == group.Key.ItemId && a.VehicleId == group.Key.VehicleId);
                 if (statModel == null)
                 {
                     statModel = new CharacterWeaponStat
                     {
                         CharacterId = characterId,
-                        ItemId = group.Key,
-                        VehicleId = group.First().VehicleId
+                        ItemId = group.Key.ItemId,
+                        VehicleId = group.Key.VehicleId
                     };
                     statModels.Add(statModel);
                 }
