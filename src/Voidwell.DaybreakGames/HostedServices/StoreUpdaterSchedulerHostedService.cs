@@ -9,18 +9,19 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Data.Models;
+using Voidwell.DaybreakGames.Services;
 
-namespace Voidwell.DaybreakGames.Services
+namespace Voidwell.DaybreakGames.HostedServices
 {
-    public class StoreUpdaterScheduler : IHostedService
+    public class StoreUpdaterSchedulerHostedService : IHostedService
     {
         private readonly IUpdaterSchedulerRepository _updaterSchedulerRepository;
         private readonly IServiceProvider _serviceProvider;
         private readonly DaybreakGamesOptions _options;
-        private readonly ILogger<StoreUpdaterScheduler> _logger;
+        private readonly ILogger<StoreUpdaterSchedulerHostedService> _logger;
         private Dictionary<string, Timer> _updaterTimers = new Dictionary<string, Timer>();
 
-        public StoreUpdaterScheduler(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider, DaybreakGamesOptions options, ILogger<StoreUpdaterScheduler> logger)
+        public StoreUpdaterSchedulerHostedService(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider, DaybreakGamesOptions options, ILogger<StoreUpdaterSchedulerHostedService> logger)
         {
             _updaterSchedulerRepository = updaterSchedulerRepository;
             _serviceProvider = serviceProvider;

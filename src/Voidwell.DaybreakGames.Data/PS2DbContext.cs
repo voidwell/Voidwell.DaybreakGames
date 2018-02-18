@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
@@ -42,6 +43,7 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<VehicleFaction> VehicleFactions { get; set; }
         public DbSet<World> Worlds { get; set; }
         public DbSet<Zone> Zones { get; set; }
+        public DbSet<SanctionedWeapon> SanctionedWeapons { get; set; }
 
         public DbSet<AchievementEarned> AchievementEarnedEvents { get; set; }
         public DbSet<BattlerankUp> BattleRankUpEvents { get; set; }
@@ -63,6 +65,12 @@ namespace Voidwell.DaybreakGames.Data
         {
             base.OnModelCreating(builder);
 
+            ApplyConfigurations(builder);
+            ConvertToConvention(builder);
+        }
+
+        private static void ApplyConfigurations(ModelBuilder builder)
+        {
             var applyGenericMethod = typeof(ModelBuilder).GetMethod("ApplyConfiguration", BindingFlags.Instance | BindingFlags.Public);
             foreach (var type in Assembly.GetExecutingAssembly().GetTypes().Where(c => c.IsClass && !c.IsAbstract && !c.ContainsGenericParameters))
             {
@@ -76,6 +84,43 @@ namespace Voidwell.DaybreakGames.Data
                     }
                 }
             }
+        }
+
+        private static void ConvertToConvention(ModelBuilder builder)
+        {
+            foreach (var entity in builder.Model.GetEntityTypes())
+            {
+                // Replace table names
+                entity.Relational().TableName = ToSnakeCase(entity.Relational().TableName);
+
+                // Replace column names
+                foreach (var property in entity.GetProperties())
+                {
+                    property.Relational().ColumnName = ToSnakeCase(property.Name);
+                }
+
+                foreach (var key in entity.GetKeys())
+                {
+                    key.Relational().Name = ToSnakeCase(key.Relational().Name);
+                }
+
+                foreach (var key in entity.GetForeignKeys())
+                {
+                    key.Relational().Name = ToSnakeCase(key.Relational().Name);
+                }
+
+                foreach (var index in entity.GetIndexes())
+                {
+                    index.Relational().Name = ToSnakeCase(index.Relational().Name);
+                }
+            }
+        }
+
+        private static string ToSnakeCase(string input)
+        {
+            var result = Regex.Replace(input, ".[A-Z]", m => m.Value[0] + "_" + m.Value[1]);
+
+            return result.ToLower();
         }
     }
 }

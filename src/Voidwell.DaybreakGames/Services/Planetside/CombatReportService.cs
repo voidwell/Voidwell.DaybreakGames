@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _mapService = mapService;
         }
 
-        public async Task<CombatReport> GetCombatReport(int worldId, int zoneId, DateTime startDate, DateTime endDate)
+        public async Task<CombatReport> GetCombatReport(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
         {
             var combatStatsTask = GetCombatStats(worldId, zoneId, startDate, endDate);
             var captureLogTask = GetCaptureLog(worldId, zoneId, startDate, endDate);
@@ -45,7 +45,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return combatReport;
         }
 
-        private async Task<CombatReportStats> GetCombatStats(int worldId, int zoneId, DateTime startDate, DateTime endDate)
+        private async Task<CombatReportStats> GetCombatStats(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
         {
             var characterDeathsTask = GetCharacterDeaths(worldId, zoneId, startDate, endDate);
             var vehicleDeathsTask = GetVehicleDeaths(worldId, zoneId, startDate, endDate);
@@ -236,17 +236,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private Task<IEnumerable<Death>> GetCharacterDeaths(int worldId, int zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<Death>> GetCharacterDeaths(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
         {
             return _eventRepository.GetDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
 
-        private Task<IEnumerable<VehicleDestroy>> GetVehicleDeaths(int worldId, int zoneId, DateTime startDate, DateTime endDate)
+        private Task<IEnumerable<VehicleDestroy>> GetVehicleDeaths(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
         {
             return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, zoneId, startDate, endDate);
         }
 
-        private async Task<IEnumerable<CaptureLogRow>> GetCaptureLog(int worldId, int zoneId, DateTime startDate, DateTime endDate)
+        private async Task<IEnumerable<CaptureLogRow>> GetCaptureLog(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
         {
             var facilityControls = await _eventRepository.GetFacilityControlsByDateAsync(worldId, zoneId, startDate, endDate);
 

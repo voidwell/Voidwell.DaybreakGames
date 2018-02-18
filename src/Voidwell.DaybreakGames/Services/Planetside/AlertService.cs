@@ -63,12 +63,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             var alert = await _alertRepository.GetAlert(worldId, instanceId);
-            if (alert == null || !alert.ZoneId.HasValue)
+            if (alert == null || !alert.ZoneId.HasValue || !alert.StartDate.HasValue)
             {
                 return null;
             }
 
-            var combatReport = await _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId.Value, alert.StartDate, alert.EndDate);
+            var combatReport = await _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId.Value, alert.StartDate.Value, alert.EndDate);
             if (combatReport == null)
             {
                 return null;

@@ -1,12 +1,6 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace Voidwell.DaybreakGames.Websocket
+﻿namespace Voidwell.DaybreakGames.Websocket
 {
-    public interface IWebsocketMonitor
+    public interface IWebsocketMonitor : IStatefulHostedService
     {
-        Task StartAsync(CancellationToken cancellationToken);
-        Task StopAsync(CancellationToken cancellationToken);
-        bool IsRunning();
     }
 }

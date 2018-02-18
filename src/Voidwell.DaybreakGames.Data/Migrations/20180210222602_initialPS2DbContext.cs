@@ -318,6 +318,25 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Item",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    FactionId = table.Column<int>(nullable: true),
+                    ImageId = table.Column<int>(nullable: true),
+                    IsVehicleWeapon = table.Column<bool>(nullable: false),
+                    ItemCategoryId = table.Column<int>(nullable: true),
+                    ItemTypeId = table.Column<int>(nullable: true),
+                    MaxStackSize = table.Column<int>(nullable: true),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Item", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ItemCategory",
                 columns: table => new
                 {
@@ -712,45 +731,20 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 columns: table => new
                 {
                     CharacterId = table.Column<string>(nullable: false),
-                    OutfitId = table.Column<string>(nullable: false),
                     MemberSinceDate = table.Column<DateTime>(nullable: true),
+                    OutfitId = table.Column<string>(nullable: false),
                     Rank = table.Column<string>(nullable: true),
                     RankOrdinal = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OutfitMember", x => new { x.CharacterId, x.OutfitId });
+                    table.PrimaryKey("PK_OutfitMember", x => x.CharacterId);
                     table.ForeignKey(
                         name: "FK_OutfitMember_Character_CharacterId",
                         column: x => x.CharacterId,
                         principalTable: "Character",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Item",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    FactionId = table.Column<int>(nullable: true),
-                    ImageId = table.Column<int>(nullable: true),
-                    IsVehicleWeapon = table.Column<bool>(nullable: false),
-                    ItemCategoryId = table.Column<int>(nullable: true),
-                    ItemTypeId = table.Column<int>(nullable: true),
-                    MaxStackSize = table.Column<int>(nullable: true),
-                    Name = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Item", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Item_ItemCategory_ItemCategoryId",
-                        column: x => x.ItemCategoryId,
-                        principalTable: "ItemCategory",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -794,12 +788,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Outfit_Character_LeaderCharacterId",
-                        column: x => x.LeaderCharacterId,
-                        principalTable: "Character",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_Outfit_World_WorldId",
                         column: x => x.WorldId,
                         principalTable: "World",
@@ -813,31 +801,14 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 column: "Kills");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Item_ItemCategoryId",
-                table: "Item",
-                column: "ItemCategoryId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Outfit_FactionId",
                 table: "Outfit",
                 column: "FactionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Outfit_LeaderCharacterId",
-                table: "Outfit",
-                column: "LeaderCharacterId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Outfit_WorldId",
                 table: "Outfit",
                 column: "WorldId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OutfitMember_CharacterId",
-                table: "OutfitMember",
-                column: "CharacterId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerSession_CharacterId_LoginDate_LogoutDate",
@@ -920,6 +891,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 name: "Item");
 
             migrationBuilder.DropTable(
+                name: "ItemCategory");
+
+            migrationBuilder.DropTable(
                 name: "MapHex");
 
             migrationBuilder.DropTable(
@@ -954,9 +928,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Zone");
-
-            migrationBuilder.DropTable(
-                name: "ItemCategory");
 
             migrationBuilder.DropTable(
                 name: "Faction");

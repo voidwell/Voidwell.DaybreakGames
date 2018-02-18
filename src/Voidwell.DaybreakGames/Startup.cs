@@ -18,6 +18,7 @@ using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
+using Voidwell.DaybreakGames.HostedServices;
 
 namespace Voidwell.DaybreakGames
 {
@@ -87,16 +88,16 @@ namespace Voidwell.DaybreakGames
             services.AddTransient<ICombatReportService, CombatReportService>();
             services.AddTransient<IMetagameEventService, MetagameEventService>();
             services.AddTransient<IWorldMonitor, WorldMonitor>();
-            services.AddTransient<IUpdaterService, UpdaterService>();
+            services.AddTransient<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddTransient<IFactionService, FactionService>();
             services.AddTransient<IFeedService, FeedService>();
             services.AddTransient<ISearchService, SearchService>();
 
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
-            services.AddSingleton<IHostedService, StoreUpdaterScheduler>();
-            services.AddSingleton<IHostedService, HostedWebsocketMonitor>();
-            services.AddSingleton<IHostedService, UpdaterHostedService>();
+            services.AddSingleton<IHostedService, StoreUpdaterSchedulerHostedService>();
+            services.AddSingleton<IHostedService, WebsocketMonitorHostedService>();
+            services.AddSingleton<IHostedService, CharacterUpdaterHostedService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

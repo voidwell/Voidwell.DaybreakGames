@@ -11,7 +11,7 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    [Migration("20180205200352_initialPS2DbContext")]
+    [Migration("20180210222602_initialPS2DbContext")]
     partial class initialPS2DbContext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -384,7 +384,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<int>("ItemId");
 
-                    b.Property<int?>("VehicleId");
+                    b.Property<int>("VehicleId");
 
                     b.Property<int?>("DamageGiven")
                         .ValueGeneratedOnAdd()
@@ -443,7 +443,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<int>("ItemId");
 
-                    b.Property<int?>("VehicleId");
+                    b.Property<int>("VehicleId");
 
                     b.Property<int?>("DamageGivenNC")
                         .ValueGeneratedOnAdd()
@@ -863,8 +863,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemCategoryId");
-
                     b.ToTable("Item");
                 });
 
@@ -977,9 +975,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.HasIndex("FactionId");
 
-                    b.HasIndex("LeaderCharacterId")
-                        .IsUnique();
-
                     b.HasIndex("WorldId");
 
                     b.ToTable("Outfit");
@@ -989,18 +984,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 {
                     b.Property<string>("CharacterId");
 
-                    b.Property<string>("OutfitId");
-
                     b.Property<DateTime?>("MemberSinceDate");
+
+                    b.Property<string>("OutfitId")
+                        .IsRequired();
 
                     b.Property<string>("Rank");
 
                     b.Property<int?>("RankOrdinal");
 
-                    b.HasKey("CharacterId", "OutfitId");
-
-                    b.HasIndex("CharacterId")
-                        .IsUnique();
+                    b.HasKey("CharacterId");
 
                     b.ToTable("OutfitMember");
                 });
@@ -1180,22 +1173,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Item", b =>
-                {
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.ItemCategory", "ItemCategory")
-                        .WithMany()
-                        .HasForeignKey("ItemCategoryId");
-                });
-
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Outfit", b =>
                 {
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.Faction", "Faction")
                         .WithMany()
                         .HasForeignKey("FactionId");
-
-                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.Character", "LeaderCharacter")
-                        .WithOne()
-                        .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.Outfit", "LeaderCharacterId");
 
                     b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.World", "World")
                         .WithMany()
