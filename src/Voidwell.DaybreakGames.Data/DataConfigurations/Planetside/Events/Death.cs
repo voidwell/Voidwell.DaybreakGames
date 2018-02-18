@@ -11,6 +11,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId });
 
+            builder.HasIndex(a => new { a.AttackerCharacterId, a.CharacterId });
+
             builder
                 .Ignore(a => a.Character)
                 .Ignore(a => a.AttackerCharacter)

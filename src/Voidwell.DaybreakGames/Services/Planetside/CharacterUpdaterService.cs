@@ -3,25 +3,28 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class UpdaterService : IUpdaterService
+    public class CharacterUpdaterService : StatefulHostedService, ICharacterUpdaterService
     {
         private readonly ICharacterUpdaterRepository _characterUpdaterRepository;
         private readonly ICharacterService _characterService;
         private readonly DaybreakGamesOptions _options;
         private readonly ILogger _logger;
 
-        public bool IsRunning { get; private set; }
+        public override string ServiceName => "CharacterUpdater";
 
         private Timer _timer;
         private readonly TimeSpan _executionInterval = TimeSpan.FromSeconds(10);
         private bool _isWorking;
 
-        public UpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService, IOptions<DaybreakGamesOptions> options, ILogger<UpdaterService> logger)
+        public CharacterUpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService,
+            IOptions<DaybreakGamesOptions> options, ICache cache, ILogger<CharacterUpdaterService> logger)
+            : base(cache)
         {
             _characterUpdaterRepository = characterUpdaterRepository;
             _characterService = characterService;
@@ -29,8 +32,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _logger = logger;
 
             _isWorking = false;
-
-            IsRunning = !_options.DisableCharacterUpdater;
         }
 
         public async Task AddToQueue(string characterId)
@@ -43,42 +44,30 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await _characterUpdaterRepository.AddAsync(dataModel);
         }
 
-        public Task StartUpdater()
+        public override Task StartInternalAsync(CancellationToken cancellationToken)
         {
-            IsRunning = true;
-            SetupTimer();
+            _timer?.Dispose();
 
-            return Task.CompletedTask;
-        }
-
-        public Task StopUpdater()
-        {
-            _timer.Dispose();
-            IsRunning = false;
-
-            _logger.LogInformation("Character updater stopped");
-
-            return Task.CompletedTask;
-        }
-
-        public Task Startup()
-        {
-            if (!IsRunning)
+            if (_options.DisableCharacterUpdater)
+            {
+                _logger.LogInformation("Character updater is disabled");
                 return Task.CompletedTask;
-
-            SetupTimer();
-
-            return Task.CompletedTask;
-        }
-
-        private void SetupTimer()
-        {
-            if (_timer != null)
-                _timer.Dispose();
+            }
 
             _logger.LogInformation("Character updater started");
 
             _timer = new Timer(ExecuteAsync, null, 0, (int)_executionInterval.TotalMilliseconds);
+
+            return Task.CompletedTask;
+        }
+
+        public override Task StopInternalAsync(CancellationToken cancellationToken)
+        {
+            _timer?.Dispose();
+
+            _logger.LogInformation("Character updater stopped");
+
+            return Task.CompletedTask;
         }
 
         private async void ExecuteAsync(Object stateInfo)

@@ -12,15 +12,9 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => a.Id);
 
-            builder.Ignore(a => a.LeaderCharacter);
-
-            builder.HasOne(a => a.World)
-                .WithMany()
-                .HasForeignKey(a => a.WorldId);
-
-            builder.HasOne(a => a.Faction)
-                .WithMany()
-                .HasForeignKey(a => a.FactionId);
+            builder.Ignore(a => a.LeaderCharacter)
+                   .Ignore(a => a.Faction)
+                   .Ignore(a => a.World);
         }
     }
 }

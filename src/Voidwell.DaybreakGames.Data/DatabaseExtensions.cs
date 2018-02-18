@@ -58,7 +58,7 @@ namespace Voidwell.DaybreakGames.Data
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<PS2DbContext>();
-                dbContext.Database.Migrate();
+                //dbContext.Database.Migrate();
             }
 
             return app;

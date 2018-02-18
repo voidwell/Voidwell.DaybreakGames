@@ -4,20 +4,23 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Voidwell.Cache;
 using Voidwell.DaybreakGames.Census.Stream;
 
 namespace Voidwell.DaybreakGames.Websocket
 {
-    public class WebsocketMonitor : IWebsocketMonitor, IDisposable
+    public class WebsocketMonitor : StatefulHostedService, IWebsocketMonitor, IDisposable
     {
         private readonly IWebsocketEventHandler _handler;
         private readonly DaybreakGamesOptions _options;
         private readonly ILogger<WebsocketMonitor> _logger;
 
         private readonly CensusStreamClient _client;
-        private bool _isRunning = false;
 
-        public WebsocketMonitor(IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options, ILogger<WebsocketMonitor> logger)
+        public override string ServiceName => "CensusMonitor";
+
+        public WebsocketMonitor(IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options, ICache cache, ILogger<WebsocketMonitor> logger)
+            :base(cache)
         {
             _handler = handler;
             _options = options.Value;
@@ -33,28 +36,31 @@ namespace Voidwell.DaybreakGames.Websocket
             _client = new CensusStreamClient(subscription, apiKey: _options.CensusServiceKey);
         }
 
-        public async Task StartAsync(CancellationToken ct)
+        public override async Task StartInternalAsync(CancellationToken cancellationToken)
         {
-            _isRunning = true;
+            if (_options.DisableCensusMonitor)
+            {
+                _logger.LogInformation("Census monitor is disabled");
+                return;
+            }
+
             _logger.LogInformation("Starting census stream monitor");
 
-            await _client.ConnectAsync(ct);
+            await _client.ConnectAsync(cancellationToken);
 
             StartListening();
         }
 
-        public async Task StopAsync(CancellationToken ct)
+        public override async Task StopInternalAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping census stream monitor");
 
-            await _client.CloseAsync(ct);
+            if (_client == null)
+            {
+                return;
+            }
 
-            _isRunning = false;
-        }
-
-        public bool IsRunning()
-        {
-            return _isRunning;
+            await _client.CloseAsync(cancellationToken);
         }
 
         private void StartListening()

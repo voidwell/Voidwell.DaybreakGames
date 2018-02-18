@@ -17,14 +17,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IZoneService _zoneService;
         private readonly IMapService _mapService;
         private readonly ICharacterService _characterService;
-        private readonly IUpdaterService _updaterService;
+        private readonly ICharacterUpdaterService _updaterService;
         private readonly ILogger<WorldMonitor> _logger;
 
         private static Dictionary<int, WorldState> _worldStates = new Dictionary<int, WorldState>();
 
         public WorldMonitor(IPlayerSessionRepository playerSessionRepository, IEventRepository eventRepository,
             IZoneService zoneService, IMapService mapService, ICharacterService characterService,
-            IUpdaterService updaterService, ILogger<WorldMonitor> logger)
+            ICharacterUpdaterService updaterService, ILogger<WorldMonitor> logger)
         {
             _playerSessionRepository = playerSessionRepository;
             _eventRepository = eventRepository;

@@ -8,9 +8,9 @@ namespace Voidwell.DaybreakGames.Models
         public int WorldId { get; set; }
         public int MetagameInstanceId { get; set; }
         public int? ZoneId { get; set; }
-        public int MetagameEventId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public int? MetagameEventId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public float StartFactionVS { get; set; }
         public float StartFactionNC { get; set; }
         public float StartFactionTR { get; set; }
