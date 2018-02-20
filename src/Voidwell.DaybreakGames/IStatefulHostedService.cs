@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames
 {
@@ -9,7 +10,7 @@ namespace Voidwell.DaybreakGames
         Task OnApplicationShutdown(CancellationToken cancellationToken);
         Task StartAsync(CancellationToken cancellationToken);
         Task StopAsync(CancellationToken cancellationToken);
-        Task<bool> GetStatus(CancellationToken cancellationToken);
+        Task<ServiceState> GetStatus(CancellationToken cancellationToken);
         string ServiceName { get; }
     }
 }

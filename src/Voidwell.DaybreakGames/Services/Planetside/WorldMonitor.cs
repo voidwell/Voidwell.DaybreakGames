@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Websocket.Models;
@@ -20,7 +20,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICharacterUpdaterService _updaterService;
         private readonly ILogger<WorldMonitor> _logger;
 
-        private static Dictionary<int, WorldState> _worldStates = new Dictionary<int, WorldState>();
+        private static ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
 
         public WorldMonitor(IPlayerSessionRepository playerSessionRepository, IEventRepository eventRepository,
             IZoneService zoneService, IMapService mapService, ICharacterService characterService,
@@ -39,7 +39,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             if (!_worldStates.ContainsKey(worldId))
             {
-                _worldStates.Add(worldId, new WorldState
+                _worldStates.TryAdd(worldId, new WorldState
                 {
                     Id = worldId,
                     Name = worldName,

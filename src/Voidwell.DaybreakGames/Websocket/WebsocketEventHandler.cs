@@ -83,10 +83,10 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public async Task Process(JToken message)
         {
-            var jType = message.SelectToken("type");
-            if (jType != null && jType.Value<string>() == "serviceStateChanged")
+            var jType = message.Value<string>("type");
+            if (jType == "serviceStateChanged")
             {
-                var detail = message.SelectToken("detail").Value<string>();
+                var detail = message.Value<string>("detail");
 
                 var regServer = @"EventServerEndpoint_(.*)_(.*)";
                 Regex r = new Regex(regServer);
@@ -96,7 +96,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
                 if (int.TryParse(m.Groups[2].Value, out var worldId))
                 {
-                    var isWorldOnline = message.SelectToken("online").Value<bool>();
+                    var isWorldOnline = message.Value<bool>("online");
 
                     await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
                 };
@@ -312,7 +312,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 ZoneControlVs = payload.FactionVs,
                 ZoneControlNc = payload.FactionNc,
                 ZoneControlTr = payload.FactionTr,
-                ExperienceBonus = payload.ExperienceBonus,
+                ExperienceBonus = (int)payload.ExperienceBonus,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId

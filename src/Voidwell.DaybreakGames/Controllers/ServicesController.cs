@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Websocket;
 
@@ -22,15 +23,15 @@ namespace Voidwell.DaybreakGames.Controllers
         [HttpGet("status")]
         public async Task<ActionResult> GetAllServiceStatus()
         {
-            var states = new Dictionary<string, bool>();
+            var states = new List<ServiceState>();
 
             var characterUpdaterState = _characterUpdaterService.GetStatus(CancellationToken.None);
             var websocketMonitorState = _websocketMonitor.GetStatus(CancellationToken.None);
 
             await Task.WhenAll(characterUpdaterState, websocketMonitorState);
 
-            states.Add(_characterUpdaterService.ServiceName, characterUpdaterState.Result);
-            states.Add(_websocketMonitor.ServiceName, websocketMonitorState.Result);
+            states.Add(characterUpdaterState.Result);
+            states.Add(websocketMonitorState.Result);
 
             return Ok(states);
         }
@@ -38,48 +39,57 @@ namespace Voidwell.DaybreakGames.Controllers
         [HttpGet("{service}/status")]
         public async Task<ActionResult> GetServiceStatus(string service)
         {
-            bool status = false;
+            ServiceState status = null;
 
-            if (service.ToLower() == _characterUpdaterService.ServiceName.ToLower())
+            if (service == _characterUpdaterService.ServiceName)
             {
                 status = await _characterUpdaterService.GetStatus(CancellationToken.None);
             }
-            else if (service.ToLower() == _websocketMonitor.ServiceName.ToLower())
+            else if (service == _websocketMonitor.ServiceName)
             {
                 status = await _websocketMonitor.GetStatus(CancellationToken.None);
             }
 
-            return Ok(status);
+            if (status != null)
+            {
+                return Ok(status);
+            }
+
+            return NotFound();
         }
 
         [HttpPost("{service}/enable")]
         public async Task<ActionResult> PostEnableService(string service)
         {
-            if (service.ToLower() == _characterUpdaterService.ServiceName.ToLower())
+            if (service == _characterUpdaterService.ServiceName)
             {
                 await _characterUpdaterService.StartAsync(CancellationToken.None);
+                return Ok(await _characterUpdaterService.GetStatus(CancellationToken.None));
             }
-            else if (service.ToLower() == _websocketMonitor.ServiceName.ToLower())
+            else if (service == _websocketMonitor.ServiceName)
             {
                 await _websocketMonitor.StartAsync(CancellationToken.None);
+                return Ok(await _websocketMonitor.GetStatus(CancellationToken.None));
             }
 
-            return NoContent();
+            return NotFound();
         }
 
         [HttpPost("{service}/disable")]
         public async Task<ActionResult> PostDisableService(string service)
         {
-            if (service.ToLower() == _characterUpdaterService.ServiceName.ToLower())
+            if (service == _characterUpdaterService.ServiceName)
             {
                 await _characterUpdaterService.StopAsync(CancellationToken.None);
+                return Ok(await _characterUpdaterService.GetStatus(CancellationToken.None));
             }
-            else if (service.ToLower() == _websocketMonitor.ServiceName.ToLower())
+            else if (service == _websocketMonitor.ServiceName)
             {
                 await _websocketMonitor.StopAsync(CancellationToken.None);
+                return Ok(await _websocketMonitor.GetStatus(CancellationToken.None));
             }
 
-            return NoContent();
+            return NotFound();
         }
     }
 }

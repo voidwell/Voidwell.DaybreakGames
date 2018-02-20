@@ -2,10 +2,13 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Census.Stream;
+using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Websocket.Models;
 
 namespace Voidwell.DaybreakGames.Websocket
 {
@@ -16,6 +19,7 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly ILogger<WebsocketMonitor> _logger;
 
         private readonly CensusStreamClient _client;
+        private CensusHeartbeat _lastHeartbeat;
 
         public override string ServiceName => "CensusMonitor";
 
@@ -63,6 +67,20 @@ namespace Voidwell.DaybreakGames.Websocket
             await _client.CloseAsync(cancellationToken);
         }
 
+        public override async Task OnApplicationShutdown(CancellationToken cancellationToken)
+        {
+            await _client?.CloseAsync(cancellationToken);
+        }
+
+        public override async Task<ServiceState> GetStatus(CancellationToken cancellationToken)
+        {
+            var status = await base.GetStatus(cancellationToken);
+
+            status.Details = _lastHeartbeat;
+
+            return status;
+        }
+
         private void StartListening()
         {
             Task.Run(StartListeningAsync);
@@ -83,7 +101,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation($"Websocket receive failed: {ex.Message}");
+                    _logger.LogInformation($"Websocket receive failed: {ex}");
                 }
 
                 if (message == null)
@@ -91,8 +109,28 @@ namespace Voidwell.DaybreakGames.Websocket
                     continue;
                 }
 
-                await _handler.Process(message);
+                if (message.Value<string>("type") == "heartbeat")
+                {
+                    _lastHeartbeat = new CensusHeartbeat
+                    {
+                        LastHeartbeat = DateTime.UtcNow,
+                        Contents = message.ToObject<object>()
+                    };
+
+                    continue;
+                }
+
+                ProcessMessage(message);
             }
+        }
+
+        private void ProcessMessage(JToken message)
+        {
+            Task.Run(() =>
+            {
+                JToken local = message;
+                return _handler.Process(local);
+            });
         }
 
         public void Dispose()
