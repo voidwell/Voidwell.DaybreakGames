@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using Voidwell.DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.CensusServices.Models;
+using System.Threading;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -41,32 +42,39 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _outfitRepository.GetOutfitsByIdsAsync(outfitIds);
         }
 
+        private readonly KeyedSemaphoreSlim _outfitLock = new KeyedSemaphoreSlim();
+
         public async Task<Outfit> GetOutfit(string outfitId)
         {
-            var cacheKey = $"{_cacheKey}_outfit_{outfitId}";
+            Outfit outfit = null;
 
-            var outfit = await _cache.GetAsync<Outfit>(cacheKey);
-            if (outfit != null)
+            using (await _outfitLock.WaitAsync(outfitId))
             {
-                return outfit;
-            }
+                var cacheKey = $"{_cacheKey}_outfit_{outfitId}";
 
-            outfit = await _outfitRepository.GetOutfitAsync(outfitId);
-            if (outfit == null)
-            {
-                try
+                outfit = await _cache.GetAsync<Outfit>(cacheKey);
+                if (outfit != null)
                 {
-                    outfit = await UpdateOutfit(outfitId);
+                    return outfit;
                 }
-                catch (CensusConnectionException ex)
-                {
-                    _logger.LogError(75342, ex.Message);
-                }
-            }
 
-            if (outfit != null)
-            {
-                await _cache.SetAsync(cacheKey, outfit, _cacheOutfitExpiration);
+                outfit = await _outfitRepository.GetOutfitAsync(outfitId);
+                if (outfit == null)
+                {
+                    try
+                    {
+                        outfit = await UpdateOutfit(outfitId);
+                    }
+                    catch (CensusConnectionException ex)
+                    {
+                        _logger.LogError(75342, ex.Message);
+                    }
+                }
+
+                if (outfit != null)
+                {
+                    await _cache.SetAsync(cacheKey, outfit, _cacheOutfitExpiration);
+                }
             }
 
             return outfit;
@@ -199,54 +207,63 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await _outfitRepository.UpsertAsync(dataModel);
         }
 
+        private readonly KeyedSemaphoreSlim _outfitMembershipLock = new KeyedSemaphoreSlim();
+
         public async Task<OutfitMember> UpdateCharacterOutfitMembership(string characterId)
         {
-            var cacheKey = $"{_cacheKey}_member_{characterId}";
+            OutfitMember outfitMember = null;
 
-            var outfitMember = await _cache.GetAsync<OutfitMember>(cacheKey);
-            if (outfitMember != null)
+            using (await _outfitMembershipLock.WaitAsync(characterId))
             {
-                return outfitMember.OutfitId != null ? outfitMember : null;
+                var cacheKey = $"{_cacheKey}_member_{characterId}";
+
+                outfitMember = await _cache.GetAsync<OutfitMember>(cacheKey);
+                if (outfitMember != null)
+                {
+                    return outfitMember.OutfitId != null ? outfitMember : null;
+                }
+
+                CensusOutfitMemberModel membership = null;
+
+                try
+                {
+                    membership = await _censusCharacter.GetCharacterOutfitMembership(characterId);
+                }
+                catch (CensusConnectionException ex)
+                {
+                    _logger.LogError(24214, ex.Message);
+                    return null;
+                }
+
+                if (membership == null)
+                {
+                    await _outfitRepository.RemoveOutfitMemberAsync(characterId);
+                    await _cache.SetAsync(cacheKey, new OutfitMember(), _cacheOutfitMemberExpiration);
+                    return null;
+                }
+
+                var outfit = await GetOutfit(membership.OutfitId);
+                if (outfit == null)
+                {
+                    _logger.LogError(84624, $"Unable to resolve outfit {membership.OutfitId} for character {characterId}");
+                    await _cache.SetAsync(cacheKey, new OutfitMember(), _cacheOutfitMemberExpiration);
+                    return null;
+                }
+
+                outfitMember = new OutfitMember
+                {
+                    OutfitId = membership.OutfitId,
+                    CharacterId = membership.CharacterId,
+                    MemberSinceDate = membership.MemberSinceDate,
+                    Rank = membership.Rank,
+                    RankOrdinal = membership.RankOrdinal
+                };
+
+                await _cache.SetAsync(cacheKey, outfitMember, _cacheOutfitMemberExpiration);
+                outfitMember = await _outfitRepository.UpsertAsync(outfitMember);
             }
 
-            CensusOutfitMemberModel membership = null;
-
-            try
-            {
-                membership = await _censusCharacter.GetCharacterOutfitMembership(characterId);
-            }
-            catch(CensusConnectionException ex)
-            {
-                _logger.LogError(24214, ex.Message);
-                return null;
-            }
-
-            if (membership == null)
-            {
-                await _outfitRepository.RemoveOutfitMemberAsync(characterId);
-                await _cache.SetAsync(cacheKey, new OutfitMember(), _cacheOutfitMemberExpiration);
-                return null;
-            }
-
-            var outfit = await GetOutfit(membership.OutfitId);
-            if (outfit == null)
-            {
-                _logger.LogError(84624, $"Unable to resolve outfit {membership.OutfitId} for character {characterId}");
-                return null;
-            }
-
-            outfitMember = new OutfitMember
-            {
-                OutfitId = membership.OutfitId,
-                CharacterId = membership.CharacterId,
-                MemberSinceDate = membership.MemberSinceDate,
-                Rank = membership.Rank,
-                RankOrdinal = membership.RankOrdinal
-            };
-
-            await _cache.SetAsync(cacheKey, outfitMember, _cacheOutfitMemberExpiration);
-
-            return await _outfitRepository.UpsertAsync(outfitMember);
+            return outfitMember;
         }
 
         private Task<Outfit> TryGetOutfitFull(string outfitId)

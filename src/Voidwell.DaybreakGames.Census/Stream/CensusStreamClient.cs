@@ -56,6 +56,11 @@ namespace Voidwell.DaybreakGames.Census.Stream
         {
             _timer?.Dispose();
 
+            if (_client == null)
+            {
+                _client = new ClientWebSocket();
+            }
+
             await _client.ConnectAsync(GetEndpoint(), ct);
 
             if (_client.State == WebSocketState.Open)
@@ -93,13 +98,13 @@ namespace Voidwell.DaybreakGames.Census.Stream
 
             if (_client.State == WebSocketState.Open || _client.State == WebSocketState.Connecting)
             {
-                await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close requested by client", ct);
+                await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Close requested by client", ct);
             }
         }
 
         private Task SendAsync(object message, CancellationToken cancellationToken)
         {
-            if (_client.State != WebSocketState.Open)
+            if (_client?.State != WebSocketState.Open)
             {
                 throw new InvalidOperationException("Connection is not ready to send data. Wait for connect to be in open state.");
             }
@@ -135,9 +140,13 @@ namespace Voidwell.DaybreakGames.Census.Stream
                         return await reader.ReadToEndAsync();
                     }
                 }
-            }
+                else if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    await CloseAsync(CancellationToken.None);
+                }
 
-            return null;
+                return null;
+            }
         }
 
         private Uri GetEndpoint()
@@ -154,9 +163,9 @@ namespace Voidwell.DaybreakGames.Census.Stream
 
         private async void ReconnectClientAsync(Object stateInfo)
         {
-            var state = _client.State;
+            var state = _client?.State;
 
-            if (state == WebSocketState.Closed || state == WebSocketState.Aborted || state == WebSocketState.None)
+            if (state == null || state == WebSocketState.Closed || state == WebSocketState.Aborted || state == WebSocketState.None)
             {
                 Console.WriteLine($"Census stream client is closed. Attempting reconnect: {_client.CloseStatusDescription}");
 

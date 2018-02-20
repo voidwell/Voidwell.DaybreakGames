@@ -9,7 +9,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("EventVehicleDestroy");
 
-            builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId });
+            builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId, a.AttackerVehicleId, a.VehicleId });
         }
     }
 }

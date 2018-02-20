@@ -8,6 +8,6 @@
         public float FactionVs { get; set; }
         public float FactionNc { get; set; }
         public float FactionTr { get; set; }
-        public int ExperienceBonus { get; set; }
+        public double ExperienceBonus { get; set; }
     }
 }

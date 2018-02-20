@@ -2,12 +2,14 @@
 using StackExchange.Redis;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace Voidwell.Cache
 {
     public class Cache : ICache, IDisposable
     {
         private CacheOptions _options;
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         private ConnectionMultiplexer _redis;
         private IDatabase _db;
 
@@ -15,41 +17,47 @@ namespace Voidwell.Cache
         {
             _options = options;
 
-            Task.Run(() => Connect());
+            Task.Run(() => ConnectAsync());
         }
 
-        public Task SetAsync(string key, object value)
+        public async Task SetAsync(string key, object value)
         {
+            var db = await ConnectAsync();
+
             try
             {
                 var sValue = JsonConvert.SerializeObject(value);
-                return _db.StringSetAsync(KeyFormatter(key), sValue);
+                await db.StringSetAsync(KeyFormatter(key), sValue);
             }
             catch (Exception)
             {
-                return Task.CompletedTask;
+                return;
             }
             
         }
 
-        public Task SetAsync(string key, object value, TimeSpan expires)
+        public async Task SetAsync(string key, object value, TimeSpan expires)
         {
+            var db = await ConnectAsync();
+
             try
             {
                 var sValue = JsonConvert.SerializeObject(value);
-                return _db.StringSetAsync(KeyFormatter(key), sValue, expiry: expires);
+                await db.StringSetAsync(KeyFormatter(key), sValue, expiry: expires);
             }
             catch (Exception)
             {
-                return Task.CompletedTask;
+                return;
             }
         }
 
         public async Task<T> GetAsync<T>(string key)
         {
+            var db = await ConnectAsync();
+
             try
             {
-                var value = await _db.StringGetAsync(KeyFormatter(key));
+                var value = await db.StringGetAsync(KeyFormatter(key));
 
                 return JsonConvert.DeserializeObject<T>(value);
             }
@@ -59,22 +67,41 @@ namespace Voidwell.Cache
             }
         }
 
-        public Task RemoveAsync(string key)
+        public async Task RemoveAsync(string key)
         {
+            var db = await ConnectAsync();
+
             try
             {
-                return _db.KeyDeleteAsync(KeyFormatter(key));
+                await db.KeyDeleteAsync(KeyFormatter(key));
             }
             catch(Exception)
             {
-                return Task.CompletedTask;
+                return;
             }
         }
 
-        private async Task Connect()
+        private async Task<IDatabaseAsync> ConnectAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _redis = await ConnectionMultiplexer.ConnectAsync(_options.RedisConfiguration);
-            _db = _redis.GetDatabase();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (_redis != null)
+                return _db;
+
+            await _connectionLock.WaitAsync(cancellationToken);
+            try
+            {
+                if (_redis == null)
+                    _redis = await ConnectionMultiplexer.ConnectAsync(_options.RedisConfiguration);
+
+                _db = _redis.GetDatabase();
+            }
+            finally
+            {
+                _connectionLock.Release();
+            }
+
+            return _db;
         }
 
         private string KeyFormatter(string key)

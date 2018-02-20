@@ -52,32 +52,39 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _characterRepository.GetCharactersByIdsAsync(characterIds);
         }
 
+        private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
+
         public async Task<Character> GetCharacter(string characterId)
         {
-            var cacheKey = $"{_cacheKey}_character_{characterId}";
+            Character character = null;
 
-            var character = await _cache.GetAsync<Character>(cacheKey);
-            if (character != null)
+            using (await _characterLock.WaitAsync(characterId))
             {
-                return character;
-            }
+                var cacheKey = $"{_cacheKey}_character_{characterId}";
 
-            character = await _characterRepository.GetCharacterAsync(characterId);
-            if (character == null)
-            {
-                try
+                character = await _cache.GetAsync<Character>(cacheKey);
+                if (character != null)
                 {
-                    character = await UpdateCharacter(characterId);
+                    return character;
                 }
-                catch (CensusConnectionException ex)
-                {
-                    _logger.LogError(51231, ex.Message);
-                }
-            }
 
-            if (character != null)
-            {
-                await _cache.SetAsync(cacheKey, character, _cacheCharacterExpiration);
+                character = await _characterRepository.GetCharacterAsync(characterId);
+                if (character == null)
+                {
+                    try
+                    {
+                        character = await UpdateCharacter(characterId);
+                    }
+                    catch (CensusConnectionException ex)
+                    {
+                        _logger.LogError(51231, ex.Message);
+                    }
+                }
+
+                if (character != null)
+                {
+                    await _cache.SetAsync(cacheKey, character, _cacheCharacterExpiration);
+                }
             }
 
             return character;

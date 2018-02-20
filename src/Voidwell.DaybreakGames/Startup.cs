@@ -88,13 +88,14 @@ namespace Voidwell.DaybreakGames
             services.AddTransient<ICombatReportService, CombatReportService>();
             services.AddTransient<IMetagameEventService, MetagameEventService>();
             services.AddTransient<IWorldMonitor, WorldMonitor>();
-            services.AddTransient<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddTransient<IFactionService, FactionService>();
             services.AddTransient<IFeedService, FeedService>();
             services.AddTransient<ISearchService, SearchService>();
 
+            services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
+
             services.AddSingleton<IHostedService, StoreUpdaterSchedulerHostedService>();
             services.AddSingleton<IHostedService, WebsocketMonitorHostedService>();
             services.AddSingleton<IHostedService, CharacterUpdaterHostedService>();
