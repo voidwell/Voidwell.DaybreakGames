@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -370,7 +371,8 @@ namespace Voidwell.DaybreakGames.Census.Test
                 CensusServiceKey = "testkey",
                 CensusServiceNamespace = "ps2"
             };
-            return new CensusClient(options);
+
+            return new CensusClient(Options.Create(options), null);
         }
     }
 }
