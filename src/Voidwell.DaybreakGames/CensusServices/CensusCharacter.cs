@@ -33,8 +33,6 @@ namespace Voidwell.DaybreakGames.CensusServices
             });
             query.Where("character_id").Equals(characterId);
 
-            var url = query.GetUri();
-
             return await query.Get<CensusCharacterModel>();
         }
 

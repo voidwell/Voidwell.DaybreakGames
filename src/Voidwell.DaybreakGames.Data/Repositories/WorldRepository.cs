@@ -16,16 +16,20 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<World>> GetAllWorldsAsync()
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Worlds.ToListAsync();
             }
         }
 
         public async Task UpsertRangeAsync(IEnumerable<World> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 foreach (var entity in entities)
                 {
                     var storeEntity = await dbContext.Worlds.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);

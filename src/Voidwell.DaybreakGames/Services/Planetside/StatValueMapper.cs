@@ -1,4 +1,5 @@
-﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using System;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -196,6 +197,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 case "weapon_vehicle_kills":
                     dbModel.VehicleKills = value;
                     break;
+                case "weapon_damage_taken_by":
+                    dbModel.DamageTakenBy = value;
+                    break;
             }
         }
 
@@ -203,6 +207,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             switch (statName)
             {
+                case "weapon_damage_taken_by":
+                    dbModel.DamageTakenByVS = valueVs;
+                    dbModel.DamageTakenByNC = valueNc;
+                    dbModel.DamageTakenByTR = valueTr;
+                    break;
                 case "weapon_damage_given":
                     dbModel.DamageGivenVS = valueVs;
                     dbModel.DamageGivenNC = valueNc;

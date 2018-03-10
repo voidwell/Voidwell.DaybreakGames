@@ -19,8 +19,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.FacilityLinks.Where(a => a.ZoneId == zoneId)
                     .ToListAsync();
             }
@@ -28,8 +30,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<int> facilityIds)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.MapRegions.Where(a => facilityIds.Contains(a.FacilityId))
                     .ToListAsync();
             }
@@ -37,8 +41,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.MapRegions.Where(a => a.ZoneId == zoneId)
                     .ToListAsync();
             }
@@ -46,8 +52,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpsertRangeAsync(IEnumerable<MapHex> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.MapHexs;
 
                 foreach (var entity in entities)
@@ -71,8 +79,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpsertRangeAsync(IEnumerable<MapRegion> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.MapRegions;
 
                 foreach (var entity in entities)
@@ -95,8 +105,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpsertRangeAsync(IEnumerable<FacilityLink> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.FacilityLinks;
 
                 foreach (var entity in entities)

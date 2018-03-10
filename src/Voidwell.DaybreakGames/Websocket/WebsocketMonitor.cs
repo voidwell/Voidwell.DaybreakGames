@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Census.Stream;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Websocket.Models;
 
 namespace Voidwell.DaybreakGames.Websocket
@@ -16,6 +17,7 @@ namespace Voidwell.DaybreakGames.Websocket
     {
         private readonly IWebsocketEventHandler _handler;
         private readonly DaybreakGamesOptions _options;
+        private readonly IWorldMonitor _worldMonitor;
         private readonly ILogger<WebsocketMonitor> _logger;
 
         private readonly CensusStreamClient _client;
@@ -23,11 +25,13 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public override string ServiceName => "CensusMonitor";
 
-        public WebsocketMonitor(IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options, ICache cache, ILogger<WebsocketMonitor> logger)
-            :base(cache)
+        public WebsocketMonitor(IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options,
+            IWorldMonitor worldMonitor, ICache cache, ILogger<WebsocketMonitor> logger)
+                :base(cache)
         {
             _handler = handler;
             _options = options.Value;
+            _worldMonitor = worldMonitor;
             _logger = logger;
 
             var subscription = new CensusStreamSubscription
@@ -65,6 +69,7 @@ namespace Voidwell.DaybreakGames.Websocket
             }
 
             await _client.CloseAsync(cancellationToken);
+            await _worldMonitor.ClearAllWorldStates();
         }
 
         public override async Task OnApplicationShutdown(CancellationToken cancellationToken)

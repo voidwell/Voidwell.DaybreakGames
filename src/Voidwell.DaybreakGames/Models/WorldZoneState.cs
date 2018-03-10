@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Models
@@ -10,7 +14,7 @@ namespace Voidwell.DaybreakGames.Models
         public int ZoneId { get; private set; }
         public WorldZone Map { get; private set; }
         public MapScore MapScore { get; private set; }
-        public Dictionary<int, int> MapRegionOwnership { get; private set; }
+        public Dictionary<int, int> MapRegionOwnership { get; private set; } = new Dictionary<int, int>();
 
         public WorldZoneState(int worldId, int zoneId, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
         {
@@ -19,7 +23,7 @@ namespace Voidwell.DaybreakGames.Models
 
             Map = new WorldZone(facilityLinks, mapRegions);
 
-            foreach(var own in ownership)
+            foreach (var own in ownership)
             {
                 MapRegionOwnership[own.RegionId] = own.FactionId;
             }
@@ -27,8 +31,12 @@ namespace Voidwell.DaybreakGames.Models
             CalculateOwnership();
         }
 
-        public void FacilityFactionChange(int facilityId, int factionId)
+        private readonly SemaphoreSlim _facilityFactionChangeLock = new SemaphoreSlim(1 ,1);
+
+        public async Task FacilityFactionChange(int facilityId, int factionId)
         {
+            await _facilityFactionChangeLock.WaitAsync();
+
             var region = Map.Regions.SingleOrDefault(r => r.FacilityId == facilityId);
             if (region != null)
             {
@@ -36,6 +44,8 @@ namespace Voidwell.DaybreakGames.Models
 
                 CalculateOwnership();
             }
+
+            _facilityFactionChangeLock.Release();
         }
 
         private void CalculateOwnership()
@@ -54,7 +64,7 @@ namespace Voidwell.DaybreakGames.Models
         private class OwnershipCalculator
         {
             public int[] Territories { get; private set; } = new[] { 0, 0, 0, 0 };
-            public float[] Percent { get; private set; } = new[] { 0f, 0f, 0f, 0f };
+            public float[] Percent { get; private set; } = new[] { 0.0f, 0.0f, 0.0f, 0.0f };
             public int[] ConnectedTerritories { get; private set; } = new[] { 0, 0, 0, 0 };
             public float[] ConnectedPercent { get; private set; } = new[] { 0f, 0f, 0f, 0f };
 
@@ -73,9 +83,9 @@ namespace Voidwell.DaybreakGames.Models
                     Territories[region.Value]++;
                 }
 
-                foreach (var factionId in Territories)
+                for(var i = 0; i < Territories.Count(); i++)
                 {
-                    Percent[factionId] = Territories[factionId] / zoneMap.Regions.Count;
+                    Percent[i] = (float)Territories[i] / zoneMap.Regions.Count;
                 }
                 
                 foreach (var warpgate in zoneMap.Warpgates)
@@ -93,6 +103,13 @@ namespace Voidwell.DaybreakGames.Models
                         CheckLinks(warpgate, warpgate.Links);
                     }
                 }
+
+                for (var i = 1; i < ConnectedTerritories.Count(); i++)
+                {
+                    ConnectedPercent[i] = (float)ConnectedTerritories[i] / zoneMap.Regions.Count;
+                }
+
+                ConnectedPercent[0] = 1 - (ConnectedPercent[1] + ConnectedPercent[2] + ConnectedPercent[3]);
             }
 
             private void CheckLinks(WorldZoneRegion root, List<WorldZoneRegion> links)
@@ -110,7 +127,7 @@ namespace Voidwell.DaybreakGames.Models
                     {
                         ConnectedTerritories[_focusFaction]++;
 
-                        CheckLinks(root, links);
+                        CheckLinks(root, link.Links);
                     }
                 }
             }

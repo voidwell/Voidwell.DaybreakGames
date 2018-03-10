@@ -168,40 +168,25 @@ namespace Voidwell.DaybreakGames.Census
             Language = language;
         }
 
-        public async Task<T> Get<T>()
+        public async Task<T> Get<T>(bool throwError = true)
         {
-            var result = await _censusClient.ExecuteQuery<IEnumerable<T>>("get", this);
+            var result = await _censusClient.ExecuteQuery<IEnumerable<T>>(this, throwError);
             return result.FirstOrDefault();
         }
 
-        public Task<IEnumerable<T>> GetList<T>()
+        public Task<IEnumerable<T>> GetList<T>(bool throwError = true)
         {
-            return _censusClient.ExecuteQuery<IEnumerable<T>>("get", this);
+            return _censusClient.ExecuteQuery<IEnumerable<T>>(this, throwError);
         }
 
-        public Task<IEnumerable<T>> GetBatch<T>()
+        public Task<IEnumerable<T>> GetBatch<T>(bool throwError = true)
         {
-            return _censusClient.ExecuteQueryBatch<T>(this);
-        }
-
-        public Task<JToken> Get()
-        {
-            return Get<JToken>();
-        }
-
-        public Task<IEnumerable<JToken>> GetList()
-        {
-            return GetList<JToken>();
-        }
-
-        public Task<IEnumerable<JToken>> GetBatch()
-        {
-            return GetBatch<JToken>();
+            return _censusClient.ExecuteQueryBatch<T>(this, throwError);
         }
 
         public Uri GetUri()
         {
-            return _censusClient.CreateRequestUri("get", this);
+            return _censusClient.CreateRequestUri(this);
         }
 
         public override string ToString()

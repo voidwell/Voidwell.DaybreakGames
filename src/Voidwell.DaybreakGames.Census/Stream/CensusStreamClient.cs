@@ -126,7 +126,18 @@ namespace Voidwell.DaybreakGames.Census.Stream
             {
                 do
                 {
-                    result = await _client.ReceiveAsync(seg, CancellationToken.None);
+                    try
+                    {
+                        result = await _client.ReceiveAsync(seg, CancellationToken.None);
+                    }
+                    catch (WebSocketException ex)
+                    {
+                        if (ex.InnerException != null && ex.InnerException is ObjectDisposedException)
+                        {
+                            return null;
+                        }
+                    }
+
                     ms.Write(seg.Array, seg.Offset, result.Count);
                 }
                 while (!result.EndOfMessage);

@@ -16,8 +16,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task AddAsync(CharacterUpdateQueue entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var storeEntity = await dbContext.CharacterUpdateQueue.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
                 if (storeEntity == null)
                 {
@@ -35,8 +37,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task RemoveAsync(CharacterUpdateQueue entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 dbContext.CharacterUpdateQueue.Remove(entity);
                 await dbContext.SaveChangesAsync();
             }
@@ -44,8 +48,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<CharacterUpdateQueue>> GetAllAsync()
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.CharacterUpdateQueue
                     .AsNoTracking()
                     .ToListAsync();

@@ -17,8 +17,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task AddAsync(PlayerSession entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 await dbContext.PlayerSessions.AddAsync(entity);
                 await dbContext.SaveChangesAsync();
             }
@@ -26,16 +28,20 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<PlayerSession> GetPlayerSessionAsync(int sessionId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id == sessionId);
             }
         }
 
         public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.LogoutDate != null)
                     .OrderBy("LoginDate", SortDirection.Descending)
                     .Take(limit)

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 
 namespace Voidwell.DaybreakGames.Models
 {
@@ -6,14 +6,14 @@ namespace Voidwell.DaybreakGames.Models
     {
         public WorldState()
         {
-            ZoneStates = new Dictionary<int, WorldZoneState>();
-            OnlinePlayers = new Dictionary<string, OnlineCharacter>();
+            ZoneStates = new ConcurrentDictionary<int, WorldZoneState>();
+            OnlinePlayers = new ConcurrentDictionary<string, OnlineCharacter>();
         }
 
         public int Id { get; set; }
         public string Name { get; set; }
         public bool IsOnline { get; set; }
-        public Dictionary<string, OnlineCharacter> OnlinePlayers { get; set; }
-        public Dictionary<int, WorldZoneState> ZoneStates { get; set;}
+        public ConcurrentDictionary<string, OnlineCharacter> OnlinePlayers { get; set; }
+        public ConcurrentDictionary<int, WorldZoneState> ZoneStates { get; set;}
     }
 }

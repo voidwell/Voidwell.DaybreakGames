@@ -16,16 +16,20 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public UpdaterScheduler GetUpdaterHistoryByServiceName(string serviceName)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return dbContext.UpdaterScheduler.SingleOrDefault(u => u.Id == serviceName);
             }
         }
 
         public async Task UpsertAsync(UpdaterScheduler entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.UpdaterScheduler;
 
                 var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);

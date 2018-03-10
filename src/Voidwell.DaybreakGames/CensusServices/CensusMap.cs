@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
@@ -22,7 +23,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             query.Where("world_id").Equals(worldId);
             query.Where("zone_ids").Equals(zoneId);
 
-            return await query.Get<CensusMapModel>();
+            return await query.Get<CensusMapModel>(false);
         }
 
         public async Task<IEnumerable<CensusMapHexModel>> GetAllMapHexs()
