@@ -1,10 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +13,7 @@ using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.HostedServices;
+using IdentityServer4.AccessTokenValidation;
 
 namespace Voidwell.DaybreakGames
 {
@@ -43,36 +38,14 @@ namespace Voidwell.DaybreakGames
                     options.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
 
-            services.AddCache(Configuration, "Voidwell.DaybreakGames");
+            services.AddOptions();
+            services.Configure<DaybreakGamesOptions>(Configuration);
+
             services.AddEntityFrameworkContext(Configuration);
-
-            services.AddAuthentication(o =>
-            {
-                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(o =>
-            {
-                o.Authority = "http://voidwellauth:5000";
-                o.Audience = "voidwell-daybreakgames";
-                o.RequireHttpsMetadata = false;
-                o.SaveToken = true;
-                o.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false
-                };
-
-                var validator = o.SecurityTokenValidators.OfType<JwtSecurityTokenHandler>().SingleOrDefault();
-                validator.InboundClaimTypeMap = new Dictionary<string, string>();
-                validator.OutboundClaimTypeMap = new Dictionary<string, string>();
-            });
-
+            services.AddCache(Configuration, "Voidwell.DaybreakGames");
             services.AddCensusClient(Configuration);
             services.AddCensusServices();
             services.AddUpdateableTasks();
-
-            services.AddOptions();
-            services.AddSingleton(impl => impl.GetRequiredService<IOptions<DaybreakGamesOptions>>().Value);
-            services.Configure<DaybreakGamesOptions>(Configuration);
 
             services.AddTransient<IItemService, ItemService>();
             services.AddTransient<IMapService, MapService>();
@@ -100,6 +73,14 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IHostedService, StoreUpdaterSchedulerHostedService>();
             services.AddSingleton<IHostedService, WebsocketMonitorHostedService>();
             services.AddSingleton<IHostedService, CharacterUpdaterHostedService>();
+
+            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
+                .AddIdentityServerAuthentication(options =>
+                {
+                    options.Authority = "http://voidwellauth:5000";
+                    options.SupportedTokens = SupportedTokens.Jwt;
+                    options.RequireHttpsMetadata = false;
+                });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
