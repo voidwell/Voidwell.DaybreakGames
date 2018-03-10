@@ -9,7 +9,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("EventFacilityControl");
 
-            builder.HasKey(a => new { a.Timestamp, a.WorldId, a.FacilityId });
+            builder.HasKey(a => new { a.Timestamp, a.WorldId, a.FacilityId, a.NewFactionId });
         }
     }
 }

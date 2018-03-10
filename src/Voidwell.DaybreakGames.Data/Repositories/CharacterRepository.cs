@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,27 +6,33 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
-    public class CharacterRepository : ICharacterRepository
+    public class CharacterRepository: Repository, ICharacterRepository
     {
         private readonly IDbContextHelper _dbContextHelper;
 
-        public CharacterRepository(IDbContextHelper dbContextHelper)
+        public CharacterRepository(IDbContextHelper dbContextHelper) : base(dbContextHelper)
         {
             _dbContextHelper = dbContextHelper;
         }
 
         public async Task<Character> GetCharacterAsync(string characterId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
-                return await dbContext.Characters.FirstOrDefaultAsync(a => a.Id == characterId);
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.Characters
+                    .Include(a => a.Time)
+                    .FirstOrDefaultAsync(a => a.Id == characterId);
             }
         }
 
         public async Task<IEnumerable<Character>> GetCharactersByIdsAsync(IEnumerable<string> characterIds)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Characters.Where(a => characterIds.Contains(a.Id))
                     .ToListAsync();
             }
@@ -35,8 +40,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, string sortColumn, SortDirection sortDirection, int rowStart, int limit)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId && s.Kills > 1)
                     .Include(i => i.Character)
                     .OrderBy(sortColumn, sortDirection)
@@ -50,8 +57,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<Character> GetCharacterWithDetailsAsync(string characterId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var query = from c in dbContext.Characters
 
                              join world in dbContext.Worlds on c.WorldId equals world.Id into worldQ
@@ -213,268 +222,44 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<Character> UpsertAsync(Character entity)
+        public Task<Character> UpsertAsync(Character entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.Characters;
-
-                var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.Id == entity.Id);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                }
-
-                await dbContext.SaveChangesAsync();
-                return entity;
-            }
+            return UpsertAsync(entity, a => a.Id == entity.Id);
         }
 
-        public async Task<CharacterTime> UpsertAsync(CharacterTime entity)
+        public Task<CharacterTime> UpsertAsync(CharacterTime entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.CharacterTimes;
-
-                var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                }
-
-                await dbContext.SaveChangesAsync();
-                return entity;
-            }
+            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId);
         }
 
-        public async Task<CharacterLifetimeStat> UpsertAsync(CharacterLifetimeStat entity)
+        public Task<CharacterLifetimeStat> UpsertAsync(CharacterLifetimeStat entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.CharacterLifetimeStats;
-
-                var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                }
-
-                await dbContext.SaveChangesAsync();
-                return entity;
-            }
+            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId, true);
         }
 
-        public async Task<CharacterLifetimeStatByFaction> UpsertAsync(CharacterLifetimeStatByFaction entity)
+        public Task<CharacterLifetimeStatByFaction> UpsertAsync(CharacterLifetimeStatByFaction entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.CharacterLifetimeStatsByFaction;
-
-                var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                }
-
-                await dbContext.SaveChangesAsync();
-                return entity;
-            }
+            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId, true);
         }
 
-        public async Task<IEnumerable<CharacterStat>> UpsertRangeAsync(IEnumerable<CharacterStat> entities)
+        public Task<IEnumerable<CharacterStat>> UpsertRangeAsync(IEnumerable<CharacterStat> entities)
         {
-            var result = new List<CharacterStat>();
-
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.CharacterStats;
-
-                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ProfileId == s.ProfileId)).ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storedStats.FirstOrDefault(a => a.ProfileId == entity.ProfileId);
-                    if (storeEntity == null)
-                    {
-                        dbSet.Add(entity);
-                        result.Add(entity);
-                    }
-                    else
-                    {
-                        foreach (var fromProp in typeof(CharacterStat).GetProperties())
-                        {
-                            var toProp = typeof(CharacterStat).GetProperty(fromProp.Name);
-                            var toValue = toProp.GetValue(entity, null);
-                            if (toValue != null)
-                            {
-                                fromProp.SetValue(storeEntity, toValue, null);
-                            }
-                        }
-
-                        dbSet.Update(storeEntity);
-                        result.Add(storeEntity);
-                    }   
-                }
-
-                await dbContext.SaveChangesAsync();
-            }
-
-            return result;
+            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ProfileId == s.ProfileId), (a, b) => a.ProfileId == b.ProfileId, true);
         }
 
-        public async Task<IEnumerable<CharacterStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterStatByFaction> entities)
+        public Task<IEnumerable<CharacterStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterStatByFaction> entities)
         {
-            var result = new List<CharacterStatByFaction>();
-
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.CharacterStatByFactions;
-
-                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ProfileId == s.ProfileId)).ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storedStats.FirstOrDefault(a => a.ProfileId == entity.ProfileId);
-                    if (storeEntity == null)
-                    {
-                        dbSet.Add(entity);
-                        result.Add(entity);
-                    }
-                    else
-                    {
-                        foreach (var fromProp in typeof(CharacterStatByFaction).GetProperties())
-                        {
-                            var toProp = typeof(CharacterStatByFaction).GetProperty(fromProp.Name);
-                            var toValue = toProp.GetValue(entity, null);
-                            if (toValue != null)
-                            {
-                                fromProp.SetValue(storeEntity, toValue, null);
-                            }
-                        }
-
-                        dbSet.Update(storeEntity);
-                        result.Add(storeEntity);
-                    }
-                }
-
-                await dbContext.SaveChangesAsync();
-            }
-
-            return result;
+            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ProfileId == s.ProfileId), (a, b) => a.ProfileId == b.ProfileId, true);
         }
 
-        public async Task<IEnumerable<CharacterWeaponStat>> UpsertRangeAsync(IEnumerable<CharacterWeaponStat> entities)
+        public Task<IEnumerable<CharacterWeaponStat>> UpsertRangeAsync(IEnumerable<CharacterWeaponStat> entities)
         {
-            var result = new List<CharacterWeaponStat>();
-            var newEntities = new List<CharacterWeaponStat>();
-
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.CharacterWeaponStats;
-
-                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId)).ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId && a.VehicleId == entity.VehicleId);
-                    if (storeEntity == null)
-                    {
-                        newEntities.Add(entity);
-                        result.Add(entity);
-                    }
-                    else
-                    {
-                        foreach (var fromProp in typeof(CharacterWeaponStat).GetProperties())
-                        {
-                            var toProp = typeof(CharacterWeaponStat).GetProperty(fromProp.Name);
-                            var toValue = toProp.GetValue(entity, null);
-                            if (toValue != null)
-                            {
-                                fromProp.SetValue(storeEntity, toValue, null);
-                            }
-                        }
-
-                        dbSet.Update(storeEntity);
-                        result.Add(storeEntity);
-                    }
-                }
-
-                if (newEntities.Count() > 0)
-                {
-                    await dbSet.AddRangeAsync(newEntities);
-                }
-
-                await dbContext.SaveChangesAsync();
-            }
-
-            return result;
+            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId), (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
         }
 
-        public async Task<IEnumerable<CharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterWeaponStatByFaction> entities)
+        public Task<IEnumerable<CharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterWeaponStatByFaction> entities)
         {
-            var result = new List<CharacterWeaponStatByFaction>();
-            var newEntities = new List<CharacterWeaponStatByFaction>();
-
-            using (var dbContext = _dbContextHelper.Create())
-            {
-                var dbSet = dbContext.CharacterWeaponStatByFactions;
-
-                var storedStats = await dbSet.Where(s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId)).ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storedStats.FirstOrDefault(a => a.ItemId == entity.ItemId && a.VehicleId == entity.VehicleId);
-                    if (storeEntity == null)
-                    {
-                        newEntities.Add(entity);
-                        result.Add(entity);
-                    }
-                    else
-                    {
-                        foreach (var fromProp in typeof(CharacterWeaponStatByFaction).GetProperties())
-                        {
-                            var toProp = typeof(CharacterWeaponStatByFaction).GetProperty(fromProp.Name);
-                            var toValue = toProp.GetValue(entity, null);
-                            if (toValue != null)
-                            {
-                                fromProp.SetValue(storeEntity, toValue, null);
-                            }
-                        }
-
-                        dbSet.Update(storeEntity);
-                        result.Add(storeEntity);
-                    }
-                }
-
-                if (newEntities.Count() > 0)
-                {
-                    await dbSet.AddRangeAsync(newEntities);
-                }
-
-                await dbContext.SaveChangesAsync();
-            }
-
-            return result;
+            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId), (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
         }
     }
 }

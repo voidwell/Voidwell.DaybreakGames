@@ -17,16 +17,20 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<Outfit> GetOutfitAsync(string outfitId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Outfits.FirstOrDefaultAsync(a => a.Id == outfitId);
             }
         }
 
         public async Task<Outfit> GetOutfitDetailsAsync(string outfitId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Outfits
                     .Include(i => i.World)
                     .Include(i => i.Faction)
@@ -37,8 +41,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(string outfitId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.OutfitMembers.Where(a => a.OutfitId == outfitId)
                     .Include(a => a.Character)
                         .ThenInclude(a => a.Time)
@@ -50,8 +56,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<Outfit>> GetOutfitsByIdsAsync(IEnumerable<string> outfitIds)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Outfits.Where(a => outfitIds.Contains(a.Id))
                     .ToListAsync();
             }
@@ -59,8 +67,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<Outfit>> GetOutfitsByNameAsync(string name, int limit)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Outfits.Where(o => o.Name.Contains(name))
                     .Take(12)
                     .ToListAsync();
@@ -69,8 +79,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task RemoveOutfitMemberAsync(string characterId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbMembership = await dbContext.OutfitMembers.FindAsync(characterId);
                 if (dbMembership != null)
                 {
@@ -82,8 +94,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<OutfitMember> UpsertAsync(OutfitMember entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.OutfitMembers;
 
                 var storeEntity = await dbContext.OutfitMembers.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
@@ -106,8 +120,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         {
             Outfit result = null;
 
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.Outfits;
 
                 var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.Id == entity.Id);

@@ -7,6 +7,7 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 using System.Collections.Generic;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -14,20 +15,28 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         private readonly IMapRepository _mapRepository;
         private readonly CensusMap _censusMap;
+        private readonly ICache _cache;
 
         public string ServiceName => "MapService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public MapService(IMapRepository mapRepository, CensusMap censusMap)
+        private readonly KeyedSemaphoreSlim _mapRegionsLock = new KeyedSemaphoreSlim();
+        private readonly KeyedSemaphoreSlim _facilityLinksLock = new KeyedSemaphoreSlim();
+
+        private const string _cacheKeyPrefix = "ps2.mapService";
+        private TimeSpan _mapRegionCacheExpiration = TimeSpan.FromMinutes(30);
+        private TimeSpan _facilityLinksCacheExpiration = TimeSpan.FromMinutes(30);
+
+        public MapService(IMapRepository mapRepository, CensusMap censusMap, ICache cache)
         {
             _mapRepository = mapRepository;
             _censusMap = censusMap;
+            _cache = cache;
         }
 
         public async Task<IEnumerable<MapOwnership>> GetMapOwnership(int worldId, int zoneId)
         {
             var ownership = await _censusMap.GetMapOwnership(worldId, zoneId);
-
             if (ownership == null)
             {
                 return null;
@@ -36,14 +45,50 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return ownership.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
         }
 
-        public Task<IEnumerable<MapRegion>> GetMapRegions(int zoneId)
+        public async Task<IEnumerable<MapRegion>> GetMapRegions(int zoneId)
         {
-            return _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
+            using (await _mapRegionsLock.WaitAsync(zoneId.ToString()))
+            {
+                var cacheKey = GetCacheKey($"mapregion-{zoneId}");
+
+                var mapRegions = await _cache.GetAsync<IEnumerable<MapRegion>>(cacheKey);
+                if (mapRegions != null)
+                {
+                    return mapRegions;
+                }
+
+                mapRegions = await _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
+
+                if (mapRegions != null)
+                {
+                    await _cache.SetAsync(cacheKey, mapRegions, _mapRegionCacheExpiration);
+                }
+
+                return mapRegions;
+            }
         }
 
-        public Task<IEnumerable<FacilityLink>> GetFacilityLinks(int zoneId)
+        public async Task<IEnumerable<FacilityLink>> GetFacilityLinks(int zoneId)
         {
-            return _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
+            using (await _facilityLinksLock.WaitAsync(zoneId.ToString()))
+            {
+                var cacheKey = GetCacheKey($"facilityLinks-{zoneId}");
+
+                var facilityLinks = await _cache.GetAsync<IEnumerable<FacilityLink>>(cacheKey);
+                if (facilityLinks != null)
+                {
+                    return facilityLinks;
+                }
+
+                facilityLinks = await _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
+
+                if (facilityLinks != null)
+                {
+                    await _cache.SetAsync(cacheKey, facilityLinks, _facilityLinksCacheExpiration);
+                }
+
+                return facilityLinks;
+            }
         }
 
         public Task<IEnumerable<MapRegion>> FindRegions(params int[] facilityIds)
@@ -114,6 +159,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 FacilityIdB = censusModel.FacilityIdB,
                 Description = censusModel.Description
             };
+        }
+
+        private string GetCacheKey(string id)
+        {
+            return $"{_cacheKeyPrefix}-{id}";
         }
     }
 }

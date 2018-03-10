@@ -1,0 +1,732 @@
+﻿[
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "220",
+        "FacilityIdB": "211",
+        "Description": "Indar - SO21.GalaxySolar to SO12.BriggsLab"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7500",
+        "FacilityIdB": "7510",
+        "Description": "Indar - Hvar to Hvar.Watchtower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4001",
+        "FacilityIdB": "4010",
+        "Description": "Indar - Allatum to Allatum.ResearchLab"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5900",
+        "FacilityIdB": "118020",
+        "Description": "Indar - LO5.CrimsonBluff to Zurvan.Storageyard"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6200",
+        "FacilityIdB": "118010",
+        "Description": "Indar - LO6.TheCrown to Zurvan.PumpStation"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "236",
+        "FacilityIdB": "6400",
+        "Description": "Indar - SO37.TheOldStockpile to LO12.FeldsparCanyon"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3410",
+        "FacilityIdB": "239",
+        "Description": "Indar - Peris.WestSat.Barracks to SO40.HighlandsSubstation"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5700",
+        "FacilityIdB": "3430",
+        "Description": "Indar - LO10.RegentRock to Peris.EasternGrove"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "207",
+        "FacilityIdB": "3810",
+        "Description": "Indar - SO8.BensonConstruction to Saurva.DataStorage"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3400",
+        "FacilityIdB": "3410",
+        "Description": "Indar - Peris to Peris.West.Barracks"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "230",
+        "FacilityIdB": "5700",
+        "Description": "Indar - SO31.XenoTechLabs to LO10.RegentRockGarrison"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "120000",
+        "FacilityIdB": "252",
+        "Description": "Indar - WG.Highlands to SO53.CeresFarm"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3210",
+        "FacilityIdB": "205",
+        "Description": "Indar - Dahaka.uplinkHub to SO6.AlkaliShipping"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "201",
+        "FacilityIdB": "5300",
+        "Description": "Indar - SO2.WasteTreatment to LO1.CampConnery"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3400",
+        "FacilityIdB": "3420",
+        "Description": "Indar - Peris to Peris.North.Tower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3601",
+        "FacilityIdB": "3620",
+        "Description": "Indar - Rashnu to Rashnu.WatchTower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7000",
+        "FacilityIdB": "7030",
+        "Description": "Indar - Tawrich to Tawrich.Recycling"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "221",
+        "FacilityIdB": "6200",
+        "Description": "Indar - SO22.ThePalisade to LO6.TheCrown"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4010",
+        "FacilityIdB": "226",
+        "Description": "Indar - AllatumWestSat.Research to SO27.NSSecureData"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "203",
+        "FacilityIdB": "204",
+        "Description": "Indar - SO4.Saurva.Overflow to SO5.HeliosSolar"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "120000",
+        "FacilityIdB": "6000",
+        "Description": "Indar - WG.Highlands to LO8.IndarBay"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4001",
+        "FacilityIdB": "4030",
+        "Description": "Indar - Allatum to Allatum.SESat"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3220",
+        "FacilityIdB": "5200",
+        "Description": "Indar - Dahaka.PumpStation to LO4.J908"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "229",
+        "FacilityIdB": "6100",
+        "Description": "Indar - SO30.SnakeRavine to LO7.CrossroadsWatchtower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3201",
+        "FacilityIdB": "3220",
+        "Description": "Indar - Dahaka to Dahaka.PumpStation"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7500",
+        "FacilityIdB": "7520",
+        "Description": "Indar - Hvar to Hvar.NorthGate"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "209",
+        "FacilityIdB": "208",
+        "Description": "Indar - SO10.CraterFiringRange to SO9.AlkaliMining"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7801",
+        "FacilityIdB": "210",
+        "Description": "Indar - WG.Ocean to SO11.AlkaliStorage"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6200",
+        "FacilityIdB": "218",
+        "Description": "Indar - LO6.TheCrown to SO19.TIAlloys"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "118000",
+        "FacilityIdB": "118020",
+        "Description": "Indar - Zurvan to Zurvan.StorageYard"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "118000",
+        "FacilityIdB": "118010",
+        "Description": "Indar - Zurvan to Zurvan.PumpStation"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3201",
+        "FacilityIdB": "3230",
+        "Description": "Indar - Dahaka to Dahaka.SouthernPass"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4401",
+        "FacilityIdB": "4420",
+        "Description": "Indar - Mao to Mao.Watchtower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "213",
+        "FacilityIdB": "224",
+        "Description": "Indar - SO14.HowlingPass to SO25.NSMaterial"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5800",
+        "FacilityIdB": "229",
+        "Description": "Indar - LO9.VanuArchive to SO30.SnakeRavine"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3801",
+        "FacilityIdB": "203",
+        "Description": "Indar - Saurva to SO4.SaurvaOverflowDepot"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "239",
+        "FacilityIdB": "237",
+        "Description": "Indar - SO40.HighlandsSubstation to SO38.CeresBiotech"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5900",
+        "FacilityIdB": "221",
+        "Description": "Indar - LO5.CrimsonBluff to SO22.ThePalisade"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3801",
+        "FacilityIdB": "3810",
+        "Description": "Indar - Saurva to Saurva.DataStorage"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "217",
+        "FacilityIdB": "3230",
+        "Description": "Indar - SO18.SeabedListening to Dahaka.SouthernPost"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5200",
+        "FacilityIdB": "209",
+        "Description": "Indar - LO4.J908 to SO10.CraterFiringRange"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4401",
+        "FacilityIdB": "4410",
+        "Description": "Indar - Mao to Mao.SouthWestGate"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3400",
+        "FacilityIdB": "3430",
+        "Description": "Indar - Peris to Peris.EasternGrove"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3201",
+        "FacilityIdB": "3210",
+        "Description": "Indar - Dahaka to Dahaka.UplinkHub"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4030",
+        "FacilityIdB": "229",
+        "Description": "Indar - Allatum.SESat to SO30.SnakeRavine"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4401",
+        "FacilityIdB": "4430",
+        "Description": "Indar - Mao to Mao.SouthEastGate"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7500",
+        "FacilityIdB": "7530",
+        "Description": "Indar - Hvar to Hvar.SouthGate"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4001",
+        "FacilityIdB": "4020",
+        "Description": "Indar - Allatum to Allatum.BroadcastHub"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5300",
+        "FacilityIdB": "207",
+        "Description": "Indar - LO1.CampConnery to SO8.BensonConstruction"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6300",
+        "FacilityIdB": "7030",
+        "Description": "Indar - LO13.ArroyoTorre to Tawrich.SESat"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4801",
+        "FacilityIdB": "247",
+        "Description": "Indar - WG.Canyons to SO48.OldAuraxiumMines"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "212",
+        "FacilityIdB": "5500",
+        "Description": "Indar - SO13.NSRefinery to LO2.CampWaterson"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "226",
+        "FacilityIdB": "7530",
+        "Description": "Indar - SO27.NSSecureData to Hvar.Southgate"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3601",
+        "FacilityIdB": "3630",
+        "Description": "Indar - Rashnu to Rashnu.SouthernPass"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "120000",
+        "FacilityIdB": "237",
+        "Description": "Indar - WG.Highlands to SO38.CeresBiotech"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "118030",
+        "FacilityIdB": "236",
+        "Description": "Indar - Zurvan.NetworkComplex to SO37.TheOldStockpile"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6000",
+        "FacilityIdB": "227",
+        "Description": "Indar - LO8.IndarBay to SO28.HighlandsSolar"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6400",
+        "FacilityIdB": "247",
+        "Description": "Indar - LO12.FeldsparCanyon to SO48.OldAuraxiumMine"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4801",
+        "FacilityIdB": "246",
+        "Description": "Indar - WG.Canyons to SO47.CopperRavine"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7020",
+        "FacilityIdB": "7010",
+        "Description": "Indar - Tawrich Depot to Tawrich Recycling"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "246",
+        "FacilityIdB": "6300",
+        "Description": "Indar - SO47.CopperRavine to LO13.ArroyoTorre"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4420",
+        "FacilityIdB": "212",
+        "Description": "Indar - Mao.WatchTower to SO13.NSRefinery"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7520",
+        "FacilityIdB": "7530",
+        "Description": "Indar - Indar.Hvar.NorthgateGarrison to Indar.Hvar.SouthgateGarrison"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3230",
+        "FacilityIdB": "214",
+        "Description": "Indar - Dahaka.SouthernPass to SO15.IndarCommArray"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "213",
+        "FacilityIdB": "4430",
+        "Description": "Indar - SO14.HowlingPass to Mao.SoutheastGate"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3601",
+        "FacilityIdB": "3610",
+        "Description": "Indar - Rashnu to Rashnu.Cavern"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4430",
+        "FacilityIdB": "4420",
+        "Description": "Indar - Mao.SoutheastGate to Mao.Watchtower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7520",
+        "FacilityIdB": "215",
+        "Description": "Indar - Hvar.Northgate to SO16.QuartzRidge"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7000",
+        "FacilityIdB": "7010",
+        "Description": "Indar - Tawrich to Tawrich.Depot"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5200",
+        "FacilityIdB": "220",
+        "Description": "Indar - LO4.J908 to SO21.GalaxySolar"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7801",
+        "FacilityIdB": "209",
+        "Description": "Indar - WG.Ocean to SO10.CraterFiringRange"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6100",
+        "FacilityIdB": "230",
+        "Description": "Indar - LO7.CrossRoads to SO31.XenoTechLabs"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "118000",
+        "FacilityIdB": "118030",
+        "Description": "Indar - Zurvan to Zurvan.NetworkComlex"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5300",
+        "FacilityIdB": "208",
+        "Description": "Indar - LO1.CampConnery to SO9.AlkaliMining"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6400",
+        "FacilityIdB": "6500",
+        "Description": "Indar - LO12.FeldsparCanyon to LO11.TheStronghold"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "206",
+        "FacilityIdB": "3210",
+        "Description": "Indar - SO7.CoraMedLabs to Dahaka.UplinkHub"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "230",
+        "FacilityIdB": "400130"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3801",
+        "FacilityIdB": "3820",
+        "Description": "Indar - Saurva to Saurva.SSat"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7000",
+        "FacilityIdB": "7020",
+        "Description": "Indar - Tawrich to Tawrich.Tower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "211",
+        "FacilityIdB": "4410",
+        "Description": "Indar - SO12.BriggsLabs to Mao.SouthwestGate"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5500",
+        "FacilityIdB": "210",
+        "Description": "Indar - LO2.CampWaterson to SO11.AlkaliStorage"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6200",
+        "FacilityIdB": "219",
+        "Description": "Indar - LO6.TheCrown to SO20.CeresHydroponics"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4030",
+        "FacilityIdB": "218",
+        "Description": "Indar - Allatum.SESat to SO19.TIAlloys"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "208",
+        "FacilityIdB": "5300",
+        "Description": "Indar - SO9.AlkaliMinning to LO1.CampConnery"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "248",
+        "FacilityIdB": "3630",
+        "Description": "Indar - SO49.ValleyStorage to Rashnu.SoutherPass"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "205",
+        "FacilityIdB": "3820",
+        "Description": "Indar - SO6.AlkaliShipping to Saurva.SSat"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "219",
+        "FacilityIdB": "217",
+        "Description": "Indar - SO20.CeresHydroponics to SO18.SeabedListening"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "224",
+        "FacilityIdB": "3620",
+        "Description": "Indar - SO25.NSMaterialStorage to Rashnu.Watchtower"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "227",
+        "FacilityIdB": "228",
+        "Description": "Indar - SO28.HighlandsSolar to SO29.AyaniLabs"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "228",
+        "FacilityIdB": "252",
+        "Description": "Indar - SO29.AyaniLabs to SO53.CeresFarms"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "400130",
+        "FacilityIdB": "5700"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "242",
+        "FacilityIdB": "400130"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "228",
+        "FacilityIdB": "5800",
+        "Description": "Indar - SO29.AyaniLabs to LO9.VanuArchives"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4801",
+        "FacilityIdB": "248",
+        "Description": "Indar - WG.Canyons to SO49.ValleyStorageYard"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "221",
+        "FacilityIdB": "211"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7510",
+        "FacilityIdB": "6000"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "214",
+        "FacilityIdB": "4020"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6500",
+        "FacilityIdB": "7020"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "201",
+        "FacilityIdB": "209"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7801",
+        "FacilityIdB": "201"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "242",
+        "FacilityIdB": "7030"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "7020",
+        "FacilityIdB": "232"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3420",
+        "FacilityIdB": "5800"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6100",
+        "FacilityIdB": "7010"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "400132",
+        "FacilityIdB": "215"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "400132",
+        "FacilityIdB": "5100"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "232",
+        "FacilityIdB": "118010",
+        "Description": "Indar - SO33.GravelPass to Zurvan.PumpStation"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "246",
+        "FacilityIdB": "247",
+        "Description": "Indar - SO.47 to SO.48"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "237",
+        "FacilityIdB": "252",
+        "Description": "Indar - SO.38 to SO.53"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "209",
+        "FacilityIdB": "210",
+        "Description": "Indar - SO.10 to SO.11"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "247",
+        "FacilityIdB": "248",
+        "Description": "Indar - SO.48 to SO.49"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6000",
+        "FacilityIdB": "252",
+        "Description": "Indar - LO.8 to SO.53"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "235",
+        "FacilityIdB": "5900",
+        "Description": "Indar - SO36.RustMesa to LO5.CrimsonBluff"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "3610",
+        "FacilityIdB": "235"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "236",
+        "FacilityIdB": "235",
+        "Description": "Indar - SO37.TheOldStockpile to SO36.RustMesa"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "6200",
+        "FacilityIdB": "6100",
+        "Description": "Indar - LO6.TheCrown to LO7.CrossRoads"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "219",
+        "FacilityIdB": "220",
+        "Description": "Indar - SO20.CeresHydro to SO21.GalaxySolar"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "5900",
+        "FacilityIdB": "224",
+        "Description": "Indar - LO5.CrimsonBluff to SO25.NSMatStorage"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "205",
+        "FacilityIdB": "207",
+        "Description": "Indar - SO6.AlkaliSHipping to SO8.BensonConstruction"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "215",
+        "FacilityIdB": "214",
+        "Description": "Indar - SO16.QuartzRidge to SO15.IndarCommArray"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "219",
+        "FacilityIdB": "218",
+        "Description": "Hydroponics to TI Alloys"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "206",
+        "FacilityIdB": "5100"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "4420",
+        "FacilityIdB": "400131"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "204",
+        "FacilityIdB": "5100"
+    },
+    {
+        "ZoneId": "2",
+        "FacilityIdA": "213",
+        "FacilityIdB": "400131"
+    }
+]

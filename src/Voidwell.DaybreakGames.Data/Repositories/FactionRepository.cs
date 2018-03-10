@@ -16,8 +16,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpsertRangeAsync(IEnumerable<Faction> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.Factions;
 
                 foreach (var entity in entities)

@@ -65,9 +65,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     {
                         outfit = await UpdateOutfit(outfitId);
                     }
-                    catch (CensusConnectionException ex)
+                    catch (CensusConnectionException)
                     {
-                        _logger.LogError(75342, ex.Message);
+                        return null;
                     }
                 }
 
@@ -229,9 +229,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 {
                     membership = await _censusCharacter.GetCharacterOutfitMembership(characterId);
                 }
-                catch (CensusConnectionException ex)
+                catch (CensusConnectionException)
                 {
-                    _logger.LogError(24214, ex.Message);
                     return null;
                 }
 

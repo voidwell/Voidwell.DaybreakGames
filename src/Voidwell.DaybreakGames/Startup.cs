@@ -74,8 +74,6 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton(impl => impl.GetRequiredService<IOptions<DaybreakGamesOptions>>().Value);
             services.Configure<DaybreakGamesOptions>(Configuration);
 
-            services.AddTransient<ICharacterService, CharacterService>();
-            services.AddTransient<IOutfitService, OutfitService>();
             services.AddTransient<IItemService, ItemService>();
             services.AddTransient<IMapService, MapService>();
             services.AddTransient<IProfileService, ProfileService>();
@@ -87,10 +85,13 @@ namespace Voidwell.DaybreakGames
             services.AddTransient<IAlertService, AlertService>();
             services.AddTransient<ICombatReportService, CombatReportService>();
             services.AddTransient<IMetagameEventService, MetagameEventService>();
-            services.AddTransient<IWorldMonitor, WorldMonitor>();
             services.AddTransient<IFactionService, FactionService>();
             services.AddTransient<IFeedService, FeedService>();
             services.AddTransient<ISearchService, SearchService>();
+
+            services.AddSingleton<ICharacterService, CharacterService>();
+            services.AddSingleton<IOutfitService, OutfitService>();
+            services.AddSingleton<IWorldMonitor, WorldMonitor>();
 
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();

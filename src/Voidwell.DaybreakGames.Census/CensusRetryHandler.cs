@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,26 +23,33 @@ namespace Voidwell.DaybreakGames.Census
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var response = await base.SendAsync(request, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                return response;
-            }
+            int tryCount = 0;
+            HttpResponseMessage response = null;
+            Exception lastException = null;
 
-            if (_logger != null)
+            do
             {
-                _logger.LogInformation($"HttpRequest failed. Trying up to {MaxRetries} more times.");
-            }
+                lastException = null;
 
-            for (int i = 0; i < MaxRetries; i++)
-            {
-                Thread.Sleep(2000);
-
-                response = await base.SendAsync(request, cancellationToken);
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    return response;
+                    response = await base.SendAsync(request, cancellationToken);
+                } catch(Exception ex)
+                {
+                    lastException = ex;
                 }
+
+                if (tryCount == 0 && (response == null || !response.IsSuccessStatusCode))
+                {
+                    Console.WriteLine($"HttpRequest failed ({response?.StatusCode}). Trying up to {MaxRetries} more times.");
+                }
+
+                tryCount++;
+            } while ((response == null || !response.IsSuccessStatusCode) && tryCount < MaxRetries);
+
+            if (lastException != null)
+            {
+                throw lastException;
             }
 
             return response;

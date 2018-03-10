@@ -28,6 +28,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Data
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Cache", "src\Voidwell.Cache\Voidwell.Cache.csproj", "{20214CD9-BDBB-49B5-B38D-DDA29D9729B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Test", "test\Voidwell.DaybreakGames.Test\Voidwell.DaybreakGames.Test.csproj", "{4A56391B-419B-4ECA-B1C4-794787F7E0D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{20214CD9-BDBB-49B5-B38D-DDA29D9729B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20214CD9-BDBB-49B5-B38D-DDA29D9729B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20214CD9-BDBB-49B5-B38D-DDA29D9729B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A56391B-419B-4ECA-B1C4-794787F7E0D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A56391B-419B-4ECA-B1C4-794787F7E0D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A56391B-419B-4ECA-B1C4-794787F7E0D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A56391B-419B-4ECA-B1C4-794787F7E0D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +70,7 @@ Global
 		{7B9F9A62-FEE3-451B-A39F-F2DB4A332DC7} = {B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}
 		{D982D254-B957-4EA4-A076-A27DFAFB4781} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{20214CD9-BDBB-49B5-B38D-DDA29D9729B3} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
+		{4A56391B-419B-4ECA-B1C4-794787F7E0D4} = {B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1011AD1D-2AC5-4BC2-A299-5778409158D2}

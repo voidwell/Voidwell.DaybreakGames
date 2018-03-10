@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -43,7 +42,11 @@ namespace Voidwell.DaybreakGames.Websocket
             { 131, 6 },
             { 132, 4 },
             { 133, 4 },
-            { 134, 4 }
+            { 134, 4 },
+            { 159, 0 },
+            { 160, 0 },
+            { 161, 0 },
+            { 162, 0 }
         };
         private enum METAGAME_EVENT_STATE
         {
@@ -83,27 +86,43 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public async Task Process(JToken message)
         {
-            var jType = message.Value<string>("type");
-            if (jType == "serviceStateChanged")
+            if (message.Value<string>("type") == "serviceStateChanged")
             {
-                var detail = message.Value<string>("detail");
-
-                var regServer = @"EventServerEndpoint_(.*)_(.*)";
-                Regex r = new Regex(regServer);
-                Match m = r.Match(detail);
-
-                var worldName = m.Groups[1].Value;
-
-                if (int.TryParse(m.Groups[2].Value, out var worldId))
+                try
                 {
-                    var isWorldOnline = message.Value<bool>("online");
-
-                    await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
-                };
+                    await ProcessServiceStateChanged(message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(75843, ex, "Failed to process service state change.");
+                }
 
                 return;
             }
 
+            await ProcessServiceEvent(message);
+        }
+
+        private async Task ProcessServiceStateChanged(JToken message)
+        {
+            var detail = message.Value<string>("detail");
+
+            var regServer = @"EventServerEndpoint_(.*)_(.*)";
+            Regex r = new Regex(regServer);
+            Match m = r.Match(detail);
+
+            var worldName = m.Groups[1].Value;
+
+            if (int.TryParse(m.Groups[2].Value, out var worldId))
+            {
+                var isWorldOnline = message.Value<bool>("online");
+
+                await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
+            };
+        }
+
+        private async Task ProcessServiceEvent(JToken message)
+        {
             var jPayload = message.SelectToken("payload");
 
             var payload = jPayload?.ToObject<PayloadBase>(_payloadDeserializer);
@@ -134,7 +153,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
                 await (Task)_processMethods[eventName].Invoke(this, new[] { inputParam });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(75642, ex, "Failed to process websocket event: {0}.", eventName);
             }
@@ -245,7 +264,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("FacilityControl", typeof(FacilityControl))]
         private async Task Process(FacilityControl payload)
         {
-            var mapUpdate = _worldMonitor.UpdateFacilityControl(payload);
+            var mapUpdate = await _worldMonitor.UpdateFacilityControl(payload);
             var territory = mapUpdate?.Territory.ToArray();
 
             var dataModel = new Data.Models.Planetside.Events.FacilityControl

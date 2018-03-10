@@ -16,8 +16,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpdateRangeAsync(IEnumerable<Title> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.Titles;
 
                 foreach (var entity in entities)

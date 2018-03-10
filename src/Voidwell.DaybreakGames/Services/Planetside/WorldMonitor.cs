@@ -47,52 +47,63 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 });
             }
 
-            if (!isOnline)
+            if (isOnline)
             {
-                _worldStates[worldId].ZoneStates.Clear();
-                _worldStates[worldId].OnlinePlayers.Clear();
-                _worldStates[worldId].IsOnline = false;
+                await SetWorldOnline(worldId);
             }
-            else if (isOnline && !_worldStates[worldId].IsOnline)
+            else
             {
-                var newState = await TryResetWorld(worldId);
-                _worldStates[worldId].IsOnline = newState;
+                SetWorldOffline(worldId);
             }
         }
 
-        public Task<bool> TryResetWorld(int worldId)
+        private async Task SetWorldOnline(int worldId)
         {
             _worldStates[worldId].ZoneStates.Clear();
             _worldStates[worldId].OnlinePlayers.Clear();
 
-            /*
-
-            var zones = await _zoneService.GetAllZones();
-
-            if (zones == null || zones.Any() == false)
-            {
-                return false;
-            }
-
-            var zoneStateWork = zones.Select(z => CreateWorldZoneState(worldId, z.Id));
+            var zoneStateWork = new[] { 2, 4, 6, 8 }.Select(z => CreateWorldZoneState(worldId, z));
 
             await Task.WhenAll(zoneStateWork);
 
             if (zoneStateWork.Any(t => t.Result == null))
             {
-                return false;
+                _logger.LogInformation(75625, "Failed to create world zone states");
+                return;
             }
 
-            foreach(var zoneState in zoneStateWork.Select(t => t.Result))
+            foreach (var zoneState in zoneStateWork.Select(t => t.Result))
             {
-                WorldStates[worldId].ZoneStates.Add(zoneState.ZoneId, zoneState);
+                _worldStates[worldId].ZoneStates.TryAdd(zoneState.ZoneId, zoneState);
             }
-            */
 
-            return Task.FromResult(true);
+            _worldStates[worldId].IsOnline = true;
+
+            _logger.LogInformation($"Set world {worldId} ONLINE");
         }
 
-        public FacilityControlChange UpdateFacilityControl(FacilityControl facilityControl)
+        private void SetWorldOffline(int worldId)
+        {
+            _worldStates[worldId].ZoneStates.Clear();
+            _worldStates[worldId].OnlinePlayers.Clear();
+            _worldStates[worldId].IsOnline = false;
+
+            _logger.LogInformation($"Set world {worldId} OFFLINE");
+        }
+
+        public Task ClearAllWorldStates()
+        {
+            foreach(var worldId in _worldStates.Keys)
+            {
+                SetWorldOffline(worldId);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private readonly KeyedSemaphoreSlim _updateFacilityControlLock = new KeyedSemaphoreSlim();
+
+        public async Task<FacilityControlChange> UpdateFacilityControl(FacilityControl facilityControl)
         {
             WorldZoneState zoneState;
             if (!TryGetZoneState(facilityControl.WorldId, facilityControl.ZoneId.Value, out zoneState))
@@ -100,13 +111,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            zoneState.FacilityFactionChange(facilityControl.FacilityId, facilityControl.NewFactionId);
-
-            return new FacilityControlChange
+            using (await _updateFacilityControlLock.WaitAsync($"{zoneState.WorldId}{zoneState.ZoneId}"))
             {
-                Region = zoneState.Map.Regions.FirstOrDefault(r => r.FacilityId == facilityControl.FacilityId),
-                Territory = zoneState.MapScore.ConnectedPercent
-            };
+                await zoneState.FacilityFactionChange(facilityControl.FacilityId, facilityControl.NewFactionId);
+
+                return new FacilityControlChange
+                {
+                    Region = zoneState.Map.Regions.FirstOrDefault(r => r.FacilityId == facilityControl.FacilityId),
+                    Territory = zoneState.MapScore.ConnectedPercent
+                };
+            }
         }
 
         public MapScore GetTerritory(int worldId, int zoneId)
@@ -150,7 +164,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (isOnline)
             {
-                _worldStates[worldId].OnlinePlayers.Add(characterId, new OnlineCharacter
+                _worldStates[worldId].OnlinePlayers.AddOrUpdate(characterId, new OnlineCharacter
                 {
                     Character = new OnlineCharacterProfile
                     {
@@ -160,6 +174,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         WorldId = worldId
                     },
                     LoginDate = timestamp
+                },
+                (key, onlineChar) =>
+                {
+                    onlineChar.LoginDate = timestamp;
+                    return onlineChar;
                 });
                 return;
             }
@@ -186,7 +205,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
             await _playerSessionRepository.AddAsync(dataModel);
 
-            _worldStates[worldId].OnlinePlayers.Remove(characterId);
+            _worldStates[worldId].OnlinePlayers.TryRemove(characterId, out OnlineCharacter offlineCharacter);
         }
 
         public IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(int worldId)
@@ -204,7 +223,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _worldStates.Select(a => new WorldOnlineState {
                 Id = a.Key,
                 Name = a.Value.Name,
-                IsOnline = a.Value.IsOnline
+                IsOnline = a.Value.IsOnline,
+                OnlineCharacters = a.Value.OnlinePlayers.Count
             });
         }
 

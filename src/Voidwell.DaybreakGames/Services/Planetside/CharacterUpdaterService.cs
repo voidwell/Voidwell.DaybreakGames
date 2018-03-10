@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
@@ -20,7 +21,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private Timer _timer;
         private readonly TimeSpan _executionInterval = TimeSpan.FromSeconds(10);
+        private const int _maxParallelUpdates = 2;
         private bool _isWorking;
+        private SemaphoreSlim _parallelSemaphore;
 
         public CharacterUpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService,
             IOptions<DaybreakGamesOptions> options, ICache cache, ILogger<CharacterUpdaterService> logger)
@@ -76,24 +79,33 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
 
             _isWorking = true;
+            _parallelSemaphore = new SemaphoreSlim(_maxParallelUpdates);
 
             var characterQueue = await _characterUpdaterRepository.GetAllAsync();
-
-            foreach (var item in characterQueue)
-            {
-                var character = await _characterService.GetCharacterDetails(item.CharacterId);
-                try
-                {
-                    await _characterService.UpdateAllCharacterInfo(item.CharacterId, character?.Times?.LastSaveDate);
-                    await _characterUpdaterRepository.RemoveAsync(item);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Failed to update for character {item.CharacterId}");
-                }
-            }
+            await Task.WhenAll(characterQueue.Select(UpdateCharacter));
 
             _isWorking = false;
+        }
+
+        private async Task UpdateCharacter(CharacterUpdateQueue characterItem)
+        {
+            await _parallelSemaphore.WaitAsync();
+
+            if (!_isRunning)
+                return;
+
+            var character = await _characterService.GetCharacter(characterItem.CharacterId);
+            try
+            {
+                await _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, character?.Time?.LastSaveDate);
+                await _characterUpdaterRepository.RemoveAsync(characterItem);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to update for character {characterItem.CharacterId}");
+            }
+
+            _parallelSemaphore.Release();
         }
     }
 }

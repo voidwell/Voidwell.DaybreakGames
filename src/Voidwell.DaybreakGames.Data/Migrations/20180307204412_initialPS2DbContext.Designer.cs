@@ -11,7 +11,7 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    [Migration("20180219192028_initialPS2DbContext")]
+    [Migration("20180307204412_initialPS2DbContext")]
     partial class initialPS2DbContext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

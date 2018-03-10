@@ -5,5 +5,6 @@
         public int Id { get; set; }
         public string Name { get; set; }
         public bool IsOnline { get; set; }
+        public int OnlineCharacters { get; set; }
     }
 }

@@ -16,8 +16,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Vehicles.Include(i => i.Faction)
                     .ToListAsync();
             }
@@ -25,8 +27,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpsertRangeAsync(IEnumerable<Vehicle> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.Vehicles;
 
                 foreach (var entity in entities)
@@ -49,8 +53,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpsertRangeAsync(IEnumerable<VehicleFaction> entities)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.VehicleFactions;
 
                 foreach (var entity in entities)

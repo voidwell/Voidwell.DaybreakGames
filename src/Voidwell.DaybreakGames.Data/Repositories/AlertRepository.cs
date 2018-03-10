@@ -17,8 +17,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<Alert> GetActiveAlert(int worldId, int zoneId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 return await dbContext.Alerts
                     .AsNoTracking()
                     .OrderBy("StartDate", SortDirection.Descending)
@@ -28,8 +30,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<Alert>> GetAlertsByWorldId(int worldId, int limit)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var query = from alert in dbContext.Alerts.Take(limit)
                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
@@ -49,8 +53,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<IEnumerable<Alert>> GetAllAlerts(int limit)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var query = from alert in dbContext.Alerts.Take(limit)
                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
@@ -69,8 +75,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<Alert> GetAlert(int worldId, int instanceId)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var query = from alert in dbContext.Alerts
                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
@@ -91,8 +99,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task AddAsync(Alert entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 dbContext.Alerts.Add(entity);
                 await dbContext.SaveChangesAsync();
             }
@@ -100,8 +110,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task UpdateAsync(Alert entity)
         {
-            using (var dbContext = _dbContextHelper.Create())
+            using (var factory = _dbContextHelper.GetFactory())
             {
+                var dbContext = factory.GetDbContext();
+
                 var dbSet = dbContext.Alerts;
 
                 var storeEntity = await dbSet
