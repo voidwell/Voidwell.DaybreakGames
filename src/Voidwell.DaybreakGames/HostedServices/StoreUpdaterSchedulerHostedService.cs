@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Services;
+using Microsoft.Extensions.Options;
 
 namespace Voidwell.DaybreakGames.HostedServices
 {
@@ -21,11 +22,12 @@ namespace Voidwell.DaybreakGames.HostedServices
         private readonly ILogger<StoreUpdaterSchedulerHostedService> _logger;
         private Dictionary<string, Timer> _updaterTimers = new Dictionary<string, Timer>();
 
-        public StoreUpdaterSchedulerHostedService(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider, DaybreakGamesOptions options, ILogger<StoreUpdaterSchedulerHostedService> logger)
+        public StoreUpdaterSchedulerHostedService(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider,
+            IOptions<DaybreakGamesOptions> options, ILogger<StoreUpdaterSchedulerHostedService> logger)
         {
             _updaterSchedulerRepository = updaterSchedulerRepository;
             _serviceProvider = serviceProvider;
-            _options = options;
+            _options = options.Value;
             _logger = logger;
         }
 

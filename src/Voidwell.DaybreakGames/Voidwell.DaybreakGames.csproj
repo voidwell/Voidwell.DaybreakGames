@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
