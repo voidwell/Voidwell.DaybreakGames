@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E07D5578-277
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E1267F52-358F-4DE7-9098-0C44BB71CBA6}"
 	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
@@ -28,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Data
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Cache", "src\Voidwell.Cache\Voidwell.Cache.csproj", "{20214CD9-BDBB-49B5-B38D-DDA29D9729B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Test", "test\Voidwell.DaybreakGames.Test\Voidwell.DaybreakGames.Test.csproj", "{4A56391B-419B-4ECA-B1C4-794787F7E0D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Test", "test\Voidwell.DaybreakGames.Test\Voidwell.DaybreakGames.Test.csproj", "{4A56391B-419B-4ECA-B1C4-794787F7E0D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
