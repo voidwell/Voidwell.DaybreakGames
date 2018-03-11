@@ -16,7 +16,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly CensusItemCategory _censusItemCategory;
 
         public string ServiceName => "ItemService";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(45);
 
         public ItemService(IItemRepository itemRepository, CensusItem censusItem, CensusItemCategory censusItemCategory)
         {
