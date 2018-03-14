@@ -57,11 +57,12 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var query = from alert in dbContext.Alerts.Take(limit)
+                var query = (from alert in dbContext.Alerts
                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
                             orderby alert.StartDate descending
-                            select new { alert, metagameEvent };
+                            select new { alert, metagameEvent })
+                            .Take(limit);
 
                 var result = query.ToList().Select(a =>
                 {
