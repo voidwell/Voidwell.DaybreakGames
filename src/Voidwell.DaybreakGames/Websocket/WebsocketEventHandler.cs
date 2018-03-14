@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.JsonConverters;
@@ -25,6 +26,11 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly IAlertService _alertService;
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
+
+        private SemaphoreSlim _continentUnlockSemaphore;
+        private SemaphoreSlim _playerFacilityCaptureSemaphore;
+        private SemaphoreSlim _playerFacilityDefendSemaphore;
+        private SemaphoreSlim _facilityControlSemaphore;
 
         private enum METAGAME_EVENT_STATE
         {
@@ -60,6 +66,11 @@ namespace Voidwell.DaybreakGames.Websocket
                 }
             };
             _payloadDeserializer = JsonSerializer.Create(deserializerSettings);
+
+            _continentUnlockSemaphore = new SemaphoreSlim(1);
+            _playerFacilityCaptureSemaphore = new SemaphoreSlim(5);
+            _playerFacilityDefendSemaphore = new SemaphoreSlim(5);
+            _facilityControlSemaphore = new SemaphoreSlim(3);
         }
 
         public async Task Process(JToken message)
@@ -183,7 +194,7 @@ namespace Voidwell.DaybreakGames.Websocket
         }
 
         [CensusEventHandler("ContinentUnlock", typeof(ContinentUnlock))]
-        private Task Process(ContinentUnlock payload)
+        private async Task Process(ContinentUnlock payload)
         {
             var dataModel = new Data.Models.Planetside.Events.ContinentUnlock
             {
@@ -193,7 +204,20 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
             };
-            return _eventRepository.AddAsync(dataModel);
+
+            await _continentUnlockSemaphore.WaitAsync();
+
+            try
+            {
+                await _eventRepository.AddAsync(dataModel);
+            }
+            catch(Exception ex)
+            {
+                _continentUnlockSemaphore.Release();
+                throw ex;
+            }
+
+            _continentUnlockSemaphore.Release();
         }
 
         [CensusEventHandler("Death", typeof(Models.Death))]
@@ -242,41 +266,55 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("FacilityControl", typeof(FacilityControl))]
         private async Task Process(FacilityControl payload)
         {
-            var mapUpdate = await _worldMonitor.UpdateFacilityControl(payload);
-            var territory = mapUpdate?.Territory.ToArray();
+            await _facilityControlSemaphore.WaitAsync();
 
-            var dataModel = new Data.Models.Planetside.Events.FacilityControl
+            try
             {
-                FacilityId = payload.FacilityId,
-                NewFactionId = payload.NewFactionId,
-                OldFactionId = payload.OldFactionId,
-                DurationHeld = payload.DurationHeld,
-                OutfitId = payload.OutfitId,
-                Timestamp = payload.Timestamp,
-                WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId.Value,
-                ZoneControlVs = territory != null ? territory[1] * 100 : 0,
-                ZoneControlNc = territory != null ? territory[2] * 100 : 0,
-                ZoneControlTr = territory != null ? territory[3] * 100 : 0
-            };
 
-            await _eventRepository.AddAsync(dataModel);
+                var mapUpdate = await _worldMonitor.UpdateFacilityControl(payload);
+                var territory = mapUpdate?.Territory.ToArray();
 
-            if (dataModel.NewFactionId != dataModel.OldFactionId)
-            {
-                var alert = await _alertRepository.GetActiveAlert(dataModel.WorldId, dataModel.ZoneId);
-
-                if (alert == null)
+                var dataModel = new Data.Models.Planetside.Events.FacilityControl
                 {
-                    return;
+                    FacilityId = payload.FacilityId,
+                    NewFactionId = payload.NewFactionId,
+                    OldFactionId = payload.OldFactionId,
+                    DurationHeld = payload.DurationHeld,
+                    OutfitId = payload.OutfitId,
+                    Timestamp = payload.Timestamp,
+                    WorldId = payload.WorldId,
+                    ZoneId = payload.ZoneId.Value,
+                    ZoneControlVs = territory != null ? territory[1] * 100 : 0,
+                    ZoneControlNc = territory != null ? territory[2] * 100 : 0,
+                    ZoneControlTr = territory != null ? territory[3] * 100 : 0
+                };
+
+                await _eventRepository.AddAsync(dataModel);
+
+                if (dataModel.NewFactionId != dataModel.OldFactionId)
+                {
+                    var alert = await _alertRepository.GetActiveAlert(dataModel.WorldId, dataModel.ZoneId);
+
+                    if (alert == null)
+                    {
+                        _facilityControlSemaphore.Release();
+                        return;
+                    }
+
+                    alert.LastFactionVs = dataModel.ZoneControlVs;
+                    alert.LastFactionNc = dataModel.ZoneControlNc;
+                    alert.LastFactionTr = dataModel.ZoneControlTr;
+
+                    await _alertRepository.UpdateAsync(alert);
                 }
-
-                alert.LastFactionVs = dataModel.ZoneControlVs;
-                alert.LastFactionNc = dataModel.ZoneControlNc;
-                alert.LastFactionTr = dataModel.ZoneControlTr;
-
-                await _alertRepository.UpdateAsync(alert);
             }
+            catch(Exception ex)
+            {
+                _facilityControlSemaphore.Release();
+                throw ex;
+            }
+
+            _facilityControlSemaphore.Release();
         }
 
         [CensusEventHandler("GainExperience", typeof(Models.GainExperience))]
@@ -326,7 +364,7 @@ namespace Voidwell.DaybreakGames.Websocket
         }
 
         [CensusEventHandler("PlayerFacilityCapture", typeof(Models.PlayerFacilityCapture))]
-        private Task Proces(Models.PlayerFacilityCapture payload)
+        private async Task Proces(Models.PlayerFacilityCapture payload)
         {
             var dataModel = new Data.Models.Planetside.Events.PlayerFacilityCapture
             {
@@ -337,11 +375,24 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
             };
-            return _eventRepository.AddAsync(dataModel);
+
+            await _playerFacilityCaptureSemaphore.WaitAsync();
+
+            try
+            {
+                await _eventRepository.AddAsync(dataModel);
+            }
+            catch(Exception ex)
+            {
+                _playerFacilityCaptureSemaphore.Release();
+                throw ex;
+            }
+            
+            _playerFacilityCaptureSemaphore.Release();
         }
 
         [CensusEventHandler("PlayerFacilityDefend", typeof(PlayerFacilityDefend))]
-        private Task Process(PlayerFacilityDefend payload)
+        private async Task Process(PlayerFacilityDefend payload)
         {
             var dataModel = new Data.Models.Planetside.Events.PlayerFacilityDefend
             {
@@ -352,7 +403,20 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
             };
-            return _eventRepository.AddAsync(dataModel);
+
+            await _playerFacilityDefendSemaphore.WaitAsync();
+
+            try
+            {
+                await _eventRepository.AddAsync(dataModel);
+            }
+            catch(Exception ex)
+            {
+                _playerFacilityDefendSemaphore.Release();
+                throw ex;
+            }
+
+            _playerFacilityDefendSemaphore.Release();
         }
 
         [CensusEventHandler("PlayerLogin", typeof(Models.PlayerLogin))]
