@@ -26,28 +26,6 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
 
-        private Dictionary<int, int> _metagameZones = new Dictionary<int, int> {
-            { 1, 2},
-            { 2, 8},
-            { 3, 6},
-            { 4, 4},
-            { 123, 2 },
-            { 124, 2 },
-            { 125, 2 },
-            { 126, 8 },
-            { 127, 8 },
-            { 128, 8 },
-            { 129, 6 },
-            { 130, 6 },
-            { 131, 6 },
-            { 132, 4 },
-            { 133, 4 },
-            { 134, 4 },
-            { 159, 0 },
-            { 160, 0 },
-            { 161, 0 },
-            { 162, 0 }
-        };
         private enum METAGAME_EVENT_STATE
         {
             STARTED = 135,
@@ -321,8 +299,6 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("MetagameEvent", typeof(MetagameEvent))]
         private async Task Process(MetagameEvent payload)
         {
-            payload.ZoneId = payload.ZoneId ?? (_metagameZones.TryGetValue(payload.MetagameEventId, out int metagameZone) ? (int?)metagameZone : null);
-
             var dataModel = new Data.Models.Planetside.Events.MetagameEvent
             {
                 InstanceId = payload.InstanceId,

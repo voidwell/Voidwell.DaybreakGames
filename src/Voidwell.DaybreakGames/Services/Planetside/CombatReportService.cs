@@ -153,18 +153,29 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             foreach(var death in deaths)
             {
+                CombatReportOutfitStats attackerOutfit = null;
+                CombatReportOutfitStats victimOutfit = null;
+                CombatReportWeaponStats weapon = null;
+                CombatReportVehicleStats vehicle = null;
+
                 participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
                 participantHash.TryGetValue(death.CharacterId, out var victim);
-                outfitHash.TryGetValue(death.AttackerOutfitId, out var attackerOutfit);
-                outfitHash.TryGetValue(death.CharacterOutfitId, out var victimOutfit);
 
-                CombatReportWeaponStats weapon = null;
+                if (death.AttackerOutfitId != null)
+                {
+                    outfitHash.TryGetValue(death.AttackerOutfitId, out attackerOutfit);
+                }
+
+                if (death.CharacterOutfitId != null)
+                {
+                    outfitHash.TryGetValue(death.CharacterOutfitId, out victimOutfit);
+                }
+
                 if (death.AttackerWeaponId.HasValue && weaponHash.ContainsKey(death.AttackerWeaponId.Value))
                 {
                     weapon = weaponHash[death.AttackerWeaponId.Value];
                 }
 
-                CombatReportVehicleStats vehicle = null;
                 if (death.AttackerVehicleId.HasValue && vehicleHash.ContainsKey(death.AttackerVehicleId.Value))
                 {
                     vehicle = vehicleHash[death.AttackerVehicleId.Value];
