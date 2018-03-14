@@ -141,7 +141,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var members = await _outfitRepository.GetOutfitMembersAsync(outfitId);
 
-            memberDetails = members.Select(a =>
+            memberDetails = members.Where(a => a.Character.Time != null).Select(a =>
             {
                 return new OutfitMemberDetails
                 {
