@@ -55,7 +55,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join victimCharacter in dbContext.Characters on e.CharacterId equals victimCharacter.Id into victimCharacterQ
                              from victimCharacter in victimCharacterQ.DefaultIfEmpty()
 
-                             where e.AttackerCharacterId == characterId || e.CharacterId == characterId && e.Timestamp > lower && e.Timestamp < upper
+                             where (e.AttackerCharacterId == characterId || e.CharacterId == characterId) && e.Timestamp > lower && e.Timestamp < upper
                              select new Death
                              {
                                  Timestamp = e.Timestamp,
