@@ -11,6 +11,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.ToTable("MetagameEventCategoryZone");
 
             builder.HasKey(a => a.MetagameEventCategoryId);
+
+            builder.Property(a => a.MetagameEventCategoryId).ValueGeneratedNever();
         }
     }
 }
