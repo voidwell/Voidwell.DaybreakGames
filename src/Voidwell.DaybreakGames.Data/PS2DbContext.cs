@@ -33,6 +33,7 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<MapHex> MapHexs { get; set; }
         public DbSet<MapRegion> MapRegions { get; set; }
         public DbSet<MetagameEventCategory> MetagameEventCategories { get; set; }
+        public DbSet<MetagameEventCategoryZone> MetagameEventCategoryZones { get; set; }
         public DbSet<MetagameEventState> MetagameEventStates { get; set; }
         public DbSet<Outfit> Outfits { get; set; }
         public DbSet<OutfitMember> OutfitMembers { get; set; }
