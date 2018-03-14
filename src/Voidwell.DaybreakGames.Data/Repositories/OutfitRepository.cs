@@ -31,11 +31,30 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.Outfits
-                    .Include(i => i.World)
-                    .Include(i => i.Faction)
-                    .Include(i => i.LeaderCharacter)
-                    .FirstOrDefaultAsync(a => a.Id == outfitId);
+                var query = from outfit in dbContext.Outfits
+
+                             join world in dbContext.Worlds on outfit.WorldId equals world.Id into worldQ
+                             from world in worldQ.DefaultIfEmpty()
+
+                             join faction in dbContext.Factions on outfit.FactionId equals faction.Id into factionQ
+                             from faction in factionQ.DefaultIfEmpty()
+
+                             join leader in dbContext.Characters on outfit.LeaderCharacterId equals leader.Id into leaderQ
+                             from leader in leaderQ.DefaultIfEmpty()
+
+                             where outfit.Id == outfitId
+                             select new { outfit, world, faction, leader };
+
+                return (await query.ToListAsync()).Select(a =>
+                {
+                    var outfit = a.outfit;
+
+                    outfit.World = a.world;
+                    outfit.Faction = a.faction;
+                    outfit.LeaderCharacter = a.leader;
+
+                    return outfit;
+                }).FirstOrDefault();
             }
         }
 
