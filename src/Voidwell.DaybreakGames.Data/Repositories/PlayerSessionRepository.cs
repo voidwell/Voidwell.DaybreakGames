@@ -42,7 +42,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.LogoutDate != null)
+                return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.LogoutDate != null && a.Duration > 300000)
                     .OrderBy("LoginDate", SortDirection.Descending)
                     .Take(limit)
                     .ToArrayAsync();
