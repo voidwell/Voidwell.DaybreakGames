@@ -126,7 +126,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task UpdateAlert(MetagameEvent metagameEvent)
         {
-            var alert = await _alertRepository.GetActiveAlert(metagameEvent.WorldId, metagameEvent.InstanceId);
+            var alert = await _alertRepository.GetAlert(metagameEvent.WorldId, metagameEvent.InstanceId);
 
             if (alert != null)
             {
