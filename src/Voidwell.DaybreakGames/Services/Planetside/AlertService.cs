@@ -18,7 +18,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private readonly string _cacheKey = "ps2.alert";
         private readonly TimeSpan _cacheAlertsExpiration = TimeSpan.FromMinutes(1);
-        private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(10);
+        private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(5);
 
         public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService, ICache cache)
         {
