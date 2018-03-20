@@ -9,8 +9,6 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Census.Exceptions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
