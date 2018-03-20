@@ -222,16 +222,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             foreach(var death in vehicleDeaths)
             {
+                CombatReportOutfitStats attackerOutfit = null;
                 participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
 
                 if (attacker != null) {
                     attacker.VehicleKills++;
 
-                    if (attacker.Outfit?.Id != null)
+                    if (attacker.Outfit?.Id != null && outfitHash.TryGetValue(attacker.Outfit.Id, out attackerOutfit))
                     {
-                        CombatReportOutfitStats attackerOutfit = null;
-                        outfitHash.TryGetValue(attacker.Outfit.Id, out attackerOutfit);
-
                         attackerOutfit.VehicleKills++;
                     }
                 }
