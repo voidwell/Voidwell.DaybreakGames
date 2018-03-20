@@ -211,13 +211,10 @@ namespace Voidwell.DaybreakGames.Websocket
             {
                 await _eventRepository.AddAsync(dataModel);
             }
-            catch(Exception ex)
+            finally
             {
                 _continentUnlockSemaphore.Release();
-                throw ex;
             }
-
-            _continentUnlockSemaphore.Release();
         }
 
         [CensusEventHandler("Death", typeof(Models.Death))]
@@ -295,7 +292,6 @@ namespace Voidwell.DaybreakGames.Websocket
 
                     if (alert == null)
                     {
-                        _facilityControlSemaphore.Release();
                         return;
                     }
 
@@ -306,13 +302,10 @@ namespace Voidwell.DaybreakGames.Websocket
                     await _alertRepository.UpdateAsync(alert);
                 }
             }
-            catch(Exception ex)
+            finally
             {
                 _facilityControlSemaphore.Release();
-                throw ex;
             }
-
-            _facilityControlSemaphore.Release();
         }
 
         [CensusEventHandler("GainExperience", typeof(Models.GainExperience))]
@@ -380,13 +373,10 @@ namespace Voidwell.DaybreakGames.Websocket
             {
                 await _eventRepository.AddAsync(dataModel);
             }
-            catch(Exception ex)
+            finally
             {
                 _playerFacilityCaptureSemaphore.Release();
-                throw ex;
             }
-            
-            _playerFacilityCaptureSemaphore.Release();
         }
 
         [CensusEventHandler("PlayerFacilityDefend", typeof(PlayerFacilityDefend))]
@@ -408,13 +398,10 @@ namespace Voidwell.DaybreakGames.Websocket
             {
                 await _eventRepository.AddAsync(dataModel);
             }
-            catch(Exception ex)
+            finally
             {
                 _playerFacilityDefendSemaphore.Release();
-                throw ex;
             }
-
-            _playerFacilityDefendSemaphore.Release();
         }
 
         [CensusEventHandler("PlayerLogin", typeof(Models.PlayerLogin))]

@@ -16,6 +16,8 @@ namespace Voidwell.DaybreakGames.Models
         public MapScore MapScore { get; private set; }
         public Dictionary<int, int> MapRegionOwnership { get; private set; } = new Dictionary<int, int>();
 
+        private readonly SemaphoreSlim _facilityFactionChangeLock = new SemaphoreSlim(1);
+
         public WorldZoneState(int worldId, int zoneId, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
         {
             WorldId = worldId;
@@ -31,21 +33,25 @@ namespace Voidwell.DaybreakGames.Models
             CalculateOwnership();
         }
 
-        private readonly SemaphoreSlim _facilityFactionChangeLock = new SemaphoreSlim(1 ,1);
-
         public async Task FacilityFactionChange(int facilityId, int factionId)
         {
             await _facilityFactionChangeLock.WaitAsync();
 
-            var region = Map.Regions.SingleOrDefault(r => r.FacilityId == facilityId);
-            if (region != null)
+            try
             {
-                MapRegionOwnership[region.RegionId] = factionId;
 
-                CalculateOwnership();
+                var region = Map.Regions.SingleOrDefault(r => r.FacilityId == facilityId);
+                if (region != null)
+                {
+                    MapRegionOwnership[region.RegionId] = factionId;
+
+                    CalculateOwnership();
+                }
             }
-
-            _facilityFactionChangeLock.Release();
+            finally
+            {
+                _facilityFactionChangeLock.Release();
+            }
         }
 
         private void CalculateOwnership()
