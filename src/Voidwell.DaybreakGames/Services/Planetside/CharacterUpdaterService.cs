@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -71,6 +72,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _logger.LogInformation("Character updater stopped");
 
             return Task.CompletedTask;
+        }
+
+        public override async Task<ServiceState> GetStatus(CancellationToken cancellationToken)
+        {
+            var status = await base.GetStatus(cancellationToken);
+
+            int count = await _characterUpdaterRepository.GetQueueLengthAsync();
+            status.Details = new { QueueLength = count };
+
+            return status;
         }
 
         private async void ExecuteAsync(Object stateInfo)

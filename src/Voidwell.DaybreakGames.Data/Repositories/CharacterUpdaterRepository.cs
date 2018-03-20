@@ -57,5 +57,16 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     .ToListAsync();
             }
         }
+
+        public Task<int> GetQueueLengthAsync()
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return dbContext.CharacterUpdateQueue
+                    .CountAsync();
+            }
+        }
     }
 }
