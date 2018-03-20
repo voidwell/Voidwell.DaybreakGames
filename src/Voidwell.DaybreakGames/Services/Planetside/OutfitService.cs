@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ILogger<OutfitService> _logger;
 
         private readonly string _cacheKey = "ps2.outfit";
-        private readonly TimeSpan _cacheOutfitExpiration = TimeSpan.FromMinutes(10);
+        private readonly TimeSpan _cacheOutfitExpiration = TimeSpan.FromMinutes(15);
         private readonly TimeSpan _cacheOutfitMemberExpiration = TimeSpan.FromMinutes(10);
         private readonly TimeSpan _cacheOutfitDetailsExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheOutfitMemberDetailsExpiration = TimeSpan.FromMinutes(30);
@@ -182,7 +182,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return null;
                 }
 
-                var outfit = await GetOutfitAsync(membership.OutfitId, character);
+                var outfit = await GetLatestOutfit(membership.OutfitId, character);
                 if (outfit == null)
                 {
                     _logger.LogError(84624, $"Unable to resolve outfit {membership.OutfitId} for character {character.Id}");
@@ -204,6 +204,33 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return outfitMember;
+        }
+
+        private async Task<Outfit> GetLatestOutfit(string outfitId, Character character)
+        {
+            Outfit outfit = null;
+
+            using (await _outfitLock.WaitAsync(outfitId))
+            {
+                outfit = await _cache.GetAsync<Outfit>(GetCacheKey(outfitId));
+                if (outfit != null)
+                {
+                    return outfit;
+                }
+
+                outfit = await GetCensusOutfit(outfitId);
+                if (outfit == null)
+                {
+                    return null;
+                }
+
+                outfit = await ResolveOutfitDetailsAsync(outfit, character);
+
+                await _outfitRepository.UpsertAsync(outfit);
+                await _cache.SetAsync(GetCacheKey(outfitId), outfit, _cacheOutfitExpiration);
+            }
+
+            return outfit;
         }
 
         private async Task<Outfit> GetOutfitAsync(string outfitId, Character member = null)
@@ -244,21 +271,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 try
                 {
-                    var censusOutfit = await _censusOutfit.GetOutfit(outfitId);
-                    if (censusOutfit == null)
-                    {
-                        return null;
-                    }
-
-                    outfit = new Outfit
-                    {
-                        Id = censusOutfit.OutfitId,
-                        Alias = censusOutfit.Alias,
-                        Name = censusOutfit.Name,
-                        LeaderCharacterId = censusOutfit.LeaderCharacterId,
-                        CreatedDate = censusOutfit.TimeCreated,
-                        MemberCount = censusOutfit.MemberCount
-                    };
+                    outfit = await GetCensusOutfit(outfitId);
                 }
                 catch (CensusConnectionException)
                 {
@@ -267,6 +280,25 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return outfit;
+        }
+
+        private async Task<Outfit> GetCensusOutfit(string outfitId)
+        {
+            var censusOutfit = await _censusOutfit.GetOutfit(outfitId);
+            if (censusOutfit == null)
+            {
+                return null;
+            }
+
+            return new Outfit
+            {
+                Id = censusOutfit.OutfitId,
+                Alias = censusOutfit.Alias,
+                Name = censusOutfit.Name,
+                LeaderCharacterId = censusOutfit.LeaderCharacterId,
+                CreatedDate = censusOutfit.TimeCreated,
+                MemberCount = censusOutfit.MemberCount
+            };
         }
 
         private async Task<Outfit> ResolveOutfitDetailsAsync(Outfit outfit, Character member = null)
