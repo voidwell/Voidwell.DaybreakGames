@@ -238,6 +238,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 outfitHash[""].Outfit.Name = "No Outfit";
             }
 
+            foreach (var outfit in outfitHash)
+            {
+                outfitHash[outfit.Key].ParticipantCount = participantHash.Values.Count(a => a.Outfit?.Id == outfit.Key);
+            }
+
             return new CombatReportStats
             {
                 Participants = participantHash.Values.ToArray(),
