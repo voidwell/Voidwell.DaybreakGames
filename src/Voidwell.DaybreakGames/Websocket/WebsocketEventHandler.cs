@@ -229,14 +229,12 @@ namespace Voidwell.DaybreakGames.Websocket
 
             if (payload.AttackerCharacterId != null && payload.AttackerCharacterId.Length > 18)
             {
-                await _characterService.GetCharacter(payload.AttackerCharacterId);
                 AttackerOutfitTask = _characterService.GetCharactersOutfit(payload.AttackerCharacterId);
                 outfitWork.Add(AttackerOutfitTask);
             }
 
             if (payload.CharacterId != null && payload.CharacterId.Length > 18)
             {
-                await _characterService.GetCharacter(payload.CharacterId);
                 VictimOutfitTask = _characterService.GetCharactersOutfit(payload.CharacterId);
                 outfitWork.Add(VictimOutfitTask);
             }

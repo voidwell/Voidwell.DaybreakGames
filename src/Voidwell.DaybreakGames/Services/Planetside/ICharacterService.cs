@@ -12,9 +12,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds);
         Task<Character> GetCharacter(string characterId);
         Task<CharacterDetails> GetCharacterDetails(string characterId);
-        Task<OutfitMember> GetCharactersOutfit(string characterId);
         Task UpdateAllCharacterInfo(string characterId, DateTime? LastLoginDate = null);
         Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetSessions(string characterId);
         Task<Models.PlayerSession> GetSession(string characterId, int sessionId);
+        Task<OutfitMember> GetCharactersOutfit(string characterId);
     }
 }
