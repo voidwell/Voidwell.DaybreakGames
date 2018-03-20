@@ -47,6 +47,7 @@ namespace Voidwell.DaybreakGames.Models
         public int Suicides { get; set; }
         public int Teamkills { get; set; }
         public int VehicleKills { get; set; }
+        public int ParticipantCount { get; set; }
     }
 
     public class CombatReportWeaponStats
