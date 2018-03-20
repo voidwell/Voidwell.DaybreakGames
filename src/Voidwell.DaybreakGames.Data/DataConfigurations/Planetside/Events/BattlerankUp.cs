@@ -9,7 +9,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("EventBattlerankUp");
 
-            builder.HasKey(a => new { a.CharacterId, a.Timestamp });
+            builder.HasKey(a => new { a.CharacterId, a.Timestamp, a.BattleRank });
         }
     }
 }
