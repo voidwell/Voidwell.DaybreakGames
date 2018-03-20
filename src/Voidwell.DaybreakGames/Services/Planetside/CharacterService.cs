@@ -295,9 +295,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                                UpdateCharacterWeaponStats(characterId, lastLoginDate));
         }
 
-        public Task<OutfitMember> GetCharactersOutfit(string characterId)
+        public async Task<OutfitMember> GetCharactersOutfit(string characterId)
         {
-            return _outfitService.UpdateCharacterOutfitMembership(characterId);
+            var character = await GetCharacter(characterId);
+            if (character == null)
+            {
+                return null;
+            }
+
+            return await _outfitService.UpdateCharacterOutfitMembership(character);
         }
 
         public async Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetSessions(string characterId)
@@ -391,7 +397,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            var dataModel = new Character
+            var model = new Character
             {
                 Id = character.CharacterId,
                 Name = character.Name.First,
@@ -403,11 +409,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 TitleId = character.TitleId
             };
 
-            await _characterRepository.UpsertAsync(dataModel);
+            await _characterRepository.UpsertAsync(model);
 
-            await _outfitService.UpdateCharacterOutfitMembership(characterId);
+            await _outfitService.UpdateCharacterOutfitMembership(model);
 
-            return dataModel;
+            return model;
         }
 
         private async Task UpdateCharacterTimes(string characterId)
