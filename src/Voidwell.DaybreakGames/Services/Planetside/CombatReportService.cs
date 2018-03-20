@@ -202,7 +202,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         attacker.Kills++;
 
                         if (attackerOutfit != null) { attackerOutfit.Kills++; }
-                        if (attackerOutfit != null) { attackerOutfit.VehicleKills++; }
                         if (weapon != null) { weapon.Kills++; }
                         if (vehicle != null) { vehicle.Kills++; }
 
@@ -225,7 +224,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
 
-                if (attacker != null) { attacker.VehicleKills++; }
+                if (attacker != null) {
+                    attacker.VehicleKills++;
+
+                    if (attacker.Outfit?.Id != null)
+                    {
+                        CombatReportOutfitStats attackerOutfit = null;
+                        outfitHash.TryGetValue(attacker.Outfit.Id, out attackerOutfit);
+
+                        attackerOutfit.VehicleKills++;
+                    }
+                }
 
                 if (death.AttackerVehicleId.HasValue && vehicleHash.ContainsKey(death.AttackerVehicleId.Value))
                 {
