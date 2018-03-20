@@ -27,6 +27,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterSessionsExpiration = TimeSpan.FromMinutes(10);
 
+        private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
+
         public CharacterService(ICharacterRepository characterRepository, IPlayerSessionRepository playerSessionRepository,
             IEventRepository eventRepository, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
             ILogger<CharacterService> logger)
@@ -50,8 +52,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             return _characterRepository.GetCharactersByIdsAsync(characterIds);
         }
-
-        private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
 
         public async Task<Character> GetCharacter(string characterId)
         {
