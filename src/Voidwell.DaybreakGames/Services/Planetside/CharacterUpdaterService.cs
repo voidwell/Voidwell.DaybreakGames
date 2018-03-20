@@ -102,21 +102,26 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             await _parallelSemaphore.WaitAsync();
 
-            if (!_isRunning)
-                return;
-
-            var character = await _characterService.GetCharacter(characterItem.CharacterId);
             try
             {
-                await _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, character?.Time?.LastSaveDate);
-                await _characterUpdaterRepository.RemoveAsync(characterItem);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Failed to update for character {characterItem.CharacterId}");
-            }
+                if (!_isRunning)
+                    return;
 
-            _parallelSemaphore.Release();
+                var character = await _characterService.GetCharacter(characterItem.CharacterId);
+                try
+                {
+                    await _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, character?.Time?.LastSaveDate);
+                    await _characterUpdaterRepository.RemoveAsync(characterItem);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Failed to update for character {characterItem.CharacterId}");
+                }
+            }
+            finally
+            {
+                _parallelSemaphore.Release();
+            }
         }
     }
 }
