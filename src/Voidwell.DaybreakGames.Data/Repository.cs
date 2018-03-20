@@ -37,7 +37,14 @@ namespace Voidwell.DaybreakGames.Data
                 var storeEntity = await dbSet.AsNoTracking()
                     .FirstOrDefaultAsync(predicate);
 
-                await PrepareEntity(dbSet, storeEntity, entity, ignoreNullProperties);
+                if (storeEntity == null)
+                {
+                    await dbSet.AddAsync(entity);
+                }
+                else
+                {
+                    PrepareEntity(dbSet, storeEntity, entity, ignoreNullProperties);
+                }
 
                 await dbContext.SaveChangesAsync();
 
@@ -52,6 +59,8 @@ namespace Voidwell.DaybreakGames.Data
                 var dbContext = factory.GetDbContext();
 
                 var result = new List<TEntity>();
+                var createdEntities = new List<TEntity>();
+                var updatedEntities = new List<object>();
 
                 var dbSet = dbContext.Set<TEntity>();
 
@@ -62,9 +71,21 @@ namespace Voidwell.DaybreakGames.Data
                 foreach (var entity in entities)
                 {
                     var storeEntity = storedStats.FirstOrDefault(storedEntity =>  matchPredicate(storedEntity, entity));
+                    if (storeEntity == null)
+                    {
+                        createdEntities.Add(entity);
+                    }
+                    else
+                    {
+                        var preparedEntity = PrepareEntity(dbSet, storeEntity, entity, ignoreNullProperties);
+                        result.Add(preparedEntity);
+                    }
+                }
 
-                    var preparedEntity = await PrepareEntity(dbSet, storeEntity, entity, ignoreNullProperties);
-                    result.Add(preparedEntity);
+                if (createdEntities.Any())
+                {
+                    await dbSet.AddRangeAsync(createdEntities);
+                    result.AddRange(createdEntities);
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -73,14 +94,8 @@ namespace Voidwell.DaybreakGames.Data
             }
         }
 
-        private static async Task<T> PrepareEntity<T>(DbSet<T> dbSet, T Target, T Source, bool ignoreNullProperties) where T : class
+        private static T PrepareEntity<T>(DbSet<T> dbSet, T Target, T Source, bool ignoreNullProperties) where T : class
         {
-            if (Target == null)
-            {
-                await dbSet.AddAsync(Source);
-                return Source;
-            }
-
             if (ignoreNullProperties)
             {
                 AssignNonNullProperties(ref Target, Source);

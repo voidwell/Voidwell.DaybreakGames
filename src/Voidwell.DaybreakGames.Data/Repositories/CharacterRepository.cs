@@ -244,22 +244,26 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public Task<IEnumerable<CharacterStat>> UpsertRangeAsync(IEnumerable<CharacterStat> entities)
         {
-            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ProfileId == s.ProfileId), (a, b) => a.ProfileId == b.ProfileId, true);
+            var id = entities.FirstOrDefault()?.CharacterId;
+            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ProfileId == b.ProfileId, true);
         }
 
         public Task<IEnumerable<CharacterStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterStatByFaction> entities)
         {
-            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ProfileId == s.ProfileId), (a, b) => a.ProfileId == b.ProfileId, true);
+            var id = entities.FirstOrDefault()?.CharacterId;
+            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ProfileId == b.ProfileId, true);
         }
 
         public Task<IEnumerable<CharacterWeaponStat>> UpsertRangeAsync(IEnumerable<CharacterWeaponStat> entities)
         {
-            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId), (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
+            var id = entities.FirstOrDefault()?.CharacterId;
+            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
         }
 
         public Task<IEnumerable<CharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterWeaponStatByFaction> entities)
         {
-            return UpsertRangeAsync(entities, s => entities.Any(c => c.CharacterId == s.CharacterId && c.ItemId == s.ItemId && c.VehicleId == s.VehicleId), (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
+            var id = entities.FirstOrDefault()?.CharacterId;
+            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
         }
     }
 }
