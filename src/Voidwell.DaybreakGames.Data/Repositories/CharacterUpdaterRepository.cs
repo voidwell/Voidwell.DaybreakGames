@@ -54,6 +54,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 return await dbContext.CharacterUpdateQueue
                     .AsNoTracking()
+                    .OrderBy("Timestamp", SortDirection.Ascending)
                     .ToListAsync();
             }
         }
