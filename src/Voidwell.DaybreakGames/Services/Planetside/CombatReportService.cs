@@ -202,7 +202,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         attacker.Kills++;
 
                         if (attackerOutfit != null) { attackerOutfit.Kills++; }
-                        if (attackerOutfit != null) { attackerOutfit.VehicleKills++; }
                         if (weapon != null) { weapon.Kills++; }
                         if (vehicle != null) { vehicle.Kills++; }
 
