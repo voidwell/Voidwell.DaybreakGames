@@ -33,6 +33,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
+                if (endDate == null)
+                {
+                    endDate = DateTime.UtcNow;
+                }
+
                 return await dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
                     .ToListAsync();
             }
@@ -88,6 +93,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
+                if (endDate == null)
+                {
+                    endDate = DateTime.UtcNow;
+                }
+
                 return await dbContext.EventFacilityControls.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
                     .ToListAsync();
             }
@@ -113,6 +123,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
+
+                if (endDate == null)
+                {
+                    endDate = DateTime.UtcNow;
+                }
 
                 return await dbContext.EventVehicleDestroys.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
                     .ToListAsync();
