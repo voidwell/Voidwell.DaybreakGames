@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Services
 {
     public interface IFeedService
     {
-        Task<List<FeedItem>> GetNewsFeed();
-        Task<List<FeedItem>> GetUpdateFeed();
+        Task<IEnumerable<FeedItem>> GetNewsFeed();
+        Task<IEnumerable<FeedItem>> GetUpdateFeed();
     }
 }

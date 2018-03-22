@@ -29,41 +29,36 @@ namespace Voidwell.DaybreakGames.Services
             _logger = logger;
         }
 
-        public async Task<List<FeedItem>> GetNewsFeed()
+        public Task<IEnumerable<FeedItem>> GetNewsFeed()
         {
-            var cacheNews = await _cache.GetAsync<List<FeedItem>>(_newsCacheKey);
-            if (cacheNews != null)
-            {
-                return cacheNews;
-            }
-
-            var news = await GetFeed(_newsFeed);
-            if (news != null)
-            {
-                await _cache.SetAsync(_newsCacheKey, news, _newsCacheExpiration);
-            }
-
-            return news;
+            return GetCachedFeed(_newsFeed, _newsCacheKey, _newsCacheExpiration);
         }
 
-        public async Task<List<FeedItem>> GetUpdateFeed()
+        public Task<IEnumerable<FeedItem>> GetUpdateFeed()
         {
-            var cacheUpdates = await _cache.GetAsync<List<FeedItem>>(_updatesCacheKey);
-            if (cacheUpdates != null)
-            {
-                return cacheUpdates;
-            }
-
-            var updates = await GetFeed(_updateFeed);
-            if (updates != null)
-            {
-                await _cache.SetAsync(_updatesCacheKey, updates, _updatesCacheExpiration);
-            }
-
-            return updates;
+            return GetCachedFeed(_updateFeed, _updatesCacheKey, _updatesCacheExpiration);
         }
 
-        private static async Task<List<FeedItem>> GetFeed(string feedAddress)
+        private async Task<IEnumerable<FeedItem>> GetCachedFeed(string feedUri, string cacheKey, TimeSpan cacheExpiration)
+        {
+            var feed = await _cache.GetAsync<IEnumerable<FeedItem>>(cacheKey);
+            if (feed != null)
+            {
+                return feed;
+            }
+
+            _logger.LogInformation($"Fetching feed: {feedUri}");
+
+            feed = await GetFeed(feedUri);
+            if (feed != null)
+            {
+                await _cache.SetAsync(cacheKey, feed, cacheExpiration);
+            }
+
+            return feed;
+        }
+
+        private static async Task<IEnumerable<FeedItem>> GetFeed(string feedAddress)
         {
             var feedResult = new List<FeedItem>();
 
