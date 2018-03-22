@@ -433,7 +433,7 @@ namespace Voidwell.DaybreakGames.Websocket
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]
-        private Task Process(Models.VehicleDestroy payload)
+        private async Task Process(Models.VehicleDestroy payload)
         {
             var dataModel = new Data.Models.Planetside.Events.VehicleDestroy
             {
@@ -449,7 +449,16 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
             };
-            return _eventRepository.AddAsync(dataModel);
+
+            try
+            {
+                await _eventRepository.AddAsync(dataModel);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(51231, $"Failed to save vehicle destroy: {ex.Message}");
+                _logger.LogInformation(JToken.FromObject(dataModel).ToString());
+            }
         }
     }
 }
