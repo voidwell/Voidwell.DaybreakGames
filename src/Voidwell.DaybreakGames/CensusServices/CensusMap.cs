@@ -59,6 +59,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "location_y",
                 "location_z"
             });
+            query.Where("facility_id").NotEquals(400127); // Filter out double The Ascent record.
 
             return await query.GetBatch<CensusMapRegionModel>();
         }
