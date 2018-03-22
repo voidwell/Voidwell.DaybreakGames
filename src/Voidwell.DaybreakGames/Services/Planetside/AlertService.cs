@@ -91,7 +91,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MetagameEvent = new AlertResultMetagameEvent { Name = alert.MetagameEvent.Name, Description = alert.MetagameEvent.Description },
                 Log = combatReport,
                 Score = new[] {
-                    0,
+                    100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault()),
                     alert.LastFactionVs.GetValueOrDefault(),
                     alert.LastFactionNc.GetValueOrDefault(),
                     alert.LastFactionTr.GetValueOrDefault()

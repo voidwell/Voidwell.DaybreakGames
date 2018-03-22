@@ -12,8 +12,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public string FacilityName { get; set; }
         public int FacilityTypeId { get; set; }
         public string FacilityType { get; set; }
-        public float XPos { get; set; }
-        public float YPos { get; set; }
-        public float ZPos { get; set; }
+        public float? XPos { get; set; }
+        public float? YPos { get; set; }
+        public float? ZPos { get; set; }
     }
 }
