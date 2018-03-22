@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,9 +57,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.MapHexs;
 
+                var storeEntities = await dbSet.AsNoTracking().ToListAsync();
+
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.MapRegionId == entity.MapRegionId && a.ZoneId == entity.ZoneId && a.XPos == entity.XPos && a.YPos == entity.YPos);
+                    var storeEntity = storeEntities.SingleOrDefault(a => a.MapRegionId == entity.MapRegionId && a.ZoneId == entity.ZoneId && a.XPos == entity.XPos && a.YPos == entity.YPos);
                     if (storeEntity == null)
                     {
                         await dbSet.AddAsync(entity);
@@ -85,9 +86,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.MapRegions;
 
+                var storeEntities = await dbSet.AsNoTracking().ToListAsync();
+
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
+                    var storeEntity = storeEntities.SingleOrDefault(a => a.Id == entity.Id);
                     if (storeEntity == null)
                     {
                         dbSet.Add(entity);
@@ -111,9 +114,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.FacilityLinks;
 
+                var storeEntities = await dbSet.AsNoTracking().ToListAsync();
+
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.ZoneId == entity.ZoneId && a.FacilityIdA == entity.FacilityIdA && a.FacilityIdB == a.FacilityIdB);
+                    var storeEntity = storeEntities.SingleOrDefault(a => a.ZoneId == entity.ZoneId && a.FacilityIdA == entity.FacilityIdA && a.FacilityIdB == entity.FacilityIdB);
                     if (storeEntity == null)
                     {
                         entity.Id = Guid.NewGuid().ToString();
