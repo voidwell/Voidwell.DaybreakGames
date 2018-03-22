@@ -242,6 +242,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (ownership == null || mapRegions == null || facilityLinks == null)
             {
+                var errors = new List<string>();
+                if (ownership == null) errors.Add("Ownership is null");
+                if (mapRegions == null) errors.Add("Map regions is null");
+                if (facilityLinks == null) errors.Add("Facility Links is null");
+
+                _logger.LogError(71612, $"{string.Join(", ", errors)} for worldId {worldId} zoneId {zoneId}");
                 return null;
             }
 

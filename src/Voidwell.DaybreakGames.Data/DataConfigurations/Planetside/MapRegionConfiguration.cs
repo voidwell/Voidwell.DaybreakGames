@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("MapRegion");
 
-            builder.HasKey(a => a.Id);
+            builder.HasKey(a => new { a.Id, a.FacilityId });
 
             builder.Property(a => a.Id).ValueGeneratedNever();
         }
