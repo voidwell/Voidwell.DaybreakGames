@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
@@ -10,12 +9,14 @@ using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
+using static Voidwell.DaybreakGames.Data.Repositories.CharacterRepository;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WeaponService : IWeaponService
     {
         private readonly ICharacterRepository _characterRepository;
+        private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
 
@@ -23,9 +24,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(1);
         private readonly TimeSpan _weaponLeaderboardCacheExpiration = TimeSpan.FromMinutes(30);
 
-        public WeaponService(ICharacterRepository characterRepository, CensusItem censusItem, ICache cache)
+        public WeaponService(ICharacterRepository characterRepository, IWeaponAggregateService weaponAggregateService, CensusItem censusItem, ICache cache)
         {
             _characterRepository = characterRepository;
+            _weaponAggregateService = weaponAggregateService;
             _censusItem = censusItem;
             _cache = cache;
         }
@@ -108,15 +110,42 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             var weaponStats = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, sortColumn, sortDirection, rowStart, limit);
-            weaponRows = weaponStats.Select(s => ConvertToResult(s));
+            var aggregate = await _weaponAggregateService.GetAggregateForItem(weaponItemId);
+
+            weaponRows = weaponStats.Select(s => ConvertToResult(s, aggregate));
 
             await _cache.SetAsync(cacheKey, weaponRows, _weaponLeaderboardCacheExpiration);
 
             return weaponRows;
         }
 
-        private WeaponLeaderboardRow ConvertToResult(CharacterWeaponStat model)
+        private WeaponLeaderboardRow ConvertToResult(CharacterWeaponStat model, WeaponAggregate aggregate)
         {
+            double? kdrDelta = null;
+            double? accuDelta = null;
+            double? hsrDelta = null;
+            double? kphDelta = null;
+
+            if (model.Deaths > 0 && aggregate.STDKdr > 0)
+            {
+                kdrDelta = (((double)model.Kills / (double)model.Deaths) - aggregate.AVGKdr) / aggregate.STDKdr;
+            }
+
+            if (model.FireCount > 0 && aggregate.STDAccuracy > 0)
+            {
+                accuDelta = (((double)model.HitCount / (double)model.FireCount) - aggregate.AVGAccuracy) / aggregate.STDAccuracy;
+            }
+
+            if (model.Kills > 0 && aggregate.STDHsr > 0)
+            {
+                hsrDelta = (((double)model.Headshots / (double)model.Kills) - aggregate.AVGHsr) / aggregate.STDHsr;
+            }
+
+            if (model.PlayTime > 0 && aggregate.STDKph > 0)
+            {
+                kphDelta = (((double)model.Kills / ((double)model.PlayTime / 3600)) - aggregate.AVGKph) / aggregate.STDKph;
+            }
+
             return new WeaponLeaderboardRow
             {
                 CharacterId = model.CharacterId,
@@ -130,7 +159,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 ShotsHit = model.HitCount.GetValueOrDefault(),
                 PlayTime = model.PlayTime.GetValueOrDefault(),
                 Score = model.Score.GetValueOrDefault(),
-                VehicleKills = model.VehicleKills.GetValueOrDefault()
+                VehicleKills = model.VehicleKills.GetValueOrDefault(),
+                KdrDelta = kdrDelta,
+                AccuracyDelta = accuDelta,
+                HsrDelta = hsrDelta,
+                KphDelta = kphDelta
             };
         }
     }

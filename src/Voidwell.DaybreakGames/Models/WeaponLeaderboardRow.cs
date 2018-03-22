@@ -14,5 +14,9 @@
         public int PlayTime { get; set; }
         public int Score { get; set; }
         public int VehicleKills { get; set; }
+        public double? KdrDelta { get; set; }
+        public double? AccuracyDelta { get; set; }
+        public double? HsrDelta { get; set; }
+        public double? KphDelta { get; set; }
     }
 }

@@ -20,6 +20,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly CensusCharacter _censusCharacter;
         private readonly ICache _cache;
         private readonly IOutfitService _outfitService;
+        private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly ILogger<CharacterService> _logger;
 
         private readonly string _cacheKey = "ps2.character";
@@ -31,7 +32,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public CharacterService(ICharacterRepository characterRepository, IPlayerSessionRepository playerSessionRepository,
             IEventRepository eventRepository, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
-            ILogger<CharacterService> logger)
+            IWeaponAggregateService weaponAggregateService, ILogger<CharacterService> logger)
         {
             _characterRepository = characterRepository;
             _playerSessionRepository = playerSessionRepository;
@@ -39,6 +40,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _censusCharacter = censusCharacter;
             _cache = cache;
             _outfitService = outfitService;
+            _weaponAggregateService = weaponAggregateService;
             _logger = logger;
         }
 
@@ -104,6 +106,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 return null;
             }
+
+            var aggregates = await _weaponAggregateService.GetAggregates();
 
             details = new CharacterDetails
             {
@@ -177,39 +181,82 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                         Tr = s.KilledByTR.GetValueOrDefault()
                     }
                 }),
-                WeaponStats = character.WeaponStats?.Where(a => a.ItemId != 0).Select(s => new CharacterDetailsWeaponStat
+                WeaponStats = character.WeaponStats?.Where(a => a.ItemId != 0).Select(s =>
                 {
-                    ItemId = s.ItemId,
-                    Name = s.Item?.Name,
-                    Category = s.Item?.ItemCategory?.Name,
-                    ImageId = s.Item?.ImageId,
-                    VehicleId = s.VehicleId,
-                    VehicleName = s.Vehicle?.Name,
-                    VehicleImageId = s.Vehicle?.ImageId,
-                    Stats = new CharacterDetailsWeaponStatValue
+                    double? kdrDelta = null;
+                    double? accuDelta = null;
+                    double? hsrDelta = null;
+                    double? kphDelta = null;
+                    double? vkphDelta = null;
+
+                    if (aggregates.TryGetValue($"{s.ItemId}-{s.VehicleId}", out var agg))
                     {
-                        DamageGiven = s.DamageGiven,
-                        DamageTakenBy = s.DamageTakenBy,
-                        Kills = s.Kills,
-                        Deaths = s.Deaths,
-                        FireCount = s.FireCount,
-                        HitCount = s.HitCount,
-                        Headshots = s.Headshots,
-                        KilledBy = s.KilledBy,
-                        PlayTime = s.PlayTime,
-                        Score = s.Score,
-                        VehicleKills = s.VehicleKills,
-                        /*
-                        Accuracy = s.HitCount.Value > 0 ? s.FireCount.Value / s.HitCount.Value : 0,
-                        HeadshotRatio = s.Kills.Value > 0 ? (s.Headshots.Value / s.Kills.Value) * 100 : 0,
-                        KillDeathRatio = s.Deaths.Value > 0 ? s.Kills.Value / s.Deaths.Value : 0,
-                        KillsPerHour = s.PlayTime.Value > 0 ? s.Kills.Value / (s.PlayTime.Value / 3600) : 0,
-                        LandedPerKill = s.Kills.Value > 0 ? s.HitCount.Value / s.Kills.Value : 0,
-                        ShotsPerKill = s.Kills.Value > 0 ? s.FireCount.Value / s.Kills.Value : 0,
-                        ScorePerMinute = s.PlayTime.Value > 0 ? s.Score.Value / (s.PlayTime.Value / 60) : 0,
-                        VehicleKillsPerHour = s.Kills.Value > 0 ? s.VehicleKills.Value / (s.Kills.Value / 3600) : 0
-                        */
+                        if (s.Deaths > 0 && agg.STDKdr > 0)
+                        {
+                            kdrDelta = (((double)s.Kills / (double)s.Deaths) - agg.AVGKdr) / agg.STDKdr;
+                        }
+
+                        if (s.FireCount > 0 && agg.STDAccuracy > 0)
+                        {
+                            accuDelta = (((double)s.HitCount / (double)s.FireCount) - agg.AVGAccuracy) / agg.STDAccuracy;
+                        }
+
+                        if (s.Kills > 0 && agg.STDHsr > 0)
+                        {
+                            hsrDelta = (((double)s.Headshots / (double)s.Kills) - agg.AVGHsr) / agg.STDHsr;
+                        }
+
+                        if (s.PlayTime > 0 && agg.STDKph > 0)
+                        {
+                            kphDelta = (((double)s.Kills / ((double)s.PlayTime / 3600)) - agg.AVGKph) / agg.STDKph;
+                        }
+
+                        if (s.PlayTime > 0 && agg.STDVkph > 0)
+                        {
+                            vkphDelta = (((double)s.VehicleKills / ((double)s.PlayTime / 3600)) - agg.AVGVkph) / agg.STDVkph;
+                        }
                     }
+
+                    return new CharacterDetailsWeaponStat
+                    {
+                        ItemId = s.ItemId,
+                        Name = s.Item?.Name,
+                        Category = s.Item?.ItemCategory?.Name,
+                        ImageId = s.Item?.ImageId,
+                        VehicleId = s.VehicleId,
+                        VehicleName = s.Vehicle?.Name,
+                        VehicleImageId = s.Vehicle?.ImageId,
+                        Stats = new CharacterDetailsWeaponStatValue
+                        {
+                            DamageGiven = s.DamageGiven,
+                            DamageTakenBy = s.DamageTakenBy,
+                            Kills = s.Kills,
+                            Deaths = s.Deaths,
+                            FireCount = s.FireCount,
+                            HitCount = s.HitCount,
+                            Headshots = s.Headshots,
+                            KilledBy = s.KilledBy,
+                            PlayTime = s.PlayTime,
+                            Score = s.Score,
+                            VehicleKills = s.VehicleKills,
+                            /*
+                            Accuracy = s.HitCount.Value > 0 ? s.FireCount.Value / s.HitCount.Value : 0,
+                            HeadshotRatio = s.Kills.Value > 0 ? (s.Headshots.Value / s.Kills.Value) * 100 : 0,
+                            KillDeathRatio = s.Deaths.Value > 0 ? s.Kills.Value / s.Deaths.Value : 0,
+                            KillsPerHour = s.PlayTime.Value > 0 ? s.Kills.Value / (s.PlayTime.Value / 3600) : 0,
+                            LandedPerKill = s.Kills.Value > 0 ? s.HitCount.Value / s.Kills.Value : 0,
+                            ShotsPerKill = s.Kills.Value > 0 ? s.FireCount.Value / s.Kills.Value : 0,
+                            ScorePerMinute = s.PlayTime.Value > 0 ? s.Score.Value / (s.PlayTime.Value / 60) : 0,
+                            VehicleKillsPerHour = s.Kills.Value > 0 ? s.VehicleKills.Value / (s.Kills.Value / 3600) : 0
+                            */
+
+                            KillDeathRatioDelta = kdrDelta,
+                            AccuracyDelta = accuDelta,
+                            HsrDelta = hsrDelta,
+                            KphDelta = kphDelta,
+                            VehicleKphDelta = vkphDelta
+                        }
+                    };
                 }),
                 VehicleStats = character.WeaponStats?.Where(a => a.VehicleId != 0).GroupBy(a => a.VehicleId).Select(s =>
                 {

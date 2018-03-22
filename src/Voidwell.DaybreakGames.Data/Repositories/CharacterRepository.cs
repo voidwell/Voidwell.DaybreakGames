@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public class CharacterRepository: Repository, ICharacterRepository
     {
+        public static T ClientMethod<T>(T element) => element;
         private readonly IDbContextHelper _dbContextHelper;
 
         public CharacterRepository(IDbContextHelper dbContextHelper) : base(dbContextHelper)
@@ -52,8 +54,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     .ToListAsync();
             }
         }
-
-        public static T ClientMethod<T>(T element) => element;
 
         public async Task<Character> GetCharacterWithDetailsAsync(string characterId)
         {
@@ -222,6 +222,64 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<WeaponAggregate>> GetWeaponAggregates()
+        {
+            var result = new List<WeaponAggregate>();
+
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                await dbContext.Database.GetDbConnection().OpenAsync();
+
+                using (var dbCmd = dbContext.Database.GetDbConnection().CreateCommand())
+                {
+                    dbCmd.CommandText = "SELECT * FROM weapon_aggregate()";
+                    var reader = await dbCmd.ExecuteReaderAsync();
+                    if (reader.HasRows)
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var row = new WeaponAggregate
+                            {
+                                ItemId = reader.GetInt32(0),
+                                VehicleId = reader.GetInt32(1),
+                                AVGKills = reader.IsDBNull(2) ? 0 : reader.GetDouble(2),
+                                STDKills = reader.IsDBNull(3) ? 0 : reader.GetDouble(3),
+                                AVGDeaths = reader.IsDBNull(4) ? 0 : reader.GetDouble(4),
+                                STDDeaths = reader.IsDBNull(5) ? 0 : reader.GetDouble(5),
+                                AVGFireCount = reader.IsDBNull(6) ? 0 : reader.GetDouble(6),
+                                STDFireCount = reader.IsDBNull(7) ? 0 : reader.GetDouble(7),
+                                AVGHitCount = reader.IsDBNull(8) ? 0 : reader.GetDouble(8),
+                                STDHitCount = reader.IsDBNull(9) ? 0 : reader.GetDouble(9),
+                                AVGHeadshots = reader.IsDBNull(10) ? 0 : reader.GetDouble(10),
+                                STDHeadshots = reader.IsDBNull(11) ? 0 : reader.GetDouble(11),
+                                AVGPlayTime = reader.IsDBNull(12) ? 0 : reader.GetDouble(12),
+                                STDPlayTime = reader.IsDBNull(13) ? 0 : reader.GetDouble(13),
+                                AVGScore = reader.IsDBNull(14) ? 0 : reader.GetDouble(14),
+                                STDScore = reader.IsDBNull(15) ? 0 : reader.GetDouble(15),
+                                AVGVehicleKills = reader.IsDBNull(16) ? 0 : reader.GetDouble(16),
+                                STDVehicleKills = reader.IsDBNull(17) ? 0 : reader.GetDouble(17),
+                                AVGKdr = reader.IsDBNull(18) ? 0 : reader.GetDouble(18),
+                                STDKdr = reader.IsDBNull(19) ? 0 : reader.GetDouble(19),
+                                AVGAccuracy = reader.IsDBNull(20) ? 0 : reader.GetDouble(20),
+                                STDAccuracy = reader.IsDBNull(21) ? 0 : reader.GetDouble(21),
+                                AVGHsr = reader.IsDBNull(22) ? 0 : reader.GetDouble(22),
+                                STDHsr = reader.IsDBNull(23) ? 0 : reader.GetDouble(23),
+                                AVGKph = reader.IsDBNull(24) ? 0 : reader.GetDouble(24),
+                                STDKph = reader.IsDBNull(25) ? 0 : reader.GetDouble(25),
+                                AVGVkph = reader.IsDBNull(26) ? 0 : reader.GetDouble(26),
+                                STDVkph = reader.IsDBNull(27) ? 0 : reader.GetDouble(27),
+                            };
+                            result.Add(row);
+                        }
+                    }
+                }
+
+                return result;
+            }
+        }
+
         public Task<Character> UpsertAsync(Character entity)
         {
             return UpsertAsync(entity, a => a.Id == entity.Id);
@@ -264,6 +322,39 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         {
             var id = entities.FirstOrDefault()?.CharacterId;
             return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
+        }
+
+        public class WeaponAggregate
+        {
+            public int ItemId { get; set; }
+            public int? VehicleId { get; set; }
+            public double? AVGKills { get; set; }
+            public double? STDKills { get; set; }
+            public double? AVGDeaths { get; set; }
+            public double? STDDeaths { get; set; }
+            public double? AVGFireCount { get; set; }
+            public double? STDFireCount { get; set; }
+            public double? AVGHitCount { get; set; }
+            public double? STDHitCount { get; set; }
+            public double? AVGHeadshots { get; set; }
+            public double? STDHeadshots { get; set; }
+            public double? AVGPlayTime { get; set; }
+            public double? STDPlayTime { get; set; }
+            public double? AVGScore { get; set; }
+            public double? STDScore { get; set; }
+            public double? AVGVehicleKills { get; set; }
+            public double? STDVehicleKills { get; set; }
+
+            public double? AVGKdr { get; set; }
+            public double? STDKdr { get; set; }
+            public double? AVGAccuracy { get; set; }
+            public double? STDAccuracy { get; set; }
+            public double? AVGHsr { get; set; }
+            public double? STDHsr { get; set; }
+            public double? AVGKph { get; set; }
+            public double? STDKph { get; set; }
+            public double? AVGVkph { get; set; }
+            public double? STDVkph { get; set; }
         }
     }
 }
