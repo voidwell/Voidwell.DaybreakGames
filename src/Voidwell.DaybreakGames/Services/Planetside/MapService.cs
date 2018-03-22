@@ -109,7 +109,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (mapRegions != null)
             {
-                mapRegions = mapRegions.Where(a => a.LocationX != 0);
                 await _mapRepository.UpsertRangeAsync(mapRegions.Select(ConvertToDbModel));
             }
 
