@@ -90,7 +90,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = storeEntities.SingleOrDefault(a => a.Id == entity.Id);
+                    var storeEntity = storeEntities.SingleOrDefault(a => a.Id == entity.Id && a.FacilityId == entity.FacilityId);
                     if (storeEntity == null)
                     {
                         dbSet.Add(entity);
