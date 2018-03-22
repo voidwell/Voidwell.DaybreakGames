@@ -131,6 +131,11 @@ namespace Voidwell.DaybreakGames.Models
         public double? ScorePerMinute { get; set; }
         public double? LandedPerKill { get; set; }
         public double? ShotsPerKill { get; set; }
+        public double? KillDeathRatioDelta { get; set; }
+        public double? AccuracyDelta { get; set; }
+        public double? HsrDelta { get; set; }
+        public double? KphDelta { get; set; }
+        public double? VehicleKphDelta { get; set; }
     }
 
     public class CharacterDetailsVehicleStat
