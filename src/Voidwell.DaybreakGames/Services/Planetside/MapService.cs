@@ -109,6 +109,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (mapRegions != null)
             {
+                mapRegions = mapRegions.ToList().Where(a => a.MapRegionId != 6329 && a.FacilityId != 400127);
+
                 await _mapRepository.UpsertRangeAsync(mapRegions.Select(ConvertToDbModel));
             }
 
