@@ -91,7 +91,7 @@ namespace Voidwell.DaybreakGames.Models
 
                 for(var i = 0; i < Territories.Count(); i++)
                 {
-                    Percent[i] = (float)Territories[i] / zoneMap.Regions.Count;
+                    Percent[i] = (float)Territories[i] / ownership.Count;
                 }
                 
                 foreach (var warpgate in zoneMap.Warpgates)
@@ -112,7 +112,7 @@ namespace Voidwell.DaybreakGames.Models
 
                 for (var i = 1; i < ConnectedTerritories.Count(); i++)
                 {
-                    ConnectedPercent[i] = (float)ConnectedTerritories[i] / zoneMap.Regions.Count;
+                    ConnectedPercent[i] = (float)ConnectedTerritories[i] / ownership.Count;
                 }
 
                 ConnectedPercent[0] = 1 - (ConnectedPercent[1] + ConnectedPercent[2] + ConnectedPercent[3]);
