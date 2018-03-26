@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
@@ -20,7 +19,8 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly IWorldMonitor _worldMonitor;
         private readonly ILogger<WebsocketMonitor> _logger;
 
-        private readonly CensusStreamClient _client;
+        private CensusStreamClient _client;
+        private CensusStreamSubscription _subscription;
         private CensusHeartbeat _lastHeartbeat;
 
         public override string ServiceName => "CensusMonitor";
@@ -34,14 +34,16 @@ namespace Voidwell.DaybreakGames.Websocket
             _worldMonitor = worldMonitor;
             _logger = logger;
 
-            var subscription = new CensusStreamSubscription
+            _subscription = new CensusStreamSubscription
             {
                 Characters = _options.CensusWebsocketCharacters,
                 Worlds = _options.CensusWebsocketWorlds,
                 EventNames = _options.CensusWebsocketServices
             };
 
-            _client = new CensusStreamClient(subscription, apiKey: _options.CensusServiceKey);
+            _client = new CensusStreamClient(_subscription, apiKey: _options.CensusServiceKey)
+                .OnMessage(OnMessage)
+                .OnDisconnect(OnDisconnect);
         }
 
         public override async Task StartInternalAsync(CancellationToken cancellationToken)
@@ -54,9 +56,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
             _logger.LogInformation("Starting census stream monitor");
 
-            await _client.ConnectAsync(cancellationToken);
-
-            StartListening();
+            await _client.ConnectAsync();
         }
 
         public override async Task StopInternalAsync(CancellationToken cancellationToken)
@@ -68,13 +68,12 @@ namespace Voidwell.DaybreakGames.Websocket
                 return;
             }
 
-            await _client.CloseAsync(cancellationToken);
-            await _worldMonitor.ClearAllWorldStates();
+            await _client.DisconnectAsync();
         }
 
         public override async Task OnApplicationShutdown(CancellationToken cancellationToken)
         {
-            await _client?.CloseAsync(cancellationToken);
+            await _client?.DisconnectAsync();
         }
 
         public override async Task<ServiceState> GetStatus(CancellationToken cancellationToken)
@@ -86,56 +85,42 @@ namespace Voidwell.DaybreakGames.Websocket
             return status;
         }
 
-        private void StartListening()
+        private async Task OnMessage(string message)
         {
-            Task.Run(StartListeningAsync);
-        }
-
-        private async Task StartListeningAsync()
-        {
-            while (_isRunning)
+            if (message == null)
             {
-                if (_client.GetState() != CensusStreamState.Open)
-                    continue;
-
-                JToken message = null;
-
-                try
-                {
-                    message = await _client.ReceiveAsync(CancellationToken.None);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogInformation($"Websocket receive failed: {ex}");
-                }
-
-                if (message == null)
-                {
-                    continue;
-                }
-
-                if (message.Value<string>("type") == "heartbeat")
-                {
-                    _lastHeartbeat = new CensusHeartbeat
-                    {
-                        LastHeartbeat = DateTime.UtcNow,
-                        Contents = message.ToObject<object>()
-                    };
-
-                    continue;
-                }
-
-                ProcessMessage(message);
+                return;
             }
+
+            JToken msg;
+
+            try
+            {
+                msg = JToken.Parse(message);
+            }
+            catch(Exception)
+            {
+                _logger.LogError(91097, "Failed to parse message: {0}", message);
+                return;
+            }
+
+            if (msg.Value<string>("type") == "heartbeat")
+            {
+                _lastHeartbeat = new CensusHeartbeat
+                {
+                    LastHeartbeat = DateTime.UtcNow,
+                    Contents = msg.ToObject<object>()
+                };
+
+                return;
+            }
+
+            await _handler.Process(msg);
         }
 
-        private void ProcessMessage(JToken message)
+        private async Task OnDisconnect(string error)
         {
-            Task.Run(() =>
-            {
-                JToken local = message;
-                return _handler.Process(local);
-            });
+            await _worldMonitor.ClearAllWorldStates();
         }
 
         public void Dispose()

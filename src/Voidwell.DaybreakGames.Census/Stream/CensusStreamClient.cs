@@ -2,9 +2,7 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.IO;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,181 +11,132 @@ namespace Voidwell.DaybreakGames.Census.Stream
     public class CensusStreamClient : IDisposable
     {
         private const int _chunkSize = 1024;
-        private UTF8Encoding encoder = new UTF8Encoding();
         private JsonSerializerSettings sendMessageSettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
-        private ClientWebSocket _client;
+        private WebSocketWrapper _client;
 
-        private Timer _timer;
-        private readonly TimeSpan _stateCheckInterval = TimeSpan.FromSeconds(5);
+        private bool _internalState = false;
 
         private string _apiKey { get; set; }
         private string _apiNamespace { get; set; }
         private CensusStreamSubscription _subscription { get; set; }
 
+        private Timer _reconnectTimer;
+        private readonly TimeSpan _stateCheckInterval = TimeSpan.FromSeconds(5);
+
+        private Func<string, Task> _onMessage;
+        private Func<string, Task> _onDisconnected;
+
         public CensusStreamClient(CensusStreamSubscription subscription, string apiKey = Constants.DefaultApiKey, string apiNamespace = Constants.DefaultApiNamespace)
         {
-            if(subscription == null)
-            {
-                throw new ArgumentNullException(nameof(subscription));
-            }
-
             _apiKey = apiKey;
             _apiNamespace = apiNamespace;
-
-            _client = new ClientWebSocket();
-            _subscription = subscription;
+            _subscription = subscription ?? throw new ArgumentNullException(nameof(subscription));
         }
 
-        public CensusStreamState GetState()
+        public CensusStreamClient OnDisconnect(Func<string, Task> onDisconnect)
         {
-            if (Enum.TryParse(_client.State.ToString(), out CensusStreamState state))
-            {
-                return state;
-            }
-
-            return CensusStreamState.None;
+            _onDisconnected = onDisconnect;
+            return this;
         }
 
-        public async Task ConnectAsync(CancellationToken ct)
+        public CensusStreamClient OnMessage(Func<string, Task> onMessage)
         {
-            _timer?.Dispose();
-
-            if (_client == null)
-            {
-                _client = new ClientWebSocket();
-            }
-
-            await _client.ConnectAsync(GetEndpoint(), ct);
-
-            if (_client.State == WebSocketState.Open)
-            {
-                await SendAsync(_subscription, ct);
-            }
-
-            SetupReconnect();
+            _onMessage = onMessage;
+            return this;
         }
 
-        public async Task<JToken> ReceiveAsync(CancellationToken cancellationToken)
+        public Task ConnectAsync()
         {
-            var message = await ReceiveMessageAsync();
-            if (message == null)
-            {
-                return null;
-            }
+            _internalState = true;
 
-            try
-            {
-                return JToken.Parse(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception: {0}", ex);
-                Console.WriteLine(message);
-            }
+            _reconnectTimer?.Dispose();
+            _reconnectTimer = new Timer(ReconnectClientAsync, null, (int)_stateCheckInterval.TotalMilliseconds, (int)_stateCheckInterval.TotalMilliseconds);
 
-            return null;
+            return ConnectInternal();
         }
 
-        public async Task CloseAsync(CancellationToken ct)
+        public async Task DisconnectAsync()
         {
-            _timer?.Dispose();
+            _internalState = false;
+            _reconnectTimer?.Dispose();
 
-            if (_client.State == WebSocketState.Open || _client.State == WebSocketState.Connecting)
+            if (_client != null && _client.State == WebSocketState.Open)
             {
-                await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Close requested by client", ct);
+                await _client.Disconnect();
+                _client.Dispose();
             }
         }
 
-        private Task SendAsync(object message, CancellationToken cancellationToken)
+        private async Task ConnectInternal()
         {
-            if (_client?.State != WebSocketState.Open)
-            {
-                throw new InvalidOperationException("Connection is not ready to send data. Wait for connect to be in open state.");
-            }
+            _client = WebSocketWrapper.Create(GetEndpoint())
+                .OnDisconnect(HandleDisconnect)
+                .OnMessage(HandleMessage);
 
-            var sMessage = JsonConvert.SerializeObject(message, sendMessageSettings);
-            byte[] buffer = encoder.GetBytes(sMessage);
-            var seg = new ArraySegment<byte>(buffer);
+            await _client.Connect();
 
-            return _client.SendAsync(seg, WebSocketMessageType.Text, true, cancellationToken);
+            Console.WriteLine("Census stream connected");
+
+            var sMessage = JsonConvert.SerializeObject(_subscription, sendMessageSettings);
+            await _client.SendMessage(sMessage);
         }
 
-        private async Task<string> ReceiveMessageAsync()
+        private async void HandleDisconnect(string error, WebSocketWrapper ws)
         {
-            var buffer = new byte[_chunkSize];
-            var seg = new ArraySegment<byte>(buffer);
-            WebSocketReceiveResult result = null;
+            Console.WriteLine($"Census stream client has closed: {error}");
+            OnDisconnect(error);
 
-            using (var ms = new MemoryStream())
+            if (_internalState)
             {
-                do
-                {
-                    try
-                    {
-                        result = await _client.ReceiveAsync(seg, CancellationToken.None);
-                    }
-                    catch (WebSocketException ex)
-                    {
-                        if (ex.InnerException != null && ex.InnerException is ObjectDisposedException)
-                        {
-                            return null;
-                        }
-                    }
-
-                    ms.Write(seg.Array, seg.Offset, result.Count);
-                }
-                while (!result.EndOfMessage);
-
-                ms.Seek(0, SeekOrigin.Begin);
-
-                if (result.MessageType == WebSocketMessageType.Text)
-                {
-                    using (var reader = new StreamReader(ms, Encoding.UTF8))
-                    {
-                        return await reader.ReadToEndAsync();
-                    }
-                }
-                else if (result.MessageType == WebSocketMessageType.Close)
-                {
-                    await CloseAsync(CancellationToken.None);
-                }
-
-                return null;
+                Console.WriteLine($"Attempting reconnect of Census stream...");
+                await ConnectInternal();
             }
         }
 
-        private Uri GetEndpoint()
+        private void HandleMessage(string message, WebSocketWrapper ws)
         {
-            return new Uri($"{Constants.WebsocketEndpoint}?environment={_apiNamespace}&service-id=s:{_apiKey}");
+            if (_onMessage != null)
+            {
+                Task.Run(() => _onMessage(message));
+            }
         }
 
-        private void SetupReconnect()
+        private void OnDisconnect(string error = null)
         {
-            _timer?.Dispose();
-
-            _timer = new Timer(ReconnectClientAsync, null, (int)_stateCheckInterval.TotalMilliseconds, (int)_stateCheckInterval.TotalMilliseconds);
+            if (_onDisconnected != null)
+            {
+                Task.Run(() => _onDisconnected(error));
+            }
         }
 
         private async void ReconnectClientAsync(Object stateInfo)
         {
-            var state = _client?.State;
-
-            if (state == null || state == WebSocketState.Closed || state == WebSocketState.Aborted || state == WebSocketState.None)
+            if (!_internalState)
             {
-                Console.WriteLine($"Census stream client is closed. Attempting reconnect: {_client.CloseStatusDescription}");
-
-                await ConnectAsync(CancellationToken.None);
+                _reconnectTimer?.Dispose();
+                return;
             }
+
+            if (_client?.State == null || _client?.State == WebSocketState.Closed)
+            {
+                Console.WriteLine($"Census stream client is closed. Attempting reconnect");
+                await ConnectInternal();
+            }
+        }
+
+        private string GetEndpoint()
+        {
+            return $"{Constants.WebsocketEndpoint}?environment={_apiNamespace}&service-id=s:{_apiKey}";
         }
 
         public void Dispose()
         {
-            _timer?.Dispose();
-            _client.Dispose();
+            _reconnectTimer?.Dispose();
+            _client?.Dispose();
         }
     }
 }
