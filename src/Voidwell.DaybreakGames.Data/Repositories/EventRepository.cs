@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,18 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 var dbContext = factory.GetDbContext();
 
                 dbContext.Add<T>(entity);
-                await dbContext.SaveChangesAsync();
+
+                try
+                {
+                    await dbContext.SaveChangesAsync();
+                }
+                catch (PostgresException ex)
+                {
+                    // Ignore unique constraint errors (https://www.postgresql.org/docs/current/static/errcodes-appendix.html)
+                    if (ex.SqlState != "23505") {
+                        throw ex;
+                    }
+                }
             }
         }
 
