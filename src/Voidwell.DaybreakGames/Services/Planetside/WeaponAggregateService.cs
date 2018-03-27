@@ -5,13 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
-using static Voidwell.DaybreakGames.Data.Repositories.CharacterRepository;
+using Voidwell.DaybreakGames.Data.Repositories.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WeaponAggregateService : IWeaponAggregateService
     {
-        private readonly ICharacterRepository _characterRepository;
+        private readonly IFunctionalRepository _functionalRepository;
         private readonly ICache _cache;
 
         private const string _cacheKey = "ps2.weaponAggregate";
@@ -19,9 +19,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private SemaphoreSlim _aggregateLock = new SemaphoreSlim(1);
 
-        public WeaponAggregateService(ICharacterRepository characterRepository, ICache cache)
+        public WeaponAggregateService(IFunctionalRepository functionalRepository, ICache cache)
         {
-            _characterRepository = characterRepository;
+            _functionalRepository = functionalRepository;
             _cache = cache;
         }
 
@@ -49,7 +49,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return aggregates;
                 }
 
-                var calculatedAggregates = await _characterRepository.GetWeaponAggregates();
+                var calculatedAggregates = await _functionalRepository.GetWeaponAggregates();
                 if (calculatedAggregates == null)
                 {
                     return null;

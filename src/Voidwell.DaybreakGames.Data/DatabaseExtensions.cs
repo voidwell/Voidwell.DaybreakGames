@@ -26,7 +26,6 @@ namespace Voidwell.DaybreakGames.Data
             services.AddDbContextPool<PS2DbContext>(builder =>
                 builder.UseNpgsql(options.DBConnectionString, b => {
                     b.MigrationsAssembly(_migrationAssembly);
-                    b.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null);
                 }), 100);
 
             services.AddSingleton<IDbContextHelper, DbContextHelper>();
@@ -46,6 +45,7 @@ namespace Voidwell.DaybreakGames.Data
             services.AddSingleton<IEventRepository, EventRepository>();
             services.AddSingleton<IAlertRepository, AlertRepository>();
             services.AddSingleton<ICharacterUpdaterRepository, CharacterUpdaterRepository>();
+            services.AddSingleton<IFunctionalRepository, FunctionalRepository>();
 
             return services;
         }

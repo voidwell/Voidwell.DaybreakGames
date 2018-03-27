@@ -12,6 +12,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => a.Id);
 
+            builder.HasIndex(a => a.Name);
+
             builder
                 .Ignore(a => a.Title)
                 .Ignore(a => a.World)

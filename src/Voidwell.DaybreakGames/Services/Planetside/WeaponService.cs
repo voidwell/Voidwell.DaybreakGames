@@ -8,8 +8,8 @@ using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Data.Repositories.Models;
 using Voidwell.DaybreakGames.Models;
-using static Voidwell.DaybreakGames.Data.Repositories.CharacterRepository;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
