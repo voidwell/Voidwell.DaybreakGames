@@ -66,6 +66,7 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IOutfitService, OutfitService>();
             services.AddSingleton<IWorldMonitor, WorldMonitor>();
             services.AddSingleton<IWeaponAggregateService, WeaponAggregateService>();
+            services.AddSingleton<IPSBUtilityService, PSBUtilityService>();
 
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
