@@ -450,15 +450,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 ZoneId = payload.ZoneId.Value
             };
 
-            try
-            {
-                await _eventRepository.AddAsync(dataModel);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(51231, $"Failed to save vehicle destroy: {ex.Message}");
-                _logger.LogInformation(JToken.FromObject(dataModel).ToString());
-            }
+            await _eventRepository.AddAsync(dataModel);
         }
     }
 }
