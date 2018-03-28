@@ -79,8 +79,17 @@ namespace Voidwell.DaybreakGames.Census
                 }
                 else
                 {
-                    var jBody = jResult.SelectToken($"{query.ServiceName}_list");
-                    return jBody.ToObject<T>(_censusDeserializer);
+                    try
+                    {
+                        var jBody = jResult.SelectToken($"{query.ServiceName}_list");
+                        return jBody.ToObject<T>(_censusDeserializer);
+                    }
+                    catch(NullReferenceException ex)
+                    {
+                        _logger.LogError(85417, "{0}", ex.Message);
+                        _logger.LogInformation(await result.Content.ReadAsStringAsync());
+                        throw ex;
+                    }
                 }
             }
             catch(HttpRequestException ex)
@@ -88,7 +97,7 @@ namespace Voidwell.DaybreakGames.Census
                 var exMessage = ex.InnerException?.Message ?? ex.Message;
                 var errorMessage = $"Census query failed for query: {requestUri}: {exMessage}";
 
-                _logger.LogError(05418, errorMessage);
+                _logger.LogError(85418, errorMessage);
 
                 if (throwError)
                 {

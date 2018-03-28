@@ -29,17 +29,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 {
                     await dbContext.SaveChangesAsync();
                 }
-                catch (DbUpdateException ex)
+                catch (DbUpdateException ex) when ((ex.InnerException as PostgresException)?.SqlState == "23505")
                 {
-                    if (ex?.InnerException is PostgresException)
-                    {
-                        var psqlEx = (PostgresException)ex.InnerException;
-                        // Ignore unique constraint errors (https://www.postgresql.org/docs/current/static/errcodes-appendix.html)
-                        if (psqlEx.SqlState != "23505")
-                        {
-                            throw ex;
-                        }
-                    }
+                    // Ignore unique constraint errors (https://www.postgresql.org/docs/current/static/errcodes-appendix.html)
+                    return;
                 }
             }
         }
