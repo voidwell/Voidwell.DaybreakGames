@@ -16,6 +16,7 @@ namespace Voidwell.DaybreakGames.Models
         public string Title { get; set; }
         public string World { get; set; }
         public int WorldId { get; set; }
+        public int PrestigeLevel { get; set; }
 
         public CharacterDetailsTimes Times { get; set; }
         public CharacterDetailsOutfit Outfit { get; set; }

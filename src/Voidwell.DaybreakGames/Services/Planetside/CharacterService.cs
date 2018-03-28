@@ -121,6 +121,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 CertsEarned = character.CertsEarned,
                 Title = character.Title?.Name,
                 WorldId = character.WorldId,
+                PrestigeLevel = character.PrestigeLevel,
                 World = character.World?.Name,
                 Times = new CharacterDetailsTimes
                 {
@@ -451,7 +452,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 BattleRank = character.BattleRank.Value,
                 BattleRankPercentToNext = character.BattleRank.PercentToNext,
                 CertsEarned = character.Certs.EarnedPoints,
-                TitleId = character.TitleId
+                TitleId = character.TitleId,
+                PrestigeLevel = character.PrestigeLevel
             };
 
             await _characterRepository.UpsertAsync(model);

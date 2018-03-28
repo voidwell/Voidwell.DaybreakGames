@@ -13,6 +13,7 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
         public CharacterCerts Certs { get; set; }
         public int WorldId { get; set; }
         public bool OnlineStatus { get; set; }
+        public int PrestigeLevel { get; set; }
 
         public class CharacterName
         {

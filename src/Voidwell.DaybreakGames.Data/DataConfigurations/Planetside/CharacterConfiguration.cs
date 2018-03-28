@@ -14,6 +14,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasIndex(a => a.Name);
 
+            builder.Property(a => a.PrestigeLevel).HasDefaultValue(0);
+
             builder
                 .Ignore(a => a.Title)
                 .Ignore(a => a.World)

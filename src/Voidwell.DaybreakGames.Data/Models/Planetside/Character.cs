@@ -16,6 +16,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int BattleRank { get; set; }
         public int BattleRankPercentToNext { get; set; }
         public int CertsEarned { get; set; }
+        public int PrestigeLevel { get; set; }
 
         public Title Title { get; set; }
         public World World { get; set; }
