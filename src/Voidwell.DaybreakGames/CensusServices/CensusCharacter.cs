@@ -29,7 +29,8 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "battle_rank.value",
                 "battle_rank.percent_to_next",
                 "certs.earned_points",
-                "title_id"
+                "title_id",
+                "prestige_level"
             });
             query.Where("character_id").Equals(characterId);
 
