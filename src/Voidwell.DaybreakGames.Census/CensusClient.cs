@@ -90,12 +90,23 @@ namespace Voidwell.DaybreakGames.Census
             }
             catch (JsonReaderException)
             {
-                _logger.LogError(85415, await result.Content.ReadAsStringAsync());
+                _logger.LogError(85413, "Failed to read JSON. Endpoint maybe in maintence mode.");
                 return default(T);
             }
 
+            var error = jResult.Value<string>("error");
             var errorCode = jResult.Value<string>("errorCode");
-            if (errorCode != null)
+
+            if (error != null)
+            {
+                _logger.LogError(85414, error);
+
+                if (throwError)
+                {
+                    throw new CensusServerException(error);
+                }
+            }
+            else if (errorCode != null)
             {
                 var errorMessage = jResult.Value<string>("errorMessage");
 
@@ -108,17 +119,8 @@ namespace Voidwell.DaybreakGames.Census
             }
             else
             {
-                try
-                {
-                    var jBody = jResult.SelectToken($"{query.ServiceName}_list");
-                    return jBody.ToObject<T>(_censusDeserializer);
-                }
-                catch (NullReferenceException ex)
-                {
-                    _logger.LogError(85417, "{0}", ex.Message);
-                    _logger.LogInformation(await result.Content.ReadAsStringAsync());
-                    throw ex;
-                }
+                var jBody = jResult.SelectToken($"{query.ServiceName}_list");
+                return jBody.ToObject<T>(_censusDeserializer);
             }
 
             return default(T);
