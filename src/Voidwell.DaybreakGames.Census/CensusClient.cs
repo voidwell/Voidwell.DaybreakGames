@@ -61,36 +61,11 @@ namespace Voidwell.DaybreakGames.Census
         {
             var requestUri = CreateRequestUri(query);
 
-            try {
-                var result = await _client.GetAsync(requestUri);
-                var jResult = await result.GetContentAsync<JToken>();
+            HttpResponseMessage result;
 
-                var errorCode = jResult.Value<string>("errorCode");
-                if (errorCode != null)
-                {
-                    var errorMessage = jResult.Value<string>("errorMessage");
-
-                    _logger.LogError(05417, errorMessage);
-
-                    if (throwError)
-                    {
-                        throw new CensusServerException($"{errorCode}: {errorMessage}");
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        var jBody = jResult.SelectToken($"{query.ServiceName}_list");
-                        return jBody.ToObject<T>(_censusDeserializer);
-                    }
-                    catch(NullReferenceException ex)
-                    {
-                        _logger.LogError(85417, "{0}", ex.Message);
-                        _logger.LogInformation(await result.Content.ReadAsStringAsync());
-                        throw ex;
-                    }
-                }
+            try
+            {
+                result = await _client.GetAsync(requestUri);
             }
             catch(HttpRequestException ex)
             {
@@ -102,6 +77,47 @@ namespace Voidwell.DaybreakGames.Census
                 if (throwError)
                 {
                     throw new CensusConnectionException(errorMessage);
+                }
+
+                return default(T);
+            }
+
+            JToken jResult;
+
+            try
+            {
+                jResult = await result.GetContentAsync<JToken>();
+            }
+            catch (JsonReaderException)
+            {
+                _logger.LogError(85415, await result.Content.ReadAsStringAsync());
+                return default(T);
+            }
+
+            var errorCode = jResult.Value<string>("errorCode");
+            if (errorCode != null)
+            {
+                var errorMessage = jResult.Value<string>("errorMessage");
+
+                _logger.LogError(85416, errorMessage);
+
+                if (throwError)
+                {
+                    throw new CensusServerException($"{errorCode}: {errorMessage}");
+                }
+            }
+            else
+            {
+                try
+                {
+                    var jBody = jResult.SelectToken($"{query.ServiceName}_list");
+                    return jBody.ToObject<T>(_censusDeserializer);
+                }
+                catch (NullReferenceException ex)
+                {
+                    _logger.LogError(85417, "{0}", ex.Message);
+                    _logger.LogInformation(await result.Content.ReadAsStringAsync());
+                    throw ex;
                 }
             }
 
