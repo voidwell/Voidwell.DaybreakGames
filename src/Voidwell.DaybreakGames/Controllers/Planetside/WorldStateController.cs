@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 
@@ -25,6 +26,18 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         public IEnumerable<OnlineCharacter> GetOnlinePlayers(int worldId)
         {
             return _worldMonitor.GetOnlineCharactersByWorld(worldId);
+        }
+
+        [HttpGet("{worldId}/zone/{zoneId}")]
+        public IEnumerable<ZoneRegionOwnership> GetWorldZoneState(int worldId, int zoneId)
+        {
+            return _worldMonitor.GetZoneMapState(worldId, zoneId);
+        }
+
+        [HttpPost("{worldId}/zone")]
+        public Task SetupWorldZones(int worldId)
+        {
+            return _worldMonitor.SetupWorldZones(worldId);
         }
     }
 }
