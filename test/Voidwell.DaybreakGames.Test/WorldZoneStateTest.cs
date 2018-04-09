@@ -19,8 +19,9 @@ namespace Voidwell.DaybreakGames.Census.Test
             var facilityLinks = GetFacilityLinks();
             var mapRegions = GetMapRegions();
             var ownership = GetMapOwnership();
+            var zone = new Zone { Id = 2, Code = "Indar" };
 
-            var worldZoneState = new WorldZoneState(17, 2, facilityLinks, mapRegions, ownership);
+            var worldZoneState = new WorldZoneState(17, zone, facilityLinks, mapRegions, ownership);
 
             var score = worldZoneState.MapScore;
 
