@@ -12,6 +12,7 @@ using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.JsonConverters;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Websocket.Models;
 
@@ -179,7 +180,7 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("ContinentLock", typeof(Models.ContinentLock))]
         private Task Process(Models.ContinentLock payload)
         {
-            var dataModel = new Data.Models.Planetside.Events.ContinentLock
+            var model = new Data.Models.Planetside.Events.ContinentLock
             {
                 TriggeringFaction = payload.TriggeringFaction,
                 MetagameEventId = payload.MetagameEventId,
@@ -190,13 +191,16 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
             };
-            return _eventRepository.AddAsync(dataModel);
+
+            _worldMonitor.UpdateZoneLock(model.WorldId, model.ZoneId, new ZoneLockState(model.Timestamp, model.MetagameEventId, model.TriggeringFaction));
+
+            return _eventRepository.AddAsync(model);
         }
 
         [CensusEventHandler("ContinentUnlock", typeof(ContinentUnlock))]
         private async Task Process(ContinentUnlock payload)
         {
-            var dataModel = new Data.Models.Planetside.Events.ContinentUnlock
+            var model = new Data.Models.Planetside.Events.ContinentUnlock
             {
                 TriggeringFaction = payload.TriggeringFaction,
                 MetagameEventId = payload.MetagameEventId,
@@ -205,11 +209,13 @@ namespace Voidwell.DaybreakGames.Websocket
                 ZoneId = payload.ZoneId.Value
             };
 
+            _worldMonitor.UpdateZoneLock(model.WorldId, model.ZoneId);
+
             await _continentUnlockSemaphore.WaitAsync();
 
             try
             {
-                await _eventRepository.AddAsync(dataModel);
+                await _eventRepository.AddAsync(model);
             }
             finally
             {

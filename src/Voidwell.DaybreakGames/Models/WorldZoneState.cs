@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,16 +10,30 @@ namespace Voidwell.DaybreakGames.Models
     {
         public int WorldId { get; private set; }
         public int ZoneId { get; private set; }
+        public string Name { get; private set; }
+        public bool IsTracking { get; private set; }
+
         public WorldZone Map { get; private set; }
         public MapScore MapScore { get; private set; }
         public Dictionary<int, int> MapRegionOwnership { get; private set; } = new Dictionary<int, int>();
+        public ZoneLockState LockState { get; private set; }
 
         private readonly SemaphoreSlim _facilityFactionChangeLock = new SemaphoreSlim(1);
 
-        public WorldZoneState(int worldId, int zoneId, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
+        public WorldZoneState(int worldId, Zone zone)
         {
             WorldId = worldId;
-            ZoneId = zoneId;
+            ZoneId = zone.Id;
+            Name = zone.Code;
+
+            IsTracking = false;
+        }
+
+        public WorldZoneState(int worldId, Zone zone, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
+        {
+            WorldId = worldId;
+            ZoneId = zone.Id;
+            Name = zone.Code;
 
             Map = new WorldZone(facilityLinks, mapRegions);
 
@@ -31,6 +43,8 @@ namespace Voidwell.DaybreakGames.Models
             }
 
             CalculateOwnership();
+
+            IsTracking = true;
         }
 
         public async Task FacilityFactionChange(int facilityId, int factionId)
@@ -52,6 +66,23 @@ namespace Voidwell.DaybreakGames.Models
             {
                 _facilityFactionChangeLock.Release();
             }
+        }
+
+        public void UpdateLockState(ZoneLockState lockState = null)
+        {
+            LockState = lockState;
+        }
+
+        public IEnumerable<ZoneRegionOwnership> GetMapOwnership()
+        {
+            if (!IsTracking)
+            {
+                return null;
+            }
+
+            return Map.Regions
+                .Select(a => a as ZoneRegion)
+                .Select(a => new ZoneRegionOwnership(a, MapRegionOwnership[a.RegionId]));
         }
 
         private void CalculateOwnership()

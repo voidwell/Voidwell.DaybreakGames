@@ -7,5 +7,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IZoneService : IUpdateable
     {
         Task<IEnumerable<Zone>> GetAllZones();
+        Task<IEnumerable<Zone>> GetPlayableZones();
     }
 }
