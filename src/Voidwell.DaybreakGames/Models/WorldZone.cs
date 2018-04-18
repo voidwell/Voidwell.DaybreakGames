@@ -22,9 +22,9 @@ namespace Voidwell.DaybreakGames.Models
                     FacilityId = region.FacilityId,
                     FacilityName = region.FacilityName,
                     FacilityType = region.FacilityType,
-                    XPos = region.XPos,
-                    YPos = region.YPos,
-                    ZPos = region.ZPos
+                    X = region.XPos,
+                    Y = region.YPos,
+                    Z = region.ZPos
                 };
 
                 if (region.FacilityType == "Warpgate")

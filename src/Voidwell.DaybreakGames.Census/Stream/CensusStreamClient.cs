@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,8 +82,12 @@ namespace Voidwell.DaybreakGames.Census.Stream
 
             Console.WriteLine("Census stream connected");
 
-            var sMessage = JsonConvert.SerializeObject(_subscription, sendMessageSettings);
-            await _client.SendMessage(sMessage);
+            if (_subscription.EventNames.Any())
+            {
+                var sMessage = JsonConvert.SerializeObject(_subscription, sendMessageSettings);
+                await _client.SendMessage(sMessage);
+                Console.WriteLine($"Subscribed to census with: {sMessage}");
+            }
         }
 
         private async void HandleDisconnect(string error, WebSocketWrapper ws)

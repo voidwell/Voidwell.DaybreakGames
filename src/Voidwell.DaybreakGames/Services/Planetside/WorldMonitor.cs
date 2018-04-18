@@ -255,7 +255,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             });
         }
 
-        public IEnumerable<ZoneRegionOwnership> GetZoneMapState(int worldId, int zoneId)
+        public async Task<MapZone> GetZoneMapState(int worldId, int zoneId)
         {
             WorldZoneState zoneState;
             if (!TryGetZoneState(worldId, zoneId, out zoneState))
@@ -263,7 +263,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            return zoneState.GetMapOwnership();
+            var facilityLinksTask = _mapService.GetFacilityLinks(zoneId);
+            var mapHexsTask = _mapService.GetMapHexs(zoneId);
+
+            await Task.WhenAll(facilityLinksTask, mapHexsTask);
+
+            var links = facilityLinksTask.Result;
+            var hexs = mapHexsTask.Result;
+
+            return new MapZone
+            {
+                Ownership = zoneState.GetMapOwnership(),
+                Links = links.Select(a => new ZoneRegionLink { FacilityIdA = a.FacilityIdA, FacilityIdB = a.FacilityIdB }),
+                Hexs = hexs
+            };
         }
 
         private async Task<WorldZoneState> CreateWorldZoneState(int worldId, Zone zone)

@@ -1,6 +1,7 @@
 FROM microsoft/dotnet:2.0.0-sdk
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
+ENV ASPNETCORE_ENVIRONMENT Development
 
 COPY ./src/Voidwell.DaybreakGames/*.csproj /tmp/
 COPY ./Directory.Build.props /

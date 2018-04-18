@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("{worldId}/zone/{zoneId}")]
-        public IEnumerable<ZoneRegionOwnership> GetWorldZoneState(int worldId, int zoneId)
+        public Task<MapZone> GetWorldZoneState(int worldId, int zoneId)
         {
             return _worldMonitor.GetZoneMapState(worldId, zoneId);
         }

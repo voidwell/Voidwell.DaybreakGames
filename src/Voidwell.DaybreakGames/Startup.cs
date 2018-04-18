@@ -14,14 +14,27 @@ using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.HostedServices;
 using IdentityServer4.AccessTokenValidation;
+using System;
+using System.Linq;
 
 namespace Voidwell.DaybreakGames
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", false, true);
+
+            if (env.IsDevelopment())
+            {
+                builder.AddJsonFile("devsettings.json", true, true);
+            }
+
+            builder.AddEnvironmentVariables();
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -40,6 +53,11 @@ namespace Voidwell.DaybreakGames
 
             services.AddOptions();
             services.Configure<DaybreakGamesOptions>(Configuration);
+            services.Configure<DaybreakGamesOptions>(a =>
+            {
+                var eventNames = Configuration.GetValue<string>("CensusWebsocketServices");
+                a.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
+            });
 
             services.AddEntityFrameworkContext(Configuration);
             services.AddCache(Configuration, "Voidwell.DaybreakGames");
