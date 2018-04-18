@@ -27,6 +27,17 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<MapHex>> GetMapHexsByZoneIdAsync(int zoneId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.MapHexs.Where(a => a.ZoneId == zoneId)
+                    .ToListAsync();
+            }
+        }
+
         public async Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<int> facilityIds)
         {
             using (var factory = _dbContextHelper.GetFactory())

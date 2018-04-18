@@ -7,10 +7,10 @@
             RegionId = region.RegionId;
             FacilityId = region.FacilityId;
             FacilityName = region.FacilityName;
-            FacilityType = region.FacilityType;
-            XPos = region.XPos;
-            YPos = region.YPos;
-            ZPos = region.ZPos;
+            FacilityType = region.FacilityType?.ToLower().Replace(" ", "_");
+            X = region.X;
+            Y = region.Y;
+            Z = region.Z;
             FactionId = factionId;
         }
 

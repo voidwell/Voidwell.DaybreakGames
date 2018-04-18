@@ -22,10 +22,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private readonly KeyedSemaphoreSlim _mapRegionsLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _facilityLinksLock = new KeyedSemaphoreSlim();
+        private readonly KeyedSemaphoreSlim _mapHexsLock = new KeyedSemaphoreSlim();
 
         private const string _cacheKeyPrefix = "ps2.mapService";
         private TimeSpan _mapRegionCacheExpiration = TimeSpan.FromMinutes(30);
         private TimeSpan _facilityLinksCacheExpiration = TimeSpan.FromMinutes(30);
+        private TimeSpan _mapHexsCacheExpiration = TimeSpan.FromMinutes(30);
 
         public MapService(IMapRepository mapRepository, CensusMap censusMap, ICache cache)
         {
@@ -88,6 +90,31 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 }
 
                 return facilityLinks;
+            }
+        }
+
+        public async Task<IEnumerable<ZoneRegionHex>> GetMapHexs(int zoneId)
+        {
+            using (await _mapHexsLock.WaitAsync(zoneId.ToString()))
+            {
+                var cacheKey = GetCacheKey($"mapHexs-{zoneId}");
+
+                var hexs = await _cache.GetAsync<IEnumerable<ZoneRegionHex>>(cacheKey);
+                if (hexs != null)
+                {
+                    return hexs;
+                }
+
+                var storeHexs = await _mapRepository.GetMapHexsByZoneIdAsync(zoneId);
+
+                hexs = storeHexs.Select(a => new ZoneRegionHex { MapRegionId = a.MapRegionId, X = a.XPos, Y = a.YPos });
+
+                if (hexs != null)
+                {
+                    await _cache.SetAsync(cacheKey, hexs, _mapHexsCacheExpiration);
+                }
+
+                return hexs;
             }
         }
 
