@@ -1,19 +1,14 @@
 ﻿namespace Voidwell.DaybreakGames.Models
 {
-    public class ZoneRegionOwnership : ZoneRegion
+    public class ZoneRegionOwnership
     {
-        public ZoneRegionOwnership(ZoneRegion region, int? factionId)
+        public ZoneRegionOwnership(int regionId, int factionId)
         {
-            RegionId = region.RegionId;
-            FacilityId = region.FacilityId;
-            FacilityName = region.FacilityName;
-            FacilityType = region.FacilityType?.ToLower().Replace(" ", "_");
-            X = region.X;
-            Y = region.Y;
-            Z = region.Z;
+            RegionId = regionId;
             FactionId = factionId;
         }
-
-        public int? FactionId { get; set; }
+        
+        public int RegionId { get; set; }
+        public int FactionId { get; set; }
     }
 }

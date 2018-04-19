@@ -29,13 +29,13 @@ namespace Voidwell.DaybreakGames.Models
             IsTracking = false;
         }
 
-        public WorldZoneState(int worldId, Zone zone, IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions, IEnumerable<MapOwnership> ownership)
+        public WorldZoneState(int worldId, Zone zone, ZoneMap zoneMap, IEnumerable<MapOwnership> ownership)
         {
             WorldId = worldId;
             ZoneId = zone.Id;
             Name = zone.Code;
 
-            Map = new WorldZone(facilityLinks, mapRegions);
+            Map = new WorldZone(zoneMap);
 
             foreach (var own in ownership)
             {
@@ -81,8 +81,7 @@ namespace Voidwell.DaybreakGames.Models
             }
 
             return Map.Regions
-                .Select(a => a as ZoneRegion)
-                .Select(a => new ZoneRegionOwnership(a, MapRegionOwnership[a.RegionId]));
+                .Select(a => new ZoneRegionOwnership(a.RegionId, MapRegionOwnership[a.RegionId]));
         }
 
         private void CalculateOwnership()

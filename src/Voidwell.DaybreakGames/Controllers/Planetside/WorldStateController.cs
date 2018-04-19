@@ -28,10 +28,10 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             return _worldMonitor.GetOnlineCharactersByWorld(worldId);
         }
 
-        [HttpGet("{worldId}/zone/{zoneId}")]
-        public Task<MapZone> GetWorldZoneState(int worldId, int zoneId)
+        [HttpGet("{worldId}/{zoneId}/map")]
+        public IEnumerable<ZoneRegionOwnership> GetZoneOwnership(int worldId, int zoneId)
         {
-            return _worldMonitor.GetZoneMapState(worldId, zoneId);
+            return _worldMonitor.GetZoneOwnership(worldId, zoneId);
         }
 
         [HttpPost("{worldId}/zone")]

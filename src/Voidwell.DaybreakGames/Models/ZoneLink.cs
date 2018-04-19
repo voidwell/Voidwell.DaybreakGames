@@ -1,6 +1,6 @@
 ﻿namespace Voidwell.DaybreakGames.Models
 {
-    public class ZoneRegionLink
+    public class ZoneLink
     {
         public int FacilityIdA { get; set; }
         public int FacilityIdB { get; set; }

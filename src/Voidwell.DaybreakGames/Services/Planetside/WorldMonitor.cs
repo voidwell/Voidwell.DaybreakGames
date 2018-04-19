@@ -255,7 +255,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             });
         }
 
-        public async Task<MapZone> GetZoneMapState(int worldId, int zoneId)
+        public IEnumerable<ZoneRegionOwnership> GetZoneOwnership(int worldId, int zoneId)
         {
             WorldZoneState zoneState;
             if (!TryGetZoneState(worldId, zoneId, out zoneState))
@@ -263,47 +263,38 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            var facilityLinksTask = _mapService.GetFacilityLinks(zoneId);
-            var mapHexsTask = _mapService.GetMapHexs(zoneId);
-
-            await Task.WhenAll(facilityLinksTask, mapHexsTask);
-
-            var links = facilityLinksTask.Result;
-            var hexs = mapHexsTask.Result;
-
-            return new MapZone
-            {
-                Ownership = zoneState.GetMapOwnership(),
-                Links = links.Select(a => new ZoneRegionLink { FacilityIdA = a.FacilityIdA, FacilityIdB = a.FacilityIdB }),
-                Hexs = hexs
-            };
+            return zoneState.GetMapOwnership() ?? Enumerable.Empty<ZoneRegionOwnership>();
         }
 
         private async Task<WorldZoneState> CreateWorldZoneState(int worldId, Zone zone)
         {
             var ownershipTask = _mapService.GetMapOwnership(worldId, zone.Id);
-            var regionsTask = _mapService.GetMapRegions(zone.Id);
-            var facilityLinksTask = _mapService.GetFacilityLinks(zone.Id);
+            var zoneMapTask = _mapService.GetZoneMap(zone.Id);
 
-            await Task.WhenAll(ownershipTask, regionsTask, facilityLinksTask);
+            await Task.WhenAll(ownershipTask, zoneMapTask);
 
             var ownership = ownershipTask.Result;
-            var mapRegions = regionsTask.Result;
-            var facilityLinks = facilityLinksTask.Result;
+            var zoneMap = zoneMapTask.Result;
 
-            if (ownership == null || mapRegions == null || facilityLinks == null)
+            if (ownership == null || zoneMap == null || zoneMap.Regions == null || zoneMap.Links == null)
             {
                 var errors = new List<string>();
                 if (ownership == null) errors.Add("Ownership is null");
-                if (mapRegions == null) errors.Add("Map regions is null");
-                if (facilityLinks == null) errors.Add("Facility Links is null");
+                if (zoneMap == null) {
+                    errors.Add("ZoneMap is null");
+                }
+                else
+                {
+                    if (zoneMap.Regions == null) errors.Add("ZoneMap.Regions is null");
+                    if (zoneMap.Links == null) errors.Add("ZoneMap.Links is null");
+                }
 
                 _logger.LogError(71612, $"{string.Join(", ", errors)} for worldId {worldId} zoneId {zone.Id}");
 
                 return new WorldZoneState(worldId, zone);
             }
 
-            return new WorldZoneState(worldId, zone, facilityLinks, mapRegions, ownership);
+            return new WorldZoneState(worldId, zone, zoneMap, ownership);
         }
 
         private static bool TryGetZoneState(int worldId, int zoneId, out WorldZoneState zoneState)

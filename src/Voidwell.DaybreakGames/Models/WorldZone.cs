@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Models
 {
@@ -9,22 +8,22 @@ namespace Voidwell.DaybreakGames.Models
         public List<WorldZoneRegion> Warpgates { get; private set; }
         public List<WorldZoneRegion> Regions { get; private set; }
 
-        public WorldZone(IEnumerable<FacilityLink> facilityLinks, IEnumerable<MapRegion> mapRegions)
+        public WorldZone(ZoneMap zoneMap)
         {
             Warpgates = new List<WorldZoneRegion>();
             Regions = new List<WorldZoneRegion>();
 
-            foreach(var region in mapRegions)
+            foreach(var region in zoneMap.Regions)
             {
                 var stateRegion = new WorldZoneRegion
                 {
-                    RegionId = region.Id,
+                    RegionId = region.RegionId,
                     FacilityId = region.FacilityId,
                     FacilityName = region.FacilityName,
                     FacilityType = region.FacilityType,
-                    X = region.XPos,
-                    Y = region.YPos,
-                    Z = region.ZPos
+                    X = region.X,
+                    Y = region.Y,
+                    Z = region.Z
                 };
 
                 if (region.FacilityType == "Warpgate")
@@ -35,7 +34,7 @@ namespace Voidwell.DaybreakGames.Models
                 Regions.Add(stateRegion);
             }
 
-            foreach(var link in facilityLinks)
+            foreach(var link in zoneMap.Links)
             {
                 var facilityA = Regions.SingleOrDefault(r => r.FacilityId == link.FacilityIdA);
                 var facilityB = Regions.SingleOrDefault(r => r.FacilityId == link.FacilityIdB);
