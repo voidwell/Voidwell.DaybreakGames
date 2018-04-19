@@ -9,10 +9,18 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
     public class MapController : Controller
     {
         private readonly IWorldMonitor _worldMonitor;
+        private readonly IMapService _mapService;
 
-        public MapController(IWorldMonitor worldMonitor)
+        public MapController(IWorldMonitor worldMonitor, IMapService mapService)
         {
             _worldMonitor = worldMonitor;
+            _mapService = mapService;
+        }
+
+        [HttpGet("{zoneId}")]
+        public Task<ZoneMap> GetZoneMap(int zoneId)
+        {
+            return _mapService.GetZoneMap(zoneId);
         }
 
         [HttpGet("territory/{worldId}/{zoneId}")]

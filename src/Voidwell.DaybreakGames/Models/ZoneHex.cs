@@ -1,6 +1,6 @@
 ﻿namespace Voidwell.DaybreakGames.Models
 {
-    public class ZoneRegionHex
+    public class ZoneHex
     {
         public int MapRegionId { get; set; }
         public int X { get; set; }

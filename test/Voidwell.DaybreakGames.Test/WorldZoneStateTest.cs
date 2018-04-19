@@ -16,12 +16,12 @@ namespace Voidwell.DaybreakGames.Census.Test
         [TestMethod]
         public void WorldZoneState_CalculateScore()
         {
-            var facilityLinks = GetFacilityLinks();
-            var mapRegions = GetMapRegions();
+            var zoneMap = GetZoneMap();
+
             var ownership = GetMapOwnership();
             var zone = new Zone { Id = 2, Code = "Indar" };
 
-            var worldZoneState = new WorldZoneState(17, zone, facilityLinks, mapRegions, ownership);
+            var worldZoneState = new WorldZoneState(17, zone, zoneMap, ownership);
 
             var score = worldZoneState.MapScore;
 
@@ -33,6 +33,27 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             Assert.AreEqual(1, percentTotal);
             Assert.AreEqual(1, connectedPercentTotal);
+        }
+
+        private ZoneMap GetZoneMap()
+        {
+            var links = GetFacilityLinks().Select(a => new ZoneLink { FacilityIdA = a.FacilityIdA, FacilityIdB = a.FacilityIdB });
+            var regions = GetMapRegions().Select(a => new ZoneRegion
+            {
+                RegionId = a.Id,
+                FacilityId = a.FacilityId,
+                FacilityName = a.FacilityName,
+                FacilityType = a.FacilityType,
+                FacilityTypeId = a.FacilityTypeId,
+                X = a.XPos,
+                Y = a.YPos
+            });
+
+            return new ZoneMap
+            {
+                Regions = regions,
+                Links = links
+            };
         }
 
         private IEnumerable<FacilityLink> GetFacilityLinks()

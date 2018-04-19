@@ -20,20 +20,74 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public string ServiceName => "MapService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        private readonly KeyedSemaphoreSlim _mapRegionsLock = new KeyedSemaphoreSlim();
-        private readonly KeyedSemaphoreSlim _facilityLinksLock = new KeyedSemaphoreSlim();
-        private readonly KeyedSemaphoreSlim _mapHexsLock = new KeyedSemaphoreSlim();
+        private readonly KeyedSemaphoreSlim _zoneMapLock = new KeyedSemaphoreSlim();
 
         private const string _cacheKeyPrefix = "ps2.mapService";
-        private TimeSpan _mapRegionCacheExpiration = TimeSpan.FromMinutes(30);
-        private TimeSpan _facilityLinksCacheExpiration = TimeSpan.FromMinutes(30);
-        private TimeSpan _mapHexsCacheExpiration = TimeSpan.FromMinutes(30);
+        private TimeSpan _zoneMapCacheExpiration = TimeSpan.FromHours(24);
 
         public MapService(IMapRepository mapRepository, CensusMap censusMap, ICache cache)
         {
             _mapRepository = mapRepository;
             _censusMap = censusMap;
             _cache = cache;
+        }
+
+        public async Task<ZoneMap> GetZoneMap(int zoneId)
+        {
+            using (await _zoneMapLock.WaitAsync(zoneId.ToString()))
+            {
+                var cacheKey = GetCacheKey($"zoneMap-{zoneId}");
+
+                var zoneMap = await _cache.GetAsync<ZoneMap>(cacheKey);
+                if (zoneMap != null)
+                {
+                    return zoneMap;
+                }
+
+                var linksTask = _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
+                var hexsTask = _mapRepository.GetMapHexsByZoneIdAsync(zoneId);
+                var regionsTask = _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
+
+                await Task.WhenAll(linksTask, hexsTask, regionsTask);
+
+                var links = linksTask.Result.Select(a => new ZoneLink
+                {
+                    FacilityIdA = a.FacilityIdA,
+                    FacilityIdB = a.FacilityIdB
+                });
+
+                var hexs = hexsTask.Result.Select(a => new ZoneHex
+                {
+                    MapRegionId = a.MapRegionId,
+                    X = a.XPos,
+                    Y = a.YPos
+                });
+
+                var regions = regionsTask.Result
+                    .Where(a => links.Any(b => a.FacilityId == b.FacilityIdA || a.FacilityId == b.FacilityIdB))
+                    .Select(a => new ZoneRegion
+                    {
+                        RegionId = a.Id,
+                        FacilityId = a.FacilityId,
+                        FacilityName = a.FacilityName,
+                        FacilityType = a.FacilityType,
+                        FacilityTypeId = a.FacilityTypeId,
+                        X = a.XPos,
+                        Y = a.YPos,
+                        Z = a.ZPos
+                    });
+
+                zoneMap = new ZoneMap
+                {
+                    Regions = regions,
+                    Hexs = hexs,
+                    Links = links
+                };
+
+                await _cache.SetAsync(cacheKey, zoneMap, _zoneMapCacheExpiration);
+
+                return zoneMap;
+            }
         }
 
         public async Task<IEnumerable<MapOwnership>> GetMapOwnership(int worldId, int zoneId)
@@ -45,77 +99,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return ownership.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
-        }
-
-        public async Task<IEnumerable<MapRegion>> GetMapRegions(int zoneId)
-        {
-            using (await _mapRegionsLock.WaitAsync(zoneId.ToString()))
-            {
-                var cacheKey = GetCacheKey($"mapregion-{zoneId}");
-
-                var mapRegions = await _cache.GetAsync<IEnumerable<MapRegion>>(cacheKey);
-                if (mapRegions != null)
-                {
-                    return mapRegions;
-                }
-
-                mapRegions = await _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
-
-                if (mapRegions != null)
-                {
-                    await _cache.SetAsync(cacheKey, mapRegions, _mapRegionCacheExpiration);
-                }
-
-                return mapRegions;
-            }
-        }
-
-        public async Task<IEnumerable<FacilityLink>> GetFacilityLinks(int zoneId)
-        {
-            using (await _facilityLinksLock.WaitAsync(zoneId.ToString()))
-            {
-                var cacheKey = GetCacheKey($"facilityLinks-{zoneId}");
-
-                var facilityLinks = await _cache.GetAsync<IEnumerable<FacilityLink>>(cacheKey);
-                if (facilityLinks != null)
-                {
-                    return facilityLinks;
-                }
-
-                facilityLinks = await _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
-
-                if (facilityLinks != null)
-                {
-                    await _cache.SetAsync(cacheKey, facilityLinks, _facilityLinksCacheExpiration);
-                }
-
-                return facilityLinks;
-            }
-        }
-
-        public async Task<IEnumerable<ZoneRegionHex>> GetMapHexs(int zoneId)
-        {
-            using (await _mapHexsLock.WaitAsync(zoneId.ToString()))
-            {
-                var cacheKey = GetCacheKey($"mapHexs-{zoneId}");
-
-                var hexs = await _cache.GetAsync<IEnumerable<ZoneRegionHex>>(cacheKey);
-                if (hexs != null)
-                {
-                    return hexs;
-                }
-
-                var storeHexs = await _mapRepository.GetMapHexsByZoneIdAsync(zoneId);
-
-                hexs = storeHexs.Select(a => new ZoneRegionHex { MapRegionId = a.MapRegionId, X = a.XPos, Y = a.YPos });
-
-                if (hexs != null)
-                {
-                    await _cache.SetAsync(cacheKey, hexs, _mapHexsCacheExpiration);
-                }
-
-                return hexs;
-            }
         }
 
         public Task<IEnumerable<MapRegion>> FindRegions(params int[] facilityIds)
