@@ -39,5 +39,29 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             var result = await _characterService.GetSession(characterId, sessionId);
             return Ok(result);
         }
+
+        [HttpGet("byname/{characterName}")]
+        public async Task<ActionResult> GetCharacterStatsByName(string characterName)
+        {
+            var result = await _characterService.GetCharacterByName(characterName);
+            if (result == null)
+            {
+                return NotFound($"Unable to find stats with character: '{characterName}'");
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("byname/{characterName}/weapon/{weaponName}")]
+        public async Task<ActionResult> GetCharacterWeaponStatsByName(string characterName, string weaponName)
+        {
+            var result = await _characterService.GetCharacterWeaponByName(characterName, weaponName);
+            if (result == null)
+            {
+                return NotFound($"Unable to find character weapon stats with character: '{characterName}' or weapon '{weaponName}'");
+            }
+
+            return Ok(result);
+        }
     }
 }

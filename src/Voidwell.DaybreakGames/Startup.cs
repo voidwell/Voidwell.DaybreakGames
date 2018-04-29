@@ -79,6 +79,7 @@ namespace Voidwell.DaybreakGames
             services.AddTransient<IFactionService, FactionService>();
             services.AddTransient<IFeedService, FeedService>();
             services.AddTransient<ISearchService, SearchService>();
+            services.AddTransient<IGradeService, GradeService>();
 
             services.AddSingleton<ICharacterService, CharacterService>();
             services.AddSingleton<IOutfitService, OutfitService>();

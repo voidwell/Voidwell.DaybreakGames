@@ -7,6 +7,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
     public interface ICharacterRepository
     {
         Task<IEnumerable<Character>> GetCharactersByIdsAsync(IEnumerable<string> characterIds);
+        Task<string> GetCharacterIdByName(string characterName);
         Task<Character> GetCharacterAsync(string characterId);
         Task<Character> GetCharacterWithDetailsAsync(string characterId);
         Task<Character> UpsertAsync(Character entity);

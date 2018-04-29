@@ -37,6 +37,17 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.Get<CensusCharacterModel>();
         }
 
+        public async Task<string> GetCharacterIdByName(string characterName)
+        {
+            var query = _censusClient.CreateQuery("character_name");
+
+            query.Where("name.first_lower").Equals(characterName.ToLower());
+
+            var result = await query.Get<CensusCharacterModel>();
+
+            return result?.CharacterId;
+        }
+
         public async Task<CensusCharacterModel.CharacterTimes> GetCharacterTimes(string characterId)
         {
             var query = _censusClient.CreateQuery("character");

@@ -21,10 +21,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICache _cache;
         private readonly IOutfitService _outfitService;
         private readonly IWeaponAggregateService _weaponAggregateService;
+        private readonly IGradeService _gradeService;
         private readonly ILogger<CharacterService> _logger;
 
         private readonly string _cacheKey = "ps2.character";
         private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
+        private readonly TimeSpan _cacheCharacterNameExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterSessionsExpiration = TimeSpan.FromMinutes(10);
 
@@ -32,7 +34,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public CharacterService(ICharacterRepository characterRepository, IPlayerSessionRepository playerSessionRepository,
             IEventRepository eventRepository, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
-            IWeaponAggregateService weaponAggregateService, ILogger<CharacterService> logger)
+            IWeaponAggregateService weaponAggregateService, IGradeService gradeService, ILogger<CharacterService> logger)
         {
             _characterRepository = characterRepository;
             _playerSessionRepository = playerSessionRepository;
@@ -41,6 +43,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _cache = cache;
             _outfitService = outfitService;
             _weaponAggregateService = weaponAggregateService;
+            _gradeService = gradeService;
             _logger = logger;
         }
 
@@ -184,37 +187,70 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 }),
                 WeaponStats = character.WeaponStats?.Where(a => a.ItemId != 0).Select(s =>
                 {
+                    double? accuracy = null;
+                    double? headshotRatio = null;
+                    double? killDeathRatio = null;
+                    double? killsPerHour = null;
+                    double? landedPerKill = null;
+                    double? shotsPerKill = null;
+                    double? scorePerMinute = null;
+                    double? vehicleKillsPerHour = null;
+
                     double? kdrDelta = null;
                     double? accuDelta = null;
                     double? hsrDelta = null;
                     double? kphDelta = null;
                     double? vkphDelta = null;
 
+                    if (s.FireCount.Value > 0)
+                    {
+                        accuracy = (double)s.HitCount.Value / s.FireCount.Value;
+                    }
+
+                    if (s.Kills.Value > 0)
+                    {
+                        headshotRatio = (double)s.Headshots.Value / s.Kills.Value;
+                        landedPerKill = (double)s.HitCount.Value / s.Kills.Value;
+                        shotsPerKill = (double)s.FireCount.Value / s.Kills.Value;
+                    }
+
+                    if (s.Deaths.Value > 0)
+                    {
+                        killDeathRatio = (double)s.Kills.Value / s.Deaths.Value;
+                    }
+
+                    if (s.PlayTime.Value > 0)
+                    {
+                        killsPerHour = s.Kills.Value / (s.PlayTime.Value / 3600.0);
+                        scorePerMinute = s.Score.Value / (s.PlayTime.Value / 60.0);
+                        vehicleKillsPerHour = s.VehicleKills.Value / (s.PlayTime.Value / 3600.0);
+                    }                   
+
                     if (aggregates.TryGetValue($"{s.ItemId}-{s.VehicleId}", out var agg))
                     {
-                        if (s.Deaths > 0 && agg.STDKdr > 0)
+                        if (killDeathRatio.HasValue && agg.STDKdr > 0)
                         {
-                            kdrDelta = (((double)s.Kills / (double)s.Deaths) - agg.AVGKdr) / agg.STDKdr;
+                            kdrDelta = (killDeathRatio - agg.AVGKdr) / agg.STDKdr;
                         }
 
-                        if (s.FireCount > 0 && agg.STDAccuracy > 0)
+                        if (accuracy.HasValue && agg.STDAccuracy > 0)
                         {
-                            accuDelta = (((double)s.HitCount / (double)s.FireCount) - agg.AVGAccuracy) / agg.STDAccuracy;
+                            accuDelta = (accuracy - agg.AVGAccuracy) / agg.STDAccuracy;
                         }
 
-                        if (s.Kills > 0 && agg.STDHsr > 0)
+                        if (headshotRatio.HasValue && agg.STDHsr > 0)
                         {
-                            hsrDelta = (((double)s.Headshots / (double)s.Kills) - agg.AVGHsr) / agg.STDHsr;
+                            hsrDelta = (headshotRatio - agg.AVGHsr) / agg.STDHsr;
                         }
 
-                        if (s.PlayTime > 0 && agg.STDKph > 0)
+                        if (killsPerHour.HasValue && agg.STDKph > 0)
                         {
-                            kphDelta = (((double)s.Kills / ((double)s.PlayTime / 3600)) - agg.AVGKph) / agg.STDKph;
+                            kphDelta = (killsPerHour - agg.AVGKph) / agg.STDKph;
                         }
 
-                        if (s.PlayTime > 0 && agg.STDVkph > 0)
+                        if (vehicleKillsPerHour.HasValue && agg.STDVkph > 0)
                         {
-                            vkphDelta = (((double)s.VehicleKills / ((double)s.PlayTime / 3600)) - agg.AVGVkph) / agg.STDVkph;
+                            vkphDelta = (vehicleKillsPerHour - agg.AVGVkph) / agg.STDVkph;
                         }
                     }
 
@@ -240,16 +276,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                             PlayTime = s.PlayTime,
                             Score = s.Score,
                             VehicleKills = s.VehicleKills,
-                            /*
-                            Accuracy = s.HitCount.Value > 0 ? s.FireCount.Value / s.HitCount.Value : 0,
-                            HeadshotRatio = s.Kills.Value > 0 ? (s.Headshots.Value / s.Kills.Value) * 100 : 0,
-                            KillDeathRatio = s.Deaths.Value > 0 ? s.Kills.Value / s.Deaths.Value : 0,
-                            KillsPerHour = s.PlayTime.Value > 0 ? s.Kills.Value / (s.PlayTime.Value / 3600) : 0,
-                            LandedPerKill = s.Kills.Value > 0 ? s.HitCount.Value / s.Kills.Value : 0,
-                            ShotsPerKill = s.Kills.Value > 0 ? s.FireCount.Value / s.Kills.Value : 0,
-                            ScorePerMinute = s.PlayTime.Value > 0 ? s.Score.Value / (s.PlayTime.Value / 60) : 0,
-                            VehicleKillsPerHour = s.Kills.Value > 0 ? s.VehicleKills.Value / (s.Kills.Value / 3600) : 0
-                            */
+
+                            Accuracy = accuracy,
+                            HeadshotRatio = headshotRatio,
+                            KillDeathRatio = killDeathRatio,
+                            KillsPerHour = killsPerHour,
+                            LandedPerKill = landedPerKill,
+                            ShotsPerKill = shotsPerKill,
+                            ScorePerMinute = scorePerMinute,
+                            VehicleKillsPerHour = vehicleKillsPerHour,
 
                             KillDeathRatioDelta = kdrDelta,
                             AccuracyDelta = accuDelta,
@@ -421,7 +456,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return sessionInfo;
         }
 
-        public async Task<Character> GetCharacterDetailsAsync(string characterId)
+        private async Task<Character> GetCharacterDetailsAsync(string characterId)
         {
             var character = await _characterRepository.GetCharacterWithDetailsAsync(characterId);
             if (character != null && character.Time != null)
@@ -652,6 +687,113 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             await _characterRepository.UpsertRangeAsync(statModels);
             await _characterRepository.UpsertRangeAsync(statByFactionModels);
+        }
+
+        private async Task<string> GetCharacterIdByName(string characterName)
+        {
+            var cacheKey = $"{_cacheKey}_name_{characterName.ToLower()}";
+
+            var characterId = await _cache.GetAsync<string>(cacheKey);
+            if (characterId != null)
+            {
+                return characterId;
+            }
+
+            characterId = await _characterRepository.GetCharacterIdByName(characterName);
+            if (characterId == null)
+            {
+                characterId = await _censusCharacter.GetCharacterIdByName(characterName);
+            }
+
+            if (characterId != null)
+            {
+                await _cache.SetAsync(cacheKey, characterId, _cacheCharacterNameExpiration);
+            }
+
+            return characterId;
+        }
+
+        public async Task<SimpleCharacterDetails> GetCharacterByName(string characterName)
+        {
+            var characterId = await GetCharacterIdByName(characterName);
+            if (characterId == null)
+            {
+                return null;
+            }
+
+            var stats = await GetCharacterDetails(characterId);
+            if (stats == null)
+            {
+                return null;
+            }
+
+            var details =  new SimpleCharacterDetails
+            {
+                Id = characterId,
+                Name = stats.Name,
+                LastSaved = stats.Times?.LastSaveDate,
+                FactionId = stats.FactionId,
+                FactionName = stats.Faction,
+                FactionImageId = stats.FactionImageId,
+                BattleRank = stats.BattleRank,
+                OutfitAlias = stats.Outfit?.Alias,
+                OutfitName = stats.Outfit?.Name,
+                Kills = stats.LifetimeStats.Kills,
+                Deaths = stats.LifetimeStats.Deaths,
+                Score = stats.LifetimeStats.Score,
+                PlayTime = stats.LifetimeStats.PlayTime
+            };
+
+            details.KillDeathRatio = (double)details.Kills / details.Deaths;
+            details.HeadshotRatio = (double)stats.LifetimeStats.Headshots / details.Kills;
+            details.KillsPerHour = details.Kills / (details.PlayTime / 3600.0);
+            details.SiegeLevel = (double)stats.LifetimeStats.FacilityCaptureCount / stats.LifetimeStats.FacilityDefendedCount * 100;
+
+            return details;
+        }
+
+        public async Task<CharacterWeaponDetails> GetCharacterWeaponByName(string characterName, string weaponName)
+        {
+            var characterId = await GetCharacterIdByName(characterName);
+            if (characterId == null)
+            {
+                return null;
+            }
+
+            var stats = await GetCharacterDetails(characterId);
+            if (stats == null)
+            {
+                return null;
+            }
+
+            var weaponStats = stats.WeaponStats.FirstOrDefault(a => a.Name.ToLower() == weaponName.ToLower());
+            if (weaponStats == null)
+            {
+                return null;
+            }
+
+            var details = new CharacterWeaponDetails
+            {
+                ItemId = weaponStats.ItemId,
+                WeaponName = weaponStats.Name,
+                WeaponImageId = weaponStats.ImageId,
+                Kills = weaponStats.Stats.Kills,
+                Deaths = weaponStats.Stats.Deaths,
+                Headshots = weaponStats.Stats.Headshots,
+                Score = weaponStats.Stats.Score,
+                PlayTime = weaponStats.Stats.PlayTime,
+                Accuracy = weaponStats.Stats.Accuracy,
+                HeadshotRatio = weaponStats.Stats.HeadshotRatio,
+                KillDeathRatio = weaponStats.Stats.KillDeathRatio,
+                KillsPerHour = weaponStats.Stats.KillsPerHour,
+
+                AccuracyGrade = _gradeService.GetGradeByDelta(weaponStats.Stats.AccuracyDelta),
+                HeadshotRatioGrade = _gradeService.GetGradeByDelta(weaponStats.Stats.HsrDelta),
+                KillDeathRatioGrade = _gradeService.GetGradeByDelta(weaponStats.Stats.KillDeathRatioDelta),
+                KillsPerHourGrade = _gradeService.GetGradeByDelta(weaponStats.Stats.KphDelta)
+            };
+
+            return details;
         }
     }
 }

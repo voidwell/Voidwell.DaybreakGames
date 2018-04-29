@@ -32,5 +32,17 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             var result = await _outfitService.GetOutfitMembers(outfitId);
             return Ok(result);
         }
+
+        [HttpGet("byalias/{outfitAlias}")]
+        public async Task<ActionResult> GetOutfitByAlias(string outfitAlias)
+        {
+            var result = await _outfitService.GetOutfitByAlias(outfitAlias);
+            if (result == null)
+            {
+                return NotFound($"Unable to find stats with outfit: '{outfitAlias}'");
+            }
+
+            return Ok(result);
+        }
     }
 }

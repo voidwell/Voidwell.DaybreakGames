@@ -23,9 +23,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private readonly string _cacheKey = "ps2.outfit";
         private readonly TimeSpan _cacheOutfitExpiration = TimeSpan.FromMinutes(15);
+        private readonly TimeSpan _cacheOutfitNameExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheOutfitMemberExpiration = TimeSpan.FromMinutes(10);
         private readonly TimeSpan _cacheOutfitDetailsExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheOutfitMemberDetailsExpiration = TimeSpan.FromMinutes(30);
+
 
         private readonly KeyedSemaphoreSlim _outfitLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _outfitMembershipLock = new KeyedSemaphoreSlim();
@@ -56,7 +58,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var details = await _cache.GetAsync<OutfitDetails>(cacheKey);
             if (details != null)
             {
-                return details;
+                //return details;
             }
 
             var outfit = await GetOutfitDetailsAsync(outfitId);
@@ -65,6 +67,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
+            var outfitMembers = await GetOutfitMembers(outfitId);
+
             details = new OutfitDetails
             {
                 Name = outfit.Name,
@@ -72,11 +76,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 CreatedDate = outfit.CreatedDate,
                 FactionId = outfit.FactionId,
                 FactionName = outfit.Faction?.Name,
+                FactionImageId = outfit.Faction?.ImageId,
                 MemberCount = outfit.MemberCount,
                 WorldId = outfit.WorldId,
                 WorldName = outfit.World?.Name,
                 LeaderCharacterId = outfit.LeaderCharacterId,
-                LeaderName = outfit.LeaderCharacter?.Name
+                LeaderName = outfit.LeaderCharacter?.Name,
+                TrackedMemberCount = outfitMembers.Count(),
+                Activity7Days = outfitMembers.Count(a => (DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault()) <= TimeSpan.FromDays(7)),
+                Activity30Days = outfitMembers.Count(a => (DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault()) <= TimeSpan.FromDays(30)),
+                Activity90Days = outfitMembers.Count(a => (DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault()) <= TimeSpan.FromDays(90))
             };
 
             await _cache.SetAsync(cacheKey, details, _cacheOutfitDetailsExpiration);
@@ -96,6 +105,36 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await GetOutfitAsync(outfitId);
 
             return await _outfitRepository.GetOutfitDetailsAsync(outfitId);
+        }
+
+        public async Task<OutfitDetails> GetOutfitByAlias(string outfitAlias)
+        {
+            var outfitId = await GetOutfitIdByAlias(outfitAlias);
+            if (outfitId == null)
+            {
+                return null;
+            }
+
+            return await GetOutfitDetails(outfitId);
+        }
+
+        private async Task<string> GetOutfitIdByAlias(string outfitAlias)
+        {
+            var cacheKey = $"{_cacheKey}_name_{outfitAlias}";
+
+            var outfitId = await _cache.GetAsync<string>(cacheKey);
+            if (outfitId != null)
+            {
+                return outfitId;
+            }
+
+            outfitId = await _outfitRepository.GetOutfitIdByAlias(outfitAlias);
+            if (outfitId != null)
+            {
+                await _cache.SetAsync(cacheKey, outfitId, _cacheOutfitNameExpiration);
+            }
+
+            return outfitId;
         }
 
         public async Task<IEnumerable<OutfitMemberDetails>> GetOutfitMembers(string outfitId)
