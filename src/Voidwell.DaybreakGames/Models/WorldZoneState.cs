@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,6 +44,12 @@ namespace Voidwell.DaybreakGames.Models
             }
 
             CalculateOwnership();
+
+            var warpgateFactions = Map.Warpgates.Select(a => MapRegionOwnership[a.RegionId]).Distinct();
+            if (warpgateFactions.Count() == 1)
+            {
+                UpdateLockState(new ZoneLockState(DateTime.MinValue, null, warpgateFactions.First()));
+            }
 
             IsTracking = true;
         }
