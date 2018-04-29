@@ -14,5 +14,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task RemoveOutfitMemberAsync(string characterId);
         Task<OutfitMember> UpsertAsync(OutfitMember entity);
         Task<Outfit> UpsertAsync(Outfit entity);
+        Task<string> GetOutfitIdByAlias(string outfitAlias);
     }
 }

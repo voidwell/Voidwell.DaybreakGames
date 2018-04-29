@@ -16,6 +16,20 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
+        public async Task<string> GetCharacterIdByName(string characterName)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var character = await dbContext.Characters
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.Name.ToLower() == characterName.ToLower());
+
+                return character?.Id;
+            }
+        }
+
         public async Task<Character> GetCharacterAsync(string characterId)
         {
             using (var factory = _dbContextHelper.GetFactory())

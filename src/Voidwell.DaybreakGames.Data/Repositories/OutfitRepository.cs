@@ -15,6 +15,18 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
+        public async Task<string> GetOutfitIdByAlias(string outfitAlias)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var outfit = await dbContext.Outfits.FirstOrDefaultAsync(a => a.Alias == outfitAlias);
+
+                return outfit?.Id;
+            }
+        }
+
         public async Task<Outfit> GetOutfitAsync(string outfitId)
         {
             using (var factory = _dbContextHelper.GetFactory())
