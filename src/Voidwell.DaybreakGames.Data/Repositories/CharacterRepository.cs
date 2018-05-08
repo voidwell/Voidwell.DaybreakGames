@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +25,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var character = await dbContext.Characters
                     .AsNoTracking()
+                    .Include(a => a.Time)
+                    .Where(a => a.Time != null)
+                    .OrderByDescending(a => a.Time.CreatedDate)
                     .FirstOrDefaultAsync(a => a.Name.ToLower() == characterName.ToLower());
 
                 return character?.Id;

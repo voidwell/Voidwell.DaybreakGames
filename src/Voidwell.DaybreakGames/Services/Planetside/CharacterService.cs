@@ -112,6 +112,215 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var aggregates = await _weaponAggregateService.GetAggregates();
 
+            var times = new CharacterDetailsTimes
+            {
+                CreatedDate = character.Time.CreatedDate,
+                LastLoginDate = character.Time.LastLoginDate,
+                LastSaveDate = character.Time.LastSaveDate,
+                MinutesPlayed = character.Time.MinutesPlayed
+            };
+
+            var lifetimeStats = new CharacterDetailsLifetimeStats
+            {
+                AchievementCount = character.LifetimeStats.AchievementCount.GetValueOrDefault(),
+                AssistCount = character.LifetimeStats.AssistCount.GetValueOrDefault(),
+                DominationCount = character.LifetimeStats.DominationCount.GetValueOrDefault(),
+                FacilityCaptureCount = character.LifetimeStats.FacilityCaptureCount.GetValueOrDefault(),
+                FacilityDefendedCount = character.LifetimeStats.FacilityDefendedCount.GetValueOrDefault(),
+                MedalCount = character.LifetimeStats.MedalCount.GetValueOrDefault(),
+                RevengeCount = character.LifetimeStats.RevengeCount.GetValueOrDefault(),
+                SkillPoints = character.LifetimeStats.SkillPoints.GetValueOrDefault(),
+                Kills = character.LifetimeStats.WeaponKills.GetValueOrDefault(),
+                PlayTime = character.LifetimeStats.WeaponPlayTime.GetValueOrDefault(),
+                VehicleKills = character.LifetimeStats.WeaponVehicleKills.GetValueOrDefault(),
+                DamageGiven = character.LifetimeStats.WeaponDamageGiven.GetValueOrDefault(),
+                DamageTakenBy = character.LifetimeStats.WeaponDamageTakenBy.GetValueOrDefault(),
+                FireCount = character.LifetimeStats.WeaponFireCount.GetValueOrDefault(),
+                HitCount = character.LifetimeStats.WeaponHitCount.GetValueOrDefault(),
+                Score = character.LifetimeStats.WeaponScore.GetValueOrDefault(),
+                Deaths = character.LifetimeStats.WeaponDeaths.GetValueOrDefault(),
+                Headshots = character.LifetimeStats.WeaponHeadshots.GetValueOrDefault()
+            };
+
+            var profileStats = character.Stats?.Select(s => new CharacterDetailsProfileStat
+            {
+                ProfileId = s.ProfileId,
+                ProfileName = s.Profile?.Name,
+                ImageId = s.Profile?.ImageId,
+                Deaths = s.Deaths.GetValueOrDefault(),
+                FireCount = s.FireCount.GetValueOrDefault(),
+                HitCount = s.HitCount.GetValueOrDefault(),
+                KilledBy = s.KilledBy.GetValueOrDefault(),
+                Kills = s.Kills.GetValueOrDefault(),
+                PlayTime = s.PlayTime.GetValueOrDefault(),
+                Score = s.Score.GetValueOrDefault()
+            });
+
+            var profileStatsByFaction = character.StatsByFaction?.Select(s => new CharacterDetailsProfileStatByFaction
+            {
+                ProfileId = s.ProfileId,
+                ProfileName = s.Profile?.Name,
+                ImageId = s.Profile?.ImageId,
+                Kills = new CharacterDetailsProfileStatByFactionValue
+                {
+                    Vs = s.KillsVS.GetValueOrDefault(),
+                    Nc = s.KillsNC.GetValueOrDefault(),
+                    Tr = s.KillsTR.GetValueOrDefault()
+                },
+                KilledBy = new CharacterDetailsProfileStatByFactionValue
+                {
+                    Vs = s.KilledByVS.GetValueOrDefault(),
+                    Nc = s.KilledByNC.GetValueOrDefault(),
+                    Tr = s.KilledByTR.GetValueOrDefault()
+                }
+            });
+
+            var weaponStats = character.WeaponStats?.Where(a => a.ItemId != 0).Select(s =>
+            {
+                double? accuracy = null;
+                double? headshotRatio = null;
+                double? killDeathRatio = null;
+                double? killsPerHour = null;
+                double? landedPerKill = null;
+                double? shotsPerKill = null;
+                double? scorePerMinute = null;
+                double? vehicleKillsPerHour = null;
+
+                double? kdrDelta = null;
+                double? accuDelta = null;
+                double? hsrDelta = null;
+                double? kphDelta = null;
+                double? vkphDelta = null;
+
+                if (s.FireCount.Value > 0)
+                {
+                    accuracy = (double)s.HitCount.Value / s.FireCount.Value;
+                }
+
+                if (s.Kills.Value > 0)
+                {
+                    headshotRatio = (double)s.Headshots.Value / s.Kills.Value;
+                    landedPerKill = (double)s.HitCount.Value / s.Kills.Value;
+                    shotsPerKill = (double)s.FireCount.Value / s.Kills.Value;
+                }
+
+                if (s.Deaths.Value > 0)
+                {
+                    killDeathRatio = (double)s.Kills.Value / s.Deaths.Value;
+                }
+
+                if (s.PlayTime.Value > 0)
+                {
+                    killsPerHour = s.Kills.Value / (s.PlayTime.Value / 3600.0);
+                    scorePerMinute = s.Score.Value / (s.PlayTime.Value / 60.0);
+                    vehicleKillsPerHour = s.VehicleKills.Value / (s.PlayTime.Value / 3600.0);
+                }
+
+                if (aggregates.TryGetValue($"{s.ItemId}-{s.VehicleId}", out var agg))
+                {
+                    if (killDeathRatio.HasValue && agg.STDKdr > 0)
+                    {
+                        kdrDelta = (killDeathRatio - agg.AVGKdr) / agg.STDKdr;
+                    }
+
+                    if (accuracy.HasValue && agg.STDAccuracy > 0)
+                    {
+                        accuDelta = (accuracy - agg.AVGAccuracy) / agg.STDAccuracy;
+                    }
+
+                    if (headshotRatio.HasValue && agg.STDHsr > 0)
+                    {
+                        hsrDelta = (headshotRatio - agg.AVGHsr) / agg.STDHsr;
+                    }
+
+                    if (killsPerHour.HasValue && agg.STDKph > 0)
+                    {
+                        kphDelta = (killsPerHour - agg.AVGKph) / agg.STDKph;
+                    }
+
+                    if (vehicleKillsPerHour.HasValue && agg.STDVkph > 0)
+                    {
+                        vkphDelta = (vehicleKillsPerHour - agg.AVGVkph) / agg.STDVkph;
+                    }
+                }
+
+                return new CharacterDetailsWeaponStat
+                {
+                    ItemId = s.ItemId,
+                    Name = s.Item?.Name,
+                    Category = s.Item?.ItemCategory?.Name,
+                    ImageId = s.Item?.ImageId,
+                    VehicleId = s.VehicleId,
+                    VehicleName = s.Vehicle?.Name,
+                    VehicleImageId = s.Vehicle?.ImageId,
+                    Stats = new CharacterDetailsWeaponStatValue
+                    {
+                        DamageGiven = s.DamageGiven,
+                        DamageTakenBy = s.DamageTakenBy,
+                        Kills = s.Kills,
+                        Deaths = s.Deaths,
+                        FireCount = s.FireCount,
+                        HitCount = s.HitCount,
+                        Headshots = s.Headshots,
+                        KilledBy = s.KilledBy,
+                        PlayTime = s.PlayTime,
+                        Score = s.Score,
+                        VehicleKills = s.VehicleKills,
+
+                        Accuracy = accuracy,
+                        HeadshotRatio = headshotRatio,
+                        KillDeathRatio = killDeathRatio,
+                        KillsPerHour = killsPerHour,
+                        LandedPerKill = landedPerKill,
+                        ShotsPerKill = shotsPerKill,
+                        ScorePerMinute = scorePerMinute,
+                        VehicleKillsPerHour = vehicleKillsPerHour,
+
+                        KillDeathRatioDelta = kdrDelta,
+                        AccuracyDelta = accuDelta,
+                        HsrDelta = hsrDelta,
+                        KphDelta = kphDelta,
+                        VehicleKphDelta = vkphDelta
+                    }
+                };
+            });
+
+            var characterVehicleStats = character.WeaponStats?.Where(a => a.VehicleId != 0).GroupBy(a => a.VehicleId).Select(s =>
+            {
+                var vehicleWeaponStats = s.Where(a => a.ItemId != 0);
+                var vehicleStats = s.Where(a => a.ItemId == 0).FirstOrDefault();
+
+                return new CharacterDetailsVehicleStat
+                {
+                    // Gunner stats
+                    VehicleId = s.Key,
+                    DamageGiven = vehicleWeaponStats.Sum(a => a.DamageGiven.GetValueOrDefault()),
+                    DamageTakenBy = vehicleWeaponStats.Sum(a => a.DamageTakenBy.GetValueOrDefault()),
+                    Deaths = vehicleWeaponStats.Sum(a => a.Deaths.GetValueOrDefault()),
+                    FireCount = vehicleWeaponStats.Sum(a => a.FireCount.GetValueOrDefault()),
+                    HitCount = vehicleWeaponStats.Sum(a => a.HitCount.GetValueOrDefault()),
+                    VehicleKills = vehicleWeaponStats.Sum(a => a.VehicleKills.GetValueOrDefault()),
+                    Headshots = vehicleWeaponStats.Sum(a => a.Headshots.GetValueOrDefault()),
+                    KilledBy = vehicleWeaponStats.Sum(a => a.KilledBy.GetValueOrDefault()),
+                    Kills = vehicleWeaponStats.Sum(a => a.Kills.GetValueOrDefault()),
+                    PlayTime = vehicleWeaponStats.Sum(a => a.PlayTime.GetValueOrDefault()),
+                    Score = vehicleWeaponStats.Sum(a => a.Score.GetValueOrDefault()),
+
+                    // Pilot stats
+                    PilotDamageGiven = vehicleStats?.DamageGiven.Value,
+                    PilotDamageTakenBy = vehicleStats?.DamageTakenBy.Value,
+                    PilotDeaths = vehicleStats?.Deaths.Value,
+                    PilotFireCount = vehicleStats?.FireCount.Value,
+                    PilotHitCount = vehicleStats?.HitCount.Value,
+                    PilotVehicleKills = vehicleStats?.VehicleKills.Value,
+                    PilotHeadshots = vehicleStats?.Headshots.Value,
+                    PilotKilledBy = vehicleStats?.KilledBy.Value,
+                    PilotKills = vehicleStats?.Kills.Value,
+                    PilotPlayTime = vehicleStats?.PlayTime.Value,
+                    PilotScore = vehicleStats?.Score.Value
+                };
+            });
+
             details = new CharacterDetails
             {
                 Id = character.Id,
@@ -126,209 +335,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 WorldId = character.WorldId,
                 PrestigeLevel = character.PrestigeLevel,
                 World = character.World?.Name,
-                Times = new CharacterDetailsTimes
-                {
-                    CreatedDate = character.Time.CreatedDate,
-                    LastLoginDate = character.Time.LastLoginDate,
-                    LastSaveDate = character.Time.LastSaveDate,
-                    MinutesPlayed = character.Time.MinutesPlayed
-                },
-                LifetimeStats = new CharacterDetailsLifetimeStats
-                {
-                    AchievementCount = character.LifetimeStats.AchievementCount.GetValueOrDefault(),
-                    AssistCount = character.LifetimeStats.AssistCount.GetValueOrDefault(),
-                    DominationCount = character.LifetimeStats.DominationCount.GetValueOrDefault(),
-                    FacilityCaptureCount = character.LifetimeStats.FacilityCaptureCount.GetValueOrDefault(),
-                    FacilityDefendedCount = character.LifetimeStats.FacilityDefendedCount.GetValueOrDefault(),
-                    MedalCount = character.LifetimeStats.MedalCount.GetValueOrDefault(),
-                    RevengeCount = character.LifetimeStats.RevengeCount.GetValueOrDefault(),
-                    SkillPoints = character.LifetimeStats.SkillPoints.GetValueOrDefault(),
-                    Kills = character.LifetimeStats.WeaponKills.GetValueOrDefault(),
-                    PlayTime = character.LifetimeStats.WeaponPlayTime.GetValueOrDefault(),
-                    VehicleKills = character.LifetimeStats.WeaponVehicleKills.GetValueOrDefault(),
-                    DamageGiven = character.LifetimeStats.WeaponDamageGiven.GetValueOrDefault(),
-                    DamageTakenBy = character.LifetimeStats.WeaponDamageTakenBy.GetValueOrDefault(),
-                    FireCount = character.LifetimeStats.WeaponFireCount.GetValueOrDefault(),
-                    HitCount = character.LifetimeStats.WeaponHitCount.GetValueOrDefault(),
-                    Score = character.LifetimeStats.WeaponScore.GetValueOrDefault(),
-                    Deaths = character.LifetimeStats.WeaponDeaths.GetValueOrDefault(),
-                    Headshots = character.LifetimeStats.WeaponHeadshots.GetValueOrDefault()
-                },
-                ProfileStats = character.Stats?.Select(s => new CharacterDetailsProfileStat
-                {
-                    ProfileId = s.ProfileId,
-                    ProfileName = s.Profile?.Name,
-                    ImageId = s.Profile?.ImageId,
-                    Deaths = s.Deaths.GetValueOrDefault(),
-                    FireCount = s.FireCount.GetValueOrDefault(),
-                    HitCount = s.HitCount.GetValueOrDefault(),
-                    KilledBy = s.KilledBy.GetValueOrDefault(),
-                    Kills = s.Kills.GetValueOrDefault(),
-                    PlayTime = s.PlayTime.GetValueOrDefault(),
-                    Score = s.Score.GetValueOrDefault()
-                }),
-                ProfileStatsByFaction = character.StatsByFaction?.Select(s => new CharacterDetailsProfileStatByFaction
-                {
-                    ProfileId = s.ProfileId,
-                    ProfileName = s.Profile?.Name,
-                    ImageId = s.Profile?.ImageId,
-                    Kills = new CharacterDetailsProfileStatByFactionValue
-                    {
-                        Vs = s.KillsVS.GetValueOrDefault(),
-                        Nc = s.KillsNC.GetValueOrDefault(),
-                        Tr = s.KillsTR.GetValueOrDefault()
-                    },
-                    KilledBy = new CharacterDetailsProfileStatByFactionValue
-                    {
-                        Vs = s.KilledByVS.GetValueOrDefault(),
-                        Nc = s.KilledByNC.GetValueOrDefault(),
-                        Tr = s.KilledByTR.GetValueOrDefault()
-                    }
-                }),
-                WeaponStats = character.WeaponStats?.Where(a => a.ItemId != 0).Select(s =>
-                {
-                    double? accuracy = null;
-                    double? headshotRatio = null;
-                    double? killDeathRatio = null;
-                    double? killsPerHour = null;
-                    double? landedPerKill = null;
-                    double? shotsPerKill = null;
-                    double? scorePerMinute = null;
-                    double? vehicleKillsPerHour = null;
-
-                    double? kdrDelta = null;
-                    double? accuDelta = null;
-                    double? hsrDelta = null;
-                    double? kphDelta = null;
-                    double? vkphDelta = null;
-
-                    if (s.FireCount.Value > 0)
-                    {
-                        accuracy = (double)s.HitCount.Value / s.FireCount.Value;
-                    }
-
-                    if (s.Kills.Value > 0)
-                    {
-                        headshotRatio = (double)s.Headshots.Value / s.Kills.Value;
-                        landedPerKill = (double)s.HitCount.Value / s.Kills.Value;
-                        shotsPerKill = (double)s.FireCount.Value / s.Kills.Value;
-                    }
-
-                    if (s.Deaths.Value > 0)
-                    {
-                        killDeathRatio = (double)s.Kills.Value / s.Deaths.Value;
-                    }
-
-                    if (s.PlayTime.Value > 0)
-                    {
-                        killsPerHour = s.Kills.Value / (s.PlayTime.Value / 3600.0);
-                        scorePerMinute = s.Score.Value / (s.PlayTime.Value / 60.0);
-                        vehicleKillsPerHour = s.VehicleKills.Value / (s.PlayTime.Value / 3600.0);
-                    }                   
-
-                    if (aggregates.TryGetValue($"{s.ItemId}-{s.VehicleId}", out var agg))
-                    {
-                        if (killDeathRatio.HasValue && agg.STDKdr > 0)
-                        {
-                            kdrDelta = (killDeathRatio - agg.AVGKdr) / agg.STDKdr;
-                        }
-
-                        if (accuracy.HasValue && agg.STDAccuracy > 0)
-                        {
-                            accuDelta = (accuracy - agg.AVGAccuracy) / agg.STDAccuracy;
-                        }
-
-                        if (headshotRatio.HasValue && agg.STDHsr > 0)
-                        {
-                            hsrDelta = (headshotRatio - agg.AVGHsr) / agg.STDHsr;
-                        }
-
-                        if (killsPerHour.HasValue && agg.STDKph > 0)
-                        {
-                            kphDelta = (killsPerHour - agg.AVGKph) / agg.STDKph;
-                        }
-
-                        if (vehicleKillsPerHour.HasValue && agg.STDVkph > 0)
-                        {
-                            vkphDelta = (vehicleKillsPerHour - agg.AVGVkph) / agg.STDVkph;
-                        }
-                    }
-
-                    return new CharacterDetailsWeaponStat
-                    {
-                        ItemId = s.ItemId,
-                        Name = s.Item?.Name,
-                        Category = s.Item?.ItemCategory?.Name,
-                        ImageId = s.Item?.ImageId,
-                        VehicleId = s.VehicleId,
-                        VehicleName = s.Vehicle?.Name,
-                        VehicleImageId = s.Vehicle?.ImageId,
-                        Stats = new CharacterDetailsWeaponStatValue
-                        {
-                            DamageGiven = s.DamageGiven,
-                            DamageTakenBy = s.DamageTakenBy,
-                            Kills = s.Kills,
-                            Deaths = s.Deaths,
-                            FireCount = s.FireCount,
-                            HitCount = s.HitCount,
-                            Headshots = s.Headshots,
-                            KilledBy = s.KilledBy,
-                            PlayTime = s.PlayTime,
-                            Score = s.Score,
-                            VehicleKills = s.VehicleKills,
-
-                            Accuracy = accuracy,
-                            HeadshotRatio = headshotRatio,
-                            KillDeathRatio = killDeathRatio,
-                            KillsPerHour = killsPerHour,
-                            LandedPerKill = landedPerKill,
-                            ShotsPerKill = shotsPerKill,
-                            ScorePerMinute = scorePerMinute,
-                            VehicleKillsPerHour = vehicleKillsPerHour,
-
-                            KillDeathRatioDelta = kdrDelta,
-                            AccuracyDelta = accuDelta,
-                            HsrDelta = hsrDelta,
-                            KphDelta = kphDelta,
-                            VehicleKphDelta = vkphDelta
-                        }
-                    };
-                }),
-                VehicleStats = character.WeaponStats?.Where(a => a.VehicleId != 0).GroupBy(a => a.VehicleId).Select(s =>
-                {
-                    var vehicleWeaponStats = s.Where(a => a.ItemId != 0);
-                    var vehicleStats = s.Where(a => a.ItemId == 0).FirstOrDefault();
-
-                    return new CharacterDetailsVehicleStat
-                    {
-                        // Gunner stats
-                        VehicleId = s.Key,
-                        DamageGiven = vehicleWeaponStats.Sum(a => a.DamageGiven.GetValueOrDefault()),
-                        DamageTakenBy = vehicleWeaponStats.Sum(a => a.DamageTakenBy.GetValueOrDefault()),
-                        Deaths = vehicleWeaponStats.Sum(a => a.Deaths.GetValueOrDefault()),
-                        FireCount = vehicleWeaponStats.Sum(a => a.FireCount.GetValueOrDefault()),
-                        HitCount = vehicleWeaponStats.Sum(a => a.HitCount.GetValueOrDefault()),
-                        VehicleKills = vehicleWeaponStats.Sum(a => a.VehicleKills.GetValueOrDefault()),
-                        Headshots = vehicleWeaponStats.Sum(a => a.Headshots.GetValueOrDefault()),
-                        KilledBy = vehicleWeaponStats.Sum(a => a.KilledBy.GetValueOrDefault()),
-                        Kills = vehicleWeaponStats.Sum(a => a.Kills.GetValueOrDefault()),
-                        PlayTime = vehicleWeaponStats.Sum(a => a.PlayTime.GetValueOrDefault()),
-                        Score = vehicleWeaponStats.Sum(a => a.Score.GetValueOrDefault()),
-
-                        // Pilot stats
-                        PilotDamageGiven = vehicleStats?.DamageGiven.Value,
-                        PilotDamageTakenBy = vehicleStats?.DamageTakenBy.Value,
-                        PilotDeaths = vehicleStats?.Deaths.Value,
-                        PilotFireCount = vehicleStats?.FireCount.Value,
-                        PilotHitCount = vehicleStats?.HitCount.Value,
-                        PilotVehicleKills = vehicleStats?.VehicleKills.Value,
-                        PilotHeadshots = vehicleStats?.Headshots.Value,
-                        PilotKilledBy = vehicleStats?.KilledBy.Value,
-                        PilotKills = vehicleStats?.Kills.Value,
-                        PilotPlayTime = vehicleStats?.PlayTime.Value,
-                        PilotScore = vehicleStats?.Score.Value
-                    };
-                })
+                Times = times,
+                LifetimeStats = lifetimeStats,
+                ProfileStats = profileStats,
+                ProfileStatsByFaction = profileStatsByFaction,
+                WeaponStats = weaponStats,
+                VehicleStats = characterVehicleStats
             };
 
             character.WeaponStats?.Where(a => a.VehicleId != 0 && a.ItemId == 0).GroupBy(a => a.VehicleId).ToList().ForEach(item =>
@@ -731,6 +743,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 Id = characterId,
                 Name = stats.Name,
+                World = stats.World,
                 LastSaved = stats.Times?.LastSaveDate,
                 FactionId = stats.FactionId,
                 FactionName = stats.Faction,
@@ -766,7 +779,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            var weaponStats = stats.WeaponStats.FirstOrDefault(a => a.Name.ToLower() == weaponName.ToLower());
+            var weaponStats = stats.WeaponStats.Where(a => a.Name != null).FirstOrDefault(a => a.Name.ToLower() == weaponName.ToLower());
             if (weaponStats == null)
             {
                 return null;
@@ -774,6 +787,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var details = new CharacterWeaponDetails
             {
+                CharacterId = characterId,
+                CharacterName = stats.Name,
                 ItemId = weaponStats.ItemId,
                 WeaponName = weaponStats.Name,
                 WeaponImageId = weaponStats.ImageId,

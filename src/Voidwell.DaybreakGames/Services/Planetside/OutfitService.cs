@@ -71,6 +71,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             details = new OutfitDetails
             {
+                OutfitId = outfit.Id,
                 Name = outfit.Name,
                 Alias = outfit.Alias,
                 CreatedDate = outfit.CreatedDate,

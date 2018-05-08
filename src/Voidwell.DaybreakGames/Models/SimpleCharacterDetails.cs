@@ -6,6 +6,7 @@ namespace Voidwell.DaybreakGames.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public string World { get; set; }
         public int FactionId { get; set; }
         public string FactionName { get; set; }
         public int? FactionImageId { get; set; }
