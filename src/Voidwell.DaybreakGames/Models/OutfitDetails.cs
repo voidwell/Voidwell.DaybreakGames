@@ -4,6 +4,7 @@ namespace Voidwell.DaybreakGames.Models
 {
     public class OutfitDetails
     {
+        public string OutfitId { get; set; }
         public string Name { get; set; }
         public string Alias { get; set; }
         public int? FactionId { get; set; }
