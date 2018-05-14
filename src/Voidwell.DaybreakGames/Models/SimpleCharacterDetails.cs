@@ -21,6 +21,7 @@ namespace Voidwell.DaybreakGames.Models
         public double HeadshotRatio { get; set; }
         public double KillsPerHour { get; set; }
         public double SiegeLevel { get; set; }
+        public int IVIScore { get; set; }
         public DateTime? LastSaved { get; set; }
     }
 }

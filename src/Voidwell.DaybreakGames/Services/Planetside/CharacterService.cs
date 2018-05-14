@@ -22,6 +22,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IOutfitService _outfitService;
         private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly IGradeService _gradeService;
+        private readonly IWeaponService _weaponService;
         private readonly ILogger<CharacterService> _logger;
 
         private readonly string _cacheKey = "ps2.character";
@@ -34,7 +35,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public CharacterService(ICharacterRepository characterRepository, IPlayerSessionRepository playerSessionRepository,
             IEventRepository eventRepository, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
-            IWeaponAggregateService weaponAggregateService, IGradeService gradeService, ILogger<CharacterService> logger)
+            IWeaponAggregateService weaponAggregateService, IGradeService gradeService, IWeaponService weaponService, ILogger<CharacterService> logger)
         {
             _characterRepository = characterRepository;
             _playerSessionRepository = playerSessionRepository;
@@ -44,6 +45,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _outfitService = outfitService;
             _weaponAggregateService = weaponAggregateService;
             _gradeService = gradeService;
+            _weaponService = weaponService;
             _logger = logger;
         }
 
@@ -104,13 +106,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return details;
             }
 
-            var character = await GetCharacterDetailsAsync(characterId);
+            var characterTask = GetCharacterDetailsAsync(characterId);
+            var aggregateTask = _weaponAggregateService.GetAggregates();
+            var sanctionedWeaponsTask = _weaponService.GetAllSanctionedWeaponIds();
+
+            await Task.WhenAll(characterTask, aggregateTask, sanctionedWeaponsTask);
+
+            var character = characterTask.Result;
+            var aggregates = aggregateTask.Result;
+            var sanctionedWeaponIds = sanctionedWeaponsTask.Result;
+
             if (character == null)
             {
                 return null;
             }
-
-            var aggregates = await _weaponAggregateService.GetAggregates();
 
             var times = new CharacterDetailsTimes
             {
@@ -340,7 +349,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 ProfileStats = profileStats,
                 ProfileStatsByFaction = profileStatsByFaction,
                 WeaponStats = weaponStats,
-                VehicleStats = characterVehicleStats
+                VehicleStats = characterVehicleStats,
+                InfantryStats = CalculateInfantryStats(weaponStats, sanctionedWeaponIds)
             };
 
             character.WeaponStats?.Where(a => a.VehicleId != 0 && a.ItemId == 0).GroupBy(a => a.VehicleId).ToList().ForEach(item =>
@@ -373,6 +383,54 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await _cache.SetAsync(cacheKey, details, _cacheCharacterDetailsExpiration);
 
             return details;
+        }
+
+        private static InfantryStats CalculateInfantryStats(IEnumerable<CharacterDetailsWeaponStat> weaponStats, IEnumerable<int> sanctionedWeaponIds)
+        {
+            var sanctionedWeapons = weaponStats.Where(a => a.Stats?.Kills >= 50).Where(a => sanctionedWeaponIds.Contains(a.ItemId));
+            var unSanctionedWeapons = weaponStats.Where(a => !sanctionedWeapons.Contains(a));
+
+            var sumHitCount = sanctionedWeapons.Sum(a => a.Stats.HitCount);
+            var sumFireCount = sanctionedWeapons.Sum(a => a.Stats.FireCount);
+            var sumKills = sanctionedWeapons.Sum(a => a.Stats.Kills);
+            var sumDeaths = sanctionedWeapons.Sum(a => a.Stats.Deaths);
+            var sumHeadshots = sanctionedWeapons.Sum(a => a.Stats.Headshots);
+
+            var sumUnsanctionedKills = unSanctionedWeapons.Sum(a => a.Stats.Kills);
+            var sumUnsanctionedDeaths = unSanctionedWeapons.Sum(a => a.Stats.Deaths);
+
+            var infantryStats = new InfantryStats
+            {
+                Weapons = sanctionedWeapons.Count(),
+                UnsanctionedWeapons = unSanctionedWeapons.Count(),
+                Kills = sumKills,
+                AccuracyDelta = sanctionedWeapons.Average(a => a.Stats.AccuracyDelta),
+                HeadshotRatioDelta = sanctionedWeapons.Average(a => a.Stats.HsrDelta)
+            };
+
+            if (sumFireCount > 0)
+            {
+                infantryStats.Accuracy = sumHitCount / (double)sumFireCount;
+            }
+
+            if (sumKills > 0)
+            {
+                infantryStats.HeadshotRatio = sumHeadshots / (double)sumKills;
+            }
+
+            if (sumUnsanctionedDeaths > 0)
+            {
+                infantryStats.KDRPadding = -1 * (sumUnsanctionedKills / (double)sumUnsanctionedDeaths);
+            }
+
+            if (sumDeaths > 0)
+            {
+                infantryStats.KillDeathRatio = (sumKills / (double)sumDeaths) - infantryStats.KDRPadding;
+            }
+
+            infantryStats.IVIScore = (int)Math.Round((infantryStats.HeadshotRatio.GetValueOrDefault() * 100) * (infantryStats.Accuracy.GetValueOrDefault() * 100), 0);
+
+            return infantryStats;
         }
 
         public async Task UpdateAllCharacterInfo(string characterId, DateTime? lastLoginDate = null)
@@ -754,7 +812,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Kills = stats.LifetimeStats.Kills,
                 Deaths = stats.LifetimeStats.Deaths,
                 Score = stats.LifetimeStats.Score,
-                PlayTime = stats.LifetimeStats.PlayTime
+                PlayTime = stats.LifetimeStats.PlayTime,
+                IVIScore = stats.InfantryStats.IVIScore.GetValueOrDefault()
             };
 
             details.KillDeathRatio = (double)details.Kills / details.Deaths;
