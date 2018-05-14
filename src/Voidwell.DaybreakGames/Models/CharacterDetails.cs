@@ -25,6 +25,7 @@ namespace Voidwell.DaybreakGames.Models
         public IEnumerable<CharacterDetailsProfileStatByFaction> ProfileStatsByFaction { get; set; }
         public IEnumerable<CharacterDetailsWeaponStat> WeaponStats { get; set; }
         public IEnumerable<CharacterDetailsVehicleStat> VehicleStats { get; set; }
+        public InfantryStats InfantryStats { get; set; }
     }
 
     public class CharacterDetailsTimes
