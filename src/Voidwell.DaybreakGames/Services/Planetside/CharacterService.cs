@@ -9,7 +9,6 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Census.Exceptions;
-using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -354,6 +353,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 InfantryStats = CalculateInfantryStats(weaponStats, sanctionedWeaponIds)
             };
 
+            details.InfantryStats.KDRPadding = (lifetimeStats.Kills / (double)lifetimeStats.Deaths) - details.InfantryStats.KillDeathRatio.GetValueOrDefault();
+
             character.WeaponStats?.Where(a => a.VehicleId != 0 && a.ItemId == 0).GroupBy(a => a.VehicleId).ToList().ForEach(item =>
             {
                 var vehicleStats = item.FirstOrDefault();
@@ -388,6 +389,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private static InfantryStats CalculateInfantryStats(IEnumerable<CharacterDetailsWeaponStat> weaponStats, IEnumerable<int> sanctionedWeaponIds)
         {
+            var allSanctionedWeapons = weaponStats.Where(a => sanctionedWeaponIds.Contains(a.ItemId));
+            var allSanctionedWeaponsDeathsSum = allSanctionedWeapons.Sum(a => a.Stats.Deaths);
+
             var sanctionedWeapons = weaponStats.Where(a => a.Stats?.Kills >= 50).Where(a => sanctionedWeaponIds.Contains(a.ItemId));
             var unSanctionedWeapons = weaponStats.Where(a => !sanctionedWeapons.Contains(a));
 
@@ -422,19 +426,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 infantryStats.HeadshotRatio = sumHeadshots / (double)sumKills;
             }
 
-            if (sumUnsanctionedDeaths > 0)
+            if (allSanctionedWeaponsDeathsSum > 0)
             {
-                infantryStats.KDRPadding = -1 * (sumUnsanctionedKills / (double)sumUnsanctionedDeaths);
-            }
-
-            if (sumDeaths > 0)
-            {
-                infantryStats.KillDeathRatio = (sumKills / (double)sumDeaths) - infantryStats.KDRPadding;
+                infantryStats.KillDeathRatio = sanctionedWeapons.Sum(a => a.Stats.Kills) / (double)allSanctionedWeaponsDeathsSum;
             }
 
             if (sumPlayTime > 0)
             {
-                infantryStats.KillsPerMinute = sumKills / (double)sumPlayTime;
+                infantryStats.KillsPerMinute = sumKills / ((double)sumPlayTime / 60);
             }
 
             infantryStats.IVIScore = (int)Math.Round((infantryStats.HeadshotRatio.GetValueOrDefault() * 100) * (infantryStats.Accuracy.GetValueOrDefault() * 100), 0);
