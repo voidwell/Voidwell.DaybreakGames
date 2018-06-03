@@ -104,6 +104,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                  Name = c.Name,
                                  BattleRank = c.BattleRank,
                                  BattleRankPercentToNext = c.BattleRankPercentToNext,
+                                 PrestigeLevel = c.PrestigeLevel,
                                  CertsEarned = c.CertsEarned,
                                  FactionId = c.FactionId,
                                  WorldId = c.WorldId,
