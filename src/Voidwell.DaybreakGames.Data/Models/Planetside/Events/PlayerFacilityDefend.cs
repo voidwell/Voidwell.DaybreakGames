@@ -15,5 +15,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
         public int WorldId { get; set; }
         public int ZoneId { get; set; }
         public string OutfitId { get; set; }
+
+        public MapRegion Facility { get; set; }
     }
 }

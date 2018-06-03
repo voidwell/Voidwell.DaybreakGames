@@ -367,7 +367,7 @@ namespace Voidwell.DaybreakGames.Websocket
             {
                 FacilityId = payload.FacilityId,
                 CharacterId = payload.CharacterId,
-                OutfitId = payload.OutfitId,
+                OutfitId = payload.OutfitId == "0" ? null : payload.OutfitId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
@@ -392,7 +392,7 @@ namespace Voidwell.DaybreakGames.Websocket
             {
                 FacilityId = payload.FacilityId,
                 CharacterId = payload.CharacterId,
-                OutfitId = payload.OutfitId,
+                OutfitId = payload.OutfitId == "0" ? null : payload.OutfitId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value

@@ -97,6 +97,141 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var query = from e in dbContext.PlayerFacilityCaptureEvents
+
+                            join facility in dbContext.MapRegions on e.FacilityId equals facility.FacilityId into facilityQ
+                            from facility in facilityQ.DefaultIfEmpty()
+
+                            where e.CharacterId == characterId && e.Timestamp > lower && e.Timestamp < upper
+                            select new PlayerFacilityCapture
+                            {
+                                Timestamp = e.Timestamp,
+                                WorldId = e.WorldId,
+                                ZoneId = e.ZoneId,
+                                CharacterId = e.CharacterId,
+                                FacilityId = e.FacilityId,
+                                OutfitId = e.OutfitId,
+
+                                Facility = facility
+                            };
+
+                var result = query.ToList();
+                return await Task.FromResult(result);
+            }
+        }
+
+        public async Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var query = from e in dbContext.PlayerFacilityDefendEvents
+
+                            join facility in dbContext.MapRegions on e.FacilityId equals facility.FacilityId into facilityQ
+                            from facility in facilityQ.DefaultIfEmpty()
+
+                            where e.CharacterId == characterId && e.Timestamp > lower && e.Timestamp < upper
+                            select new PlayerFacilityDefend
+                            {
+                                Timestamp = e.Timestamp,
+                                WorldId = e.WorldId,
+                                ZoneId = e.ZoneId,
+                                CharacterId = e.CharacterId,
+                                FacilityId = e.FacilityId,
+                                OutfitId = e.OutfitId,
+
+                                Facility = facility
+                            };
+
+                var result = query.ToList();
+                return await Task.FromResult(result);
+            }
+        }
+
+        public async Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var query = from e in dbContext.BattleRankUpEvents
+
+                            where e.CharacterId == characterId && e.Timestamp > lower && e.Timestamp < upper
+                            select new BattlerankUp
+                            {
+                                Timestamp = e.Timestamp,
+                                WorldId = e.WorldId,
+                                ZoneId = e.ZoneId,
+                                CharacterId = e.CharacterId,
+                                BattleRank = e.BattleRank
+                            };
+
+                var result = query.ToList();
+                return await Task.FromResult(result);
+            }
+        }
+
+        public async Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var query = from e in dbContext.EventVehicleDestroys
+
+                            join weapon in dbContext.Items on e.AttackerWeaponId equals weapon.Id into weaponQ
+                            from weapon in weaponQ.DefaultIfEmpty()
+
+                            join attackerCharacter in dbContext.Characters on e.AttackerCharacterId equals attackerCharacter.Id into attackerCharacterQ
+                            from attackerCharacter in attackerCharacterQ.DefaultIfEmpty()
+
+                            join victimCharacter in dbContext.Characters on e.CharacterId equals victimCharacter.Id into victimCharacterQ
+                            from victimCharacter in victimCharacterQ.DefaultIfEmpty()
+
+                            join attackerVehicle in dbContext.Vehicles on e.AttackerVehicleId equals attackerVehicle.Id into attackerVehicleQ
+                            from attackerVehicle in attackerVehicleQ.DefaultIfEmpty()
+
+                            join victimVehicle in dbContext.Vehicles on e.VehicleId equals victimVehicle.Id into victimVehicleQ
+                            from victimVehicle in victimVehicleQ.DefaultIfEmpty()
+
+                            join facility in dbContext.MapRegions on e.FacilityId equals facility.FacilityId into facilityQ
+                            from facility in facilityQ.DefaultIfEmpty()
+
+                            where (e.AttackerCharacterId == characterId || e.CharacterId == characterId) && e.Timestamp > lower && e.Timestamp < upper
+                            select new VehicleDestroy
+                            {
+                                Timestamp = e.Timestamp,
+                                WorldId = e.WorldId,
+                                ZoneId = e.ZoneId,
+                                AttackerCharacterId = e.AttackerCharacterId,
+                                AttackerLoadoutId = e.AttackerLoadoutId,
+                                AttackerVehicleId = e.AttackerVehicleId,
+                                AttackerWeaponId = e.AttackerWeaponId,
+                                CharacterId = e.CharacterId,
+                                FacilityId = e.FacilityId,
+                                FactionId = e.FactionId,
+                                VehicleId = e.VehicleId,
+                                
+                                AttackerCharacter = attackerCharacter,
+                                Character = victimCharacter,
+                                AttackerWeapon = weapon,
+                                AttackerVehicle = attackerVehicle,
+                                VictimVehicle = victimVehicle,
+                                Facility = facility
+                            };
+
+                var result = query.ToList();
+                return await Task.FromResult(result);
+            }
+        }
+
         public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
         {
             using (var factory = _dbContextHelper.GetFactory())
