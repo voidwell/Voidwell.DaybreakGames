@@ -10,6 +10,9 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.ToTable("EventPlayerFacilityDefend");
 
             builder.HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
+
+            builder
+                .Ignore(a => a.Facility);
         }
     }
 }

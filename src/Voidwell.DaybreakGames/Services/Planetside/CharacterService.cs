@@ -9,6 +9,7 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Census.Exceptions;
+using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -490,23 +491,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            var sessionDeaths = await _eventRepository.GetDeathEventsForCharacterIdByDateAsync(characterId, playerSession.LoginDate, playerSession.LogoutDate);
+            var sessionEvents = await GetSessionEventsForCharacter(characterId, playerSession.LoginDate, playerSession.LogoutDate);
 
-            var sessionEvents = sessionDeaths.Select(d => new PlayerSessionEvent
-            {
-                Attacker = new CombatReportItemDetail { Id = d.AttackerCharacterId, Name = d.AttackerCharacter?.Name ?? d.AttackerCharacterId, FactionId = d.AttackerCharacter?.FactionId },
-                Victim = new CombatReportItemDetail { Id = d.CharacterId, Name = d.Character?.Name ?? d.CharacterId, FactionId = d.Character?.FactionId },
-                Weapon = new PlayerSessionWeapon { Id = d.AttackerWeaponId.Value, ImageId = d.AttackerWeapon?.ImageId, Name = d.AttackerWeapon?.Name ?? d.AttackerWeaponId.Value.ToString() },
-                Timestamp = d.Timestamp,
-                ZoneId = d.ZoneId,
-                IsHeadshot = d.IsHeadshot,
-                AttackerFireModeId = d.AttackerFireModeId,
-                AttackerLoadoutId = d.AttackerLoadoutId,
-                AttackerOutfitId = d.AttackerOutfitId,
-                AttackerVehicleId = d.AttackerVehicleId,
-                CharacterLoadoutId = d.CharacterLoadoutId,
-                CharacterOutfitId = d.CharacterOutfitId
-            });
+            sessionEvents.Insert(0, new PlayerSessionLoginEvent { Timestamp = playerSession.LoginDate });
+            sessionEvents.Add(new PlayerSessionLogoutEvent { Timestamp = playerSession.LogoutDate });
 
             sessionInfo = new Models.PlayerSession
             {
@@ -524,6 +512,33 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await _cache.SetAsync(cacheKey, sessionInfo, _cacheCharacterSessionsExpiration);
 
             return sessionInfo;
+        }
+
+        private async Task<List<PlayerSessionEvent>> GetSessionEventsForCharacter(string characterId, DateTime start, DateTime end)
+        {
+            var sessionDeathsTask = _eventRepository.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionFacilityCapturesTask = _eventRepository.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionFacilityDefendsTask = _eventRepository.GetFacilityDefendEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionBattleRankUpsTask = _eventRepository.GetBattleRankUpEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionVehicleDestroysTask = _eventRepository.GetVehicleDestroyEventsForCharacterIdByDateAsync(characterId, start, end);
+
+            await Task.WhenAll(sessionDeathsTask, sessionFacilityCapturesTask, sessionFacilityDefendsTask, sessionBattleRankUpsTask, sessionVehicleDestroysTask);
+
+            var sessionDeaths = sessionDeathsTask.Result;
+            var sessionFacilityCaptures = sessionFacilityCapturesTask.Result;
+            var sessionFacilityDefends = sessionFacilityDefendsTask.Result;
+            var sessionBattleRankUps = sessionBattleRankUpsTask.Result;
+            var sessionVehicleDestroys = sessionVehicleDestroysTask.Result;
+
+            var sessionEvents = new List<PlayerSessionEvent>();
+
+            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionDeaths));
+            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionFacilityCaptures));
+            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionFacilityDefends));
+            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionBattleRankUps));
+            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionVehicleDestroys));
+
+            return sessionEvents.OrderBy(a => a.Timestamp).ToList();
         }
 
         private async Task<Character> GetCharacterDetailsAsync(string characterId)
