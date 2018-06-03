@@ -396,6 +396,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var sumKills = sanctionedWeapons.Sum(a => a.Stats.Kills);
             var sumDeaths = sanctionedWeapons.Sum(a => a.Stats.Deaths);
             var sumHeadshots = sanctionedWeapons.Sum(a => a.Stats.Headshots);
+            var sumPlayTime = sanctionedWeapons.Sum(a => a.Stats.PlayTime);
 
             var sumUnsanctionedKills = unSanctionedWeapons.Sum(a => a.Stats.Kills);
             var sumUnsanctionedDeaths = unSanctionedWeapons.Sum(a => a.Stats.Deaths);
@@ -406,7 +407,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 UnsanctionedWeapons = unSanctionedWeapons.Count(),
                 Kills = sumKills,
                 AccuracyDelta = sanctionedWeapons.Average(a => a.Stats.AccuracyDelta),
-                HeadshotRatioDelta = sanctionedWeapons.Average(a => a.Stats.HsrDelta)
+                HeadshotRatioDelta = sanctionedWeapons.Average(a => a.Stats.HsrDelta),
+                KillDeathRatioDelta = sanctionedWeapons.Average(a => a.Stats.KillDeathRatioDelta),
+                KillsPerMinuteDelta = sanctionedWeapons.Average(a => a.Stats.KphDelta)
             };
 
             if (sumFireCount > 0)
@@ -427,6 +430,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             if (sumDeaths > 0)
             {
                 infantryStats.KillDeathRatio = (sumKills / (double)sumDeaths) - infantryStats.KDRPadding;
+            }
+
+            if (sumPlayTime > 0)
+            {
+                infantryStats.KillsPerMinute = sumKills / (double)sumPlayTime;
             }
 
             infantryStats.IVIScore = (int)Math.Round((infantryStats.HeadshotRatio.GetValueOrDefault() * 100) * (infantryStats.Accuracy.GetValueOrDefault() * 100), 0);
