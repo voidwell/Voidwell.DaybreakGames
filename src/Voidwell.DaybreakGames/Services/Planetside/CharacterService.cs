@@ -353,7 +353,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 InfantryStats = CalculateInfantryStats(weaponStats, sanctionedWeaponIds)
             };
 
-            details.InfantryStats.KDRPadding = (lifetimeStats.Kills / (double)lifetimeStats.Deaths) - details.InfantryStats.KillDeathRatio.GetValueOrDefault();
+            if (lifetimeStats.Deaths > 0)
+            {
+                details.InfantryStats.KDRPadding = (lifetimeStats.Kills / (double)lifetimeStats.Deaths) - details.InfantryStats.KillDeathRatio.GetValueOrDefault();
+            }            
 
             character.WeaponStats?.Where(a => a.VehicleId != 0 && a.ItemId == 0).GroupBy(a => a.VehicleId).ToList().ForEach(item =>
             {
