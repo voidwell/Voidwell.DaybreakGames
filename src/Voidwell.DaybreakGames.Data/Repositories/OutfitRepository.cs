@@ -129,18 +129,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.OutfitMembers;
-
-                var storeEntity = await dbContext.OutfitMembers.FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                }
+                await dbContext.OutfitMembers.UpsertAsync(entity, a => a.CharacterId == entity.CharacterId);
 
                 await dbContext.SaveChangesAsync();
                 return entity;
@@ -155,20 +144,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.Outfits;
-
-                var storeEntity = await dbSet.FirstOrDefaultAsync(a => a.Id == entity.Id);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                    result = entity;
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                    result = storeEntity;
-                }
+                result = await dbContext.Outfits.UpsertAsync(entity, a => a.Id == entity.Id);
 
                 await dbContext.SaveChangesAsync();
             }

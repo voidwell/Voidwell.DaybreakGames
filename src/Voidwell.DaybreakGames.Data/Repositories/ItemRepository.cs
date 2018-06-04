@@ -45,21 +45,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var storeEntities = await dbContext.Items.Where(a => entities.Any(e => e.Id == a.Id)).ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storeEntities.FirstOrDefault(a => a.Id == entity.Id);
-                    if (storeEntity == null)
-                    {
-                        dbContext.Items.Add(entity);
-                    }
-                    else
-                    {
-                        storeEntity = entity;
-                        dbContext.Items.Update(storeEntity);
-                    }
-                }
+                await dbContext.Items.UpsertRangeAsync(entities, a => entities.Any(e => e.Id == a.Id), (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }
@@ -71,19 +57,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                foreach (var entity in entities)
-                {
-                    var storeEntity = await dbContext.ItemCategories.SingleOrDefaultAsync(a => a.Id == entity.Id);
-                    if (storeEntity == null)
-                    {
-                        dbContext.ItemCategories.Add(entity);
-                    }
-                    else
-                    {
-                        storeEntity = entity;
-                        dbContext.ItemCategories.Update(storeEntity);
-                    }
-                }
+                await dbContext.ItemCategories.UpsertRangeAsync(entities, a => entities.Any(e => e.Id == a.Id), (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }
