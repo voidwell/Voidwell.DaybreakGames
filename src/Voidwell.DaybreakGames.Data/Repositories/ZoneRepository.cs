@@ -45,7 +45,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbContext.Zones.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
+                    var storeEntity = await dbContext.Zones.SingleOrDefaultAsync(a => a.Id == entity.Id);
                     if (storeEntity == null)
                     {
                         dbContext.Zones.Add(entity);

@@ -68,7 +68,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.MapHexs;
 
-                var storeEntities = await dbSet.AsNoTracking().ToListAsync();
+                var storeEntities = await dbSet.ToListAsync();
 
                 foreach (var entity in entities)
                 {
@@ -97,7 +97,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.MapRegions;
 
-                var storeEntities = await dbSet.AsNoTracking().ToListAsync();
+                var storeEntities = await dbSet.ToListAsync();
 
                 foreach (var entity in entities)
                 {
@@ -125,7 +125,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.FacilityLinks;
 
-                var storeEntities = await dbSet.AsNoTracking().ToListAsync();
+                var storeEntities = await dbSet.ToListAsync();
 
                 foreach (var entity in entities)
                 {

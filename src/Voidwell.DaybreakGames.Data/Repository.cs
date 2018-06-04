@@ -34,8 +34,7 @@ namespace Voidwell.DaybreakGames.Data
 
                 var dbSet = dbContext.Set<TEntity>();
 
-                var storeEntity = await dbSet.AsNoTracking()
-                    .FirstOrDefaultAsync(predicate);
+                var storeEntity = await dbSet.FirstOrDefaultAsync(predicate);
 
                 if (storeEntity == null)
                 {
@@ -43,7 +42,7 @@ namespace Voidwell.DaybreakGames.Data
                 }
                 else
                 {
-                    PrepareEntity(dbSet, storeEntity, entity, ignoreNullProperties);
+                    PrepareEntityUpdate(dbSet, storeEntity, entity, ignoreNullProperties);
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -60,11 +59,10 @@ namespace Voidwell.DaybreakGames.Data
 
                 var result = new List<TEntity>();
                 var createdEntities = new List<TEntity>();
-                var updatedEntities = new List<object>();
 
                 var dbSet = dbContext.Set<TEntity>();
 
-                var storedStats = await dbSet.AsNoTracking()
+                var storedStats = await dbSet
                     .Where(searchPredicate)
                     .ToListAsync();
 
@@ -77,7 +75,7 @@ namespace Voidwell.DaybreakGames.Data
                     }
                     else
                     {
-                        var preparedEntity = PrepareEntity(dbSet, storeEntity, entity, ignoreNullProperties);
+                        var preparedEntity = PrepareEntityUpdate(dbSet, storeEntity, entity, ignoreNullProperties);
                         result.Add(preparedEntity);
                     }
                 }
@@ -94,30 +92,30 @@ namespace Voidwell.DaybreakGames.Data
             }
         }
 
-        private static T PrepareEntity<T>(DbSet<T> dbSet, T Target, T Source, bool ignoreNullProperties) where T : class
+        private static T PrepareEntityUpdate<T>(DbSet<T> dbSet, T target, T source, bool ignoreNullProperties) where T : class
         {
             if (ignoreNullProperties)
             {
-                AssignNonNullProperties(ref Target, Source);
+                AssignNonNullProperties(ref target, source);
             }
             else
             {
-                Target = Source;
+                target = source;
             }
 
-            dbSet.Update(Target);
-            return Target;
+            dbSet.Update(target);
+            return target;
         }
 
-        private static void AssignNonNullProperties<T>(ref T Target, T Source) where T : class
+        private static void AssignNonNullProperties<T>(ref T target, T source) where T : class
         {
             foreach (var fromProp in typeof(T).GetProperties())
             {
                 var toProp = typeof(T).GetProperty(fromProp.Name);
-                var toValue = toProp.GetValue(Source, null);
+                var toValue = toProp.GetValue(source, null);
                 if (toValue != null)
                 {
-                    fromProp.SetValue(Target, toValue, null);
+                    fromProp.SetValue(target, toValue, null);
                 }
             }
         }

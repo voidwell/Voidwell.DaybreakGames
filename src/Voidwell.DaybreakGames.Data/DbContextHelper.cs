@@ -15,11 +15,6 @@ namespace Voidwell.DaybreakGames.Data
             _scopeFactory = scopeFactory;
         }
 
-        public PS2DbContext Create()
-        {
-            return new PS2DbContext(_options);
-        }
-
         public DbContextFactory GetFactory()
         {
             return new DbContextFactory(_scopeFactory);
@@ -34,6 +29,8 @@ namespace Voidwell.DaybreakGames.Data
             {
                 _scope = scopeFactory.CreateScope();
                 _dbContext = _scope.ServiceProvider.GetRequiredService<PS2DbContext>();
+
+                _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             }
 
             public PS2DbContext GetDbContext()

@@ -45,7 +45,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var storeEntities = await dbContext.Items.Where(a => entities.Any(e => e.Id == a.Id)).AsNoTracking().ToListAsync();
+                var storeEntities = await dbContext.Items.Where(a => entities.Any(e => e.Id == a.Id)).ToListAsync();
 
                 foreach (var entity in entities)
                 {
@@ -73,7 +73,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbContext.ItemCategories.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
+                    var storeEntity = await dbContext.ItemCategories.SingleOrDefaultAsync(a => a.Id == entity.Id);
                     if (storeEntity == null)
                     {
                         dbContext.ItemCategories.Add(entity);
