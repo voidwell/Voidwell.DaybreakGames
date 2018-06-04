@@ -23,7 +23,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 var dbContext = factory.GetDbContext();
 
                 var character = await dbContext.Characters
-                    .AsNoTracking()
                     .Include(a => a.Time)
                     .Where(a => a.Time != null)
                     .OrderByDescending(a => a.Time.CreatedDate)
@@ -233,7 +232,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                              Vehicle = vehicle
                                                          }).ToList()
                              };
-                var result = query.AsNoTracking().FirstOrDefault();
+                var result = query.FirstOrDefault();
 
                 return await Task.FromResult(result);
             }

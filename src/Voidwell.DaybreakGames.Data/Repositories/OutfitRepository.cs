@@ -131,7 +131,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.OutfitMembers;
 
-                var storeEntity = await dbContext.OutfitMembers.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
+                var storeEntity = await dbContext.OutfitMembers.FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
                 if (storeEntity == null)
                 {
                     dbSet.Add(entity);
@@ -157,7 +157,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.Outfits;
 
-                var storeEntity = await dbSet.AsNoTracking().FirstOrDefaultAsync(a => a.Id == entity.Id);
+                var storeEntity = await dbSet.FirstOrDefaultAsync(a => a.Id == entity.Id);
                 if (storeEntity == null)
                 {
                     dbSet.Add(entity);

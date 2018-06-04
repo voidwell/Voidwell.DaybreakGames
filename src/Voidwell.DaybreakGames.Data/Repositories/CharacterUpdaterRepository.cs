@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
@@ -20,7 +21,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var storeEntity = await dbContext.CharacterUpdateQueue.AsNoTracking().FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
+                var storeEntity = await dbContext.CharacterUpdateQueue.FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
                 if (storeEntity == null)
                 {
                     dbContext.CharacterUpdateQueue.Add(entity);
@@ -53,8 +54,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 var dbContext = factory.GetDbContext();
 
                 return await dbContext.CharacterUpdateQueue
-                    .AsNoTracking()
-                    .OrderBy("Timestamp", SortDirection.Ascending)
+                    .OrderBy(a => a.Timestamp)
                     .ToListAsync();
             }
         }

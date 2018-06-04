@@ -32,7 +32,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var dbSet = dbContext.UpdaterScheduler;
 
-                var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
+                var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.Id == entity.Id);
                 if (storeEntity == null)
                 {
                     dbSet.Add(entity);

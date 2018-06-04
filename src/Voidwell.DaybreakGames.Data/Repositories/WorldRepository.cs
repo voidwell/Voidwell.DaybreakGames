@@ -32,7 +32,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbContext.Worlds.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
+                    var storeEntity = await dbContext.Worlds.SingleOrDefaultAsync(a => a.Id == entity.Id);
                     if (storeEntity == null)
                     {
                         dbContext.Worlds.Add(entity);

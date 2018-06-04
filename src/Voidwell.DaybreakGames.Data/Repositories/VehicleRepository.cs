@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.Id == entity.Id);
+                    var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.Id == entity.Id);
                     if (storeEntity == null)
                     {
                         dbSet.Add(entity);
@@ -61,7 +61,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 foreach (var entity in entities)
                 {
-                    var storeEntity = await dbSet.AsNoTracking().SingleOrDefaultAsync(a => a.VehicleId == entity.VehicleId && a.FactionId == entity.FactionId);
+                    var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.VehicleId == entity.VehicleId && a.FactionId == entity.FactionId);
                     if (storeEntity == null)
                     {
                         dbSet.Add(entity);
