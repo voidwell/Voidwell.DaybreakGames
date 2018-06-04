@@ -14,8 +14,6 @@ using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.HostedServices;
 using IdentityServer4.AccessTokenValidation;
-using System;
-using System.Linq;
 
 namespace Voidwell.DaybreakGames
 {
