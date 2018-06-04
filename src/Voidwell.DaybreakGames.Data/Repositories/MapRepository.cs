@@ -66,24 +66,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.MapHexs;
-
-                var storeEntities = await dbSet.ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storeEntities.SingleOrDefault(a => a.MapRegionId == entity.MapRegionId && a.ZoneId == entity.ZoneId && a.XPos == entity.XPos && a.YPos == entity.YPos);
-                    if (storeEntity == null)
-                    {
-                        await dbSet.AddAsync(entity);
-                    }
-                    else
-                    {
-                        entity.Id = storeEntity.Id;
-                        storeEntity = entity;
-                        dbSet.Update(storeEntity);
-                    }
-                }
+                await dbContext.MapHexs.UpsertRangeAsync(entities, (a, e) => a.MapRegionId == e.MapRegionId && a.ZoneId == e.ZoneId && a.XPos == e.XPos && a.YPos == e.YPos, true);
 
                 await dbContext.SaveChangesAsync();
             }
@@ -95,23 +78,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.MapRegions;
-
-                var storeEntities = await dbSet.ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storeEntities.SingleOrDefault(a => a.Id == entity.Id && a.FacilityId == entity.FacilityId);
-                    if (storeEntity == null)
-                    {
-                        dbSet.Add(entity);
-                    }
-                    else
-                    {
-                        storeEntity = entity;
-                        dbSet.Update(storeEntity);
-                    }
-                }
+                await dbContext.MapRegions.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id && a.FacilityId == e.FacilityId);
 
                 await dbContext.SaveChangesAsync();
             }

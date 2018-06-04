@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
@@ -20,21 +19,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.Titles;
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.Id == entity.Id);
-                    if (storeEntity == null)
-                    {
-                        dbSet.Add(entity);
-                    }
-                    else
-                    {
-                        storeEntity = entity;
-                        dbSet.Update(storeEntity);
-                    }
-                }
+                await dbContext.Titles.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }

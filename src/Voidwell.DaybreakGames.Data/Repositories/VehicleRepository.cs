@@ -31,21 +31,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.Vehicles;
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.Id == entity.Id);
-                    if (storeEntity == null)
-                    {
-                        dbSet.Add(entity);
-                    }
-                    else
-                    {
-                        storeEntity = entity;
-                        dbSet.Update(storeEntity);
-                    }
-                }
+                await dbContext.Vehicles.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }
@@ -57,21 +43,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.VehicleFactions;
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.VehicleId == entity.VehicleId && a.FactionId == entity.FactionId);
-                    if (storeEntity == null)
-                    {
-                        dbSet.Add(entity);
-                    }
-                    else
-                    {
-                        storeEntity = entity;
-                        dbSet.Update(storeEntity);
-                    }
-                }
+                await dbContext.VehicleFactions.UpsertRangeAsync(entities, (a, e) => a.VehicleId == e.VehicleId && a.FactionId == e.FactionId);
 
                 await dbContext.SaveChangesAsync();
             }

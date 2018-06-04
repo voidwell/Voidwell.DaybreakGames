@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models;
 
@@ -30,18 +29,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.UpdaterScheduler;
-
-                var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.Id == entity.Id);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                }
+                await dbContext.UpdaterScheduler.UpsertAsync(entity, a => a.Id == entity.Id);
 
                 await dbContext.SaveChangesAsync();
             }

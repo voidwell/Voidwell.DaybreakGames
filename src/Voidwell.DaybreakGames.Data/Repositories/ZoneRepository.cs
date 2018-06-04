@@ -43,19 +43,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                foreach (var entity in entities)
-                {
-                    var storeEntity = await dbContext.Zones.SingleOrDefaultAsync(a => a.Id == entity.Id);
-                    if (storeEntity == null)
-                    {
-                        dbContext.Zones.Add(entity);
-                    }
-                    else
-                    {
-                        storeEntity = entity;
-                        dbContext.Zones.Update(storeEntity);
-                    }
-                }
+                await dbContext.Zones.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }
