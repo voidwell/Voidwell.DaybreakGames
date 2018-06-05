@@ -863,7 +863,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            var weaponStats = stats.WeaponStats.Where(a => a.Name != null).FirstOrDefault(a => a.Name.ToLower() == weaponName.ToLower());
+            var weaponStats = stats.WeaponStats.Where(a => a.Name != null).FirstOrDefault(a => a.Name.ToLower().StartsWith(weaponName.ToLower()));
             if (weaponStats == null)
             {
                 return null;
