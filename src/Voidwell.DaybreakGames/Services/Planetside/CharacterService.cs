@@ -9,6 +9,7 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Census.Exceptions;
+using Newtonsoft.Json.Linq;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -330,6 +331,19 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 };
             });
 
+            var characterStatsHistory = character.StatsHistory?.Select(a =>
+            {
+                return new CharacterDetailsStatsHistory
+                {
+                    StatName = a.StatName,
+                    AllTime = a.AllTime,
+                    OneLifeMax = a.OneLifeMax,
+                    Day = JToken.Parse(a.Day).ToObject<IEnumerable<int>>(),
+                    Week = JToken.Parse(a.Week).ToObject<IEnumerable<int>>(),
+                    Month = JToken.Parse(a.Month).ToObject<IEnumerable<int>>(),
+                };
+            });
+
             details = new CharacterDetails
             {
                 Id = character.Id,
@@ -350,7 +364,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 ProfileStatsByFaction = profileStatsByFaction,
                 WeaponStats = weaponStats,
                 VehicleStats = characterVehicleStats,
-                InfantryStats = CalculateInfantryStats(weaponStats, sanctionedWeaponIds)
+                InfantryStats = CalculateInfantryStats(weaponStats, sanctionedWeaponIds),
+                StatsHistory = characterStatsHistory
             };
 
             if (lifetimeStats.Deaths > 0)
@@ -454,7 +469,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             await Task.WhenAll(UpdateCharacterTimes(characterId),
                                UpdateCharacterStats(characterId, lastLoginDate),
-                               UpdateCharacterWeaponStats(characterId, lastLoginDate));
+                               UpdateCharacterWeaponStats(characterId, lastLoginDate),
+                               UpdateCharacterStatsHistory(characterId, lastLoginDate));
         }
 
         public async Task<OutfitMember> GetCharactersOutfit(string characterId)
@@ -784,6 +800,45 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await _characterRepository.UpsertRangeAsync(statByFactionModels);
         }
 
+        private async Task UpdateCharacterStatsHistory(string characterId, DateTime? lastLoginDate)
+        {
+            var statsHistory = await _censusCharacter.GetCharacterStatsHistory(characterId, lastLoginDate);
+            if (statsHistory == null)
+            {
+                return;
+            }
+
+            var dataModels = statsHistory.Select(a =>
+            {
+                var day = new List<int> {
+                    a.Day.d01, a.Day.d02, a.Day.d03, a.Day.d04, a.Day.d05, a.Day.d06, a.Day.d07, a.Day.d08, a.Day.d09, a.Day.d10, a.Day.d11, a.Day.d12,
+                    a.Day.d13, a.Day.d14, a.Day.d15, a.Day.d16, a.Day.d17, a.Day.d18, a.Day.d19, a.Day.d20, a.Day.d21, a.Day.d22, a.Day.d23, a.Day.d24,
+                    a.Day.d25, a.Day.d26, a.Day.d27, a.Day.d28, a.Day.d29, a.Day.d30, a.Day.d31
+                };
+
+                var month = new List<int> {
+                    a.Month.m01, a.Month.m02, a.Month.m03, a.Month.m04, a.Month.m05, a.Month.m06, a.Month.m07, a.Month.m08, a.Month.m09, a.Month.m10, a.Month.m11, a.Month.m12
+                };
+
+                var week = new List<int> {
+                    a.Week.w01, a.Week.w02, a.Week.w03, a.Week.w04, a.Week.w05, a.Week.w06, a.Week.w07, a.Week.w08, a.Week.w09, a.Week.w10, a.Week.w11, a.Week.w12, a.Week.w13
+                };
+
+                return new CharacterStatHistory
+                {
+                    CharacterId = a.CharacterId,
+                    StatName = a.StatName,
+                    AllTime = a.AllTime,
+                    OneLifeMax = a.OneLifeMax,
+                    Day = JToken.FromObject(day).ToString(),
+                    Week = JToken.FromObject(week).ToString(),
+                    Month = JToken.FromObject(month).ToString()
+                };
+            });
+
+            await _characterRepository.UpsertRangeAsync(dataModels);
+        }
+
         private async Task<string> GetCharacterIdByName(string characterName)
         {
             var cacheKey = $"{_cacheKey}_name_{characterName.ToLower()}";
@@ -865,6 +920,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var weaponStats = stats.WeaponStats
                 .Where(a => a.Name != null && a.Stats.PlayTime.GetValueOrDefault() > 0)
+                .OrderBy(a => a.Name)
                 .FirstOrDefault(a => a.Name.ToLower().Contains(weaponName.ToLower()));
             if (weaponStats == null)
             {

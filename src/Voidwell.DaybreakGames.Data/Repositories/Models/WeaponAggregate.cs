@@ -1,4 +1,6 @@
-﻿namespace Voidwell.DaybreakGames.Data.Repositories.Models
+﻿using System;
+
+namespace Voidwell.DaybreakGames.Data.Repositories.Models
 {
     public class WeaponAggregate
     {

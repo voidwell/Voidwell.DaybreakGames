@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 var dbContext = factory.GetDbContext();
 
                 return await dbContext.Alerts
-                    .OrderBy("StartDate", SortDirection.Descending)
+                    .OrderByDescending(a => a.StartDate)
                     .Where(a => a.MetagameEventId != 159 && a.MetagameEventId != 160 && a.MetagameEventId != 161 && a.MetagameEventId != 162)
                     .FirstOrDefaultAsync(a => a.WorldId == worldId && a.ZoneId == zoneId && a.EndDate == null);
             }

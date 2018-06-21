@@ -26,6 +26,7 @@ namespace Voidwell.DaybreakGames.Models
         public IEnumerable<CharacterDetailsWeaponStat> WeaponStats { get; set; }
         public IEnumerable<CharacterDetailsVehicleStat> VehicleStats { get; set; }
         public InfantryStats InfantryStats { get; set; }
+        public IEnumerable<CharacterDetailsStatsHistory> StatsHistory { get; set; }
     }
 
     public class CharacterDetailsTimes
@@ -45,6 +46,16 @@ namespace Voidwell.DaybreakGames.Models
         public string Alias { get; set; }
         public DateTime CreatedDate { get; set; }
         public int MemberCount { get; set; }
+    }
+
+    public class CharacterDetailsStatsHistory
+    {
+        public string StatName { get; set; }
+        public int AllTime { get; set; }
+        public int OneLifeMax { get; set; }
+        public IEnumerable<int> Day { get; set; }
+        public IEnumerable<int> Month { get; set; }
+        public IEnumerable<int> Week { get; set; }
     }
 
     public class CharacterDetailsLifetimeStats

@@ -11,7 +11,7 @@ namespace Voidwell.DaybreakGames.Data
         {
             IConfiguration configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("devsettings.json")
                 .Build();
 
             var builder = new DbContextOptionsBuilder<PS2DbContext>();

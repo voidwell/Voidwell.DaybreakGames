@@ -161,6 +161,31 @@ namespace Voidwell.DaybreakGames.CensusServices
             return await query.GetBatch<CensusCharacterWeaponFactionStatModel>();
         }
 
+        public async Task<IEnumerable<CensusCharacterStatsHistoryModel>> GetCharacterStatsHistory(string characterId, DateTime? lastLogin = null)
+        {
+            var query = _censusClient.CreateQuery("characters_stat_history");
+
+            query.SetLimit(5000);
+            query.ShowFields(new[]
+            {
+                "character_id",
+                "stat_name",
+                "all_time",
+                "one_life_max",
+                "day",
+                "month",
+                "week"
+            });
+            query.Where("character_id").Equals(characterId);
+
+            if (lastLogin != null)
+            {
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
+            }
+
+            return await query.GetBatch<CensusCharacterStatsHistoryModel>();
+        }
+
         public async Task<CensusOutfitMemberModel> GetCharacterOutfitMembership(string characterId)
         {
             var query = _censusClient.CreateQuery("outfit_member");
