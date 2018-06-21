@@ -96,7 +96,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
                              from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
 
-                             where c.Id == characterId
+                            where c.Id == characterId
                              select new Character
                              {
                                  Id = c.Id,
@@ -126,7 +126,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                          RankOrdinal = om.RankOrdinal,
                                                          Outfit = outfit
                                                      }).FirstOrDefault(),
-                               Stats = (from s in dbContext.CharacterStats
+                                 Stats = (from s in dbContext.CharacterStats
                                           join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
                                           from profile in profileQ.DefaultIfEmpty()
                                           where s.CharacterId == c.Id
@@ -143,6 +143,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                               Score = s.Score,
                                               Profile = profile
                                           }).ToList(),
+                                 StatsHistory = (from s in dbContext.CharacterStatHistory
+                                          where s.CharacterId == c.Id
+                                          select s).ToList(),
                                  StatsByFaction = (from s in dbContext.CharacterStatByFactions
                                                    join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
                                                    from profile in profileQ.DefaultIfEmpty()
@@ -280,6 +283,12 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         {
             var id = entities.FirstOrDefault()?.CharacterId;
             return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
+        }
+
+        public Task<IEnumerable<CharacterStatHistory>> UpsertRangeAsync(IEnumerable<CharacterStatHistory> entities)
+        {
+            var id = entities.FirstOrDefault()?.CharacterId;
+            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.StatName == b.StatName);
         }
     }
 }

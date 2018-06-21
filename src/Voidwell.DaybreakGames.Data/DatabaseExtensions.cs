@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 using Voidwell.DaybreakGames.Data.Repositories;
-using System;
 
 namespace Voidwell.DaybreakGames.Data
 {

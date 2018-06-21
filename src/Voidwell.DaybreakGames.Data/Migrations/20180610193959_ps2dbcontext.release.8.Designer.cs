@@ -11,9 +11,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20180610193959_ps2dbcontext.release.8")]
+    partial class ps2dbcontextrelease8
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -451,9 +452,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<string>("CharacterId")
                         .HasColumnName("character_id");
 
-                    b.Property<string>("StatName")
-                        .HasColumnName("stat_name");
-
                     b.Property<int>("AllTime")
                         .HasColumnName("all_time");
 
@@ -466,10 +464,13 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("OneLifeMax")
                         .HasColumnName("one_life_max");
 
+                    b.Property<string>("StatName")
+                        .HasColumnName("stat_name");
+
                     b.Property<string>("Week")
                         .HasColumnName("week");
 
-                    b.HasKey("CharacterId", "StatName")
+                    b.HasKey("CharacterId")
                         .HasName("p_k_character_stat_history");
 
                     b.ToTable("character_stat_history");
