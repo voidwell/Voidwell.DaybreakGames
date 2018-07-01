@@ -11,8 +11,8 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    [Migration("20180307204412_initialPS2DbContext")]
-    partial class initialPS2DbContext
+    [Migration("20180630235034_ps2dbcontext.release.11")]
+    partial class ps2dbcontextrelease11
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -87,6 +87,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .IsRequired()
                         .HasColumnName("name");
 
+                    b.Property<int>("PrestigeLevel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("prestige_level")
+                        .HasDefaultValue(0);
+
                     b.Property<int>("TitleId")
                         .HasColumnName("title_id");
 
@@ -95,6 +100,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("p_k_character");
+
+                    b.HasIndex("Name")
+                        .HasName("i_x_character_name");
 
                     b.ToTable("character");
                 });
@@ -439,6 +447,35 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.ToTable("character_stat_by_faction");
                 });
 
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterStatHistory", b =>
+                {
+                    b.Property<string>("CharacterId")
+                        .HasColumnName("character_id");
+
+                    b.Property<string>("StatName")
+                        .HasColumnName("stat_name");
+
+                    b.Property<int>("AllTime")
+                        .HasColumnName("all_time");
+
+                    b.Property<string>("Day")
+                        .HasColumnName("day");
+
+                    b.Property<string>("Month")
+                        .HasColumnName("month");
+
+                    b.Property<int>("OneLifeMax")
+                        .HasColumnName("one_life_max");
+
+                    b.Property<string>("Week")
+                        .HasColumnName("week");
+
+                    b.HasKey("CharacterId", "StatName")
+                        .HasName("p_k_character_stat_history");
+
+                    b.ToTable("character_stat_history");
+                });
+
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterTime", b =>
                 {
                     b.Property<string>("CharacterId")
@@ -699,7 +736,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("ZoneId")
                         .HasColumnName("zone_id");
 
-                    b.HasKey("CharacterId", "Timestamp")
+                    b.HasKey("CharacterId", "Timestamp", "BattleRank")
                         .HasName("p_k_event_battlerank_up");
 
                     b.ToTable("event_battlerank_up");
@@ -804,6 +841,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId")
                         .HasName("p_k_event_death");
 
+                    b.HasIndex("AttackerWeaponId")
+                        .HasName("i_x_event_death_attacker_weapon_id");
+
                     b.ToTable("event_death");
                 });
 
@@ -818,11 +858,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("FacilityId")
                         .HasColumnName("facility_id");
 
-                    b.Property<int>("DurationHeld")
-                        .HasColumnName("duration_held");
-
                     b.Property<int?>("NewFactionId")
                         .HasColumnName("new_faction_id");
+
+                    b.Property<int>("DurationHeld")
+                        .HasColumnName("duration_held");
 
                     b.Property<int?>("OldFactionId")
                         .HasColumnName("old_faction_id");
@@ -842,7 +882,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("ZoneId")
                         .HasColumnName("zone_id");
 
-                    b.HasKey("Timestamp", "WorldId", "FacilityId")
+                    b.HasKey("Timestamp", "WorldId", "FacilityId", "NewFactionId")
                         .HasName("p_k_event_facility_control");
 
                     b.ToTable("event_facility_control");
@@ -1147,18 +1187,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.MapHex", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id");
-
-                    b.Property<int>("HexType")
-                        .HasColumnName("hex_type");
-
                     b.Property<int>("MapRegionId")
                         .HasColumnName("map_region_id");
-
-                    b.Property<string>("TypeName")
-                        .HasColumnName("type_name");
 
                     b.Property<int>("XPos")
                         .HasColumnName("x_pos");
@@ -1169,7 +1199,13 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("ZoneId")
                         .HasColumnName("zone_id");
 
-                    b.HasKey("Id")
+                    b.Property<int>("HexType")
+                        .HasColumnName("hex_type");
+
+                    b.Property<string>("TypeName")
+                        .HasColumnName("type_name");
+
+                    b.HasKey("MapRegionId", "XPos", "YPos", "ZoneId")
                         .HasName("p_k_map_hex");
 
                     b.ToTable("map_hex");
@@ -1192,19 +1228,19 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("FacilityTypeId")
                         .HasColumnName("facility_type_id");
 
-                    b.Property<float>("XPos")
+                    b.Property<float?>("XPos")
                         .HasColumnName("x_pos");
 
-                    b.Property<float>("YPos")
+                    b.Property<float?>("YPos")
                         .HasColumnName("y_pos");
 
-                    b.Property<float>("ZPos")
+                    b.Property<float?>("ZPos")
                         .HasColumnName("z_pos");
 
                     b.Property<int>("ZoneId")
                         .HasColumnName("zone_id");
 
-                    b.HasKey("Id")
+                    b.HasKey("Id", "FacilityId")
                         .HasName("p_k_map_region");
 
                     b.ToTable("map_region");
@@ -1231,6 +1267,20 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasName("p_k_metagame_event_category");
 
                     b.ToTable("metagame_event_category");
+                });
+
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.MetagameEventCategoryZone", b =>
+                {
+                    b.Property<int>("MetagameEventCategoryId")
+                        .HasColumnName("metagame_event_category_id");
+
+                    b.Property<int>("ZoneId")
+                        .HasColumnName("zone_id");
+
+                    b.HasKey("MetagameEventCategoryId")
+                        .HasName("p_k_metagame_event_category_zone");
+
+                    b.ToTable("metagame_event_category_zone");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.MetagameEventState", b =>
@@ -1512,6 +1562,15 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .WithMany("StatsByFaction")
                         .HasForeignKey("CharacterId")
                         .HasConstraintName("f_k_character_stat_by_faction_character_character_id")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterStatHistory", b =>
+                {
+                    b.HasOne("Voidwell.DaybreakGames.Data.Models.Planetside.Character", "Character")
+                        .WithMany("StatsHistory")
+                        .HasForeignKey("CharacterId")
+                        .HasConstraintName("f_k_character_stat_history_character_character_id")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
