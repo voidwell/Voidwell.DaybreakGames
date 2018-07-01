@@ -4,8 +4,6 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
 {
     public class MapHex
     {
-        public int Id { get; set; }
-
         [Required]
         public int ZoneId { get; set; }
         [Required]

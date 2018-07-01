@@ -840,8 +840,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId")
                         .HasName("p_k_event_death");
 
-                    b.HasIndex("AttackerCharacterId", "CharacterId")
-                        .HasName("i_x_event_death_attacker_character_id_character_id");
+                    b.HasIndex("AttackerWeaponId")
+                        .HasName("i_x_event_death_attacker_weapon_id");
 
                     b.ToTable("event_death");
                 });
@@ -1186,18 +1186,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.MapHex", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id");
-
-                    b.Property<int>("HexType")
-                        .HasColumnName("hex_type");
-
                     b.Property<int>("MapRegionId")
                         .HasColumnName("map_region_id");
-
-                    b.Property<string>("TypeName")
-                        .HasColumnName("type_name");
 
                     b.Property<int>("XPos")
                         .HasColumnName("x_pos");
@@ -1208,7 +1198,13 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("ZoneId")
                         .HasColumnName("zone_id");
 
-                    b.HasKey("Id")
+                    b.Property<int>("HexType")
+                        .HasColumnName("hex_type");
+
+                    b.Property<string>("TypeName")
+                        .HasColumnName("type_name");
+
+                    b.HasKey("MapRegionId", "XPos", "YPos", "ZoneId")
                         .HasName("p_k_map_hex");
 
                     b.ToTable("map_hex");

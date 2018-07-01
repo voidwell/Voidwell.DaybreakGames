@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private readonly KeyedSemaphoreSlim _zoneMapLock = new KeyedSemaphoreSlim();
 
-        private const string _cacheKeyPrefix = "ps2.mapService";
+        private const string _cacheKeyPrefix = "ps2.map_service";
         private TimeSpan _zoneMapCacheExpiration = TimeSpan.FromHours(24);
 
         public MapService(IMapRepository mapRepository, CensusMap censusMap, ICache cache)
@@ -115,6 +115,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 await _mapRepository.UpsertRangeAsync(mapHexs.Select(ConvertToDbModel));
             }
 
+            /*
             var mapRegions = await _censusMap.GetAllMapRegions();
 
             if (mapRegions != null)
@@ -128,6 +129,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 await _mapRepository.UpsertRangeAsync(facilityLinks.Select(ConvertToDbModel));
             }
+            */
         }
 
         private MapHex ConvertToDbModel(CensusMapHexModel censusModel)

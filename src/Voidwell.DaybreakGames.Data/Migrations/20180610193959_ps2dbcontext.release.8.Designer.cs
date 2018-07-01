@@ -841,9 +841,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId")
                         .HasName("p_k_event_death");
 
-                    b.HasIndex("AttackerCharacterId", "CharacterId")
-                        .HasName("i_x_event_death_attacker_character_id_character_id");
-
                     b.ToTable("event_death");
                 });
 

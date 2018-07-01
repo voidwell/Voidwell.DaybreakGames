@@ -803,11 +803,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 column: "kills");
 
             migrationBuilder.CreateIndex(
-                name: "i_x_event_death_attacker_character_id_character_id",
-                table: "event_death",
-                columns: new[] { "attacker_character_id", "character_id" });
-
-            migrationBuilder.CreateIndex(
                 name: "i_x_player_session_character_id_login_date_logout_date",
                 table: "player_session",
                 columns: new[] { "character_id", "login_date", "logout_date" });

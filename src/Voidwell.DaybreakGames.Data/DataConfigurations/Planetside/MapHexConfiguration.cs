@@ -10,9 +10,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("MapHex");
 
-            builder.HasKey(a => a.Id);
-
-            builder.Property(a => a.Id).ValueGeneratedOnAdd();
+            builder.HasKey(a => new { a.MapRegionId, a.XPos, a.YPos, a.ZoneId });
         }
     }
 }

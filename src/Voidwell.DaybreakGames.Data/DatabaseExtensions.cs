@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -15,7 +14,6 @@ namespace Voidwell.DaybreakGames.Data
         public static IServiceCollection AddEntityFrameworkContext(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddOptions();
-            services.AddSingleton(impl => impl.GetRequiredService<IOptions<DatabaseOptions>>().Value);
             services.Configure<DatabaseOptions>(configuration);
 
             var options = configuration.Get<DatabaseOptions>();
