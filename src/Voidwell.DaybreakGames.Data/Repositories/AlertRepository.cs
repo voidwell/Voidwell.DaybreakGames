@@ -21,10 +21,26 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.Alerts
-                    .OrderByDescending(a => a.StartDate)
-                    .Where(a => a.MetagameEventId != 159 && a.MetagameEventId != 160 && a.MetagameEventId != 161 && a.MetagameEventId != 162)
-                    .FirstOrDefaultAsync(a => a.WorldId == worldId && a.ZoneId == zoneId && a.EndDate == null);
+                var query = (from alert in dbContext.Alerts
+
+                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
+
+                             join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
+                             from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
+
+                             where alert.WorldId == worldId && alert.EndDate == null && metagameEventZone.ZoneId == zoneId && metagameEvent.Type != 5
+                             select new { alert, metagameEvent, metagameEventZone });
+
+                var result = await query.FirstOrDefaultAsync();
+                result.alert.MetagameEvent = result.metagameEvent;
+
+                if (result.metagameEventZone != null)
+                {
+                    result.alert.ZoneId = result.metagameEventZone.ZoneId;
+                }
+
+                return result.alert;
             }
         }
 
@@ -42,7 +58,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
                              from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
 
-                             where alert.WorldId == worldId && alert.MetagameEventId != 159 && alert.MetagameEventId != 160 && alert.MetagameEventId != 161 && alert.MetagameEventId != 162
+                             where alert.WorldId == worldId && metagameEvent.Type != 5
                             orderby alert.StartDate descending
                             select new { alert, metagameEvent, metagameEventZone })
                             .Take(limit);
@@ -77,7 +93,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
                              from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
 
-                             where alert.MetagameEventId != 159 && alert.MetagameEventId != 160 && alert.MetagameEventId != 161 && alert.MetagameEventId != 162
+                             where metagameEvent.Type != 5
                             orderby alert.StartDate descending
                             select new { alert, metagameEvent, metagameEventZone })
                             .Take(limit);
@@ -130,6 +146,17 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 .First();
 
                 return await Task.FromResult(result);
+            }
+        }
+
+        public async Task<int?> GetMetagameCategoryZoneId(int metagameEventId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var categoryZone = await dbContext.MetagameEventCategoryZones.FirstOrDefaultAsync(a => a.MetagameEventCategoryId == metagameEventId);
+                return categoryZone?.ZoneId;
             }
         }
 

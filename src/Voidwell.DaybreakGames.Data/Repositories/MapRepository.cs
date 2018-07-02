@@ -60,6 +60,29 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<ZoneOwnershipSnapshot>> GetZoneSnapshotByMetagameEvent(int worldId, int metagameInstanceId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.ZoneOwnershipSnapshots.Where(a => a.WorldId == worldId && a.MetagameInstanceId == metagameInstanceId)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task InsertRangeAsync(IEnumerable<ZoneOwnershipSnapshot> entities)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                dbContext.ZoneOwnershipSnapshots.AddRange(entities);
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
         public async Task UpsertRangeAsync(IEnumerable<MapHex> entities)
         {
             using (var factory = _dbContextHelper.GetFactory())

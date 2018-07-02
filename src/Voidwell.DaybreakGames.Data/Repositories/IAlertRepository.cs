@@ -12,5 +12,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<IEnumerable<Alert>> GetAlertsByWorldId(int worldId, int limit);
         Task AddAsync(Alert dataModel);
         Task<Alert> GetAlert(int worldId, int instanceId);
+        Task<int?> GetMetagameCategoryZoneId(int metagameEventId);
     }
 }

@@ -10,6 +10,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId);
         Task<IEnumerable<MapHex>> GetMapHexsByZoneIdAsync(int zoneId);
         Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<int> facilityIds);
+        Task<IEnumerable<ZoneOwnershipSnapshot>> GetZoneSnapshotByMetagameEvent(int worldId, int metagameInstanceId);
+        Task InsertRangeAsync(IEnumerable<ZoneOwnershipSnapshot> entities);
         Task UpsertRangeAsync(IEnumerable<MapHex> entities);
         Task UpsertRangeAsync(IEnumerable<MapRegion> entities);
         Task UpsertRangeAsync(IEnumerable<FacilityLink> entities);

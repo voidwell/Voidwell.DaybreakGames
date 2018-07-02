@@ -273,7 +273,7 @@ namespace Voidwell.DaybreakGames.Websocket
             {
 
                 var mapUpdate = await _worldMonitor.UpdateFacilityControl(payload);
-                var territory = mapUpdate?.Territory.ToArray();
+                var score = mapUpdate?.Score;
 
                 var dataModel = new Data.Models.Planetside.Events.FacilityControl
                 {
@@ -285,25 +285,49 @@ namespace Voidwell.DaybreakGames.Websocket
                     Timestamp = payload.Timestamp,
                     WorldId = payload.WorldId,
                     ZoneId = payload.ZoneId.Value,
-                    ZoneControlVs = territory != null ? territory[1] * 100 : 0,
-                    ZoneControlNc = territory != null ? territory[2] * 100 : 0,
-                    ZoneControlTr = territory != null ? territory[3] * 100 : 0
+                    ZoneControlVs = score != null ? score.ConnectedTerritories.Vs.Percent * 100 : 0,
+                    ZoneControlNc = score != null ? score.ConnectedTerritories.Nc.Percent * 100 : 0,
+                    ZoneControlTr = score != null ? score.ConnectedTerritories.Tr.Percent * 100 : 0
                 };
 
                 await _eventRepository.AddAsync(dataModel);
 
-                if (dataModel.NewFactionId != dataModel.OldFactionId)
+                if (dataModel.NewFactionId != dataModel.OldFactionId && score != null)
                 {
                     var alert = await _alertRepository.GetActiveAlert(dataModel.WorldId, dataModel.ZoneId);
-
                     if (alert == null)
                     {
                         return;
                     }
 
-                    alert.LastFactionVs = dataModel.ZoneControlVs;
-                    alert.LastFactionNc = dataModel.ZoneControlNc;
-                    alert.LastFactionTr = dataModel.ZoneControlTr;
+                    if (alert.MetagameEvent?.Type == 1 || alert.MetagameEvent?.Type == 8 || alert.MetagameEvent?.Type == 9)
+                    {
+                        alert.LastFactionVs = score.ConnectedTerritories.Vs.Percent * 100;
+                        alert.LastFactionNc = score.ConnectedTerritories.Nc.Percent * 100;
+                        alert.LastFactionTr = score.ConnectedTerritories.Tr.Percent * 100;
+                    }
+                    else if (alert.MetagameEvent?.Type == 2 && alert.MetagameEventId == 9 && alert.MetagameEventId == 12 && alert.MetagameEventId == 14 && alert.MetagameEventId == 18)
+                    {
+                        alert.LastFactionVs = score.AmpStations.Vs.Value * 100;
+                        alert.LastFactionNc = score.AmpStations.Nc.Value * 100;
+                        alert.LastFactionTr = score.AmpStations.Tr.Value * 100;
+                    }
+                    else if (alert.MetagameEvent?.Type == 2 && alert.MetagameEventId == 8 && alert.MetagameEventId == 11 && alert.MetagameEventId == 17)
+                    {
+                        alert.LastFactionVs = score.TechPlants.Vs.Percent * 100;
+                        alert.LastFactionNc = score.TechPlants.Nc.Percent * 100;
+                        alert.LastFactionTr = score.TechPlants.Tr.Percent * 100;
+                    }
+                    else if (alert.MetagameEvent?.Type == 2 && alert.MetagameEventId == 7 && alert.MetagameEventId == 10 && alert.MetagameEventId == 13 && alert.MetagameEventId == 16)
+                    {
+                        alert.LastFactionVs = score.BioLabs.Vs.Percent * 100;
+                        alert.LastFactionNc = score.BioLabs.Nc.Percent * 100;
+                        alert.LastFactionTr = score.BioLabs.Tr.Percent * 100;
+                    }
+                    else
+                    {
+                        return;
+                    }
 
                     await _alertRepository.UpdateAsync(alert);
                 }
