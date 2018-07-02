@@ -16,6 +16,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IPlayerSessionRepository _playerSessionRepository;
         private readonly IEventRepository _eventRepository;
         private readonly IZoneService _zoneService;
+        private readonly IWorldService _worldService;
         private readonly IMapService _mapService;
         private readonly ICharacterService _characterService;
         private readonly ICharacterUpdaterService _updaterService;
@@ -24,16 +25,45 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private static ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
 
         public WorldMonitor(IPlayerSessionRepository playerSessionRepository, IEventRepository eventRepository,
-            IZoneService zoneService, IMapService mapService, ICharacterService characterService,
+            IZoneService zoneService, IWorldService worldService, IMapService mapService, ICharacterService characterService,
             ICharacterUpdaterService updaterService, ILogger<WorldMonitor> logger)
         {
             _playerSessionRepository = playerSessionRepository;
             _eventRepository = eventRepository;
             _zoneService = zoneService;
+            _worldService = worldService;
             _mapService = mapService;
             _characterService = characterService;
             _updaterService = updaterService;
             _logger = logger;
+
+            Task.Run(() => InitializeWorlds());
+        }
+
+        private async Task InitializeWorlds()
+        {
+            var worldsTask = _worldService.GetAllWorlds();
+            var zonesTask = _zoneService.GetPlayableZones();
+
+            await Task.WhenAll(worldsTask, zonesTask);
+
+            foreach(var world in worldsTask.Result)
+            {
+                if (!_worldStates.ContainsKey(world.Id))
+                {
+                    var worldState = new WorldState
+                    {
+                        Id = world.Id,
+                        Name = world.Name,
+                        IsOnline = false
+                    };
+
+                    zonesTask.Result.ToList()
+                        .ForEach(zone => worldState.ZoneStates.TryAdd(zone.Id, new WorldZoneState(world.Id, zone)));
+
+                    _worldStates.TryAdd(world.Id, worldState);
+                }
+            }
         }
 
         public async Task SetWorldState(int worldId, string worldName, bool isOnline)
@@ -252,7 +282,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     IsTracking = b.Value.IsTracking,
                     LockState = b.Value.LockState
                 })
-            });
+            }).OrderBy(a => a.Name);
         }
 
         public IEnumerable<ZoneRegionOwnership> GetZoneOwnership(int worldId, int zoneId)
