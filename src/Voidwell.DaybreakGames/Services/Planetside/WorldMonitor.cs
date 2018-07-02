@@ -157,7 +157,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return new FacilityControlChange
                 {
                     Region = zoneState.Map.Regions.FirstOrDefault(r => r.FacilityId == facilityControl.FacilityId),
-                    Territory = zoneState.MapScore.ConnectedPercent
+                    Score = zoneState.MapScore
                 };
             }
         }

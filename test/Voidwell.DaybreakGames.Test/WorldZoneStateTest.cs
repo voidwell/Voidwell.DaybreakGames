@@ -25,11 +25,8 @@ namespace Voidwell.DaybreakGames.Census.Test
 
             var score = worldZoneState.MapScore;
 
-            var percentScore = score.Percent.ToArray();
-            var percentTotal = percentScore[0] + percentScore[1] + percentScore[2] + percentScore[3];
-
-            var connectedPercentScore = score.ConnectedPercent.ToArray();
-            var connectedPercentTotal = connectedPercentScore[0] + connectedPercentScore[1] + connectedPercentScore[2] + connectedPercentScore[3];
+            var percentTotal = score.Territories.Neutural.Percent + score.Territories.Vs.Percent + score.Territories.Nc.Percent + score.Territories.Tr.Percent;
+            var connectedPercentTotal = score.ConnectedTerritories.Neutural.Percent + score.ConnectedTerritories.Vs.Percent + score.ConnectedTerritories.Nc.Percent + score.ConnectedTerritories.Tr.Percent;
 
             Assert.AreEqual(1, percentTotal);
             Assert.AreEqual(1, connectedPercentTotal);

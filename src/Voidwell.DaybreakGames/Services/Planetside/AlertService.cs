@@ -14,16 +14,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         private readonly IAlertRepository _alertRepository;
         private readonly ICombatReportService _combatReportService;
+        private readonly IMapService _mapService;
         private readonly ICache _cache;
 
         private readonly string _cacheKey = "ps2.alert";
         private readonly TimeSpan _cacheAlertsExpiration = TimeSpan.FromMinutes(1);
         private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(5);
 
-        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService, ICache cache)
+        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService, IMapService mapService, ICache cache)
         {
             _alertRepository = alertRepository;
             _combatReportService = combatReportService;
+            _mapService = mapService;
             _cache = cache;
         }
 
@@ -68,8 +70,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            var combatReport = await _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId.Value, alert.StartDate.Value, alert.EndDate);
-            if (combatReport == null)
+            var combatReportTask = _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId.Value, alert.StartDate.Value, alert.EndDate);
+            var zoneSnapshotTask = _mapService.GetZoneSnapshotByMetagameEvent(worldId, instanceId);
+
+            await Task.WhenAll(combatReportTask, zoneSnapshotTask);
+
+            if (combatReportTask.Result == null)
             {
                 return null;
             }
@@ -89,7 +95,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LastFactionNC = alert.LastFactionNc.GetValueOrDefault(),
                 LastFactionTR = alert.LastFactionTr.GetValueOrDefault(),
                 MetagameEvent = new AlertResultMetagameEvent { Name = alert.MetagameEvent.Name, Description = alert.MetagameEvent.Description },
-                Log = combatReport,
+                Log = combatReportTask.Result,
                 Score = new[] {
                     100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault()),
                     alert.LastFactionVs.GetValueOrDefault(),
@@ -97,7 +103,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     alert.LastFactionTr.GetValueOrDefault()
                 },
                 ServerId = alert.WorldId.ToString(),
-                MapId = alert.ZoneId.ToString()
+                MapId = alert.ZoneId.ToString(),
+                ZoneSnapshot = zoneSnapshotTask.Result?.Ownership
             };
 
             await _cache.SetAsync(cacheKey, alertResult, _cacheAlertExpiration);
@@ -105,7 +112,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return alertResult;
         }
 
-        public Task CreateAlert(MetagameEvent metagameEvent)
+        public async Task CreateAlert(MetagameEvent metagameEvent)
         {
             var dataModel = new Alert
             {
@@ -121,7 +128,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LastFactionNc = metagameEvent.FactionNc,
                 LastFactionTr = metagameEvent.FactionTr
             };
-            return _alertRepository.AddAsync(dataModel);
+
+            await Task.WhenAll(_alertRepository.AddAsync(dataModel), CreateAlertZoneSnapshot(metagameEvent));
         }
 
         public async Task UpdateAlert(MetagameEvent metagameEvent)
@@ -136,6 +144,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 alert.LastFactionTr = metagameEvent.FactionTr;
 
                 await _alertRepository.UpdateAsync(alert);
+            }
+        }
+
+        private async Task CreateAlertZoneSnapshot(MetagameEvent metagameEvent)
+        {
+            var zoneId = metagameEvent.ZoneId ?? await _alertRepository.GetMetagameCategoryZoneId(metagameEvent.MetagameEventId);
+            if (zoneId != null)
+            {
+                await _mapService.CreateZoneSnapshot(metagameEvent.WorldId, zoneId.Value, metagameEvent.Timestamp, metagameEvent.InstanceId);
             }
         }
     }

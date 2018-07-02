@@ -93,23 +93,19 @@ namespace Voidwell.DaybreakGames.Models
 
         private void CalculateOwnership()
         {
-            var score = new OwnershipCalculator(Map, MapRegionOwnership);
-
-            MapScore = new MapScore
-            {
-                Territories = score.Territories,
-                ConnectedTerritories = score.ConnectedTerritories,
-                Percent = score.Percent,
-                ConnectedPercent = score.ConnectedPercent
-            };
+            var calculator = new OwnershipCalculator(Map, MapRegionOwnership);
+            MapScore = calculator.Score;
         }
 
         private class OwnershipCalculator
         {
-            public int[] Territories { get; private set; } = new[] { 0, 0, 0, 0 };
-            public float[] Percent { get; private set; } = new[] { 0.0f, 0.0f, 0.0f, 0.0f };
-            public int[] ConnectedTerritories { get; private set; } = new[] { 0, 0, 0, 0 };
-            public float[] ConnectedPercent { get; private set; } = new[] { 0f, 0f, 0f, 0f };
+            public MapScore Score = new MapScore();
+
+            private int[] _territories { get; set; } = new[] { 0, 0, 0, 0 };
+            private int[] _connectedTerritories { get; set; } = new[] { 0, 0, 0, 0 };
+            private int[] _ampStations { get; set; } = new[] { 0, 0, 0, 0 };
+            private int[] _techPlants { get; set; } = new[] { 0, 0, 0, 0 };
+            private int[] _bioLabs { get; set; } = new[] { 0, 0, 0, 0 };
 
             private Dictionary<int, bool> _factionsChecked;
             private Dictionary<int, bool> _checkedRegions;
@@ -123,12 +119,21 @@ namespace Voidwell.DaybreakGames.Models
 
                 foreach (var region in ownership)
                 {
-                    Territories[region.Value]++;
-                }
+                    _territories[region.Value]++;
 
-                for(var i = 0; i < Territories.Count(); i++)
-                {
-                    Percent[i] = (float)Territories[i] / ownership.Count;
+                    var facilityType = zoneMap.Regions.FirstOrDefault(a => a.RegionId == region.Key)?.FacilityType;
+                    switch(facilityType)
+                    {
+                        case "Amp Station":
+                            _ampStations[region.Value]++;
+                            break;
+                        case "Tech Plant":
+                            _techPlants[region.Value]++;
+                            break;
+                        case "Bio Lab":
+                            _bioLabs[region.Value]++;
+                            break;
+                    }
                 }
                 
                 foreach (var warpgate in zoneMap.Warpgates)
@@ -140,19 +145,18 @@ namespace Voidwell.DaybreakGames.Models
                     {
                         _factionsChecked.Add(_focusFaction, true);
 
-                        ConnectedTerritories[_focusFaction]++;
+                        _connectedTerritories[_focusFaction]++;
                         _checkedRegions.Add(warpgate.RegionId, true);
 
                         CheckLinks(warpgate, warpgate.Links);
                     }
                 }
 
-                for (var i = 1; i < ConnectedTerritories.Count(); i++)
-                {
-                    ConnectedPercent[i] = (float)ConnectedTerritories[i] / ownership.Count;
-                }
-
-                ConnectedPercent[0] = 1 - (ConnectedPercent[1] + ConnectedPercent[2] + ConnectedPercent[3]);
+                Score.Territories = new OwnershipScoreFactions(_territories[1], _territories[2], _territories[3], _territories[0]);
+                Score.ConnectedTerritories = new OwnershipScoreFactions(_connectedTerritories[1], _connectedTerritories[2], _connectedTerritories[3], _connectedTerritories[0]);
+                Score.AmpStations = new OwnershipScoreFactions(_ampStations[1], _ampStations[2], _ampStations[3], _ampStations[0]);
+                Score.TechPlants = new OwnershipScoreFactions(_techPlants[1], _techPlants[2], _techPlants[3], _techPlants[0]);
+                Score.BioLabs = new OwnershipScoreFactions(_bioLabs[1], _bioLabs[2], _bioLabs[3], _bioLabs[0]);
             }
 
             private void CheckLinks(WorldZoneRegion root, List<WorldZoneRegion> links)
@@ -168,7 +172,7 @@ namespace Voidwell.DaybreakGames.Models
 
                     if (_ownership[link.RegionId] == _focusFaction)
                     {
-                        ConnectedTerritories[_focusFaction]++;
+                        _connectedTerritories[_focusFaction]++;
 
                         CheckLinks(root, link.Links);
                     }

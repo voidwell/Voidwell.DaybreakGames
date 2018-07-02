@@ -106,6 +106,49 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _mapRepository.GetMapRegionsByFacilityIdsAsync(facilityIds);
         }
 
+        public async Task CreateZoneSnapshot(int worldId, int zoneId, DateTime? timestamp = null, int? metagameInstanceId = null)
+        {
+            if (timestamp == null)
+            {
+                timestamp = DateTime.UtcNow;
+            }
+
+            var zoneOwnership = await GetMapOwnership(worldId, zoneId);
+            if (zoneOwnership == null)
+            {
+                return;
+            }
+
+            var snapshotRegions = zoneOwnership.Select(a =>
+            {
+                return new ZoneOwnershipSnapshot
+                {
+                    Timestamp = timestamp.Value,
+                    WorldId = worldId,
+                    ZoneId = zoneId,
+                    MetagameInstanceId = metagameInstanceId,
+                    RegionId = a.RegionId,
+                    FactionId = a.FactionId
+                };
+            });
+
+            await _mapRepository.InsertRangeAsync(snapshotRegions);
+        }
+
+        public async Task<ZoneSnapshot> GetZoneSnapshotByMetagameEvent(int worldId, int metagameInstanceId)
+        {
+            var snapshotRegions = await _mapRepository.GetZoneSnapshotByMetagameEvent(worldId, metagameInstanceId);
+
+            return new ZoneSnapshot
+            {
+                Timestamp = snapshotRegions.First().Timestamp,
+                WorldId = snapshotRegions.First().WorldId,
+                ZoneId = snapshotRegions.First().ZoneId,
+                MetagameInstanceId = snapshotRegions.First().MetagameInstanceId,
+                Ownership = snapshotRegions.Select(a => new MapOwnership(a.RegionId, a.FactionId))
+            };
+        }
+
         public async Task RefreshStore()
         {
             var mapHexs = await _censusMap.GetAllMapHexs();
