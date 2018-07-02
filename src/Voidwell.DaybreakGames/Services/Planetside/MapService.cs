@@ -138,6 +138,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public async Task<ZoneSnapshot> GetZoneSnapshotByMetagameEvent(int worldId, int metagameInstanceId)
         {
             var snapshotRegions = await _mapRepository.GetZoneSnapshotByMetagameEvent(worldId, metagameInstanceId);
+            if (snapshotRegions == null || snapshotRegions.Count() == 0)
+            {
+                return null;
+            }
 
             return new ZoneSnapshot
             {
