@@ -18,6 +18,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICharacterRepository _characterRepository;
         private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly ISanctionedWeaponsRepository _sanctionedWeaponsRepository;
+        private readonly IEventRepository _eventRepository;
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
 
@@ -28,11 +29,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
 
         public WeaponService(ICharacterRepository characterRepository, IWeaponAggregateService weaponAggregateService,
-            ISanctionedWeaponsRepository sanctionedWeaponRepository, CensusItem censusItem, ICache cache)
+            ISanctionedWeaponsRepository sanctionedWeaponRepository, IEventRepository eventRepository, CensusItem censusItem, ICache cache)
         {
             _characterRepository = characterRepository;
             _weaponAggregateService = weaponAggregateService;
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
+            _eventRepository = eventRepository;
             _censusItem = censusItem;
             _cache = cache;
         }
@@ -143,6 +145,46 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return weapons;
         }
 
+        public async Task<Dictionary<int, IEnumerable<OracleStat>>> GetOracleStatsFromWeaponByDateAsync(string statName, IEnumerable<int> weaponIds, DateTime start, DateTime end)
+        {
+            var statTasks = weaponIds.Select(id => GetOracleStats(statName, id, start, end)).ToArray();
+            await Task.WhenAll(statTasks);
+
+            var oracleDict = new Dictionary<int, IEnumerable<OracleStat>>();
+            for (var i = 0; i < weaponIds.Count(); i++)
+            {
+                oracleDict[weaponIds.ToArray()[i]] = statTasks.ToArray()[i].Result;
+            }
+
+            return oracleDict;
+        }
+
+        private readonly KeyedSemaphoreSlim _oracleStatLock = new KeyedSemaphoreSlim();
+
+        private async Task<IEnumerable<OracleStat>> GetOracleStats(string statName, int weaponId, DateTime start, DateTime end)
+        {
+            var cacheKeyDate = $"{start.Year}-{start.Month}-{start.Day}";
+
+            using (await _oracleStatLock.WaitAsync($"{statName}-{weaponId}-{cacheKeyDate}"))
+            {
+                var cacheKey = $"ps2.oracle_{weaponId}_{cacheKeyDate}";
+
+                var stats = await _cache.GetAsync<IEnumerable<OracleStat>>(cacheKey);
+                if (stats != null)
+                {
+                    return stats;
+                }
+
+                stats = await _eventRepository.GetDeathEventsByItemIdFromDateAsync(weaponId, start, end);
+                if (stats != null)
+                {
+                    await _cache.SetAsync(cacheKey, stats, TimeSpan.FromDays(1));
+                }
+
+                return stats;
+            }
+        }
+
         private WeaponLeaderboardRow ConvertToResult(CharacterWeaponStat model, WeaponAggregate aggregate)
         {
             double? kdrDelta = null;
@@ -150,24 +192,28 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             double? hsrDelta = null;
             double? kphDelta = null;
 
-            if (model.Deaths > 0 && aggregate.STDKdr > 0)
+            if (aggregate == null)
             {
-                kdrDelta = (((double)model.Kills / (double)model.Deaths) - aggregate.AVGKdr) / aggregate.STDKdr;
-            }
 
-            if (model.FireCount > 0 && aggregate.STDAccuracy > 0)
-            {
-                accuDelta = (((double)model.HitCount / (double)model.FireCount) - aggregate.AVGAccuracy) / aggregate.STDAccuracy;
-            }
+                if (model.Deaths > 0 && aggregate.STDKdr > 0)
+                {
+                    kdrDelta = (((double)model.Kills / (double)model.Deaths) - aggregate.AVGKdr) / aggregate.STDKdr;
+                }
 
-            if (model.Kills > 0 && aggregate.STDHsr > 0)
-            {
-                hsrDelta = (((double)model.Headshots / (double)model.Kills) - aggregate.AVGHsr) / aggregate.STDHsr;
-            }
+                if (model.FireCount > 0 && aggregate.STDAccuracy > 0)
+                {
+                    accuDelta = (((double)model.HitCount / (double)model.FireCount) - aggregate.AVGAccuracy) / aggregate.STDAccuracy;
+                }
 
-            if (model.PlayTime > 0 && aggregate.STDKph > 0)
-            {
-                kphDelta = (((double)model.Kills / ((double)model.PlayTime / 3600)) - aggregate.AVGKph) / aggregate.STDKph;
+                if (model.Kills > 0 && aggregate.STDHsr > 0)
+                {
+                    hsrDelta = (((double)model.Headshots / (double)model.Kills) - aggregate.AVGHsr) / aggregate.STDHsr;
+                }
+
+                if (model.PlayTime > 0 && aggregate.STDKph > 0)
+                {
+                    kphDelta = (((double)model.Kills / ((double)model.PlayTime / 3600)) - aggregate.AVGKph) / aggregate.STDKph;
+                }
             }
 
             return new WeaponLeaderboardRow

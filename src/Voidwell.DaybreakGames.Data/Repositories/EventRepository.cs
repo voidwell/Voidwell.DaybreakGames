@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
+using Voidwell.DaybreakGames.Data.Repositories.Models;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -277,6 +278,46 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 return await dbContext.EventVehicleDestroys.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
                     .ToListAsync();
             }
+        }
+
+        public async Task<IEnumerable<OracleStat>> GetDeathEventsByItemIdFromDateAsync(int itemId, DateTime start, DateTime end)
+        {
+            var result = new List<OracleStat>();
+
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                await dbContext.Database.GetDbConnection().OpenAsync();
+
+                using (var dbCmd = dbContext.Database.GetDbConnection().CreateCommand())
+                {
+                    var sStart = ConvertToDbDateTime(start);
+                    var sEnd = ConvertToDbDateTime(end);
+
+                    dbCmd.CommandText = $"SELECT date_trunc('day', \"timestamp\") AS \"date\", count(*) AS \"value\" FROM event_death WHERE attacker_weapon_id = '{itemId}' AND \"timestamp\" >= '{sStart}' AND \"timestamp\" <= '{sEnd}' GROUP BY 1 ORDER BY 1;";
+                    var reader = await dbCmd.ExecuteReaderAsync();
+                    if (reader.HasRows)
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var row = new OracleStat
+                            {
+                                Date = reader.GetDateTime(0),
+                                Value = reader.GetInt32(1)
+                            };
+                            result.Add(row);
+                        }
+                    }
+                }
+
+                return result;
+            }
+        }
+
+        private string ConvertToDbDateTime(DateTime input)
+        {
+            return input.ToString("yyyy-MM-dd HH:mm:ss.fff");
         }
     }
 }

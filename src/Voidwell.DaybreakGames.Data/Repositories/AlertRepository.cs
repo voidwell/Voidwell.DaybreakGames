@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -26,19 +27,10 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
                              from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                             join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
-                             from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
-
-                             where alert.WorldId == worldId && alert.EndDate == null && metagameEventZone.ZoneId == zoneId && metagameEvent.Type != 5
-                             select new { alert, metagameEvent, metagameEventZone });
-
+                             where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != 5
+                             select new { alert, metagameEvent });
                 var result = await query.FirstOrDefaultAsync();
                 result.alert.MetagameEvent = result.metagameEvent;
-
-                if (result.metagameEventZone != null)
-                {
-                    result.alert.ZoneId = result.metagameEventZone.ZoneId;
-                }
 
                 return result.alert;
             }
@@ -69,7 +61,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                     if (a.metagameEventZone != null)
                     {
-                        a.alert.ZoneId = a.metagameEventZone.ZoneId;
+                        a.alert.ZoneId = a.alert.ZoneId ?? a.metagameEventZone.ZoneId;
                     }
 
                     return a.alert;
@@ -104,7 +96,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                     if (a.metagameEventZone != null)
                     {
-                        a.alert.ZoneId = a.metagameEventZone.ZoneId;
+                        a.alert.ZoneId = a.alert.ZoneId ?? a.metagameEventZone.ZoneId;
                     }
 
                     return a.alert;
@@ -138,7 +130,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                     if (a.metagameEventZone != null)
                     {
-                        a.alert.ZoneId = a.metagameEventZone.ZoneId;
+                        a.alert.ZoneId = a.alert.ZoneId ?? a.metagameEventZone.ZoneId;
                     }
 
                     return a.alert;

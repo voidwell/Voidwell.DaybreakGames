@@ -63,7 +63,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 return await dbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId && s.Kills > 1)
                     .Include(i => i.Character)
-                    .OrderBy(sortColumn, sortDirection)
+                    .OrderByDescending(a => a.Kills)
                     .Skip(rowStart)
                     .Take(limit)
                     .ToListAsync();
