@@ -114,6 +114,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task CreateAlert(MetagameEvent metagameEvent)
         {
+            if (metagameEvent.ZoneId == null)
+            {
+                metagameEvent.ZoneId = await _alertRepository.GetMetagameCategoryZoneId(metagameEvent.MetagameEventId);
+            }
+
             var dataModel = new Alert
             {
                 WorldId = metagameEvent.WorldId,
@@ -121,6 +126,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MetagameInstanceId = metagameEvent.InstanceId,
                 MetagameEventId = metagameEvent.MetagameEventId,
                 StartDate = metagameEvent.Timestamp,
+                EndDate = metagameEvent.Timestamp.AddMinutes(45),
                 StartFactionVs = metagameEvent.FactionVs,
                 StartFactionNc = metagameEvent.FactionNc,
                 StartFactionTr = metagameEvent.FactionTr,
@@ -149,10 +155,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task CreateAlertZoneSnapshot(MetagameEvent metagameEvent)
         {
-            var zoneId = metagameEvent.ZoneId ?? await _alertRepository.GetMetagameCategoryZoneId(metagameEvent.MetagameEventId);
-            if (zoneId != null)
+            if (metagameEvent.ZoneId != null)
             {
-                await _mapService.CreateZoneSnapshot(metagameEvent.WorldId, zoneId.Value, metagameEvent.Timestamp, metagameEvent.InstanceId);
+                await _mapService.CreateZoneSnapshot(metagameEvent.WorldId, metagameEvent.ZoneId.Value, metagameEvent.Timestamp, metagameEvent.InstanceId);
             }
         }
     }

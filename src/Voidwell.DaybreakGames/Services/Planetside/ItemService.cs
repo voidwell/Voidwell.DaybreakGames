@@ -6,21 +6,27 @@ using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class ItemService : IItemService
     {
         private readonly IItemRepository _itemRepository;
+        private readonly ICache _cache;
         private readonly CensusItem _censusItem;
         private readonly CensusItemCategory _censusItemCategory;
+
+        private readonly string _categoryItemsCacheKey = "ps2.categoryItems";
+        private readonly TimeSpan _categoryItemsCacheExpiration = TimeSpan.FromHours(1);
 
         public string ServiceName => "ItemService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(45);
 
-        public ItemService(IItemRepository itemRepository, CensusItem censusItem, CensusItemCategory censusItemCategory)
+        public ItemService(IItemRepository itemRepository, ICache cache, CensusItem censusItem, CensusItemCategory censusItemCategory)
         {
             _itemRepository = itemRepository;
+            _cache = cache;
             _censusItem = censusItem;
             _censusItemCategory = censusItemCategory;
         }
@@ -33,6 +39,25 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public Task<IEnumerable<Item>> LookupItemsByName(string name, int limit = 12)
         {
             return _itemRepository.FindItemsByNameAsync(name, limit);
+        }
+
+        public async Task<IEnumerable<Item>> GetItemsByCategoryIds(IEnumerable<int> categoryIds)
+        {
+            var cacheKey = $"{_categoryItemsCacheKey}_{string.Join("-", categoryIds)}";
+
+            var items = await _cache.GetAsync<IEnumerable<Item>>(cacheKey);
+            if (items != null)
+            {
+                return items;
+            }
+
+            items = await _itemRepository.GetItemsByCategoryIds(categoryIds);
+            if (items != null)
+            {
+                await _cache.SetAsync(cacheKey, items, _categoryItemsCacheExpiration);
+            }
+
+            return items;
         }
 
         public async Task RefreshStore()

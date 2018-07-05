@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,13 +40,24 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<Item>> GetItemsByCategoryIds(IEnumerable<int> categoryIds)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.Items.Where(i => i.ItemCategoryId.HasValue && categoryIds.Contains(i.ItemCategoryId.Value))
+                    .ToListAsync();
+            }
+        }
+
         public async Task UpsertRangeAsync(IEnumerable<Item> entities)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.Items.UpsertRangeAsync(entities, a => entities.Any(e => e.Id == a.Id), (a, e) => a.Id == e.Id);
+                await dbContext.Items.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }
@@ -57,7 +69,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.ItemCategories.UpsertRangeAsync(entities, a => entities.Any(e => e.Id == a.Id), (a, e) => a.Id == e.Id);
+                await dbContext.ItemCategories.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }
