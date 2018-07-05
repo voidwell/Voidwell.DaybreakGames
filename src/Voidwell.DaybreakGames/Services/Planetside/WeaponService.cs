@@ -192,7 +192,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             double? hsrDelta = null;
             double? kphDelta = null;
 
-            if (aggregate == null)
+            if (aggregate != null)
             {
 
                 if (model.Deaths > 0 && aggregate.STDKdr > 0)
