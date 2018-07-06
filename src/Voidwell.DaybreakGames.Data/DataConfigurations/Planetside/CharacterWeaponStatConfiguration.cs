@@ -12,7 +12,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => new { a.CharacterId, a.ItemId, a.VehicleId });
 
-            builder.HasIndex(a => a.Kills);
+            builder.HasIndex(a => new { a.ItemId, a.Kills });
 
             builder
                 .Ignore(a => a.Item)

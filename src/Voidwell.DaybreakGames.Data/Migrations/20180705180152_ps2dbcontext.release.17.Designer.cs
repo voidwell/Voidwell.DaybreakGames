@@ -11,9 +11,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20180705180152_ps2dbcontext.release.17")]
+    partial class ps2dbcontextrelease17
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -582,8 +583,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("CharacterId", "ItemId", "VehicleId")
                         .HasName("p_k_character_weapon_stat");
 
-                    b.HasIndex("ItemId", "Kills")
-                        .HasName("i_x_character_weapon_stat_item_id_kills");
+                    b.HasIndex("Kills")
+                        .HasName("i_x_character_weapon_stat_kills");
 
                     b.ToTable("character_weapon_stat");
                 });
@@ -703,9 +704,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnName("date");
 
-                    b.Property<int>("AircraftKills")
-                        .HasColumnName("aircraft_kills");
-
                     b.Property<float>("AvgBr")
                         .HasColumnName("avg_br");
 
@@ -741,9 +739,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<int>("Uniques")
                         .HasColumnName("uniques");
-
-                    b.Property<int>("VehicleKills")
-                        .HasColumnName("vehicle_kills");
 
                     b.HasKey("WeaponId", "Date")
                         .HasName("p_k_daily_weapon_stats");

@@ -171,7 +171,7 @@ namespace Voidwell.DaybreakGames.Census
         public async Task<T> Get<T>(bool throwError = true)
         {
             var result = await _censusClient.ExecuteQuery<IEnumerable<T>>(this, throwError);
-            return result.FirstOrDefault();
+            return result == null ? default(T) : result.FirstOrDefault();
         }
 
         public Task<IEnumerable<T>> GetList<T>(bool throwError = true)

@@ -1,6 +1,6 @@
 pushd %~dp0\src\Voidwell.DaybreakGames.Data
 set ASPNETCORE_ENVIRONMENT=Development
-dotnet ef migrations add ps2dbcontext.release.12 -v ^
+dotnet ef migrations add ps2dbcontext.release.19 -v ^
     -c Voidwell.DaybreakGames.Data.PS2DbContext ^
     -s ./../Voidwell.DaybreakGames/Voidwell.DaybreakGames.csproj ^
     -o ./Migrations ^

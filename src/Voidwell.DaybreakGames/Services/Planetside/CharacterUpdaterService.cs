@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private Timer _timer;
         private readonly TimeSpan _executionInterval = TimeSpan.FromSeconds(10);
-        private const int _maxParallelUpdates = 2;
+        private const int _maxParallelUpdates = 1;
         private bool _isWorking;
         private SemaphoreSlim _parallelSemaphore;
 
@@ -92,9 +92,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _isWorking = true;
             _parallelSemaphore = new SemaphoreSlim(_maxParallelUpdates);
 
-            var characterQueue = await _characterUpdaterRepository.GetAllAsync();
+            var characterQueue = await _characterUpdaterRepository.GetAllAsync(TimeSpan.FromHours(1));
             await Task.WhenAll(characterQueue.Select(UpdateCharacter));
-
             _isWorking = false;
         }
 

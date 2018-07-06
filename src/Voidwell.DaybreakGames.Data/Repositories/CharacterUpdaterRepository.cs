@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,13 +48,14 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<CharacterUpdateQueue>> GetAllAsync()
+        public async Task<IEnumerable<CharacterUpdateQueue>> GetAllAsync(TimeSpan? delay = null)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
 
                 return await dbContext.CharacterUpdateQueue
+                    .Where(a => DateTime.UtcNow - a.Timestamp >= delay)
                     .OrderBy(a => a.Timestamp)
                     .ToListAsync();
             }

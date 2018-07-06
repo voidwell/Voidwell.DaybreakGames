@@ -11,9 +11,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20180705144746_ps2dbcontext.release.13")]
+    partial class ps2dbcontextrelease13
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -582,8 +583,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("CharacterId", "ItemId", "VehicleId")
                         .HasName("p_k_character_weapon_stat");
 
-                    b.HasIndex("ItemId", "Kills")
-                        .HasName("i_x_character_weapon_stat_item_id_kills");
+                    b.HasIndex("Kills")
+                        .HasName("i_x_character_weapon_stat_kills");
 
                     b.ToTable("character_weapon_stat");
                 });
@@ -697,55 +698,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.DailyWeaponStats", b =>
                 {
-                    b.Property<int>("WeaponId")
-                        .HasColumnName("weapon_id");
+                    b.Property<string>("StatName")
+                        .HasColumnName("stat_name");
 
                     b.Property<DateTime>("Date")
                         .HasColumnName("date");
 
-                    b.Property<int>("AircraftKills")
-                        .HasColumnName("aircraft_kills");
+                    b.Property<int>("Value")
+                        .HasColumnName("value");
 
-                    b.Property<float>("AvgBr")
-                        .HasColumnName("avg_br");
-
-                    b.Property<int>("Headshots")
-                        .HasColumnName("headshots");
-
-                    b.Property<int>("Kills")
-                        .HasColumnName("kills");
-
-                    b.Property<float>("Kpu")
-                        .HasColumnName("kpu");
-
-                    b.Property<float>("Q1Kpu")
-                        .HasColumnName("q1_kpu");
-
-                    b.Property<float>("Q2Kpu")
-                        .HasColumnName("q2_kpu");
-
-                    b.Property<float>("Q3Kpu")
-                        .HasColumnName("q3_kpu");
-
-                    b.Property<int>("Q4Headshots")
-                        .HasColumnName("q4_headshots");
-
-                    b.Property<int>("Q4Kills")
-                        .HasColumnName("q4_kills");
-
-                    b.Property<float>("Q4Kpu")
-                        .HasColumnName("q4_kpu");
-
-                    b.Property<int>("Q4Uniques")
-                        .HasColumnName("q4_uniques");
-
-                    b.Property<int>("Uniques")
-                        .HasColumnName("uniques");
-
-                    b.Property<int>("VehicleKills")
-                        .HasColumnName("vehicle_kills");
-
-                    b.HasKey("WeaponId", "Date")
+                    b.HasKey("StatName", "Date")
                         .HasName("p_k_daily_weapon_stats");
 
                     b.ToTable("daily_weapon_stats");
