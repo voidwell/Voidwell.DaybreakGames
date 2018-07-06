@@ -47,6 +47,7 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<Zone> Zones { get; set; }
         public DbSet<SanctionedWeapon> SanctionedWeapons { get; set; }
         public DbSet<ZoneOwnershipSnapshot> ZoneOwnershipSnapshots { get; set; }
+        public DbSet<DailyWeaponStats> DailyWeaponStats { get; set; }
 
         public DbSet<AchievementEarned> AchievementEarnedEvents { get; set; }
         public DbSet<BattlerankUp> BattleRankUpEvents { get; set; }

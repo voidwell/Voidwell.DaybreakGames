@@ -11,9 +11,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20180705180303_ps2dbcontext.release.18")]
+    partial class ps2dbcontextrelease18
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -582,8 +583,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("CharacterId", "ItemId", "VehicleId")
                         .HasName("p_k_character_weapon_stat");
 
-                    b.HasIndex("ItemId", "Kills")
-                        .HasName("i_x_character_weapon_stat_item_id_kills");
+                    b.HasIndex("Kills")
+                        .HasName("i_x_character_weapon_stat_kills");
 
                     b.ToTable("character_weapon_stat");
                 });

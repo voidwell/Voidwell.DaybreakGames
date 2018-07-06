@@ -93,12 +93,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public async Task<IEnumerable<MapOwnership>> GetMapOwnership(int worldId, int zoneId)
         {
             var ownership = await _censusMap.GetMapOwnership(worldId, zoneId);
-            if (ownership == null)
-            {
-                return null;
-            }
 
-            return ownership.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
+            return ownership?.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
         }
 
         public Task<IEnumerable<MapRegion>> FindRegions(params int[] facilityIds)

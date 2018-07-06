@@ -145,12 +145,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return weapons;
         }
 
-        public async Task<Dictionary<int, IEnumerable<OracleStat>>> GetOracleStatsFromWeaponByDateAsync(string statName, IEnumerable<int> weaponIds, DateTime start, DateTime end)
+        public async Task<Dictionary<int, IEnumerable<DailyWeaponStats>>> GetOracleStatsFromWeaponByDateAsync(IEnumerable<int> weaponIds, DateTime start, DateTime end)
         {
-            var statTasks = weaponIds.Select(id => GetOracleStats(statName, id, start, end)).ToArray();
+            var statTasks = weaponIds.Select(id => GetOracleStats(id, start, end)).ToArray();
             await Task.WhenAll(statTasks);
 
-            var oracleDict = new Dictionary<int, IEnumerable<OracleStat>>();
+            var oracleDict = new Dictionary<int, IEnumerable<DailyWeaponStats>>();
             for (var i = 0; i < weaponIds.Count(); i++)
             {
                 oracleDict[weaponIds.ToArray()[i]] = statTasks.ToArray()[i].Result;
@@ -161,25 +161,26 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private readonly KeyedSemaphoreSlim _oracleStatLock = new KeyedSemaphoreSlim();
 
-        private async Task<IEnumerable<OracleStat>> GetOracleStats(string statName, int weaponId, DateTime start, DateTime end)
+        private async Task<IEnumerable<DailyWeaponStats>> GetOracleStats(int weaponId, DateTime start, DateTime end)
         {
-            var cacheKeyDate = $"{start.Year}-{start.Month}-{start.Day}";
+            var cacheKey = $"ps2.oracle_{weaponId}_{start.Year}-{start.Month}-{start.Day}_{end.Year}-{end.Month}-{end.Day}";
 
-            using (await _oracleStatLock.WaitAsync($"{statName}-{weaponId}-{cacheKeyDate}"))
+            using (await _oracleStatLock.WaitAsync(cacheKey))
             {
-                var cacheKey = $"ps2.oracle_{weaponId}_{cacheKeyDate}";
 
-                var stats = await _cache.GetAsync<IEnumerable<OracleStat>>(cacheKey);
+                var stats = await _cache.GetAsync<IEnumerable<DailyWeaponStats>>(cacheKey);
                 if (stats != null)
                 {
                     return stats;
                 }
 
-                stats = await _eventRepository.GetDeathEventsByItemIdFromDateAsync(weaponId, start, end);
+                stats = await _eventRepository.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end);
                 if (stats != null)
                 {
                     await _cache.SetAsync(cacheKey, stats, TimeSpan.FromDays(1));
                 }
+
+                Console.WriteLine(stats.Count());
 
                 return stats;
             }

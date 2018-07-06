@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 
@@ -34,53 +35,14 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             }
             else
             {
-                return BadRequest("Invalid Oracle Category");
+                return BadRequest($"Invalid category '{categoryId}'");
             }
 
             var weapons = await _itemService.GetItemsByCategoryIds(categoryIds);
 
             var simpleWeapons = weapons.Select(item =>
             {
-                var name = item.Name;
-
-                if (weapons.Count(a => a.Name == name) > 1)
-                {
-                    switch (item.FactionId)
-                    {
-                        case 1: //VS
-                            name = "VS " + name;
-                            break;
-                        case 2: //NC
-                            name = "NC " + name;
-                            break;
-                        case 3: //TR
-                            name = "TR " + name;
-                            break;
-                    }
-                }
-
-                switch (item.ItemCategoryId)
-                {
-                    case 110: //Galaxy Left
-                        name += " (Left)";
-                        break;
-                    case 111: //Galaxy Tail
-                        name += " (Tail)";
-                        break;
-                    case 112: //Galaxy Right
-                        name += " (Right)";
-                        break;
-                    case 113: //Galaxy Top
-                        name += " (Top)";
-                        break;
-                    case 129: //Sunderer Front
-                        name += " (Front)";
-                        break;
-                    case 130: //Sunderer Rear
-                        name += " (Back)";
-                        break;
-                }
-
+                var name = FormatCategoryName(item, weapons);
                 return new SimpleItem { Id = item.Id, Name = name };
             });
 
@@ -90,13 +52,88 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         [HttpGet("stats/{statId}")]
         public async Task<ActionResult> GetOracleStats(string statId, [FromQuery(Name = "q")]string sWeaponIds)
         {
+            if (!OracleStatTransforms.ContainsKey(statId))
+            {
+                return BadRequest($"Invalid stat type '{statId}'");
+            }
+
             var weaponIds = sWeaponIds.Split(",").Select(a => int.Parse(a));
-            var yesterDate = DateTime.UtcNow.Date.AddSeconds(-1);
-            var stats = await _weaponService.GetOracleStatsFromWeaponByDateAsync(statId, weaponIds, yesterDate.Date.AddMonths(-1), yesterDate);
-            return Ok(stats);
+            if (!weaponIds.Any())
+            {
+                return BadRequest("Must select at least one weapon");
+            }
+
+            var stats = await _weaponService.GetOracleStatsFromWeaponByDateAsync(weaponIds, DateTime.MinValue, DateTime.UtcNow.Date.AddDays(-1).AddSeconds(-1));
+
+            var oracleStat = stats.ToDictionary(a => a.Key, a => a.Value.Select(v => new OracleStat { Period = v.Date, Value = OracleStatTransforms[statId](v) }));
+
+            return Ok(oracleStat);
         }
 
-        private readonly Dictionary<string, IEnumerable<int>> OracleCategoryMap = new Dictionary<string, IEnumerable<int>>() {
+        private static string FormatCategoryName(Item item, IEnumerable<Item> items)
+        {
+            var name = item.Name;
+
+            if (items.Count(a => a.Name == name) > 1)
+            {
+                switch (item.FactionId)
+                {
+                    case 1: //VS
+                        name = "VS " + name;
+                        break;
+                    case 2: //NC
+                        name = "NC " + name;
+                        break;
+                    case 3: //TR
+                        name = "TR " + name;
+                        break;
+                }
+            }
+
+            switch (item.ItemCategoryId)
+            {
+                case 110: //Galaxy Left
+                    name += " (Left)";
+                    break;
+                case 111: //Galaxy Tail
+                    name += " (Tail)";
+                    break;
+                case 112: //Galaxy Right
+                    name += " (Right)";
+                    break;
+                case 113: //Galaxy Top
+                    name += " (Top)";
+                    break;
+                case 129: //Sunderer Front
+                    name += " (Front)";
+                    break;
+                case 130: //Sunderer Rear
+                    name += " (Back)";
+                    break;
+            }
+
+            return name;
+        }
+
+        private static readonly Dictionary<string, Func<DailyWeaponStats, float>> OracleStatTransforms = new Dictionary<string, Func<DailyWeaponStats, float>>()
+        {
+            { "kills", a => a.Kills },
+            { "uniques", a => a.Uniques },
+            { "kpu", a => a.Kpu },
+            { "avg-br", a => a.AvgBr },
+            { "hkills" , a => a.Headshots },
+            { "headshot-percent" , a => a.Headshots / a.Kills },
+            { "q4-kills" , a => a.Q4Kills },
+            { "q4-uniques" , a => a.Q4Uniques },
+            { "q4-headshots" , a => a.Q4Headshots },
+            { "q4-headshots-percent" , a => a.Q4Headshots / a.Q4Kills },
+            { "q4-kpu", a => a.Q4Kpu },
+            { "q3-kpu", a => a.Q3Kpu },
+            { "q2-kpu", a => a.Q2Kpu },
+            { "q1-kpu", a => a.Q1Kpu }
+        };
+
+        private static readonly Dictionary<string, IEnumerable<int>> OracleCategoryMap = new Dictionary<string, IEnumerable<int>>() {
             { "melee", new[] { 2 } },
             { "sidearms", new[] { 3, 24 } },
             { "shotguns", new[] { 4 } },
