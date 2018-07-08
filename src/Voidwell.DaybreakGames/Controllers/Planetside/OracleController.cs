@@ -44,7 +44,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             {
                 var name = FormatCategoryName(item, weapons);
                 return new SimpleItem { Id = item.Id, Name = name };
-            });
+            }).OrderBy(a => a.Id);
 
             return Ok(simpleWeapons);
         }
@@ -65,9 +65,46 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
 
             var stats = await _weaponService.GetOracleStatsFromWeaponByDateAsync(weaponIds, DateTime.MinValue, DateTime.UtcNow.Date.AddDays(-1).AddSeconds(-1));
 
-            var oracleStat = stats.ToDictionary(a => a.Key, a => a.Value.Select(v => new OracleStat { Period = v.Date, Value = OracleStatTransforms[statId](v) }));
+            var oracleStats = stats.ToDictionary(a => a.Key, a => a.Value.Select(v => new OracleStat { Period = v.Date, Value = OracleStatTransforms[statId](v) }));
+            var paddedStats = PadPeriods(oracleStats);
 
-            return Ok(oracleStat);
+            return Ok(paddedStats);
+        }
+
+        private static Dictionary<int, IEnumerable<OracleStat>> PadPeriods(Dictionary<int, IEnumerable<OracleStat>> stats)
+        {
+            DateTime minDate = DateTime.MaxValue;
+            DateTime maxDate = DateTime.MinValue;
+
+            foreach(var stat in stats)
+            {
+                var minStatDate = stat.Value.Min(a => a.Period);
+                if (minStatDate < minDate)
+                {
+                    minDate = minStatDate;
+                }
+
+                var maxStatDate = stat.Value.Max(a => a.Period);
+                if (maxStatDate > maxDate)
+                {
+                    maxDate = maxStatDate;
+                }
+            }
+
+            var emptyDates = new List<OracleStat>();
+            for(var d = 0; d < (maxDate - minDate).Days; d++)
+            {
+                var emptyStat = new OracleStat { Period = minDate.AddDays(d) };
+                emptyDates.Add(emptyStat);
+            }
+
+            var paddedStats = new Dictionary<int, IEnumerable<OracleStat>>();
+            foreach (var stat in stats)
+            {
+                paddedStats[stat.Key] = stat.Value.Union(emptyDates, new OracleStatComparer()).OrderBy(a => a.Period);
+            }
+
+            return paddedStats;
         }
 
         private static string FormatCategoryName(Item item, IEnumerable<Item> items)
@@ -122,11 +159,11 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             { "kpu", a => a.Kpu },
             { "avg-br", a => a.AvgBr },
             { "hkills" , a => a.Headshots },
-            { "headshot-percent" , a => a.Headshots / a.Kills },
+            { "headshot-percent" , a => a.Kills > 0 ? a.Headshots / a.Kills : 0 },
             { "q4-kills" , a => a.Q4Kills },
             { "q4-uniques" , a => a.Q4Uniques },
             { "q4-headshots" , a => a.Q4Headshots },
-            { "q4-headshots-percent" , a => a.Q4Headshots / a.Q4Kills },
+            { "q4-headshots-percent" , a => a.Q4Kills > 0 ? a.Q4Headshots / a.Q4Kills : 0 },
             { "q4-kpu", a => a.Q4Kpu },
             { "q3-kpu", a => a.Q3Kpu },
             { "q2-kpu", a => a.Q2Kpu },
