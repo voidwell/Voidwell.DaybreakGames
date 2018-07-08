@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dockerfile.debug = Dockerfile.debug
 		init-migrate.bat = init-migrate.bat
 		init-update.bat = init-update.bat
+		new-build.sh = new-build.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Census", "src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj", "{BF5870AC-AD8C-4DE8-800B-2C270DABA807}"
