@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("ZoneOwnershipSnapshot");
 
-            builder.HasKey(a => new { a.Timestamp, a.WorldId, a.ZoneId });
+            builder.HasKey(a => new { a.Timestamp, a.WorldId, a.ZoneId, a.RegionId });
 
             builder.HasIndex(a => new { a.WorldId, a.MetagameInstanceId });
         }

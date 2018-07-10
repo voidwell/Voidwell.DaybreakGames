@@ -30,9 +30,12 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != 5
                              select new { alert, metagameEvent });
                 var result = await query.FirstOrDefaultAsync();
-                result.alert.MetagameEvent = result.metagameEvent;
+                if (result != null)
+                {
+                    result.alert.MetagameEvent = result.metagameEvent;
+                }
 
-                return result.alert;
+                return result?.alert;
             }
         }
 

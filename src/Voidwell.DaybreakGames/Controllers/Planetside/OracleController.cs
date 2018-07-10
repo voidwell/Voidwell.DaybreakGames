@@ -167,7 +167,12 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             { "q4-kpu", a => a.Q4Kpu },
             { "q3-kpu", a => a.Q3Kpu },
             { "q2-kpu", a => a.Q2Kpu },
-            { "q1-kpu", a => a.Q1Kpu }
+            { "q1-kpu", a => a.Q1Kpu },
+            { "vkpu", a => a.VehicleKpu },
+            { "akpu", a => a.AircraftKpu },
+            { "kph", a => a.Kills / (float)24 },
+            { "vkph", a => a.VehicleKills / (float)24 },
+            { "akph", a => a.AircraftKills / (float)24 }
         };
 
         private static readonly Dictionary<string, IEnumerable<int>> OracleCategoryMap = new Dictionary<string, IEnumerable<int>>() {
