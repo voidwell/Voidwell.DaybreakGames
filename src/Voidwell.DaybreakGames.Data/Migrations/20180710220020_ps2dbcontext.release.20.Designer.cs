@@ -11,9 +11,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20180710220020_ps2dbcontext.release.20")]
+    partial class ps2dbcontextrelease20
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1589,16 +1590,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("ZoneId")
                         .HasColumnName("zone_id");
 
-                    b.Property<int>("RegionId")
-                        .HasColumnName("region_id");
-
                     b.Property<int>("FactionId")
                         .HasColumnName("faction_id");
 
                     b.Property<int?>("MetagameInstanceId")
                         .HasColumnName("metagame_instance_id");
 
-                    b.HasKey("Timestamp", "WorldId", "ZoneId", "RegionId")
+                    b.Property<int>("RegionId")
+                        .HasColumnName("region_id");
+
+                    b.HasKey("Timestamp", "WorldId", "ZoneId")
                         .HasName("p_k_zone_ownership_snapshot");
 
                     b.HasIndex("WorldId", "MetagameInstanceId")

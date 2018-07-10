@@ -23,5 +23,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int Q4Headshots { get; set; }
         public int VehicleKills { get; set; }
         public int AircraftKills { get; set; }
+        public float VehicleKpu { get; set; }
+        public float AircraftKpu { get; set; }
     }
 }
