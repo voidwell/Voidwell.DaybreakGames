@@ -63,7 +63,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
                 return BadRequest("Must select at least one weapon");
             }
 
-            var stats = await _weaponService.GetOracleStatsFromWeaponByDateAsync(weaponIds, DateTime.MinValue, DateTime.UtcNow.Date.AddDays(-1).AddSeconds(-1));
+            var stats = await _weaponService.GetOracleStatsFromWeaponByDateAsync(weaponIds, DateTime.MinValue, DateTime.UtcNow.Date.AddSeconds(-1));
 
             var oracleStats = stats.ToDictionary(a => a.Key, a => a.Value.Select(v => new OracleStat { Period = v.Date, Value = OracleStatTransforms[statId](v) }));
             var paddedStats = PadPeriods(oracleStats);
