@@ -177,10 +177,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 stats = await _eventRepository.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end);
                 if (stats != null)
                 {
-                    await _cache.SetAsync(cacheKey, stats, TimeSpan.FromDays(1));
+                    await _cache.SetAsync(cacheKey, stats, TimeSpan.FromHours(1));
                 }
-
-                Console.WriteLine(stats.Count());
 
                 return stats;
             }
