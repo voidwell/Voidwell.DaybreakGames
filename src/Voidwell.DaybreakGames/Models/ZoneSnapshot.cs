@@ -9,6 +9,6 @@ namespace Voidwell.DaybreakGames.Models
         public int WorldId { get; set; }
         public int ZoneId { get; set; }
         public int? MetagameInstanceId { get; set; }
-        public IEnumerable<MapOwnership> Ownership { get; set; }
+        public IEnumerable<ZoneRegionOwnership> Ownership { get; set; }
     }
 }

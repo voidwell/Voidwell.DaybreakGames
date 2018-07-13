@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Models
         public IEnumerable<float> Score { get; set; }
         public string ServerId { get; set; }
         public string MapId { get; set; }
-        public IEnumerable<MapOwnership> ZoneSnapshot { get; set; }
+        public IEnumerable<ZoneRegionOwnership> ZoneSnapshot { get; set; }
     }
 
     public class AlertResultMetagameEvent

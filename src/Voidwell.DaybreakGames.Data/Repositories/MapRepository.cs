@@ -71,6 +71,17 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<ZoneOwnershipSnapshot>> GetZoneSnapshotByDateTime(int worldId, int zoneId, DateTime timestamp)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.ZoneOwnershipSnapshots.Where(a => a.WorldId == worldId && a.ZoneId == zoneId && a.Timestamp == timestamp)
+                    .ToListAsync();
+            }
+        }
+
         public async Task InsertRangeAsync(IEnumerable<ZoneOwnershipSnapshot> entities)
         {
             using (var factory = _dbContextHelper.GetFactory())

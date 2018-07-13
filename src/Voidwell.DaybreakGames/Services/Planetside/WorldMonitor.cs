@@ -23,6 +23,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ILogger<WorldMonitor> _logger;
 
         private static ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
+        private static ConcurrentDictionary<int, Dictionary<int, Zone>> RetryingWorlds = new ConcurrentDictionary<int, Dictionary<int, Zone>>();
 
         public WorldMonitor(IPlayerSessionRepository playerSessionRepository, IEventRepository eventRepository,
             IZoneService zoneService, IWorldService worldService, IMapService mapService, ICharacterService characterService,
@@ -110,24 +111,38 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task SetupWorldZones(int worldId)
         {
-            _worldStates[worldId].ZoneStates.Clear();
-
-            var zones = await _zoneService.GetPlayableZones();
-
-            var zoneStateWork = zones.Select(zone => CreateWorldZoneState(worldId, zone));
-
-            await Task.WhenAll(zoneStateWork);
-
-            if (zoneStateWork.Any(t => t.Result == null))
+            if (!_worldStates[worldId].IsOnline)
             {
-                _logger.LogInformation(75625, "Failed to create world zone states");
+                if (RetryingWorlds.ContainsKey(worldId))
+                {
+                    RetryingWorlds.TryRemove(worldId, out var value);
+                }
                 return;
             }
 
-            foreach (var zoneState in zoneStateWork.Select(t => t.Result))
+            var zones = RetryingWorlds.GetValueOrDefault(worldId)?.Values ?? await _zoneService.GetPlayableZones();
+
+            await Task.WhenAll(zones.Select(zone => SetupWorldZone(worldId, zone)));
+
+            if (RetryingWorlds.ContainsKey(worldId) && RetryingWorlds[worldId].Any())
             {
-                _worldStates[worldId].ZoneStates.TryAdd(zoneState.ZoneId, zoneState);
+                SetupWorldDelay(worldId);
             }
+            else if (RetryingWorlds.ContainsKey(worldId))
+            {
+                RetryingWorlds.TryRemove(worldId, out var value);
+            }
+        }
+
+        public async Task<bool> SetupWorldZone(int worldId, int zoneId, bool retryAsync = false)
+        {
+            var zone = await _zoneService.GetZone(zoneId);
+            if (zone == null)
+            {
+                throw new InvalidOperationException("Invalid zone id provided");
+            }
+
+            return await SetupWorldZone(worldId, zone, retryAsync);
         }
 
         public Task ClearAllWorldStates()
@@ -296,6 +311,23 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return zoneState.GetMapOwnership() ?? Enumerable.Empty<ZoneRegionOwnership>();
         }
 
+        public async Task<IEnumerable<ZoneRegionOwnership>> RefreshZoneOwnership(int worldId, int zoneId)
+        {
+            var setupSuccess = await SetupWorldZone(worldId, zoneId, true);
+            if (!setupSuccess)
+            {
+                return null;
+            }
+
+            WorldZoneState zoneState;
+            if (!TryGetZoneState(worldId, zoneId, out zoneState))
+            {
+                return null;
+            }
+
+            return zoneState.GetMapOwnership() ?? Enumerable.Empty<ZoneRegionOwnership>();
+        }
+
         private async Task<WorldZoneState> CreateWorldZoneState(int worldId, Zone zone)
         {
             var ownershipTask = _mapService.GetMapOwnership(worldId, zone.Id);
@@ -337,6 +369,61 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             zoneState = _worldStates[worldId].ZoneStates[zoneId];
             return true;
+        }
+
+        private async Task<bool> SetupWorldZone(int worldId, Zone zone, bool retry = true)
+        {
+            if (!_worldStates.ContainsKey(worldId))
+            {
+                return false;
+            }
+
+            var zoneState = await CreateWorldZoneState(worldId, zone);
+            if (zoneState == null)
+            {
+                if (retry)
+                {
+                    if (!RetryingWorlds.ContainsKey(worldId))
+                    {
+                        RetryingWorlds[worldId] = new Dictionary<int, Zone>();
+                    }
+
+                    RetryingWorlds[worldId][zone.Id] = zone;
+                }
+
+                _logger.LogInformation(75725, $"Failed to create world zone states for world '{worldId}' zone '{zone.Id}'");
+
+                return false;
+            }
+
+            _worldStates[worldId].ZoneStates[zoneState.ZoneId] = zoneState;
+
+            if (RetryingWorlds.ContainsKey(worldId) && RetryingWorlds[worldId].ContainsKey(zone.Id))
+            {
+                RetryingWorlds[worldId].Remove(zone.Id);
+            }
+
+            return true;
+        }
+
+        private void SetupWorldDelay(int worldId)
+        {
+            Task.Run(() => Task.Delay(TimeSpan.FromMinutes(5)).ContinueWith(t => SetupWorldZonesRetry(worldId)));
+        }
+
+        private Task SetupWorldZonesRetry(int worldId)
+        {
+            if (!RetryingWorlds.ContainsKey(worldId))
+            {
+                return Task.CompletedTask;
+            }
+            else if (!RetryingWorlds[worldId].Any())
+            {
+                RetryingWorlds.TryRemove(worldId, out var value);
+                return Task.CompletedTask;
+            }
+
+            return SetupWorldZones(worldId);
         }
     }
 }

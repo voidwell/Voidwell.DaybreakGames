@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
@@ -11,6 +12,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<IEnumerable<MapHex>> GetMapHexsByZoneIdAsync(int zoneId);
         Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(IEnumerable<int> facilityIds);
         Task<IEnumerable<ZoneOwnershipSnapshot>> GetZoneSnapshotByMetagameEvent(int worldId, int metagameInstanceId);
+        Task<IEnumerable<ZoneOwnershipSnapshot>> GetZoneSnapshotByDateTime(int worldId, int zoneId, DateTime timestamp);
         Task InsertRangeAsync(IEnumerable<ZoneOwnershipSnapshot> entities);
         Task UpsertRangeAsync(IEnumerable<MapHex> entities);
         Task UpsertRangeAsync(IEnumerable<MapRegion> entities);

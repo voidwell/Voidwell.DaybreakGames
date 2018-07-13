@@ -17,7 +17,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(int worldId);
         IEnumerable<WorldOnlineState> GetWorldStates();
         IEnumerable<ZoneRegionOwnership> GetZoneOwnership(int worldId, int zoneId);
+        Task<IEnumerable<ZoneRegionOwnership>> RefreshZoneOwnership(int worldId, int zoneId);
         Task ClearAllWorldStates();
         Task SetupWorldZones(int worldId);
+        Task<bool> SetupWorldZone(int worldId, int zoneId, bool retryAsync = false);
     }
 }

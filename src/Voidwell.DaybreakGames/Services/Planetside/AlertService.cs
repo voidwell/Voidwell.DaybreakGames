@@ -15,17 +15,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IAlertRepository _alertRepository;
         private readonly ICombatReportService _combatReportService;
         private readonly IMapService _mapService;
+        private readonly IWorldMonitor _worldMonitor;
         private readonly ICache _cache;
 
         private readonly string _cacheKey = "ps2.alert";
         private readonly TimeSpan _cacheAlertsExpiration = TimeSpan.FromMinutes(1);
         private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(5);
 
-        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService, IMapService mapService, ICache cache)
+        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService,
+            IMapService mapService, IWorldMonitor worldMonitor, ICache cache)
         {
             _alertRepository = alertRepository;
             _combatReportService = combatReportService;
             _mapService = mapService;
+            _worldMonitor = worldMonitor;
             _cache = cache;
         }
 
@@ -157,7 +160,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             if (metagameEvent.ZoneId != null)
             {
-                await _mapService.CreateZoneSnapshot(metagameEvent.WorldId, metagameEvent.ZoneId.Value, metagameEvent.Timestamp, metagameEvent.InstanceId);
+                var zoneOwnership = await _worldMonitor.RefreshZoneOwnership(metagameEvent.WorldId, metagameEvent.ZoneId.Value);
+                if (zoneOwnership != null && zoneOwnership.Any())
+                {
+                    await _mapService.CreateZoneSnapshot(metagameEvent.WorldId, metagameEvent.ZoneId.Value, metagameEvent.Timestamp, metagameEvent.InstanceId, zoneOwnership);
+                }
             }
         }
     }
