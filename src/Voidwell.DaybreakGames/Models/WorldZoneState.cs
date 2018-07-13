@@ -30,7 +30,7 @@ namespace Voidwell.DaybreakGames.Models
             IsTracking = false;
         }
 
-        public WorldZoneState(int worldId, Zone zone, ZoneMap zoneMap, IEnumerable<MapOwnership> ownership)
+        public WorldZoneState(int worldId, Zone zone, ZoneMap zoneMap, IEnumerable<ZoneRegionOwnership> ownership)
         {
             WorldId = worldId;
             ZoneId = zone.Id;

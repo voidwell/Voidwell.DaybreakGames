@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private const string _cacheKeyPrefix = "ps2.zoneService";
         private readonly string _playableZonesCacheKey = $"{_cacheKeyPrefix}-playable-zones";
-        private readonly TimeSpan _playableZonesCacheExpiration = TimeSpan.FromHours(8);
+        private readonly TimeSpan _zoneCacheExpiration = TimeSpan.FromHours(8);
 
         private readonly int[] _playableZoneIds = new[] { 2, 4, 6, 8 };
 
@@ -37,6 +37,25 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _zoneRepository.GetAllZonesAsync();
         }
 
+        public async Task<Zone> GetZone(int zoneId)
+        {
+            var cacheKey = $"{_cacheKeyPrefix}_{zoneId}";
+
+            var zone = await _cache.GetAsync<Zone>(cacheKey);
+            if (zone != null)
+            {
+                return zone;
+            }
+
+            zone = (await _zoneRepository.GetZonesByIdsAsync(zoneId)).FirstOrDefault();
+            if (zone != null)
+            {
+                await _cache.SetAsync(cacheKey, zone, _zoneCacheExpiration);
+            }
+
+            return zone;
+        }
+
         public async Task<IEnumerable<Zone>> GetPlayableZones()
         {
             var zones = await _cache.GetAsync<IEnumerable<Zone>>(_playableZonesCacheKey);
@@ -48,7 +67,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             zones = await _zoneRepository.GetZonesByIdsAsync(_playableZoneIds);
             if (zones != null)
             {
-                await _cache.SetAsync(_playableZonesCacheKey, zones, _playableZonesCacheExpiration);
+                await _cache.SetAsync(_playableZonesCacheKey, zones, _zoneCacheExpiration);
             }
 
             return zones;

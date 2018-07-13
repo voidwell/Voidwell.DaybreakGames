@@ -90,11 +90,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        public async Task<IEnumerable<MapOwnership>> GetMapOwnership(int worldId, int zoneId)
+        public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnership(int worldId, int zoneId)
         {
             var ownership = await _censusMap.GetMapOwnership(worldId, zoneId);
 
-            return ownership?.Regions.Row.Select(o => new MapOwnership(o.RowData.RegionId, o.RowData.FactionId));
+            return ownership?.Regions.Row.Select(o => new ZoneRegionOwnership(o.RowData.RegionId, o.RowData.FactionId));
         }
 
         public Task<IEnumerable<MapRegion>> FindRegions(params int[] facilityIds)
@@ -102,14 +102,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _mapRepository.GetMapRegionsByFacilityIdsAsync(facilityIds);
         }
 
-        public async Task CreateZoneSnapshot(int worldId, int zoneId, DateTime? timestamp = null, int? metagameInstanceId = null)
+        public async Task CreateZoneSnapshot(int worldId, int zoneId, DateTime? timestamp = null, int? metagameInstanceId = null, IEnumerable<ZoneRegionOwnership> zoneOwnership = null)
         {
             if (timestamp == null)
             {
                 timestamp = DateTime.UtcNow;
             }
 
-            var zoneOwnership = await GetMapOwnership(worldId, zoneId);
+            if (zoneOwnership == null || !zoneOwnership.Any())
+            {
+                zoneOwnership = await GetMapOwnership(worldId, zoneId);
+            }
+
             if (zoneOwnership == null)
             {
                 return;
@@ -145,7 +149,24 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 WorldId = snapshotRegions.First().WorldId,
                 ZoneId = snapshotRegions.First().ZoneId,
                 MetagameInstanceId = snapshotRegions.First().MetagameInstanceId,
-                Ownership = snapshotRegions.Select(a => new MapOwnership(a.RegionId, a.FactionId))
+                Ownership = snapshotRegions.Select(a => new ZoneRegionOwnership(a.RegionId, a.FactionId))
+            };
+        }
+
+        public async Task<ZoneSnapshot> GetZoneSnapshotByDateTime(int worldId, int zoneId, DateTime timestamp)
+        {
+            var snapshotRegions = await _mapRepository.GetZoneSnapshotByDateTime(worldId, zoneId, timestamp);
+            if (snapshotRegions == null || snapshotRegions.Count() == 0)
+            {
+                return null;
+            }
+
+            return new ZoneSnapshot
+            {
+                Timestamp = snapshotRegions.First().Timestamp,
+                WorldId = snapshotRegions.First().WorldId,
+                ZoneId = snapshotRegions.First().ZoneId,
+                Ownership = snapshotRegions.Select(a => new ZoneRegionOwnership(a.RegionId, a.FactionId))
             };
         }
 
@@ -158,7 +179,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 await _mapRepository.UpsertRangeAsync(mapHexs.Select(ConvertToDbModel));
             }
 
-            /*
             var mapRegions = await _censusMap.GetAllMapRegions();
 
             if (mapRegions != null)
@@ -172,7 +192,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 await _mapRepository.UpsertRangeAsync(facilityLinks.Select(ConvertToDbModel));
             }
-            */
         }
 
         private MapHex ConvertToDbModel(CensusMapHexModel censusModel)

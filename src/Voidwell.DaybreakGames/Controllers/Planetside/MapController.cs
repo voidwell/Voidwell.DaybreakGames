@@ -35,5 +35,35 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             var result = await _worldMonitor.GetTerritoryFromDate(request.WorldId, request.ZoneId, request.EndDate);
             return Ok(result);
         }
+
+        [HttpPost("snapshot/create")]
+        public async Task<ActionResult> PostCreateZoneSnapshot([FromBody]SnapshotRequest request)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _mapService.CreateZoneSnapshot(request.WorldId.Value, request.ZoneId.Value, request.Timestamp);
+            return NoContent();
+        }
+
+        [HttpPost("snapshot")]
+        public async Task<ActionResult> PostGetZoneSnapshot([FromBody]SnapshotRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _mapService.GetZoneSnapshotByDateTime(request.WorldId.Value, request.ZoneId.Value, request.Timestamp.Value);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        }
+
     }
 }

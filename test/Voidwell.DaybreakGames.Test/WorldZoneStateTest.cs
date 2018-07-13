@@ -88,10 +88,10 @@ namespace Voidwell.DaybreakGames.Census.Test
             });
         }
 
-        private IEnumerable<MapOwnership> GetMapOwnership()
+        private IEnumerable<ZoneRegionOwnership> GetMapOwnership()
         {
             var model = LoadJson<CensusMapModel>("MapOwnership.json");
-            return model.Regions.Row.Select(a => new MapOwnership(a.RowData.RegionId, a.RowData.FactionId));
+            return model.Regions.Row.Select(a => new ZoneRegionOwnership(a.RowData.RegionId, a.RowData.FactionId));
         }
 
         private T LoadJson<T>(string filename) where T: class
