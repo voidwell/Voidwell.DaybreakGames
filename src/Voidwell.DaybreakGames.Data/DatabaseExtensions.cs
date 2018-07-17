@@ -44,6 +44,7 @@ namespace Voidwell.DaybreakGames.Data
             services.AddSingleton<ICharacterUpdaterRepository, CharacterUpdaterRepository>();
             services.AddSingleton<IFunctionalRepository, FunctionalRepository>();
             services.AddSingleton<ISanctionedWeaponsRepository, SanctionedWeaponsRepository>();
+            services.AddSingleton<IExperienceRepository, ExperienceRepository>();
 
             return services;
         }
