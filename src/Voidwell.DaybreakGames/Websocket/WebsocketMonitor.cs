@@ -61,7 +61,7 @@ namespace Voidwell.DaybreakGames.Websocket
             {
                 Characters = _options.CensusWebsocketCharacters,
                 Worlds = _options.CensusWebsocketWorlds,
-                EventNames = _options.CensusWebsocketServices
+                EventNames = eventNames
             };
         }
 
