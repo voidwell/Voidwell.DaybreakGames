@@ -57,7 +57,11 @@ namespace Voidwell.DaybreakGames
                 var experienceIds = Configuration.GetValue<string>("CensusWebsocketExperienceIds");
 
                 a.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
-                a.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
+
+                if (experienceIds != null)
+                {
+                    a.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
+                }
             });
 
             services.AddEntityFrameworkContext(Configuration);
