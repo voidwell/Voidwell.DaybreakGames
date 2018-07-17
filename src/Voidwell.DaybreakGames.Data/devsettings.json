@@ -1,0 +1,3 @@
+﻿{
+    "DBConnectionString": "Server=192.168.2.100;Database=voidwell.daybreakgames;Username=localdev;Password=localdev;Keepalive=1"
+}

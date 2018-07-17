@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
@@ -20,7 +22,6 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly ILogger<WebsocketMonitor> _logger;
 
         private CensusStreamClient _client;
-        private CensusStreamSubscription _subscription;
         private CensusHeartbeat _lastHeartbeat;
 
         public override string ServiceName => "CensusMonitor";
@@ -34,16 +35,34 @@ namespace Voidwell.DaybreakGames.Websocket
             _worldMonitor = worldMonitor;
             _logger = logger;
 
-            _subscription = new CensusStreamSubscription
+            var subscription = CreateSubscription();
+
+            _client = new CensusStreamClient(subscription, apiKey: _options.CensusServiceKey)
+                .OnMessage(OnMessage)
+                .OnDisconnect(OnDisconnect);
+        }
+
+        private CensusStreamSubscription CreateSubscription()
+        {
+            var eventNames = new List<string>();
+
+            if (_options.CensusWebsocketServices != null)
+            {
+                eventNames.AddRange(_options.CensusWebsocketServices);
+            }
+
+            if (_options.CensusWebsocketExperienceIds != null && _options.CensusWebsocketExperienceIds.Any())
+            {
+                var experienceEvents = _options.CensusWebsocketExperienceIds.Select(id => $"GainExperience_experience_id_{id}");
+                eventNames.AddRange(experienceEvents);
+            }
+
+            return new CensusStreamSubscription
             {
                 Characters = _options.CensusWebsocketCharacters,
                 Worlds = _options.CensusWebsocketWorlds,
                 EventNames = _options.CensusWebsocketServices
             };
-
-            _client = new CensusStreamClient(_subscription, apiKey: _options.CensusServiceKey)
-                .OnMessage(OnMessage)
-                .OnDisconnect(OnDisconnect);
         }
 
         public override async Task StartInternalAsync(CancellationToken cancellationToken)

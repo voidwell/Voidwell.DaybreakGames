@@ -14,7 +14,6 @@ using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.HostedServices;
 using IdentityServer4.AccessTokenValidation;
-using System;
 
 namespace Voidwell.DaybreakGames
 {
@@ -55,7 +54,10 @@ namespace Voidwell.DaybreakGames
             services.Configure<DaybreakGamesOptions>(a =>
             {
                 var eventNames = Configuration.GetValue<string>("CensusWebsocketServices");
+                var experienceIds = Configuration.GetValue<string>("CensusWebsocketExperienceIds");
+
                 a.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
+                a.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
             });
 
             services.AddEntityFrameworkContext(Configuration);
