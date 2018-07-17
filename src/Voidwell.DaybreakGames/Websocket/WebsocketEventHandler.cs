@@ -338,8 +338,8 @@ namespace Voidwell.DaybreakGames.Websocket
             }
         }
 
-        [CensusEventHandler("GainExperience", typeof(Models.GainExperience))]
-        private Task Process(Models.GainExperience payload)
+        [CensusEventHandler("GainExperience", typeof(GainExperience))]
+        private Task Process(GainExperience payload)
         {
             var dataModel = new Data.Models.Planetside.Events.GainExperience
             {
