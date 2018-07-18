@@ -273,6 +273,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _worldStates[worldId].OnlinePlayers.TryRemove(characterId, out OnlineCharacter offlineCharacter);
         }
 
+        public void SetPlayerLastSeen(int worldId, string characterId, DateTime timestamp, int zoneId)
+        {
+            if (!_worldStates.ContainsKey(worldId) || !_worldStates[worldId].OnlinePlayers.ContainsKey(characterId))
+            {
+                return;
+            }
+
+            _worldStates[worldId].OnlinePlayers[characterId].UpdateLastSeen(timestamp, zoneId);
+        }
+
         public IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(int worldId)
         {
             if (!_worldStates.ContainsKey(worldId))
@@ -283,6 +293,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _worldStates[worldId].OnlinePlayers.Values;
         }
 
+        public ZonePopulation GetZonePopulation(int worldId, int zoneId)
+        {
+            if (!_worldStates.ContainsKey(worldId))
+            {
+                return null;
+            }
+
+            return _worldStates[worldId].GetZonePopulation(zoneId);
+        }
+
         public IEnumerable<WorldOnlineState> GetWorldStates()
         {
             return _worldStates.Select(a => new WorldOnlineState {
@@ -290,6 +310,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Name = a.Value.Name,
                 IsOnline = a.Value.IsOnline,
                 OnlineCharacters = a.Value.OnlinePlayers.Count,
+                ZonePopulations = a.Value.GetZonePopulations(),
                 ZoneStates = a.Value.ZoneStates.Select(b => new WorldOnlineZoneState
                 {
                     Id = b.Key,

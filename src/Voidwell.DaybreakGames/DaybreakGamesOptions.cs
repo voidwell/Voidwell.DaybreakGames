@@ -13,7 +13,6 @@ namespace Voidwell.DaybreakGames
         public IEnumerable<string> CensusWebsocketCharacters { get; set; }
         public IEnumerable<string> CensusWebsocketExperienceIds { get; set; } = new[]
         {
-            "2",    // Kill Player Assist
             "4",    // Heal Player
             "7",    // Revive
             "15",   // Control Point Defend

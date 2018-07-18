@@ -8,6 +8,7 @@ namespace Voidwell.DaybreakGames.Models
         public string Name { get; set; }
         public bool IsOnline { get; set; }
         public int OnlineCharacters { get; set; }
+        public Dictionary<int, ZonePopulation> ZonePopulations { get; set; }
         public IEnumerable<WorldOnlineZoneState> ZoneStates { get; set; }
     }
 

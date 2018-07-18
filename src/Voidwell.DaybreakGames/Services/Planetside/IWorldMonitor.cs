@@ -21,5 +21,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task ClearAllWorldStates();
         Task SetupWorldZones(int worldId);
         Task<bool> SetupWorldZone(int worldId, int zoneId, bool retryAsync = false);
+        void SetPlayerLastSeen(int worldId, string characterId, DateTime timestamp, int zoneId);
+        ZonePopulation GetZonePopulation(int worldId, int zoneId);
     }
 }
