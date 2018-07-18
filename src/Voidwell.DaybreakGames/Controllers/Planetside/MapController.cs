@@ -29,6 +29,12 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             return _worldMonitor.GetTerritory(worldId, zoneId);
         }
 
+        [HttpGet("population/{worldId}/{zoneId}")]
+        public ZonePopulation GetWorldPopulation(int worldId, int zoneId)
+        {
+            return _worldMonitor.GetZonePopulation(worldId, zoneId);
+        }
+
         [HttpPost("territory")]
         public async Task<ActionResult> GetWorldScoreFromDate([FromBody]CombatReportRequest request)
         {
