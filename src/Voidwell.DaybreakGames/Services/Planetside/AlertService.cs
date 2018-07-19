@@ -32,9 +32,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _cache = cache;
         }
 
-        public async Task<IEnumerable<Alert>> GetAllAlerts(int limit = 25)
+        public async Task<IEnumerable<Alert>> GetAlerts(int pageNumber, int? worldId = null, int limit = 10)
         {
-            var cacheKey = $"{_cacheKey}_alerts";
+            var cacheKey = $"{_cacheKey}_alerts_{pageNumber}:{worldId}";
 
             var alerts = await _cache.GetAsync<IEnumerable<Alert>>(cacheKey);
             if (alerts != null)
@@ -42,7 +42,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return alerts;
             }
 
-            alerts = await _alertRepository.GetAllAlerts(limit);
+            alerts = await _alertRepository.GetAlerts(pageNumber, limit, worldId);
 
             if (alerts != null && alerts.Any())
             {
@@ -50,11 +50,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return alerts;
-        }
-
-        public Task<IEnumerable<Alert>> GetAlerts(int worldId, int limit = 25)
-        {
-            return _alertRepository.GetAlertsByWorldId(worldId, limit);
         }
 
         public async Task<AlertResult> GetAlert(int worldId, int instanceId)
