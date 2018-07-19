@@ -39,7 +39,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Alert>> GetAlertsByWorldId(int worldId, int limit)
+        public async Task<IEnumerable<Alert>> GetAlerts(int pageNumber, int limit, int? worldId)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
@@ -47,53 +47,22 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var query = (from alert in dbContext.Alerts
 
-                            join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                            from metagameEvent in metagameEventQ.DefaultIfEmpty()
-
-                             join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
-                             from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
-
-                             where alert.WorldId == worldId && metagameEvent.Type != 5
-                            orderby alert.StartDate descending
-                            select new { alert, metagameEvent, metagameEventZone })
-                            .Take(limit);
-
-                var result = query.ToList().Select(a =>
-                {
-                    a.alert.MetagameEvent = a.metagameEvent;
-
-                    if (a.metagameEventZone != null)
-                    {
-                        a.alert.ZoneId = a.alert.ZoneId ?? a.metagameEventZone.ZoneId;
-                    }
-
-                    return a.alert;
-                });
-
-                return await Task.FromResult(result);
-            }
-        }
-
-        public async Task<IEnumerable<Alert>> GetAllAlerts(int limit)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                var query = (from alert in dbContext.Alerts
-
-                            join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                            from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
                              join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
                              from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
 
                              where metagameEvent.Type != 5
-                            orderby alert.StartDate descending
-                            select new { alert, metagameEvent, metagameEventZone })
-                            .Take(limit);
+                             orderby alert.StartDate descending
+                             select new { alert, metagameEvent, metagameEventZone });
 
-                var result = query.ToList().Select(a =>
+                if (worldId != null)
+                {
+                    query = query.Where(a => a.alert.WorldId == worldId);
+                }
+
+                var result = query.Skip(pageNumber * limit).Take(limit).ToList().Select(a =>
                 {
                     a.alert.MetagameEvent = a.metagameEvent;
 

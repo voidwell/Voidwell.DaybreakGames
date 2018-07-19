@@ -21,17 +21,10 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             return Ok(result);
         }
 
-        [HttpGet("{worldId}")]
-        public async Task<ActionResult> GetAlertsByWorldId(int worldId)
+        [HttpGet("alerts/{pageNumber}")]
+        public async Task<ActionResult> GetAlerts (int pageNumber, [FromQuery]int? worldId)
         {
-            var result = await _alertService.GetAlerts(worldId);
-            return Ok(result);
-        }
-
-        [HttpGet]
-        public async Task<ActionResult> GetAllAlerts()
-        {
-            var result = await _alertService.GetAllAlerts();
+            var result = await _alertService.GetAlerts(pageNumber, worldId);
             return Ok(result);
         }
     }
