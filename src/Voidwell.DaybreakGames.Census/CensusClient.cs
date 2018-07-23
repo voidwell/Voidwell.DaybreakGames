@@ -103,7 +103,14 @@ namespace Voidwell.DaybreakGames.Census
 
                 if (throwError)
                 {
-                    throw new CensusServerException(error);
+                    if (error == "service_unavailable")
+                    {
+                        throw new CensusServiceUnavailableException();
+                    }
+                    else
+                    {
+                        throw new CensusServerException(error);
+                    }
                 }
             }
             else if (errorCode != null)
