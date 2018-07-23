@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
+using Voidwell.DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
@@ -24,6 +25,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _executionInterval = TimeSpan.FromSeconds(10);
         private const int _maxParallelUpdates = 1;
         private bool _isWorking;
+        private bool _waitError;
         private SemaphoreSlim _parallelSemaphore;
 
         public CharacterUpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService,
@@ -90,6 +92,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
 
             _isWorking = true;
+            _waitError = false;
             _parallelSemaphore = new SemaphoreSlim(_maxParallelUpdates);
 
             var characterQueue = await _characterUpdaterRepository.GetAllAsync(TimeSpan.FromHours(1));
@@ -103,7 +106,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             try
             {
-                if (!_isRunning)
+                if (!_isRunning || _waitError)
                     return;
 
                 var character = await _characterService.GetCharacter(characterItem.CharacterId);
@@ -111,6 +114,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 {
                     await _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, character?.Time?.LastSaveDate);
                     await _characterUpdaterRepository.RemoveAsync(characterItem);
+                }
+                catch (CensusServiceUnavailableException)
+                {
+                    _logger.LogError(75214, $"Service Unavailable when trying to update character {characterItem.CharacterId}");
+                    _waitError = true;
                 }
                 catch (Exception ex)
                 {
