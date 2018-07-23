@@ -5,6 +5,8 @@ using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Models;
+using System.Collections.Generic;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -16,10 +18,45 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public string ServiceName => "MetagameEventService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
+        private static readonly Dictionary<int, TimeSpan> _metagameTypeDurations = new Dictionary<int, TimeSpan>
+        {
+            {1, TimeSpan.FromMinutes(80) },
+            {2, TimeSpan.FromMinutes(45) },
+            {5, TimeSpan.FromMinutes(5) },
+            {8, TimeSpan.FromMinutes(45) },
+            {9, TimeSpan.FromMinutes(90) },
+            {10, TimeSpan.FromMinutes(25) }
+        };
+
         public MetagameEventService(IMetagameEventRepository metagameEventRepository, CensusMetagameEvent censusMetagameEvent)
         {
             _metagameEventRepository = metagameEventRepository;
             _censusMetagameEvent = censusMetagameEvent;
+        }
+
+        public async Task<ZoneMetagameEvent> GetMetagameEvent(int metagameEventId)
+        {
+            var categoryTask = _metagameEventRepository.GetMetagameEventCategory(metagameEventId);
+            var zoneTask = _metagameEventRepository.GetMetagameCategoryZoneId(metagameEventId);
+
+            await Task.WhenAll(categoryTask, zoneTask);
+
+            if (categoryTask.Result == null)
+            {
+                return null;
+            }
+
+            var category = categoryTask.Result;
+
+            return new ZoneMetagameEvent
+            {
+                Id = category.Id,
+                TypeId = category.Type.Value,
+                Name = category.Name,
+                Description = category.Description,
+                ZoneId = zoneTask.Result,
+                Duration = _metagameTypeDurations.GetValueOrDefault(category.Type.Value, TimeSpan.FromMinutes(45))
+            };
         }
 
         public async Task RefreshStore()

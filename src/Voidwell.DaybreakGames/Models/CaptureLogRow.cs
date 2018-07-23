@@ -7,6 +7,9 @@ namespace Voidwell.DaybreakGames.Models
         public float? FactionVs { get; set; }
         public float? FactionNc { get; set; }
         public float? FactionTr { get; set; }
+        public int? ZonePopVs { get; set; }
+        public int? ZonePopNc { get; set; }
+        public int? ZonePopTr { get; set; }
         public int? NewFactionId { get; set; }
         public int? OldFactionId { get; set; }
         public DateTime Timestamp { get; set; }
