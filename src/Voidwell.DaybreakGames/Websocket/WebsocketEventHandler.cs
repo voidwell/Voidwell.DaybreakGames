@@ -272,11 +272,33 @@ namespace Voidwell.DaybreakGames.Websocket
         {
             await _facilityControlSemaphore.WaitAsync();
 
+            float scoreVs = 0f;
+            float scoreNc = 0f;
+            float scoreTr = 0f;
+            int popVs = 0;
+            int popNc = 0;
+            int popTr = 0;
+
             try
             {
-
+                var zonePopulation = _worldMonitor.GetZonePopulation(payload.WorldId, payload.ZoneId.Value);
                 var mapUpdate = await _worldMonitor.UpdateFacilityControl(payload);
+
                 var score = mapUpdate?.Score;
+
+                if (score != null)
+                {
+                    scoreVs = score.ConnectedTerritories.Vs.Percent * 100;
+                    scoreNc = score.ConnectedTerritories.Nc.Percent * 100;
+                    scoreTr = score.ConnectedTerritories.Tr.Percent * 100;
+                }
+
+                if (zonePopulation != null)
+                {
+                    popVs = zonePopulation.VS;
+                    popNc = zonePopulation.NC;
+                    popTr = zonePopulation.TR;
+                }
 
                 var dataModel = new Data.Models.Planetside.Events.FacilityControl
                 {
@@ -288,9 +310,12 @@ namespace Voidwell.DaybreakGames.Websocket
                     Timestamp = payload.Timestamp,
                     WorldId = payload.WorldId,
                     ZoneId = payload.ZoneId.Value,
-                    ZoneControlVs = score != null ? score.ConnectedTerritories.Vs.Percent * 100 : 0,
-                    ZoneControlNc = score != null ? score.ConnectedTerritories.Nc.Percent * 100 : 0,
-                    ZoneControlTr = score != null ? score.ConnectedTerritories.Tr.Percent * 100 : 0
+                    ZoneControlVs = scoreVs,
+                    ZoneControlNc = scoreNc,
+                    ZoneControlTr = scoreTr,
+                    ZonePopulationVs = popVs,
+                    ZonePopulationNc = popNc,
+                    ZonePopulationTr = popTr
                 };
 
                 await _eventRepository.AddAsync(dataModel);

@@ -83,44 +83,31 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
+                var query = (from alert in dbContext.Alerts
 
-                var query = from alert in dbContext.Alerts
+                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                            join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                            from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                             join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
+                             from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
 
-                            join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
-                            from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
+                             where alert.WorldId == worldId && alert.MetagameInstanceId == instanceId
+                             select new { alert, metagameEvent, metagameEventZone });
 
-                            where alert.WorldId == worldId && alert.MetagameInstanceId == instanceId
-                            orderby alert.StartDate descending
-                            select new { alert, metagameEvent, metagameEventZone };
-
-                var result = query.ToList().Select(a =>
+                var result = await query.FirstOrDefaultAsync();
+                if (result == null)
                 {
-                    a.alert.MetagameEvent = a.metagameEvent;
+                    return null;
+                }
 
-                    if (a.metagameEventZone != null)
-                    {
-                        a.alert.ZoneId = a.alert.ZoneId ?? a.metagameEventZone.ZoneId;
-                    }
+                result.alert.MetagameEvent = result.metagameEvent;
 
-                    return a.alert;
-                })
-                .First();
+                if (result.alert.ZoneId == null && result.metagameEventZone != null)
+                {
+                    result.alert.ZoneId = result.metagameEventZone.ZoneId;
+                }
 
-                return await Task.FromResult(result);
-            }
-        }
-
-        public async Task<int?> GetMetagameCategoryZoneId(int metagameEventId)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                var categoryZone = await dbContext.MetagameEventCategoryZones.FirstOrDefaultAsync(a => a.MetagameEventCategoryId == metagameEventId);
-                return categoryZone?.ZoneId;
+                return result.alert;
             }
         }
 

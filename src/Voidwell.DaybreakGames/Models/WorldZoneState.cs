@@ -44,12 +44,7 @@ namespace Voidwell.DaybreakGames.Models
             }
 
             CalculateOwnership();
-
-            var warpgateFactions = Map.Warpgates.Select(a => MapRegionOwnership[a.RegionId]).Distinct();
-            if (warpgateFactions.Count() == 1)
-            {
-                UpdateLockState(new ZoneLockState(DateTime.MinValue, null, warpgateFactions.First()));
-            }
+            VerifyLockState();
 
             IsTracking = true;
         }
@@ -67,6 +62,7 @@ namespace Voidwell.DaybreakGames.Models
                     MapRegionOwnership[region.RegionId] = factionId;
 
                     CalculateOwnership();
+                    VerifyLockState();
                 }
             }
             finally
@@ -89,6 +85,24 @@ namespace Voidwell.DaybreakGames.Models
 
             return Map.Regions
                 .Select(a => new ZoneRegionOwnership(a.RegionId, MapRegionOwnership[a.RegionId]));
+        }
+
+        public WorldZoneRegion GetRegionByFacilityId(int facilityId)
+        {
+            return Map.Regions.FirstOrDefault(r => r.FacilityId == facilityId);
+        }
+
+        private void VerifyLockState()
+        {
+            var warpgateFactions = Map.Warpgates.Select(a => MapRegionOwnership[a.RegionId]).Distinct();
+            if (LockState == null && warpgateFactions.Count() == 1)
+            {
+                UpdateLockState(new ZoneLockState(DateTime.UtcNow, null, warpgateFactions.First()));
+            }
+            else if (warpgateFactions.Count() > 1)
+            {
+                UpdateLockState();
+            }
         }
 
         private void CalculateOwnership()

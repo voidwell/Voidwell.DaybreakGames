@@ -13,6 +13,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class AlertService : IAlertService
     {
         private readonly IAlertRepository _alertRepository;
+        private readonly IMetagameEventService _metagameEventService;
         private readonly ICombatReportService _combatReportService;
         private readonly IMapService _mapService;
         private readonly IWorldMonitor _worldMonitor;
@@ -22,10 +23,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _cacheAlertsExpiration = TimeSpan.FromMinutes(1);
         private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(5);
 
-        public AlertService(IAlertRepository alertRepository, ICombatReportService combatReportService,
-            IMapService mapService, IWorldMonitor worldMonitor, ICache cache)
+        public AlertService(IAlertRepository alertRepository, IMetagameEventService metagameEventService,
+            ICombatReportService combatReportService, IMapService mapService, IWorldMonitor worldMonitor, ICache cache)
         {
             _alertRepository = alertRepository;
+            _metagameEventService = metagameEventService;
             _combatReportService = combatReportService;
             _mapService = mapService;
             _worldMonitor = worldMonitor;
@@ -112,9 +114,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task CreateAlert(MetagameEvent metagameEvent)
         {
+            var category = await _metagameEventService.GetMetagameEvent(metagameEvent.MetagameEventId);
+
             if (metagameEvent.ZoneId == null)
             {
-                metagameEvent.ZoneId = await _alertRepository.GetMetagameCategoryZoneId(metagameEvent.MetagameEventId);
+                metagameEvent.ZoneId = category.ZoneId;
             }
 
             var dataModel = new Alert
@@ -124,7 +128,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MetagameInstanceId = metagameEvent.InstanceId,
                 MetagameEventId = metagameEvent.MetagameEventId,
                 StartDate = metagameEvent.Timestamp,
-                EndDate = metagameEvent.Timestamp.AddMinutes(45),
+                EndDate = metagameEvent.Timestamp + category.Duration,
                 StartFactionVs = metagameEvent.FactionVs,
                 StartFactionNc = metagameEvent.FactionNc,
                 StartFactionTr = metagameEvent.FactionTr,
