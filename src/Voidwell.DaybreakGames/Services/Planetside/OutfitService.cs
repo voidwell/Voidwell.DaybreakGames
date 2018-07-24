@@ -58,7 +58,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var details = await _cache.GetAsync<OutfitDetails>(cacheKey);
             if (details != null)
             {
-                //return details;
+                return details;
             }
 
             var outfit = await GetOutfitDetailsAsync(outfitId);
