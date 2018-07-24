@@ -334,6 +334,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 _logger.LogInformation(75725, $"Failed to create world zone states for world '{worldId}' zone '{zone.Id}'");
 
+                zoneState = new WorldZoneState(worldId, zone);
+                _worldStates[worldId].SetZoneState(zoneState);
                 return false;
             }
 
