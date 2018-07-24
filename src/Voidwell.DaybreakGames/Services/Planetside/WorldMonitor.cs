@@ -306,7 +306,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 _logger.LogError(71612, $"{string.Join(", ", errors)} for worldId {worldId} zoneId {zone.Id}");
 
-                return new WorldZoneState(worldId, zone);
+                return null;
             }
 
             return new WorldZoneState(worldId, zone, zoneMap, ownership);
