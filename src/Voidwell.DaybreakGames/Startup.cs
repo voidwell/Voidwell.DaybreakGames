@@ -14,6 +14,7 @@ using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.HostedServices;
 using IdentityServer4.AccessTokenValidation;
+using System;
 
 namespace Voidwell.DaybreakGames
 {
@@ -107,6 +108,9 @@ namespace Voidwell.DaybreakGames
                     options.Authority = "http://voidwellauth:5000";
                     options.SupportedTokens = SupportedTokens.Jwt;
                     options.RequireHttpsMetadata = false;
+
+                    options.EnableCaching = true;
+                    options.CacheDuration = TimeSpan.FromMinutes(10);
                 });
         }
 

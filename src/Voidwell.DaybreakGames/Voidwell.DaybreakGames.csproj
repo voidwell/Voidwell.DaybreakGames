@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>Voidwell.DaybreakGames</AssemblyName>
   </PropertyGroup>
 
@@ -26,11 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="2.0.2" />
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" Watch="false" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" Watch="false" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" Watch="false" />
@@ -44,6 +39,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-  <Import Project="$(_WatchTarget)" Condition="Exists('$(_WatchTarget)')" />
+    
 </Project>
