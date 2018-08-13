@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.0.0-sdk
+FROM microsoft/dotnet:2.1-sdk
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 ENV ASPNETCORE_ENVIRONMENT Development

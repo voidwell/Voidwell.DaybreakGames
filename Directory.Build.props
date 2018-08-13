@@ -5,6 +5,5 @@
       <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
       <OutputPath>$(RepositoryRootDirectory)\build\$(MSBuildProjectName)\$(Configuration)\bin\</OutputPath>
       <BaseIntermediateOutputPath>$(RepositoryRootDirectory)\build\$(MSBuildProjectName)\$(Configuration)\obj\</BaseIntermediateOutputPath>
-      <_WatchTarget>$(MSBuildProjectDirectory)\obj\$(MSBuildProjectFile).dotnetwatch.g.targets</_WatchTarget>
   </PropertyGroup>
 </Project>
