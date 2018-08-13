@@ -23,5 +23,6 @@ namespace Voidwell.DaybreakGames.Models
         public double SiegeLevel { get; set; }
         public int IVIScore { get; set; }
         public DateTime? LastSaved { get; set; }
+        public int Prestige { get; set; }
     }
 }

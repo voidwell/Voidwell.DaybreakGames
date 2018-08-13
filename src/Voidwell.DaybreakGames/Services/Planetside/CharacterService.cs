@@ -893,7 +893,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Deaths = stats.LifetimeStats.Deaths,
                 Score = stats.LifetimeStats.Score,
                 PlayTime = stats.LifetimeStats.PlayTime,
-                IVIScore = stats.InfantryStats.IVIScore.GetValueOrDefault()
+                IVIScore = stats.InfantryStats.IVIScore.GetValueOrDefault(),
+                Prestige = stats.PrestigeLevel
             };
 
             details.KillDeathRatio = (double)details.Kills / details.Deaths;
