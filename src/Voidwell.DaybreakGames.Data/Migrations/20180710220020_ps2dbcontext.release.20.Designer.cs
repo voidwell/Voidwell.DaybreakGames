@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 using Voidwell.DaybreakGames.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
