@@ -471,6 +471,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                                UpdateCharacterStats(characterId, lastLoginDate),
                                UpdateCharacterWeaponStats(characterId, lastLoginDate),
                                UpdateCharacterStatsHistory(characterId, lastLoginDate));
+
+            var characterCacheKey = $"{_cacheKey}_character_{characterId}";
+            var detailsCacheKey = $"{_cacheKey}_details_{characterId}";
+            await Task.WhenAll(_cache.RemoveAsync(characterCacheKey), _cache.RemoveAsync(detailsCacheKey));
         }
 
         public async Task<OutfitMember> GetCharactersOutfit(string characterId)

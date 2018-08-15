@@ -112,7 +112,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var character = await _characterService.GetCharacter(characterItem.CharacterId);
                 try
                 {
-                    await _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, character?.Time?.LastSaveDate);
+                    var lastSaveDate = character?.Time?.LastSaveDate;
+                    lastSaveDate = lastSaveDate?.AddHours(-12);
+                    await _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, lastSaveDate);
                     await _characterUpdaterRepository.RemoveAsync(characterItem);
                 }
                 catch (CensusServiceUnavailableException)
