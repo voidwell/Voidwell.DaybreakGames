@@ -68,6 +68,7 @@ namespace Voidwell.DaybreakGames.Models
                 Name = zoneState.Name,
                 IsTracking = zoneState.IsTracking,
                 LockState = zoneState.LockState,
+                AlertState = zoneState.AlertState,
                 Population = GetZonePopulation(zoneId)
             };
         }
@@ -100,6 +101,16 @@ namespace Voidwell.DaybreakGames.Models
             }
 
             ZoneStates[zoneId].UpdateLockState(lockState);
+        }
+
+        public void UpdateZoneAlertState(int zoneId, ZoneAlertState alertState = null)
+        {
+            if (!ZoneStates.ContainsKey(zoneId))
+            {
+                return;
+            }
+
+            ZoneStates[zoneId].UpdateAlertState(alertState);
         }
 
         public async Task<FacilityControlChange> UpdateZoneFacilityFaction(int zoneId, int facilityId, int factionId)

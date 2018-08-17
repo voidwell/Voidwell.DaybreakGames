@@ -43,15 +43,6 @@ namespace Voidwell.DaybreakGames.Websocket
                 }
         });
 
-        private enum METAGAME_EVENT_STATE
-        {
-            STARTED = 135,
-            RESTARTED = 136,
-            CANCELED = 137,
-            ENDED = 138,
-            XPCHANGE = 139
-        };
-
         public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor, ICharacterService characterService, IAlertService alertService, ILogger<WebsocketEventHandler> logger)
         {
             _eventRepository = eventRepository;
@@ -404,17 +395,8 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId
             };
-            await _eventRepository.AddAsync(dataModel);
 
-            var eventState = Enum.Parse<METAGAME_EVENT_STATE>(dataModel.MetagameEventState);
-            if (eventState == METAGAME_EVENT_STATE.STARTED || eventState == METAGAME_EVENT_STATE.RESTARTED)
-            {
-                await _alertService.CreateAlert(payload);
-            }
-            else if (eventState == METAGAME_EVENT_STATE.ENDED || eventState == METAGAME_EVENT_STATE.CANCELED)
-            {
-                await _alertService.UpdateAlert(payload);
-            }
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), _alertService.ProcessMetagameEvent(payload));
         }
 
         [CensusEventHandler("PlayerFacilityCapture", typeof(Models.PlayerFacilityCapture))]
