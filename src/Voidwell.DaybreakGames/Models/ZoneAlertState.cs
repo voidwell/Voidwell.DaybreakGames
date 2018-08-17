@@ -4,19 +4,15 @@ namespace Voidwell.DaybreakGames.Models
 {
     public class ZoneAlertState
     {
-        public ZoneAlertState(DateTime timestamp, int? instanceId, int? metagameEventType, int? metagameEventId, TimeSpan? duration)
+        public ZoneAlertState(DateTime timestamp, int? instanceId, ZoneMetagameEvent metagameEvent)
         {
             Timestamp = timestamp;
             InstanceId = instanceId;
-            MetagameEventType = metagameEventType;
-            MetagameEventId = metagameEventId;
-            Duration = duration?.Minutes;
+            MetagameEvent = metagameEvent;
         }
 
         public DateTime Timestamp { get; set; }
         public int? InstanceId { get; set; }
-        public int? MetagameEventType { get; set; }
-        public int? MetagameEventId { get; set; }
-        public int? Duration { get; set; }
+        public ZoneMetagameEvent MetagameEvent { get; set; }
     }
 }
