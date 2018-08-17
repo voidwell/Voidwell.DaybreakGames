@@ -7,6 +7,8 @@
         public OwnershipScoreFactions AmpStations { get; set; }
         public OwnershipScoreFactions TechPlants { get; set; }
         public OwnershipScoreFactions BioLabs { get; set; }
+        public OwnershipScoreFactions LargeOutposts { get; set; }
+        public OwnershipScoreFactions SmallOutposts { get; set; }
     }
 
     public class OwnershipScoreBreakdown

@@ -43,8 +43,7 @@ namespace Voidwell.DaybreakGames.Models
                 MapRegionOwnership[own.RegionId] = own.FactionId;
             }
 
-            CalculateOwnership();
-            VerifyLockState();
+            PostMapUpdate();
 
             IsTracking = true;
         }
@@ -61,8 +60,7 @@ namespace Voidwell.DaybreakGames.Models
                 {
                     MapRegionOwnership[region.RegionId] = factionId;
 
-                    CalculateOwnership();
-                    VerifyLockState();
+                    PostMapUpdate();
                 }
             }
             finally
@@ -92,8 +90,10 @@ namespace Voidwell.DaybreakGames.Models
             return Map.Regions.FirstOrDefault(r => r.FacilityId == facilityId);
         }
 
-        private void VerifyLockState()
+        private void PostMapUpdate()
         {
+            MapScore = OwnershipCalculator.Calculate(Map, MapRegionOwnership);
+
             var warpgateFactions = Map.Warpgates.Select(a => MapRegionOwnership[a.RegionId]).Distinct();
             if (LockState == null && warpgateFactions.Count() == 1)
             {
@@ -105,92 +105,103 @@ namespace Voidwell.DaybreakGames.Models
             }
         }
 
-        private void CalculateOwnership()
+        private static class OwnershipCalculator
         {
-            var calculator = new OwnershipCalculator(Map, MapRegionOwnership);
-            MapScore = calculator.Score;
-        }
-
-        private class OwnershipCalculator
-        {
-            public MapScore Score = new MapScore();
-
-            private int[] _territories { get; set; } = new[] { 0, 0, 0, 0 };
-            private int[] _connectedTerritories { get; set; } = new[] { 0, 0, 0, 0 };
-            private int[] _ampStations { get; set; } = new[] { 0, 0, 0, 0 };
-            private int[] _techPlants { get; set; } = new[] { 0, 0, 0, 0 };
-            private int[] _bioLabs { get; set; } = new[] { 0, 0, 0, 0 };
-
-            private Dictionary<int, bool> _factionsChecked;
-            private Dictionary<int, bool> _checkedRegions;
-            private Dictionary<int, int> _ownership;
-            private int _focusFaction;
-
-            public OwnershipCalculator(WorldZone zoneMap, Dictionary<int, int> ownership)
+            public static MapScore Calculate(WorldZone zoneMap, Dictionary<int, int> ownership)
             {
-                _factionsChecked = new Dictionary<int, bool>();
-                _ownership = ownership;
+                Dictionary<int, int> _ownership = ownership;
+
+                var territories = new[] { 0, 0, 0, 0 };
+                var ampStations = new[] { 0, 0, 0, 0 };
+                var techPlants = new[] { 0, 0, 0, 0 };
+                var bioLabs = new[] { 0, 0, 0, 0 };
+                var largeOutposts = new[] { 0, 0, 0, 0 };
+                var smallOutposts = new[] { 0, 0, 0, 0 };
 
                 foreach (var region in ownership)
                 {
-                    _territories[region.Value]++;
+                    territories[region.Value]++;
 
                     var facilityType = zoneMap.Regions.FirstOrDefault(a => a.RegionId == region.Key)?.FacilityType;
-                    switch(facilityType)
+                    switch (facilityType)
                     {
                         case "Amp Station":
-                            _ampStations[region.Value]++;
+                            ampStations[region.Value]++;
                             break;
                         case "Tech Plant":
-                            _techPlants[region.Value]++;
+                            techPlants[region.Value]++;
                             break;
                         case "Bio Lab":
-                            _bioLabs[region.Value]++;
+                            bioLabs[region.Value]++;
+                            break;
+                        case "Large Outpost":
+                            largeOutposts[region.Value]++;
+                            break;
+                        case "Small Outpost":
+                            smallOutposts[region.Value]++;
                             break;
                     }
                 }
-                
+
+                var connectedTerritories = CalculateConnectedTerritories(zoneMap, _ownership);
+
+                return new MapScore
+                {
+                    Territories = new OwnershipScoreFactions(territories[1], territories[2], territories[3], territories[0]),
+                    ConnectedTerritories = new OwnershipScoreFactions(connectedTerritories[1], connectedTerritories[2], connectedTerritories[3], connectedTerritories[0]),
+                    AmpStations = new OwnershipScoreFactions(ampStations[1], ampStations[2], ampStations[3], ampStations[0]),
+                    TechPlants = new OwnershipScoreFactions(techPlants[1], techPlants[2], techPlants[3], techPlants[0]),
+                    BioLabs = new OwnershipScoreFactions(bioLabs[1], bioLabs[2], bioLabs[3], bioLabs[0]),
+                    LargeOutposts = new OwnershipScoreFactions(largeOutposts[1], largeOutposts[2], largeOutposts[3], largeOutposts[0]),
+                    SmallOutposts = new OwnershipScoreFactions(smallOutposts[1], smallOutposts[2], smallOutposts[3], smallOutposts[0])
+                };
+            }
+
+            private static int[] CalculateConnectedTerritories(WorldZone zoneMap, Dictionary<int, int> ownership)
+            {
+                var connectedTerritories = new[] { 0, 0, 0, 0 };
+                var factionsChecked = new Dictionary<int, bool>();
+
                 foreach (var warpgate in zoneMap.Warpgates)
                 {
-                    _checkedRegions = new Dictionary<int, bool>();
-                    _focusFaction = ownership[warpgate.RegionId];
+                    var checkedRegions = new Dictionary<int, bool>();
+                    var focusFaction = ownership[warpgate.RegionId];
 
-                    if (!_factionsChecked.ContainsKey(_focusFaction))
+                    if (!factionsChecked.ContainsKey(focusFaction))
                     {
-                        _factionsChecked.Add(_focusFaction, true);
+                        factionsChecked.Add(focusFaction, true);
 
-                        _connectedTerritories[_focusFaction]++;
-                        _checkedRegions.Add(warpgate.RegionId, true);
+                        connectedTerritories[focusFaction]++;
+                        checkedRegions.Add(warpgate.RegionId, true);
 
-                        CheckLinks(warpgate, warpgate.Links);
+                        var factionRegions = ownership.Where(a => a.Value == focusFaction).ToDictionary(a => a.Key, a => a.Value);
+                        connectedTerritories[focusFaction] += CountConnectedRegions(warpgate, checkedRegions, factionRegions);
                     }
                 }
 
-                Score.Territories = new OwnershipScoreFactions(_territories[1], _territories[2], _territories[3], _territories[0]);
-                Score.ConnectedTerritories = new OwnershipScoreFactions(_connectedTerritories[1], _connectedTerritories[2], _connectedTerritories[3], _connectedTerritories[0]);
-                Score.AmpStations = new OwnershipScoreFactions(_ampStations[1], _ampStations[2], _ampStations[3], _ampStations[0]);
-                Score.TechPlants = new OwnershipScoreFactions(_techPlants[1], _techPlants[2], _techPlants[3], _techPlants[0]);
-                Score.BioLabs = new OwnershipScoreFactions(_bioLabs[1], _bioLabs[2], _bioLabs[3], _bioLabs[0]);
+                return connectedTerritories;
             }
 
-            private void CheckLinks(WorldZoneRegion root, List<WorldZoneRegion> links)
+            private static int CountConnectedRegions(WorldZoneRegion source, Dictionary<int, bool> checkedRegions, Dictionary<int, int> factionRegions)
             {
-                foreach (var link in links)
+                var connectedCount = 0;
+
+                foreach (var linkedRegion in source.Links)
                 {
-                    if (_checkedRegions.ContainsKey(link.RegionId))
+                    if (checkedRegions.ContainsKey(linkedRegion.RegionId))
                     {
                         continue;
                     }
 
-                    _checkedRegions.Add(link.RegionId, true);
+                    checkedRegions.Add(linkedRegion.RegionId, true);
 
-                    if (_ownership[link.RegionId] == _focusFaction)
+                    if (factionRegions.ContainsKey(linkedRegion.RegionId))
                     {
-                        _connectedTerritories[_focusFaction]++;
-
-                        CheckLinks(root, link.Links);
+                        connectedCount += 1 + CountConnectedRegions(linkedRegion, checkedRegions, factionRegions);
                     }
                 }
+
+                return connectedCount;
             }
         }
     }
