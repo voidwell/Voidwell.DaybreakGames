@@ -336,27 +336,27 @@ namespace Voidwell.DaybreakGames.Websocket
                     }
                     else if (alert.MetagameEventId == 9 || alert.MetagameEventId == 12 || alert.MetagameEventId == 14 || alert.MetagameEventId == 18)
                     {
-                        alert.LastFactionVs = score.AmpStations.Vs.Value * 100;
-                        alert.LastFactionNc = score.AmpStations.Nc.Value * 100;
-                        alert.LastFactionTr = score.AmpStations.Tr.Value * 100;
+                        alert.LastFactionVs = score.AmpStations.Vs.Value;
+                        alert.LastFactionNc = score.AmpStations.Nc.Value;
+                        alert.LastFactionTr = score.AmpStations.Tr.Value;
                     }
                     else if (alert.MetagameEventId == 8 || alert.MetagameEventId == 11 || alert.MetagameEventId == 17)
                     {
-                        alert.LastFactionVs = score.TechPlants.Vs.Value * 100;
-                        alert.LastFactionNc = score.TechPlants.Nc.Value * 100;
-                        alert.LastFactionTr = score.TechPlants.Tr.Value * 100;
+                        alert.LastFactionVs = score.TechPlants.Vs.Value;
+                        alert.LastFactionNc = score.TechPlants.Nc.Value;
+                        alert.LastFactionTr = score.TechPlants.Tr.Value;
                     }
                     else if (alert.MetagameEventId == 7 || alert.MetagameEventId == 10 || alert.MetagameEventId == 13 || alert.MetagameEventId == 16)
                     {
-                        alert.LastFactionVs = score.BioLabs.Vs.Value * 100;
-                        alert.LastFactionNc = score.BioLabs.Nc.Value * 100;
-                        alert.LastFactionTr = score.BioLabs.Tr.Value * 100;
+                        alert.LastFactionVs = score.BioLabs.Vs.Value;
+                        alert.LastFactionNc = score.BioLabs.Nc.Value;
+                        alert.LastFactionTr = score.BioLabs.Tr.Value;
                     }
                     else if (alert.MetagameEventId == 180 || alert.MetagameEventId == 181 || alert.MetagameEventId == 182 || alert.MetagameEventId == 183)
                     {
-                        alert.LastFactionVs = score.LargeOutposts.Vs.Value * 100;
-                        alert.LastFactionNc = score.LargeOutposts.Nc.Value * 100;
-                        alert.LastFactionTr = score.LargeOutposts.Tr.Value * 100;
+                        alert.LastFactionVs = score.LargeOutposts.Vs.Value;
+                        alert.LastFactionNc = score.LargeOutposts.Nc.Value;
+                        alert.LastFactionTr = score.LargeOutposts.Tr.Value;
                     }
                     else
                     {
