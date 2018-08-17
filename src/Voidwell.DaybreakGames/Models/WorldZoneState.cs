@@ -18,6 +18,7 @@ namespace Voidwell.DaybreakGames.Models
         public MapScore MapScore { get; private set; }
         public Dictionary<int, int> MapRegionOwnership { get; private set; } = new Dictionary<int, int>();
         public ZoneLockState LockState { get; private set; }
+        public ZoneAlertState AlertState { get; private set; }
 
         private readonly SemaphoreSlim _facilityFactionChangeLock = new SemaphoreSlim(1);
 
@@ -72,6 +73,16 @@ namespace Voidwell.DaybreakGames.Models
         public void UpdateLockState(ZoneLockState lockState = null)
         {
             LockState = lockState;
+
+            if (LockState != null)
+            {
+                UpdateAlertState();
+            }
+        }
+
+        public void UpdateAlertState(ZoneAlertState alertState = null)
+        {
+            AlertState = alertState;
         }
 
         public IEnumerable<ZoneRegionOwnership> GetMapOwnership()

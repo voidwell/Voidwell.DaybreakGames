@@ -19,6 +19,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IWorldMonitor _worldMonitor;
         private readonly ICache _cache;
 
+        private enum METAGAME_EVENT_STATE
+        {
+            STARTED = 135,
+            RESTARTED = 136,
+            CANCELED = 137,
+            ENDED = 138,
+            XPCHANGE = 139
+        };
+
         private readonly string _cacheKey = "ps2.alert";
         private readonly TimeSpan _cacheAlertsExpiration = TimeSpan.FromMinutes(1);
         private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(5);
@@ -118,13 +127,32 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return alertResult;
         }
 
-        public async Task CreateAlert(MetagameEvent metagameEvent)
+        public async Task ProcessMetagameEvent(MetagameEvent metagameEvent)
+        {
+            var eventState = Enum.Parse<METAGAME_EVENT_STATE>(metagameEvent.MetagameEventState);
+            if (eventState == METAGAME_EVENT_STATE.STARTED || eventState == METAGAME_EVENT_STATE.RESTARTED)
+            {
+                await StartAlert(metagameEvent);
+            }
+            else if (eventState == METAGAME_EVENT_STATE.ENDED || eventState == METAGAME_EVENT_STATE.CANCELED)
+            {
+                await EndAlert(metagameEvent);
+            }
+        }
+
+        private async Task StartAlert(MetagameEvent metagameEvent)
         {
             var category = await _metagameEventService.GetMetagameEvent(metagameEvent.MetagameEventId);
 
             if (metagameEvent.ZoneId == null)
             {
-                metagameEvent.ZoneId = category.ZoneId;
+                metagameEvent.ZoneId = category?.ZoneId;
+            }
+
+            if (metagameEvent.ZoneId != null)
+            {
+                var zoneAlert = new ZoneAlertState(metagameEvent.Timestamp, metagameEvent.InstanceId, category?.TypeId, metagameEvent.MetagameEventId, category.Duration);
+                _worldMonitor.UpdateZoneAlert(metagameEvent.WorldId, (int)metagameEvent.ZoneId, zoneAlert);
             }
 
             var dataModel = new Alert
@@ -134,7 +162,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MetagameInstanceId = metagameEvent.InstanceId,
                 MetagameEventId = metagameEvent.MetagameEventId,
                 StartDate = metagameEvent.Timestamp,
-                EndDate = metagameEvent.Timestamp + category.Duration,
+                EndDate = metagameEvent.Timestamp + (category?.Duration ?? TimeSpan.FromMinutes(45)),
                 StartFactionVs = metagameEvent.FactionVs,
                 StartFactionNc = metagameEvent.FactionNc,
                 StartFactionTr = metagameEvent.FactionTr,
@@ -146,19 +174,25 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await Task.WhenAll(_alertRepository.AddAsync(dataModel), CreateAlertZoneSnapshot(metagameEvent));
         }
 
-        public async Task UpdateAlert(MetagameEvent metagameEvent)
+        private async Task EndAlert(MetagameEvent metagameEvent)
         {
             var alert = await _alertRepository.GetAlert(metagameEvent.WorldId, metagameEvent.InstanceId);
-
-            if (alert != null)
+            if (alert == null)
             {
-                alert.EndDate = metagameEvent.Timestamp;
-                alert.LastFactionVs = metagameEvent.FactionVs;
-                alert.LastFactionNc = metagameEvent.FactionNc;
-                alert.LastFactionTr = metagameEvent.FactionTr;
-
-                await _alertRepository.UpdateAsync(alert);
+                return;
             }
+
+            if (alert.ZoneId != null)
+            {
+                _worldMonitor.UpdateZoneAlert(metagameEvent.WorldId, (int)alert.ZoneId);
+            }
+
+            alert.EndDate = metagameEvent.Timestamp;
+            alert.LastFactionVs = metagameEvent.FactionVs;
+            alert.LastFactionNc = metagameEvent.FactionNc;
+            alert.LastFactionTr = metagameEvent.FactionTr;
+
+            await _alertRepository.UpdateAsync(alert);
         }
 
         private async Task CreateAlertZoneSnapshot(MetagameEvent metagameEvent)

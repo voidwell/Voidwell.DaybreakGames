@@ -150,12 +150,22 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public void UpdateZoneLock(int worldId, int zoneId, ZoneLockState lockState = null)
         {
-            if (_worldStates.ContainsKey(worldId))
+            if (!_worldStates.ContainsKey(worldId))
             {
                 return;
             }
 
             _worldStates[worldId].UpdateZoneLockState(zoneId, lockState);
+        }
+
+        public void UpdateZoneAlert(int worldId, int zoneId, ZoneAlertState alertState = null)
+        {
+            if (!_worldStates.ContainsKey(worldId))
+            {
+                return;
+            }
+
+            _worldStates[worldId].UpdateZoneAlertState(zoneId, alertState);
         }
 
         public MapScore GetTerritory(int worldId, int zoneId)

@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         Task<IEnumerable<Alert>> GetAlerts(int pageNumber, int? worldId = null, int limit = 10);
         Task<AlertResult> GetAlert(int worldId, int instanceId);
-        Task CreateAlert(MetagameEvent metagameEvent);
-        Task UpdateAlert(MetagameEvent metagameEvent);
+        Task ProcessMetagameEvent(MetagameEvent metagameEvent);
     }
 }
