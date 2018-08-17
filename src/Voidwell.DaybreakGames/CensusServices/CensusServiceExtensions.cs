@@ -19,6 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             services.AddSingleton<CensusWorld>();
             services.AddSingleton<CensusZone>();
             services.AddSingleton<CensusExperience>();
+            services.AddSingleton<CensusWorldEvent>();
 
             return services;
         }
