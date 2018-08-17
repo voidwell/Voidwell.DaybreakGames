@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Models
 {
@@ -33,7 +34,10 @@ namespace Voidwell.DaybreakGames.Models
 
         public void SetWorldOffline()
         {
-            ZoneStates.Clear();
+            foreach(var zone in ZoneStates)
+            {
+                zone.Value.DisableTracking();
+            }
             OnlinePlayers.Clear();
             IsOnline = false;
         }
@@ -47,6 +51,23 @@ namespace Voidwell.DaybreakGames.Models
             }
 
             ZoneStates[zoneState.ZoneId] = zoneState;
+        }
+
+        public void InitZoneState(Zone zone)
+        {
+            var zoneState = new WorldZoneState(Id, zone);
+            SetZoneState(zoneState);
+        }
+
+        public bool TrySetupZoneState(int zoneId, ZoneMap zoneMap, IEnumerable<ZoneRegionOwnership> ownership)
+        {
+            if (!ZoneStates.ContainsKey(zoneId))
+            {
+                return false;
+            }
+
+            ZoneStates[zoneId].Setup(zoneMap, ownership);
+            return true;
         }
 
         public IEnumerable<WorldOnlineZoneState> GetZoneStates()
@@ -75,7 +96,7 @@ namespace Voidwell.DaybreakGames.Models
         
         public IEnumerable<ZoneRegionOwnership> GetZoneMapOwnership(int zoneId)
         {
-            if (!ZoneStates.ContainsKey(zoneId))
+            if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
             {
                 return null;
             }
@@ -85,7 +106,7 @@ namespace Voidwell.DaybreakGames.Models
 
         public MapScore GetZoneMapScore(int zoneId)
         {
-            if (!ZoneStates.ContainsKey(zoneId))
+            if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
             {
                 return null;
             }
@@ -115,7 +136,7 @@ namespace Voidwell.DaybreakGames.Models
 
         public async Task<FacilityControlChange> UpdateZoneFacilityFaction(int zoneId, int facilityId, int factionId)
         {
-            if (!ZoneStates.ContainsKey(zoneId))
+            if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
             {
                 return null;
             }

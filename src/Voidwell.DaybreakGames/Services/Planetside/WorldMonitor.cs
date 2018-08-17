@@ -55,7 +55,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     var worldState = new WorldState(world.Id, world.Name);
 
                     zonesTask.Result.ToList()
-                        .ForEach(zone => worldState.SetZoneState(new WorldZoneState(world.Id, zone)));
+                        .ForEach(zone => worldState.InitZoneState(zone));
 
                     _worldStates.TryAdd(world.Id, worldState);
                 }
@@ -290,8 +290,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _worldStates[worldId].GetZoneMapOwnership(zoneId);
         }
 
-        private async Task<WorldZoneState> CreateWorldZoneState(int worldId, Zone zone)
+        private async Task<bool> SetupWorldZone(int worldId, Zone zone, bool retry = true)
         {
+            if (!_worldStates.ContainsKey(worldId))
+            {
+                return false;
+            }
+
+            if (_worldStates[worldId].GetZoneState(zone.Id) == null)
+            {
+                _worldStates[worldId].InitZoneState(zone);
+            }
+
             var ownershipTask = _mapService.GetMapOwnership(worldId, zone.Id);
             var zoneMapTask = _mapService.GetZoneMap(zone.Id);
 
@@ -316,22 +326,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 _logger.LogError(71612, $"{string.Join(", ", errors)} for worldId {worldId} zoneId {zone.Id}");
 
-                return null;
-            }
-
-            return new WorldZoneState(worldId, zone, zoneMap, ownership);
-        }
-
-        private async Task<bool> SetupWorldZone(int worldId, Zone zone, bool retry = true)
-        {
-            if (!_worldStates.ContainsKey(worldId))
-            {
-                return false;
-            }
-
-            var zoneState = await CreateWorldZoneState(worldId, zone);
-            if (zoneState == null)
-            {
                 if (retry)
                 {
                     if (!RetryingWorlds.ContainsKey(worldId))
@@ -342,14 +336,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     RetryingWorlds[worldId][zone.Id] = zone;
                 }
 
-                _logger.LogInformation(75725, $"Failed to create world zone states for world '{worldId}' zone '{zone.Id}'");
-
-                zoneState = new WorldZoneState(worldId, zone);
-                _worldStates[worldId].SetZoneState(zoneState);
                 return false;
             }
 
-            _worldStates[worldId].SetZoneState(zoneState);
+            if (!_worldStates[worldId].TrySetupZoneState(zone.Id, zoneMap, ownership))
+            {
+                return false;
+            }
 
             if (RetryingWorlds.ContainsKey(worldId) && RetryingWorlds[worldId].ContainsKey(zone.Id))
             {

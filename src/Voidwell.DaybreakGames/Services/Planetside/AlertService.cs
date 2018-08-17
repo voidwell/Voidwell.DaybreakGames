@@ -151,7 +151,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (metagameEvent.ZoneId != null)
             {
-                var zoneAlert = new ZoneAlertState(metagameEvent.Timestamp, metagameEvent.InstanceId, category?.TypeId, metagameEvent.MetagameEventId, category.Duration);
+                var zoneAlert = new ZoneAlertState(metagameEvent.Timestamp, metagameEvent.InstanceId, category);
                 _worldMonitor.UpdateZoneAlert(metagameEvent.WorldId, (int)metagameEvent.ZoneId, zoneAlert);
             }
 

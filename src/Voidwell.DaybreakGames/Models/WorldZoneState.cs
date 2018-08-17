@@ -37,6 +37,11 @@ namespace Voidwell.DaybreakGames.Models
             ZoneId = zone.Id;
             Name = zone.Code;
 
+            Setup(zoneMap, ownership);
+        }
+
+        public void Setup(ZoneMap zoneMap, IEnumerable<ZoneRegionOwnership> ownership)
+        {
             Map = new WorldZone(zoneMap);
 
             foreach (var own in ownership)
@@ -49,13 +54,19 @@ namespace Voidwell.DaybreakGames.Models
             IsTracking = true;
         }
 
+        public void DisableTracking()
+        {
+            IsTracking = false;
+            UpdateLockState();
+            UpdateAlertState();
+        }
+
         public async Task FacilityFactionChange(int facilityId, int factionId)
         {
             await _facilityFactionChangeLock.WaitAsync();
 
             try
             {
-
                 var region = Map.Regions.SingleOrDefault(r => r.FacilityId == facilityId);
                 if (region != null)
                 {
