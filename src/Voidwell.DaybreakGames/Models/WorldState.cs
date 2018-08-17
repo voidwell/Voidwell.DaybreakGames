@@ -142,8 +142,7 @@ namespace Voidwell.DaybreakGames.Models
 
         public OnlineCharacter SetPlayerOffline(string characterId)
         {
-            OnlineCharacter onlineCharacter = null;
-            OnlinePlayers.TryRemove(characterId, out onlineCharacter);
+            OnlinePlayers.TryRemove(characterId, out OnlineCharacter onlineCharacter);
             return onlineCharacter;
         }
 
