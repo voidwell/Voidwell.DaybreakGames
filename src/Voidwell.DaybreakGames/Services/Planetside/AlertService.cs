@@ -80,6 +80,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
+            float neuturalScore = 0.0f;
+            if (alert.MetagameEvent?.Type == 1 || alert.MetagameEvent?.Type == 8 || alert.MetagameEvent?.Type == 9)
+            {
+                neuturalScore = 100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault());
+            }
+
             alertResult = new AlertResult
             {
                 WorldId = alert.WorldId,
@@ -94,10 +100,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LastFactionVS = alert.LastFactionVs.GetValueOrDefault(),
                 LastFactionNC = alert.LastFactionNc.GetValueOrDefault(),
                 LastFactionTR = alert.LastFactionTr.GetValueOrDefault(),
-                MetagameEvent = new AlertResultMetagameEvent { Name = alert.MetagameEvent.Name, Description = alert.MetagameEvent.Description },
+                MetagameEvent = alert.MetagameEvent,
                 Log = combatReportTask.Result,
                 Score = new[] {
-                    100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault()),
+                    neuturalScore,
                     alert.LastFactionVs.GetValueOrDefault(),
                     alert.LastFactionNc.GetValueOrDefault(),
                     alert.LastFactionTr.GetValueOrDefault()

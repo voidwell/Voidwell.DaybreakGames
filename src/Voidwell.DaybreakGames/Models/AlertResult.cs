@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.Models
 {
@@ -17,17 +18,11 @@ namespace Voidwell.DaybreakGames.Models
         public float LastFactionVS { get; set; }
         public float LastFactionNC { get; set; }
         public float LastFactionTR { get; set; }
-        public AlertResultMetagameEvent MetagameEvent { get; set; }
+        public MetagameEventCategory MetagameEvent { get; set; }
         public CombatReport Log { get; set; }
         public IEnumerable<float> Score { get; set; }
         public string ServerId { get; set; }
         public string MapId { get; set; }
         public IEnumerable<ZoneRegionOwnership> ZoneSnapshot { get; set; }
-    }
-
-    public class AlertResultMetagameEvent
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
     }
 }

@@ -33,6 +33,16 @@ namespace Voidwell.DaybreakGames.Websocket
         private SemaphoreSlim _playerFacilityDefendSemaphore;
         private SemaphoreSlim _facilityControlSemaphore;
 
+        private readonly JsonSerializer _payloadDeserializer = JsonSerializer.Create(new JsonSerializerSettings
+        {
+            ContractResolver = new UnderscorePropertyNamesContractResolver(),
+            Converters = new JsonConverter[]
+                {
+                    new BooleanJsonConverter(),
+                    new DateTimeJsonConverter()
+                }
+        });
+
         private enum METAGAME_EVENT_STATE
         {
             STARTED = 135,
@@ -41,7 +51,6 @@ namespace Voidwell.DaybreakGames.Websocket
             ENDED = 138,
             XPCHANGE = 139
         };
-        private JsonSerializer _payloadDeserializer;
 
         public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor, ICharacterService characterService, IAlertService alertService, ILogger<WebsocketEventHandler> logger)
         {
@@ -56,17 +65,6 @@ namespace Voidwell.DaybreakGames.Websocket
                 .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
                 .Where(m => m.GetCustomAttribute<CensusEventHandlerAttribute>() != null)
                 .ToDictionary(m => m.GetCustomAttribute<CensusEventHandlerAttribute>().EventName);
-
-            var deserializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new UnderscorePropertyNamesContractResolver(),
-                Converters = new JsonConverter[]
-                {
-                    new BooleanJsonConverter(),
-                    new DateTimeJsonConverter()
-                }
-            };
-            _payloadDeserializer = JsonSerializer.Create(deserializerSettings);
 
             _continentUnlockSemaphore = new SemaphoreSlim(1);
             _playerFacilityCaptureSemaphore = new SemaphoreSlim(5);
