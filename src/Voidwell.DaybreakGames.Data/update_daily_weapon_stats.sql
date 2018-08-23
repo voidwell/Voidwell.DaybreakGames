@@ -50,4 +50,7 @@ BEGIN
                 WHERE d."timestamp" >= lowerBoundDate AND d."timestamp" < upperBoundDate AND d."attacker_weapon_id" IS NOT NULL AND i."item_category_id"  = ANY(weaponCategoryIds)
                 GROUP BY 2, 1
                 ORDER BY 2, 1 DESC
-:
+        ON CONFLICT ("date", "weapon_id") DO UPDATE
+                SET ("vehicle_kills", "aircraft_kills", "vehicle_kpu", "aircraft_kpu") =
+                (EXCLUDED."vehicle_kills", EXCLUDED."aircraft_kills", EXCLUDED."vehicle_kpu", EXCLUDED."aircraft_kpu");
+END; $function$
