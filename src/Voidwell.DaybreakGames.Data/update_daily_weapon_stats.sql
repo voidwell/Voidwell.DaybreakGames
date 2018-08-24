@@ -41,9 +41,9 @@ BEGIN
                 SELECT
                         date_trunc('day', d."timestamp")::timestamp without time zone AS "date",
                         d."attacker_weapon_id",
-                        COALESCE(SUM(CASE WHEN d."vehicle_id" > 0 AND d."vehicle_id" != ANY(aircraftVehicleIds) THEN 1 ELSE 0 END), 0) AS "vehicle_kills",
+                        COALESCE(SUM(CASE WHEN d."vehicle_id" > 0 AND d."vehicle_id" != ALL(aircraftVehicleIds) THEN 1 ELSE 0 END), 0) AS "vehicle_kills",
                         COALESCE(SUM(CASE WHEN d."vehicle_id" = ANY(aircraftVehicleIds) THEN 1 ELSE 0 END), 0) AS "aircraft_kills",
-                        COALESCE((CAST(COALESCE(SUM(CASE WHEN d."vehicle_id" > 0 AND d."vehicle_id" != ANY(aircraftVehicleIds) THEN 1 ELSE 0 END), 0) AS float) / NULLIF(CAST(count(distinct(CASE WHEN d."vehicle_id" > 0 AND d."vehicle_id" != ANY(aircraftVehicleIds) THEN d."attacker_character_id" END)) AS float), 0)), 0) AS "vehicle_kpu",
+                        COALESCE((CAST(COALESCE(SUM(CASE WHEN d."vehicle_id" > 0 AND d."vehicle_id" != ANY(aircraftVehicleIds) THEN 1 ELSE 0 END), 0) AS float) / NULLIF(CAST(count(distinct(CASE WHEN d."vehicle_id" > 0 AND d."vehicle_id" != ALL(aircraftVehicleIds) THEN d."attacker_character_id" END)) AS float), 0)), 0) AS "vehicle_kpu",
                         COALESCE((CAST(COALESCE(SUM(CASE WHEN d."vehicle_id" = ANY(aircraftVehicleIds) THEN 1 ELSE 0 END), 0) AS float) / NULLIF(CAST(count(distinct(CASE WHEN d."vehicle_id" = ANY(aircraftVehicleIds) THEN d."attacker_character_id" END)) AS float), 0)), 0) AS "aircraft_kpu"
                 FROM event_vehicle_destroy AS d
                 LEFT OUTER JOIN item AS i ON d."attacker_weapon_id" = i."id"
