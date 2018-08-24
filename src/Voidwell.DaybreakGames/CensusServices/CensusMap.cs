@@ -1,34 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusMap
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusMap(ICensusClient censusClient)
+        public CensusMap(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<CensusMapModel> GetMapOwnership(int worldId, int zoneId)
         {
-            var query = _censusClient.CreateQuery("map");
+            var query = _queryFactory.Create("map");
             query.SetLanguage("en");
 
             query.Where("world_id").Equals(worldId);
             query.Where("zone_ids").Equals(zoneId);
 
-            return await query.Get<CensusMapModel>(false);
+            try
+            {
+                var result = await query.GetAsync();
+                return result?.ToObject<CensusMapModel>();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public async Task<IEnumerable<CensusMapHexModel>> GetAllMapHexs()
         {
-            var query = _censusClient.CreateQuery("map_hex");
+            var query = _queryFactory.Create("map_hex");
 
             query.ShowFields(new[]
             {
@@ -40,12 +48,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "type_name"
             });
 
-            return await query.GetBatch<CensusMapHexModel>();
+            return await query.GetBatchAsync<CensusMapHexModel>();
         }
 
         public async Task<IEnumerable<CensusMapRegionModel>> GetAllMapRegions()
         {
-            var query = _censusClient.CreateQuery("map_region");
+            var query = _queryFactory.Create("map_region");
 
             query.ShowFields(new[]
             {
@@ -60,12 +68,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "location_z"
             });
 
-            return await query.GetBatch<CensusMapRegionModel>();
+            return await query.GetBatchAsync<CensusMapRegionModel>();
         }
 
         public async Task<IEnumerable<CensusFacilityLinkModel>> GetAllFacilityLinks()
         {
-            var query = _censusClient.CreateQuery("facility_link");
+            var query = _queryFactory.Create("facility_link");
 
             query.ShowFields(new[]
             {
@@ -75,7 +83,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "description"
             });
 
-            return await query.GetBatch<CensusFacilityLinkModel>();
+            return await query.GetBatchAsync<CensusFacilityLinkModel>();
         }
     }
 }

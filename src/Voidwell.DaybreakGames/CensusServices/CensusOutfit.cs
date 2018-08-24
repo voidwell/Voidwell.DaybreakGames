@@ -1,21 +1,21 @@
 ﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusOutfit
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusOutfit(ICensusClient censusClient)
+        public CensusOutfit(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<CensusOutfitModel> GetOutfit(string outfitId)
         {
-            var query = _censusClient.CreateQuery("outfit");
+            var query = _queryFactory.Create("outfit");
 
             query.ShowFields(new[]
             {
@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             query.Where("outfit_id").Equals(outfitId);
 
-            return await query.Get<CensusOutfitModel>();
+            return await query.GetAsync<CensusOutfitModel>();
         }
     }
 }

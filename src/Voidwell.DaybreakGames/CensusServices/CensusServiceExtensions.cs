@@ -4,7 +4,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 {
     public static class CensusServiceExtensions
     {
-        public static IServiceCollection AddCensusServices(this IServiceCollection services)
+        public static IServiceCollection AddCensusHelpers(this IServiceCollection services)
         {
             services.AddSingleton<CensusCharacter>();
             services.AddSingleton<CensusFaction>();

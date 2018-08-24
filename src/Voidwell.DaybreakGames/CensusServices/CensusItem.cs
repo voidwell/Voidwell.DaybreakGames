@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusItem
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusItem(ICensusClient censusClient)
+        public CensusItem(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusItemModel>> GetAllItems()
         {
-            var query = _censusClient.CreateQuery("item");
+            var query = _queryFactory.Create("item");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -33,12 +33,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "image_id"
             });
 
-            return await query.GetBatch<CensusItemModel>();
+            return await query.GetBatchAsync<CensusItemModel>();
         }
 
         public async Task<CensusWeaponInfoModel> GetWeaponInfo(int weaponItemId)
         {
-            var query = _censusClient.CreateQuery("item");
+            var query = _queryFactory.Create("item");
             query.SetLanguage("en");
 
             query.HideFields(new[]
@@ -97,7 +97,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             query.Where("item_id").Equals(weaponItemId.ToString());
 
-            return await query.Get<CensusWeaponInfoModel>();
+            return await query.GetAsync<CensusWeaponInfoModel>();
         }
     }
 }

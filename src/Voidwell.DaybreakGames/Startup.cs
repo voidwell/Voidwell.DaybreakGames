@@ -8,7 +8,6 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Websocket;
-using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
@@ -67,8 +66,12 @@ namespace Voidwell.DaybreakGames
 
             services.AddEntityFrameworkContext(Configuration);
             services.AddCache(Configuration, "Voidwell.DaybreakGames");
-            services.AddCensusClient(Configuration);
-            services.AddCensusServices();
+            services.AddCensusServices(options =>
+            {
+                options.CensusServiceId = Configuration.GetValue<string>("CensusServiceKey");
+            });
+
+            services.AddCensusHelpers();
             services.AddUpdateableTasks();
 
             services.AddTransient<IItemService, ItemService>();

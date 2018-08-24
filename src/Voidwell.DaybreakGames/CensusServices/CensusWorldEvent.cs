@@ -1,25 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusWorldEvent
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusWorldEvent(ICensusClient censusClient)
+        public CensusWorldEvent(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusMetagameWorldEventModel>> GetMetagameWorldEvents()
         {
-            var query = _censusClient.CreateQuery("world_event");
+            var query = _queryFactory.Create("world_event");
             query.Where("type").Equals("METAGAME");
 
-            return await query.GetList<CensusMetagameWorldEventModel>();
+            return await query.GetListAsync<CensusMetagameWorldEventModel>();
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
             public int GiftedPoints { get; set; }
             public int SpentPoints { get; set; }
             public int AvailablePoints { get; set; }
-            public int PercentToNext { get; set; }
+            public float PercentToNext { get; set; }
         }
     }
 }

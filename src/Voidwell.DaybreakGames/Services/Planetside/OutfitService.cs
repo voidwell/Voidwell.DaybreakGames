@@ -8,7 +8,7 @@ using Voidwell.DaybreakGames.Models;
 using Voidwell.Cache;
 using System;
 using System.Linq;
-using Voidwell.DaybreakGames.Census.Exceptions;
+using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside

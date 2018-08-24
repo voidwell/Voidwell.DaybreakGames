@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusItemCategory
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusItemCategory(ICensusClient censusClient)
+        public CensusItemCategory(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusItemCategoryModel>> GetAllItemCategories()
         {
-            var query = _censusClient.CreateQuery("item_category");
+            var query = _queryFactory.Create("item_category");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -25,7 +25,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "name"
             });
 
-            return await query.GetBatch<CensusItemCategoryModel>();
+            return await query.GetBatchAsync<CensusItemCategoryModel>();
         }
     }
 }
