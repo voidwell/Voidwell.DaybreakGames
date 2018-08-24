@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DaybreakGames.Census" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.1.1" />
@@ -27,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" Watch="false" />
-    <ProjectReference Include="..\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" Watch="false" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" Watch="false" />
   </ItemGroup>
 

@@ -1,23 +1,23 @@
-﻿using System;
+﻿using DaybreakGames.Census;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusCharacter
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusCharacter(ICensusClient censusClient)
+        public CensusCharacter(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<CensusCharacterModel> GetCharacter(string characterId)
         {
-            var query = _censusClient.CreateQuery("character");
+            var query = _queryFactory.Create("character");
 
             query.AddResolve("world");
             query.ShowFields(new[]
@@ -34,23 +34,23 @@ namespace Voidwell.DaybreakGames.CensusServices
             });
             query.Where("character_id").Equals(characterId);
 
-            return await query.Get<CensusCharacterModel>();
+            return await query.GetAsync<CensusCharacterModel>();
         }
 
         public async Task<string> GetCharacterIdByName(string characterName)
         {
-            var query = _censusClient.CreateQuery("character_name");
+            var query = _queryFactory.Create("character_name");
 
             query.Where("name.first_lower").Equals(characterName.ToLower());
 
-            var result = await query.Get<CensusCharacterModel>();
+            var result = await query.GetAsync<CensusCharacterModel>();
 
             return result?.CharacterId;
         }
 
         public async Task<CensusCharacterModel.CharacterTimes> GetCharacterTimes(string characterId)
         {
-            var query = _censusClient.CreateQuery("character");
+            var query = _queryFactory.Create("character");
 
             query.ShowFields(new[]
             {
@@ -62,13 +62,13 @@ namespace Voidwell.DaybreakGames.CensusServices
             });
             query.Where("character_id").Equals(characterId);
 
-            var result = await query.Get<CensusCharacterModel>();
+            var result = await query.GetAsync<CensusCharacterModel>();
             return result?.Times;
         }
 
         public async Task<IEnumerable<CensusCharacterStatModel>> GetCharacterStats(string characterId, DateTime? lastLogin = null)
         {
-            var query = _censusClient.CreateQuery("characters_stat");
+            var query = _queryFactory.Create("characters_stat");
 
             query.SetLimit(500);
             query.ShowFields(new[]
@@ -85,12 +85,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
-            return await query.GetBatch<CensusCharacterStatModel>();
+            return await query.GetBatchAsync<CensusCharacterStatModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterFactionStatModel>> GetCharacterFactionStats(string characterId, DateTime? lastLogin = null)
         {
-            var query = _censusClient.CreateQuery("characters_stat_by_faction");
+            var query = _queryFactory.Create("characters_stat_by_faction");
 
 
             query.SetLimit(500);
@@ -110,12 +110,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
-            return await query.GetBatch<CensusCharacterFactionStatModel>();
+            return await query.GetBatchAsync<CensusCharacterFactionStatModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterWeaponStatModel>> GetCharacterWeaponStats(string characterId, DateTime? lastLogin = null)
         {
-            var query = _censusClient.CreateQuery("characters_weapon_stat");
+            var query = _queryFactory.Create("characters_weapon_stat");
 
             query.SetLimit(5000);
             query.ShowFields(new[]
@@ -133,12 +133,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
-            return await query.GetBatch<CensusCharacterWeaponStatModel>();
+            return await query.GetBatchAsync<CensusCharacterWeaponStatModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterWeaponFactionStatModel>> GetCharacterWeaponStatsByFaction(string characterId, DateTime? lastLogin = null)
         {
-            var query = _censusClient.CreateQuery("characters_weapon_stat_by_faction");
+            var query = _queryFactory.Create("characters_weapon_stat_by_faction");
 
             query.SetLimit(5000);
             query.ShowFields(new[]
@@ -158,12 +158,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
-            return await query.GetBatch<CensusCharacterWeaponFactionStatModel>();
+            return await query.GetBatchAsync<CensusCharacterWeaponFactionStatModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterStatsHistoryModel>> GetCharacterStatsHistory(string characterId, DateTime? lastLogin = null)
         {
-            var query = _censusClient.CreateQuery("characters_stat_history");
+            var query = _queryFactory.Create("characters_stat_history");
 
             query.SetLimit(5000);
             query.ShowFields(new[]
@@ -183,12 +183,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
             }
 
-            return await query.GetBatch<CensusCharacterStatsHistoryModel>();
+            return await query.GetBatchAsync<CensusCharacterStatsHistoryModel>();
         }
 
         public async Task<CensusOutfitMemberModel> GetCharacterOutfitMembership(string characterId)
         {
-            var query = _censusClient.CreateQuery("outfit_member");
+            var query = _queryFactory.Create("outfit_member");
 
             query.ShowFields(new[]
             {
@@ -200,12 +200,12 @@ namespace Voidwell.DaybreakGames.CensusServices
             });
             query.Where("character_id").Equals(characterId);
 
-            return await query.Get<CensusOutfitMemberModel>();
+            return await query.GetAsync<CensusOutfitMemberModel>();
         }
 
         public async Task<IEnumerable<CensusCharacterModel>> LookupCharactersByName(string name, int limit)
         {
-            var query = _censusClient.CreateQuery("character");
+            var query = _queryFactory.Create("character");
 
             query.SetLimit(limit);
             query.ExactMatchFirst = true;
@@ -223,9 +223,9 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "times.last_login"
             });
             query.Where("name.first_lower").StartsWith(name.ToLower());
-            query.Where("battle_rank.value").IsGreaterThan("0");
+            query.Where("battle_rank.value").IsGreaterThan(0);
 
-            return await query.GetList<CensusCharacterModel>();
+            return await query.GetListAsync<CensusCharacterModel>();
         }
     }
 }

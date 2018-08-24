@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusExperience
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusExperience(ICensusClient censusClient)
+        public CensusExperience(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusExperienceModel>> GetAllExperience()
         {
-            var query = _censusClient.CreateQuery("experience");
+            var query = _queryFactory.Create("experience");
 
             query.ShowFields(new[]
             {
@@ -25,7 +25,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "xp"
             });
 
-            return await query.GetBatch<CensusExperienceModel>();
+            return await query.GetBatchAsync<CensusExperienceModel>();
         }
     }
 }

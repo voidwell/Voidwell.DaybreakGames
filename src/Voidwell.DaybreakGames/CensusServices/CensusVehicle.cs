@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusVehicle
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusVehicle(ICensusClient censusClient)
+        public CensusVehicle(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusVehicleModel>> GetAllVehicles()
         {
-            var query = _censusClient.CreateQuery("vehicle");
+            var query = _queryFactory.Create("vehicle");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -29,12 +29,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "image_id"
             });
 
-            return await query.GetBatch<CensusVehicleModel>();
+            return await query.GetBatchAsync<CensusVehicleModel>();
         }
 
         public async Task<IEnumerable<CensusVehicleFactionModel>> GetAllVehicleFactions()
         {
-            var query = _censusClient.CreateQuery("vehicle_faction");
+            var query = _queryFactory.Create("vehicle_faction");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -43,7 +43,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "faction_id"
             });
 
-            return await query.GetBatch<CensusVehicleFactionModel>();
+            return await query.GetBatchAsync<CensusVehicleFactionModel>();
         }
     }
 }

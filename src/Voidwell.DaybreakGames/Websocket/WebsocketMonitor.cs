@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DaybreakGames.Census.Stream;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
@@ -7,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.Census.Stream;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Websocket.Models;
@@ -16,28 +16,27 @@ namespace Voidwell.DaybreakGames.Websocket
 {
     public class WebsocketMonitor : StatefulHostedService, IWebsocketMonitor, IDisposable
     {
+        private readonly ICensusStreamClient _client;
         private readonly IWebsocketEventHandler _handler;
         private readonly DaybreakGamesOptions _options;
         private readonly IWorldMonitor _worldMonitor;
         private readonly ILogger<WebsocketMonitor> _logger;
 
-        private CensusStreamClient _client;
         private CensusHeartbeat _lastHeartbeat;
 
         public override string ServiceName => "CensusMonitor";
 
-        public WebsocketMonitor(IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options,
+        public WebsocketMonitor(ICensusStreamClient censusStreamClient, IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options,
             IWorldMonitor worldMonitor, ICache cache, ILogger<WebsocketMonitor> logger)
                 :base(cache)
         {
+            _client = censusStreamClient;
             _handler = handler;
             _options = options.Value;
             _worldMonitor = worldMonitor;
             _logger = logger;
 
-            var subscription = CreateSubscription();
-
-            _client = new CensusStreamClient(subscription, apiKey: _options.CensusServiceKey)
+            _client.Subscribe(CreateSubscription())
                 .OnMessage(OnMessage)
                 .OnDisconnect(OnDisconnect);
         }
@@ -144,7 +143,10 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public void Dispose()
         {
-            _client?.Dispose();
+            if (_client != null &&_client is IDisposable client)
+            {
+                client.Dispose();
+            }
         }
     }
 }

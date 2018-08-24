@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusProfile
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusProfile(ICensusClient censusClient)
+        public CensusProfile(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusProfileModel>> GetAllProfiles()
         {
-            var query = _censusClient.CreateQuery("profile");
+            var query = _queryFactory.Create("profile");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -28,7 +28,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "image_id"
             });
 
-            return await query.GetBatch<CensusProfileModel>();
+            return await query.GetBatchAsync<CensusProfileModel>();
         }
     }
 }

@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusMetagameEvent
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusMetagameEvent(ICensusClient censusClient)
+        public CensusMetagameEvent(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusMetagameEventCategoryModel>> GetAllCategories()
         {
-            var query = _censusClient.CreateQuery("metagame_event");
+            var query = _queryFactory.Create("metagame_event");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -28,12 +28,12 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "experience_bonus"
             });
 
-            return await query.GetBatch<CensusMetagameEventCategoryModel>();
+            return await query.GetBatchAsync<CensusMetagameEventCategoryModel>();
         }
 
         public async Task<IEnumerable<CensusMetagameEventStateModel>> GetAllStates()
         {
-            var query = _censusClient.CreateQuery("metagame_event_state");
+            var query = _queryFactory.Create("metagame_event_state");
             query.SetLanguage("en");
 
             query.ShowFields(new[]
@@ -42,7 +42,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 "name"
             });
 
-            return await query.GetBatch<CensusMetagameEventStateModel>();
+            return await query.GetBatchAsync<CensusMetagameEventStateModel>();
         }
     }
 }

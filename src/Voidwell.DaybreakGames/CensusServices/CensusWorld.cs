@@ -1,25 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
     public class CensusWorld
     {
-        private readonly ICensusClient _censusClient;
+        private readonly ICensusQueryFactory _queryFactory;
 
-        public CensusWorld(ICensusClient censusClient)
+        public CensusWorld(ICensusQueryFactory queryFactory)
         {
-            _censusClient = censusClient;
+            _queryFactory = queryFactory;
         }
 
         public async Task<IEnumerable<CensusWorldModel>> GetAllWorlds()
         {
-            var query = _censusClient.CreateQuery("world");
+            var query = _queryFactory.Create("world");
             query.SetLanguage("en");
 
-            return await query.GetBatch<CensusWorldModel>();
+            return await query.GetBatchAsync<CensusWorldModel>();
         }
     }
 }
