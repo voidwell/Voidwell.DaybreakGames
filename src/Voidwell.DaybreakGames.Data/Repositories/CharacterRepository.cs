@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Data.Repositories.Models;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -177,7 +178,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                                   ItemTypeId = item.ItemTypeId,
                                                                   MaxStackSize = item != null ? item.MaxStackSize : 0,
                                                                   ItemCategoryId = item.ItemCategoryId,
-                                                                  ItemCategory = category != null ? category : null
+                                                                  ItemCategory = category
                                                               }) on s.ItemId equals item.Id into itemQ
                                                 from item in itemQ.DefaultIfEmpty()
                                                 join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
@@ -241,6 +242,30 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<CharacterRating> GetCharacterRatingAsync(string characterId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.CharacterRating.FirstOrDefaultAsync(a => a.CharacterId == characterId);
+            }
+        }
+
+        public async Task<IEnumerable<CharacterRating>> GetCharacterRatingLeaderboardAsync(int limit)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.CharacterRating
+                    .Include(i => i.Character)
+                    .Take(limit)
+                    .OrderByDescending(a => a.Rating)
+                    .ToListAsync();
+            }
+        }
+
         public Task<Character> UpsertAsync(Character entity)
         {
             return UpsertAsync(entity, a => a.Id == entity.Id);
@@ -259,6 +284,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         public Task<CharacterLifetimeStatByFaction> UpsertAsync(CharacterLifetimeStatByFaction entity)
         {
             return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId, true);
+        }
+
+        public Task<CharacterRating> UpsertAsync(CharacterRating entity)
+        {
+            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId);
         }
 
         public Task<IEnumerable<CharacterStat>> UpsertRangeAsync(IEnumerable<CharacterStat> entities)

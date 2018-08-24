@@ -25,6 +25,7 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly IWorldMonitor _worldMonitor;
         private readonly ICharacterService _characterService;
         private readonly IAlertService _alertService;
+        private readonly ICharacterRatingService _characterRatingService;
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
 
@@ -43,13 +44,16 @@ namespace Voidwell.DaybreakGames.Websocket
                 }
         });
 
-        public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor, ICharacterService characterService, IAlertService alertService, ILogger<WebsocketEventHandler> logger)
+        public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor,
+            ICharacterService characterService, IAlertService alertService, ICharacterRatingService characterRatingService,
+            ILogger<WebsocketEventHandler> logger)
         {
             _eventRepository = eventRepository;
             _alertRepository = alertRepository;
             _worldMonitor = worldMonitor;
             _characterService = characterService;
             _alertService = alertService;
+            _characterRatingService = characterRatingService;
             _logger = logger;
 
             _processMethods = GetType()
@@ -216,23 +220,30 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("Death", typeof(Models.Death))]
         private async Task Process(Models.Death payload)
         {
-            List<Task> outfitWork = new List<Task>();
+            List<Task> PreProcessTasks = new List<Task>();
             Task<OutfitMember> AttackerOutfitTask = null;
             Task<OutfitMember> VictimOutfitTask = null;
 
             if (payload.AttackerCharacterId != null && payload.AttackerCharacterId.Length > 18)
             {
                 AttackerOutfitTask = _characterService.GetCharactersOutfit(payload.AttackerCharacterId);
-                outfitWork.Add(AttackerOutfitTask);
+                PreProcessTasks.Add(AttackerOutfitTask);
             }
 
             if (payload.CharacterId != null && payload.CharacterId.Length > 18)
             {
                 VictimOutfitTask = _characterService.GetCharactersOutfit(payload.CharacterId);
-                outfitWork.Add(VictimOutfitTask);
+                PreProcessTasks.Add(VictimOutfitTask);
             }
 
-            await Task.WhenAll(outfitWork);
+            if (payload.AttackerCharacterId != null && payload.CharacterId != null &&
+                payload.AttackerCharacterId != payload.CharacterId &&
+                payload.AttackerCharacterId.Length > 18 && payload.CharacterId.Length > 18)
+            {
+                PreProcessTasks.Add(_characterRatingService.CalculateRatingAsync(payload.AttackerCharacterId, payload.CharacterId));
+            }
+
+            await Task.WhenAll(PreProcessTasks);
 
             var dataModel = new Data.Models.Planetside.Events.Death
             {
@@ -476,7 +487,8 @@ namespace Voidwell.DaybreakGames.Websocket
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId
             };
-            await _eventRepository.AddAsync(dataModel);
+
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), _characterRatingService.SaveCachedRatingAsync(payload.CharacterId));
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]

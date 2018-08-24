@@ -27,6 +27,7 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<CharacterWeaponStat> CharacterWeaponStats { get; set; }
         public DbSet<CharacterWeaponStatByFaction> CharacterWeaponStatByFactions { get; set; }
         public DbSet<CharacterStatHistory> CharacterStatHistory { get; set; }
+        public DbSet<CharacterRating> CharacterRating { get; set; }
         public DbSet<FacilityLink> FacilityLinks { get; set; }
         public DbSet<Faction> Factions { get; set; }
         public DbSet<Item> Items { get; set; }
