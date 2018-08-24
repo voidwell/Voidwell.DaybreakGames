@@ -96,14 +96,15 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IWorldMonitor, WorldMonitor>();
             services.AddSingleton<IWeaponAggregateService, WeaponAggregateService>();
             services.AddSingleton<IPSBUtilityService, PSBUtilityService>();
+            services.AddSingleton<ICharacterRatingService, CharacterRatingService>();
 
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
 
-            services.AddSingleton<IHostedService, StoreUpdaterSchedulerHostedService>();
-            services.AddSingleton<IHostedService, WebsocketMonitorHostedService>();
-            services.AddSingleton<IHostedService, CharacterUpdaterHostedService>();
+            services.AddHostedService<StoreUpdaterSchedulerHostedService>();
+            services.AddHostedService<WebsocketMonitorHostedService>();
+            services.AddHostedService<CharacterUpdaterHostedService>();
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(options =>

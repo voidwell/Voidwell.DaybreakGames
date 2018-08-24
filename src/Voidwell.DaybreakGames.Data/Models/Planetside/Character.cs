@@ -31,5 +31,6 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public IEnumerable<CharacterWeaponStat> WeaponStats { get; set; }
         public IEnumerable<CharacterWeaponStatByFaction> WeaponStatsByFaction { get; set; }
         public IEnumerable<CharacterStatHistory> StatsHistory { get; set; }
+        public CharacterRating Rating { get; set; }
     }
 }
