@@ -79,107 +79,108 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var query = from c in dbContext.Characters
 
-                             join world in dbContext.Worlds on c.WorldId equals world.Id into worldQ
-                             from world in worldQ.DefaultIfEmpty()
+                            join world in dbContext.Worlds on c.WorldId equals world.Id into worldQ
+                            from world in worldQ.DefaultIfEmpty()
 
-                             join title in dbContext.Titles on c.TitleId equals title.Id into titleQ
-                             from title in titleQ.DefaultIfEmpty()
+                            join title in dbContext.Titles on c.TitleId equals title.Id into titleQ
+                            from title in titleQ.DefaultIfEmpty()
 
-                             join time in dbContext.CharacterTimes on c.Id equals time.CharacterId into timeQ
-                             from time in timeQ.DefaultIfEmpty()
+                            join time in dbContext.CharacterTimes on c.Id equals time.CharacterId into timeQ
+                            from time in timeQ.DefaultIfEmpty()
 
-                             join faction in dbContext.Factions on c.FactionId equals faction.Id into factionQ
-                             from faction in factionQ.DefaultIfEmpty()
+                            join faction in dbContext.Factions on c.FactionId equals faction.Id into factionQ
+                            from faction in factionQ.DefaultIfEmpty()
 
-                             join lifetimeStats in dbContext.CharacterLifetimeStats on c.Id equals lifetimeStats.CharacterId into lifetimeStatsQ
-                             from lifetimeStats in lifetimeStatsQ.DefaultIfEmpty()
+                            join lifetimeStats in dbContext.CharacterLifetimeStats on c.Id equals lifetimeStats.CharacterId into lifetimeStatsQ
+                            from lifetimeStats in lifetimeStatsQ.DefaultIfEmpty()
 
-                             join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
-                             from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
+                            join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
+                            from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
 
                             where c.Id == characterId
-                             select new Character
-                             {
-                                 Id = c.Id,
-                                 Name = c.Name,
-                                 BattleRank = c.BattleRank,
-                                 BattleRankPercentToNext = c.BattleRankPercentToNext,
-                                 PrestigeLevel = c.PrestigeLevel,
-                                 CertsEarned = c.CertsEarned,
-                                 FactionId = c.FactionId,
-                                 WorldId = c.WorldId,
-                                 TitleId = c.TitleId,
-                                 Time = time,
-                                 World = world,
-                                 Title = title,
-                                 Faction = faction,
-                                 LifetimeStats = lifetimeStats,
-                                 LifetimeStatsByFaction = lifetimeStatsByFaction,
-                                 OutfitMembership = (from om in dbContext.OutfitMembers
-                                                     join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
-                                                     where om.CharacterId == characterId
-                                                     select new OutfitMember
-                                                     {
-                                                         CharacterId = om.CharacterId,
-                                                         MemberSinceDate = om.MemberSinceDate,
-                                                         OutfitId = om.OutfitId,
-                                                         Rank = om.Rank,
-                                                         RankOrdinal = om.RankOrdinal,
-                                                         Outfit = outfit
-                                                     }).FirstOrDefault(),
-                                 Stats = (from s in dbContext.CharacterStats
-                                          join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
-                                          from profile in profileQ.DefaultIfEmpty()
-                                          where s.CharacterId == c.Id
-                                          select new CharacterStat
-                                          {
-                                              CharacterId = s.CharacterId,
-                                              ProfileId = s.ProfileId,
-                                              Deaths = s.Deaths,
-                                              FireCount = s.FireCount,
-                                              HitCount = s.HitCount,
-                                              KilledBy = s.KilledBy,
-                                              Kills = s.Kills,
-                                              PlayTime = s.PlayTime,
-                                              Score = s.Score,
-                                              Profile = profile
-                                          }).ToList(),
-                                 StatsHistory = (from s in dbContext.CharacterStatHistory
-                                          where s.CharacterId == c.Id
-                                          select s).ToList(),
-                                 StatsByFaction = (from s in dbContext.CharacterStatByFactions
-                                                   join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
-                                                   from profile in profileQ.DefaultIfEmpty()
-                                                   where s.CharacterId == c.Id
-                                                   select new CharacterStatByFaction
-                                                   {
-                                                       CharacterId = s.CharacterId,
-                                                       ProfileId = s.ProfileId,
-                                                       KilledByVS = s.KilledByVS,
-                                                       KilledByNC = s.KilledByNC,
-                                                       KilledByTR = s.KilledByTR,
-                                                       KillsVS = s.KillsVS,
-                                                       KillsNC = s.KillsNC,
-                                                       KillsTR = s.KillsTR,
-                                                       Profile = profile
-                                                   }).ToList(),
-                                 WeaponStats = (from s in dbContext.CharacterWeaponStats
-                                                join item in (from item in dbContext.Items
-                                                              join category in dbContext.ItemCategories on item.ItemCategoryId equals category.Id into categoryQ
+                            select new Character
+                            {
+                                Id = c.Id,
+                                Name = c.Name,
+                                BattleRank = c.BattleRank,
+                                BattleRankPercentToNext = c.BattleRankPercentToNext,
+                                PrestigeLevel = c.PrestigeLevel,
+                                CertsEarned = c.CertsEarned,
+                                FactionId = c.FactionId,
+                                WorldId = c.WorldId,
+                                TitleId = c.TitleId,
+                                Time = time,
+                                World = world,
+                                Title = title,
+                                Faction = faction,
+                                LifetimeStats = lifetimeStats,
+                                LifetimeStatsByFaction = lifetimeStatsByFaction,
+                                OutfitMembership = (from om in dbContext.OutfitMembers
+                                                    join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
+                                                    where om.CharacterId == characterId
+                                                    select new OutfitMember
+                                                    {
+                                                        CharacterId = om.CharacterId,
+                                                        MemberSinceDate = om.MemberSinceDate,
+                                                        OutfitId = om.OutfitId,
+                                                        Rank = om.Rank,
+                                                        RankOrdinal = om.RankOrdinal,
+                                                        Outfit = outfit
+                                                    }).FirstOrDefault(),
+                                Stats = (from s in dbContext.CharacterStats
+                                         join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
+                                         from profile in profileQ.DefaultIfEmpty()
+                                         where s.CharacterId == c.Id
+                                         select new CharacterStat
+                                         {
+                                             CharacterId = s.CharacterId,
+                                             ProfileId = s.ProfileId,
+                                             Deaths = s.Deaths,
+                                             FireCount = s.FireCount,
+                                             HitCount = s.HitCount,
+                                             KilledBy = s.KilledBy,
+                                             Kills = s.Kills,
+                                             PlayTime = s.PlayTime,
+                                             Score = s.Score,
+                                             Profile = profile
+                                         }).ToList(),
+                                StatsHistory = (from s in dbContext.CharacterStatHistory
+                                                where s.CharacterId == c.Id
+                                                select s).ToList(),
+                                StatsByFaction = (from s in dbContext.CharacterStatByFactions
+                                                  join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
+                                                  from profile in profileQ.DefaultIfEmpty()
+                                                  where s.CharacterId == c.Id
+                                                  select new CharacterStatByFaction
+                                                  {
+                                                      CharacterId = s.CharacterId,
+                                                      ProfileId = s.ProfileId,
+                                                      KilledByVS = s.KilledByVS,
+                                                      KilledByNC = s.KilledByNC,
+                                                      KilledByTR = s.KilledByTR,
+                                                      KillsVS = s.KillsVS,
+                                                      KillsNC = s.KillsNC,
+                                                      KillsTR = s.KillsTR,
+                                                      Profile = profile
+                                                  }).ToList(),
+                                WeaponStats = (from s in dbContext.CharacterWeaponStats
+                                                join item in (from i in dbContext.Items
+                                                              join category in dbContext.ItemCategories on i.ItemCategoryId equals category.Id into categoryQ
                                                               from category in categoryQ.DefaultIfEmpty()
                                                               select new Item
                                                               {
-                                                                  Id = item.Id,
-                                                                  Name = item.Name,
-                                                                  Description = item.Description,
-                                                                  FactionId = item.FactionId,
-                                                                  ImageId = item.ImageId,
-                                                                  IsVehicleWeapon = item != null ? item.IsVehicleWeapon : false,
-                                                                  ItemTypeId = item.ItemTypeId,
-                                                                  MaxStackSize = item != null ? item.MaxStackSize : 0,
-                                                                  ItemCategoryId = item.ItemCategoryId,
+                                                                  Id = i.Id,
+                                                                  Name = i.Name,
+                                                                  Description = i.Description,
+                                                                  FactionId = i.FactionId,
+                                                                  ImageId = i.ImageId,
+                                                                  IsVehicleWeapon = i.IsVehicleWeapon,
+                                                                  ItemTypeId = i.ItemTypeId,
+                                                                  MaxStackSize = i.MaxStackSize,
+                                                                  ItemCategoryId = i.ItemCategoryId,
                                                                   ItemCategory = category
-                                                              }) on s.ItemId equals item.Id into itemQ
+                                                              }).ToList()
+                                                on s.ItemId equals item.Id into itemQ
                                                 from item in itemQ.DefaultIfEmpty()
                                                 join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
                                                 from vehicle in vehicleQ.DefaultIfEmpty()
