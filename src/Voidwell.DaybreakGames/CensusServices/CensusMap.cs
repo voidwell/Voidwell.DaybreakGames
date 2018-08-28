@@ -25,8 +25,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             try
             {
-                var result = await query.GetAsync();
-                return result?.ToObject<CensusMapModel>();
+                return await query.GetAsync<CensusMapModel>();
             }
             catch (Exception)
             {

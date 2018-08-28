@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DaybreakGames.Census" Version="1.0.3" />
+    <PackageReference Include="DaybreakGames.Census" Version="1.0.4" />
     <PackageReference Include="Glicko-2RankingSystem" Version="1.0.21" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.2" />
