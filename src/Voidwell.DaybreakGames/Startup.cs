@@ -51,16 +51,16 @@ namespace Voidwell.DaybreakGames
 
             services.AddOptions();
             services.Configure<DaybreakGamesOptions>(Configuration);
-            services.Configure<DaybreakGamesOptions>(a =>
+            services.Configure<DaybreakGamesOptions>(daybreakOptions =>
             {
                 var eventNames = Configuration.GetValue<string>("CensusWebsocketServices");
                 var experienceIds = Configuration.GetValue<string>("CensusWebsocketExperienceIds");
 
-                a.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
+                daybreakOptions.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
 
                 if (experienceIds != null)
                 {
-                    a.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
+                    daybreakOptions.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
                 }
             });
 

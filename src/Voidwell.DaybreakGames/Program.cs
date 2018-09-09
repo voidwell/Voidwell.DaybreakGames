@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Voidwell.DaybreakGames.Logging;
 
 namespace Voidwell.DaybreakGames
 {
@@ -15,14 +17,31 @@ namespace Voidwell.DaybreakGames
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls("http://0.0.0.0:5000")
-                .ConfigureLogging(builder =>
+                .ConfigureLogging((context, builder) =>
                 {
+                    builder.ClearProviders();
+
+                    var useGelf = context.Configuration.GetValue("UseGelfLogging", false);
+
                     builder.SetMinimumLevel(LogLevel.Information);
+
                     builder.AddFilter("Microsoft.AspNetCore.Mvc", LogLevel.Error);
                     builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
                     builder.AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.None);
                     builder.AddFilter("Microsoft.EntityframeworkCore.Database.Command", LogLevel.None);
-                    builder.AddDebug();
+
+                    if (useGelf && !context.HostingEnvironment.IsDevelopment())
+                    {
+                        builder.AddGelf(options =>
+                        {
+                            options.LogSource = "Voidwell.DaybreakGames";
+                        });
+                    }
+                    else
+                    {
+                        builder.AddConsole();
+                        builder.AddDebug();
+                    }
                 })
                 .Build();
     }

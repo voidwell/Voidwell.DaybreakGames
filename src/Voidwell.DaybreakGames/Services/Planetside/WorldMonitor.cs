@@ -138,14 +138,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return Task.CompletedTask;
         }
 
-        public Task<FacilityControlChange> UpdateFacilityControl(FacilityControl facilityControl)
+        public async Task<FacilityControlChange> UpdateFacilityControl(FacilityControl facilityControl)
         {
             if (!_worldStates.ContainsKey(facilityControl.WorldId) || facilityControl.ZoneId == null)
             {
                 return null;
             }
 
-            return _worldStates[facilityControl.WorldId].UpdateZoneFacilityFaction(facilityControl.ZoneId.Value, facilityControl.FacilityId, facilityControl.NewFactionId);
+            return await _worldStates[facilityControl.WorldId].UpdateZoneFacilityFaction(facilityControl.ZoneId.Value, facilityControl.FacilityId, facilityControl.NewFactionId);
         }
 
         public void UpdateZoneLock(int worldId, int zoneId, ZoneLockState lockState = null)

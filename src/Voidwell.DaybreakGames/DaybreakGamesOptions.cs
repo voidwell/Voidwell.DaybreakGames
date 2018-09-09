@@ -23,5 +23,6 @@ namespace Voidwell.DaybreakGames
             "337",  // Holiday Event NPC: Kill
             "338"   // Holiday Event NPC Gold: Kill
         };
+        public bool UseGelfLogging { get; set; }
     }
 }
