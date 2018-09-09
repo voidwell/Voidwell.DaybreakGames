@@ -40,6 +40,7 @@ namespace Voidwell.DaybreakGames.Data
 
             public void Dispose()
             {
+                _dbContext.Dispose();
                 _scope.Dispose();
             }
         }

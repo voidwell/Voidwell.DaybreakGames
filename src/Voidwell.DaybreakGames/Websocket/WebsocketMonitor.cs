@@ -143,10 +143,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public void Dispose()
         {
-            if (_client != null &&_client is IDisposable client)
-            {
-                client.Dispose();
-            }
+            _client?.Dispose();
         }
     }
 }
