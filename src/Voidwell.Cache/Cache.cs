@@ -3,6 +3,8 @@ using StackExchange.Redis;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Voidwell.Cache
 {
@@ -48,6 +50,64 @@ namespace Voidwell.Cache
             catch (Exception)
             {
                 return;
+            }
+        }
+
+        public async Task AddToListAsync(string key, string item)
+        {
+            var db = await ConnectAsync();
+
+            try
+            {
+                await db.SetAddAsync(KeyFormatter(key), item);
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        public async Task RemoveFromListAsync(string key, string item)
+        {
+            var db = await ConnectAsync();
+
+            try
+            {
+                await db.SetRemoveAsync(KeyFormatter(key), item);
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetListAsync(string key)
+        {
+            var db = await ConnectAsync();
+
+            try
+            {
+                var list = await db.SetMembersAsync(KeyFormatter(key));
+
+                return list.ToStringArray();
+            }
+            catch (Exception)
+            {
+                return Enumerable.Empty<string>();
+            }
+        }
+
+        public async Task<long> GetListLengthAsync(string key)
+        {
+            var db = await ConnectAsync();
+
+            try
+            {
+                return await db.SetLengthAsync(KeyFormatter(key));
+            }
+            catch (Exception)
+            {
+                return 0;
             }
         }
 
