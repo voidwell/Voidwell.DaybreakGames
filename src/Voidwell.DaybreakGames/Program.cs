@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Voidwell.DaybreakGames.Logging;
+using Voidwell.Logging;
 
 namespace Voidwell.DaybreakGames
 {
@@ -25,7 +25,7 @@ namespace Voidwell.DaybreakGames
 
                     builder.SetMinimumLevel(LogLevel.Information);
 
-                    builder.AddFilter("Microsoft.AspNetCore.Mvc", LogLevel.Error);
+                    builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
                     builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
                     builder.AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.None);
                     builder.AddFilter("Microsoft.EntityframeworkCore.Database.Command", LogLevel.None);

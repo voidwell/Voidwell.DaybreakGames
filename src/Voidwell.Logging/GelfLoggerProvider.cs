@@ -2,17 +2,17 @@
 using Microsoft.Extensions.Options;
 using System;
 
-namespace Voidwell.DaybreakGames.Logging
+namespace Voidwell.Logging
 {
     public class GelfLoggerProvider : ILoggerProvider
     {
-        private readonly GelfOptions _options;
+        private readonly LoggingOptions _options;
 
-        public GelfLoggerProvider(IOptions<GelfOptions> options) : this(options.Value)
+        public GelfLoggerProvider(IOptions<LoggingOptions> options) : this(options.Value)
         {
         }
 
-        public GelfLoggerProvider(GelfOptions options)
+        public GelfLoggerProvider(LoggingOptions options)
         {
 
             if (string.IsNullOrEmpty(options.LogSource))

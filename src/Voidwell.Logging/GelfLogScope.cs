@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Voidwell.DaybreakGames.Logging
+namespace Voidwell.Logging
 {
     public class GelfLogScope
     {
