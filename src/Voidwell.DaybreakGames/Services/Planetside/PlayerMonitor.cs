@@ -107,7 +107,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var taskList = idList.Select(characterId => _cache.GetAsync<OnlineCharacter>(GetPlayerCacheKey(characterId)));
 
-            var characters = await Task.WhenAll(taskList);
+            var characters = (await Task.WhenAll(taskList))?.Where(a => a != null);
 
             var timedOutCharacters = idList.Where(characterId => !characters.Any(a => a.Character.CharacterId == characterId));
             if (timedOutCharacters.Any())
