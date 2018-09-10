@@ -23,6 +23,7 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly IEventRepository _eventRepository;
         private readonly IAlertRepository _alertRepository;
         private readonly IWorldMonitor _worldMonitor;
+        private readonly IPlayerMonitor _playerMonitor;
         private readonly ICharacterService _characterService;
         private readonly IAlertService _alertService;
         private readonly ICharacterRatingService _characterRatingService;
@@ -45,12 +46,13 @@ namespace Voidwell.DaybreakGames.Websocket
         });
 
         public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor,
-            ICharacterService characterService, IAlertService alertService, ICharacterRatingService characterRatingService,
-            ILogger<WebsocketEventHandler> logger)
+            IPlayerMonitor playerMonitor, ICharacterService characterService, IAlertService alertService,
+            ICharacterRatingService characterRatingService, ILogger<WebsocketEventHandler> logger)
         {
             _eventRepository = eventRepository;
             _alertRepository = alertRepository;
             _worldMonitor = worldMonitor;
+            _playerMonitor = playerMonitor;
             _characterService = characterService;
             _alertService = alertService;
             _characterRatingService = characterRatingService;
@@ -167,8 +169,7 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
             };
-            await _eventRepository.AddAsync(dataModel);
-            _worldMonitor.SetPlayerLastSeen(dataModel.WorldId, dataModel.CharacterId, dataModel.Timestamp, dataModel.ZoneId);
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
         }
 
         [CensusEventHandler("ContinentLock", typeof(Models.ContinentLock))]
@@ -262,9 +263,9 @@ namespace Voidwell.DaybreakGames.Websocket
                 ZoneId = payload.ZoneId.Value
             };
 
-            await _eventRepository.AddAsync(dataModel);
-            _worldMonitor.SetPlayerLastSeen(dataModel.WorldId, dataModel.AttackerCharacterId, dataModel.Timestamp, dataModel.ZoneId);
-            _worldMonitor.SetPlayerLastSeen(dataModel.WorldId, dataModel.CharacterId, dataModel.Timestamp, dataModel.ZoneId);
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel),
+                _playerMonitor.SetLastSeenAsync(dataModel.AttackerCharacterId, dataModel.ZoneId, dataModel.Timestamp),
+                _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
         }
 
         [CensusEventHandler("FacilityControl", typeof(FacilityControl))]
@@ -281,8 +282,13 @@ namespace Voidwell.DaybreakGames.Websocket
 
             try
             {
-                var zonePopulation = _worldMonitor.GetZonePopulation(payload.WorldId, payload.ZoneId.Value);
-                var mapUpdate = await _worldMonitor.UpdateFacilityControl(payload);
+                var zonePopulationTask = _worldMonitor.GetZonePopulation(payload.WorldId, payload.ZoneId.Value);
+                var mapUpdateTask = _worldMonitor.UpdateFacilityControl(payload);
+
+                await Task.WhenAll(zonePopulationTask, mapUpdateTask);
+
+                var zonePopulation = zonePopulationTask.Result;
+                var mapUpdate = mapUpdateTask.Result;
 
                 var score = mapUpdate?.Score;
 
@@ -386,8 +392,8 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId,
                 ZoneId = payload.ZoneId.Value
             };
-            await _eventRepository.AddAsync(dataModel);
-            _worldMonitor.SetPlayerLastSeen(dataModel.WorldId, dataModel.CharacterId, dataModel.Timestamp, dataModel.ZoneId);
+
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
         }
 
         [CensusEventHandler("MetagameEvent", typeof(MetagameEvent))]
@@ -427,8 +433,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
             try
             {
-                await _eventRepository.AddAsync(dataModel);
-                _worldMonitor.SetPlayerLastSeen(dataModel.WorldId, dataModel.CharacterId, dataModel.Timestamp, dataModel.ZoneId);
+                await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
             }
             finally
             {
@@ -453,8 +458,7 @@ namespace Voidwell.DaybreakGames.Websocket
 
             try
             {
-                await _eventRepository.AddAsync(dataModel);
-                _worldMonitor.SetPlayerLastSeen(dataModel.WorldId, dataModel.CharacterId, dataModel.Timestamp, dataModel.ZoneId);
+                await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
             }
             finally
             {
@@ -465,22 +469,20 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("PlayerLogin", typeof(Models.PlayerLogin))]
         private async Task Process(Models.PlayerLogin payload)
         {
-            await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, true);
-
             var dataModel = new Data.Models.Planetside.Events.PlayerLogin
             {
                 CharacterId = payload.CharacterId,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId
             };
-            await _eventRepository.AddAsync(dataModel);
+
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel),
+                _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp));
         }
 
         [CensusEventHandler("PlayerLogout", typeof(Models.PlayerLogout))]
         private async Task Process(Models.PlayerLogout payload)
         {
-            await _worldMonitor.SetPlayerOnlineState(payload.CharacterId, payload.Timestamp, false);
-
             var dataModel = new Data.Models.Planetside.Events.PlayerLogout
             {
                 CharacterId = payload.CharacterId,
@@ -488,7 +490,9 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId
             };
 
-            await Task.WhenAll(_eventRepository.AddAsync(dataModel), _characterRatingService.SaveCachedRatingAsync(payload.CharacterId));
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel),
+                _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp),
+                _characterRatingService.SaveCachedRatingAsync(payload.CharacterId));
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]
