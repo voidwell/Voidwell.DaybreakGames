@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Voidwell.DaybreakGames.Logging
+namespace Voidwell.Logging
 {
     public class GelfMessage
     {
@@ -31,6 +31,9 @@ namespace Voidwell.DaybreakGames.Logging
 
         [JsonProperty("_event_name")]
         public string EventName { get; set; }
+
+        [JsonProperty("_level_name")]
+        public string LevelName { get; set; }
 
         [JsonIgnore]
         public IEnumerable<KeyValuePair<string, object>> AdditionalFields { get; set; }

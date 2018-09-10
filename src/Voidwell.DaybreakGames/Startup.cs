@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.HostedServices;
 using IdentityServer4.AccessTokenValidation;
 using System;
+using Voidwell.Logging;
 
 namespace Voidwell.DaybreakGames
 {
@@ -121,6 +122,8 @@ namespace Voidwell.DaybreakGames
         public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             app.InitializeDatabases();
+
+            app.UseLoggingMiddleware(); 
 
             app.UseAuthentication();
 

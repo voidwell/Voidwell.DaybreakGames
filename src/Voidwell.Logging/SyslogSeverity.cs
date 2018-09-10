@@ -1,4 +1,8 @@
-﻿namespace Voidwell.DaybreakGames.Logging
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Voidwell.Logging
 {
     public enum SyslogSeverity
     {

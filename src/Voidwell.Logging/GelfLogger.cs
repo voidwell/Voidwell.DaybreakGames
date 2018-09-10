@@ -1,14 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Internal;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Voidwell.DaybreakGames.Logging
+namespace Voidwell.Logging
 {
     public class GelfLogger : ILogger
     {
@@ -23,9 +21,9 @@ namespace Voidwell.DaybreakGames.Logging
         };
 
         private readonly string _name;
-        private readonly GelfOptions _options;
+        private readonly LoggingOptions _options;
 
-        public GelfLogger(string name, GelfOptions options)
+        public GelfLogger(string name, LoggingOptions options)
         {
             _name = name;
             _options = options;
@@ -44,7 +42,7 @@ namespace Voidwell.DaybreakGames.Logging
             }
 
             var additionalFields = GetScopeAdditionalFields()
-                .Concat(GetStateAdditionalFields(state));
+            .Concat(GetStateAdditionalFields(state));
 
             var message = new GelfMessage
             {
@@ -56,10 +54,11 @@ namespace Voidwell.DaybreakGames.Logging
                 Exception = exception?.ToString(),
                 EventId = eventId.Id,
                 EventName = eventId.Name,
+                LevelName = logLevel.ToString(),
                 AdditionalFields = ValidateAdditionalFields(additionalFields)
             };
 
-            Console.WriteLine(JToken.FromObject(message).ToString(Formatting.None));
+            Console.WriteLine(message.ToJson());
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -107,9 +106,16 @@ namespace Voidwell.DaybreakGames.Logging
 
         private static IEnumerable<KeyValuePair<string, object>> GetStateAdditionalFields<TState>(TState state)
         {
-            return state is FormattedLogValues logValues
-                ? logValues.Take(logValues.Count - 1)
-                : Enumerable.Empty<KeyValuePair<string, object>>();
+            if (state is FormattedLogValues logValues)
+            {
+                return logValues.Take(logValues.Count - 1);
+            }
+            else if (state is IReadOnlyList<KeyValuePair<string, object>> rolLogValues)
+            {
+                return rolLogValues.Take(rolLogValues.Count - 1);
+            }
+
+            return Enumerable.Empty<KeyValuePair<string, object>>();
         }
 
         private static IEnumerable<KeyValuePair<string, object>> GetScopeAdditionalFields()
