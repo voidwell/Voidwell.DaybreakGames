@@ -5,11 +5,12 @@ namespace Voidwell.DaybreakGames.Models
     public class OnlineCharacter
     {
         public OnlineCharacterProfile Character { get; set; }
+        public OnlineCharacterLastSeen LastSeen { get; set; }
         public DateTime LoginDate { get; set; }
 
         public void UpdateLastSeen(DateTime timestamp, int zoneId)
         {
-            Character.LastSeen = new OnlineCharacterLastSeen
+            LastSeen = new OnlineCharacterLastSeen
             {
                 Timestamp = timestamp,
                 ZoneId = zoneId
@@ -23,7 +24,6 @@ namespace Voidwell.DaybreakGames.Models
         public int FactionId { get; set; }
         public string Name { get; set; }
         public int WorldId { get; set; }
-        public OnlineCharacterLastSeen LastSeen { get; set; }
     }
 
     public class OnlineCharacterLastSeen

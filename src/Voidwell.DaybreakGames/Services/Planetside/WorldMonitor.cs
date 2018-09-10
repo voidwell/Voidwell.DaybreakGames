@@ -13,29 +13,24 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WorldMonitor : IWorldMonitor
     {
-        private readonly IPlayerSessionRepository _playerSessionRepository;
         private readonly IEventRepository _eventRepository;
         private readonly IZoneService _zoneService;
         private readonly IWorldService _worldService;
         private readonly IMapService _mapService;
-        private readonly ICharacterService _characterService;
-        private readonly ICharacterUpdaterService _updaterService;
+        private readonly IPlayerMonitor _playerMonitor;
         private readonly ILogger<WorldMonitor> _logger;
 
         private static ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
         private static ConcurrentDictionary<int, Dictionary<int, Zone>> RetryingWorlds = new ConcurrentDictionary<int, Dictionary<int, Zone>>();
 
-        public WorldMonitor(IPlayerSessionRepository playerSessionRepository, IEventRepository eventRepository,
-            IZoneService zoneService, IWorldService worldService, IMapService mapService, ICharacterService characterService,
-            ICharacterUpdaterService updaterService, ILogger<WorldMonitor> logger)
+        public WorldMonitor(IEventRepository eventRepository, IZoneService zoneService, IWorldService worldService, IMapService mapService,
+            IPlayerMonitor playerMonitor, ILogger<WorldMonitor> logger)
         {
-            _playerSessionRepository = playerSessionRepository;
             _eventRepository = eventRepository;
             _zoneService = zoneService;
             _worldService = worldService;
             _mapService = mapService;
-            _characterService = characterService;
-            _updaterService = updaterService;
+            _playerMonitor = playerMonitor;
             _logger = logger;
 
             Task.Run(() => InitializeWorlds());
@@ -75,21 +70,28 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
             else
             {
-                SetWorldOffline(worldId);
+                await SetWorldOffline(worldId);
             }
         }
 
-        private async Task SetWorldOnline(int worldId)
+        private Task SetWorldOnline(int worldId)
         {
-            _worldStates[worldId].SetWorldOnline();
             _logger.LogInformation($"Set world {worldId} ONLINE");
-            await SetupWorldZones(worldId);
+            _worldStates[worldId].SetWorldOnline();
+            return SetupWorldZones(worldId);
         }
 
-        private void SetWorldOffline(int worldId)
+        private Task SetWorldOffline(int worldId, bool preservePlayers = false)
         {
-            _worldStates[worldId].SetWorldOffline();
             _logger.LogInformation($"Set world {worldId} OFFLINE");
+            _worldStates[worldId].SetWorldOffline();
+
+            if (preservePlayers)
+            {
+                return Task.CompletedTask;
+            }
+
+            return _playerMonitor.ClearWorldAsync(worldId);
         }
 
         public async Task SetupWorldZones(int worldId)
@@ -132,7 +134,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             foreach(var worldId in _worldStates.Keys)
             {
-                SetWorldOffline(worldId);
+                SetWorldOffline(worldId, true);
             }
 
             return Task.CompletedTask;
@@ -192,81 +194,41 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        public async Task SetPlayerOnlineState(string characterId, DateTime timestamp, bool isOnline)
+        public async Task<IEnumerable<OnlineCharacter>> GetOnlineCharactersByWorld(int worldId)
         {
-            var character = await _characterService.GetCharacter(characterId);
-            if (character == null || !_worldStates.ContainsKey(character.WorldId))
-            {
-                return;
-            }
-
-            if (isOnline)
-            {
-                _worldStates[character.WorldId].SetPlayerOnline(character.Id, character.Name, character.FactionId, timestamp);
-                return;
-            }
-
-            var onlineCharacter = _worldStates[character.WorldId].SetPlayerOffline(character.Id);
-            if (onlineCharacter == null)
-            {
-                return;
-            }
-
-            var duration = timestamp - onlineCharacter.LoginDate;
-            if (duration.TotalMinutes >= 5)
-            {
-                await _updaterService.AddToQueue(characterId);
-            }
-
-            var dataModel = new Data.Models.Planetside.PlayerSession
-            {
-                CharacterId = characterId,
-                LoginDate = onlineCharacter.LoginDate,
-                LogoutDate = timestamp,
-                Duration = (int)duration.TotalMilliseconds
-            };
-            await _playerSessionRepository.AddAsync(dataModel);
-        }
-
-        public void SetPlayerLastSeen(int worldId, string characterId, DateTime timestamp, int zoneId)
-        {
-            if (!_worldStates.ContainsKey(worldId))
-            {
-                return;
-            }
-
-            _worldStates[worldId].SetPlayerLastSeen(characterId, zoneId, timestamp);
-        }
-
-        public IEnumerable<OnlineCharacter> GetOnlineCharactersByWorld(int worldId)
-        {
-            if (!_worldStates.ContainsKey(worldId))
+            if (!_worldStates.ContainsKey(worldId) || !_worldStates[worldId].IsOnline)
             {
                 return Enumerable.Empty<OnlineCharacter>();
             }
 
-            return _worldStates[worldId].GetOnlinePlayers();
+            return await _playerMonitor.GetAllAsync(worldId);
         }
 
-        public ZonePopulation GetZonePopulation(int worldId, int zoneId)
+        public async Task<ZonePopulation> GetZonePopulation(int worldId, int zoneId)
         {
             if (!_worldStates.ContainsKey(worldId))
             {
                 return null;
             }
 
-            return _worldStates[worldId].GetZonePopulation(zoneId);
+            if (!_worldStates[worldId].IsOnline)
+            {
+                return new ZonePopulation();
+            }
+
+            var zonePlayers = await _playerMonitor.GetAllAsync(worldId, zoneId);
+
+            return new ZonePopulation
+            {
+                VS = zonePlayers.Count(a => a.Character.FactionId == 1),
+                NC = zonePlayers.Count(a => a.Character.FactionId == 2),
+                TR = zonePlayers.Count(a => a.Character.FactionId == 3)
+            };
         }
 
-        public IEnumerable<WorldOnlineState> GetWorldStates()
+        public async Task<IEnumerable<WorldOnlineState>> GetWorldStates()
         {
-            return _worldStates.Select(a => new WorldOnlineState {
-                Id = a.Key,
-                Name = a.Value.Name,
-                IsOnline = a.Value.IsOnline,
-                OnlineCharacters = a.Value.CountOnlinePlayers(),
-                ZoneStates = a.Value.GetZoneStates()
-            }).OrderBy(a => a.Name);
+            return (await Task.WhenAll(_worldStates.Select(a => GetWorldState(a.Key)))).OrderBy(a => a.Name);
         }
 
         public IEnumerable<ZoneRegionOwnership> GetZoneOwnership(int worldId, int zoneId)
@@ -288,6 +250,34 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return _worldStates[worldId].GetZoneMapOwnership(zoneId);
+        }
+
+        private async Task<WorldOnlineState> GetWorldState(int worldId)
+        {
+            if (!_worldStates.ContainsKey(worldId))
+            {
+                return null;
+            }
+
+            var worldState = _worldStates[worldId];
+
+            var worldPopulation = worldState.IsOnline ? await _playerMonitor.GetPlayerCountAsync(worldId) : 0;
+
+            var zoneStates = new List<WorldOnlineZoneState>();
+            foreach (var zoneState in worldState.GetZoneStates())
+            {
+                zoneState.Population = await GetZonePopulation(worldId, zoneState.Id);
+                zoneStates.Add(zoneState);
+            }
+
+            return new WorldOnlineState
+            {
+                Id = worldId,
+                Name = worldState.Name,
+                IsOnline = worldState.IsOnline,
+                OnlineCharacters = (int)worldPopulation,
+                ZoneStates = zoneStates
+            };
         }
 
         private async Task<bool> SetupWorldZone(int worldId, Zone zone, bool retry = true)
