@@ -124,7 +124,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var zone = await _zoneService.GetZone(zoneId);
             if (zone == null)
             {
-                throw new InvalidOperationException("Invalid zone id provided");
+                throw new InvalidOperationException($"Invalid zone id {zoneId} for world {worldId} provided.");
             }
 
             return await SetupWorldZone(worldId, zone, retryAsync);

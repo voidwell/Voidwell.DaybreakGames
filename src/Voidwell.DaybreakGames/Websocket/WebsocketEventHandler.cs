@@ -491,8 +491,7 @@ namespace Voidwell.DaybreakGames.Websocket
             };
 
             await Task.WhenAll(_eventRepository.AddAsync(dataModel),
-                _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp),
-                _characterRatingService.SaveCachedRatingAsync(payload.CharacterId));
+                _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp));
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]

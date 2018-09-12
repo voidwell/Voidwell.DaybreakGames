@@ -14,6 +14,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICharacterService _characterService;
         private readonly ICharacterUpdaterService _updaterService;
         private readonly IPlayerSessionRepository _playerSessionRepository;
+        private readonly ICharacterRatingService _characterRatingService;
         private readonly ICache _cache;
 
         private static readonly Func<int, string> GetListCacheKey = worldId => $"ps2.online-players_world_{worldId}";
@@ -21,11 +22,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private static readonly TimeSpan CacheIdleDuration = TimeSpan.FromHours(3);
         private static readonly TimeSpan MaximumIdleDuration = TimeSpan.FromMinutes(10);
 
-        public PlayerMonitor(ICharacterService characterService, ICharacterUpdaterService updaterService, IPlayerSessionRepository playerSessionRepository, ICache cache)
+        public PlayerMonitor(ICharacterService characterService, ICharacterUpdaterService updaterService,
+            IPlayerSessionRepository playerSessionRepository, ICharacterRatingService characterRatingService, ICache cache)
         {
             _characterService = characterService;
             _updaterService = updaterService;
             _playerSessionRepository = playerSessionRepository;
+            _characterRatingService = characterRatingService;
             _cache = cache;
         }
 
@@ -82,7 +85,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Duration = (int)duration.TotalMilliseconds
             };
 
-            await Task.WhenAll(_playerSessionRepository.AddAsync(dataModel), RemoveFromCacheList(character));
+            await Task.WhenAll(_playerSessionRepository.AddAsync(dataModel),
+                RemoveFromCacheList(character),
+                _characterRatingService.SaveCachedRatingAsync(characterId));
         }
 
         public async Task SetLastSeenAsync(string characterId, int zoneId, DateTime timestamp)
