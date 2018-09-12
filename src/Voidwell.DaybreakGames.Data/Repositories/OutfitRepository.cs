@@ -96,14 +96,24 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<Outfit> GetOutfitByAliasAsync(string alias)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.Outfits.FirstOrDefaultAsync(o => o.Alias == alias);
+            }
+        }
+
         public async Task<IEnumerable<Outfit>> GetOutfitsByNameAsync(string name, int limit)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.Outfits.Where(o => o.Name.Contains(name))
-                    .Take(12)
+                return await dbContext.Outfits.Where(o => o.Name.StartsWith(name))
+                    .Take(limit)
                     .ToListAsync();
             }
         }

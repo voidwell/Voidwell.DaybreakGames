@@ -8,6 +8,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IOutfitService
     {
         Task<IEnumerable<Outfit>> LookupOutfitsByName(string name, int limit = 12);
+        Task<Outfit> LookupOutfitByAlias(string alias);
         Task<Outfit> GetOutfit(string outfitId);
         Task<OutfitDetails> GetOutfitDetails(string outfitId);
         Task<Outfit> GetOutfitDetailsAsync(string outfitId);
