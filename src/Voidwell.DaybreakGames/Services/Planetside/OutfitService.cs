@@ -190,6 +190,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _outfitRepository.GetOutfitsByNameAsync(name, limit);
         }
 
+        public Task<Outfit> LookupOutfitByAlias(string alias)
+        {
+            return _outfitRepository.GetOutfitByAliasAsync(alias);
+        }
+
         public async Task<OutfitMember> UpdateCharacterOutfitMembership(Character character)
         {
             OutfitMember outfitMember = null;

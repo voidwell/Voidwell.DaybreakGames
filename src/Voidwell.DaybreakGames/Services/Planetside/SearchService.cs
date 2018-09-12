@@ -36,15 +36,35 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return cacheResult;
             }
 
-            var characterLookup = _characterService.LookupCharactersByName(query, 10);
-            var outfitLookup = _outfitService.LookupOutfitsByName(query, 10);
-            var weaponLookup = _itemService.LookupItemsByName(query, 10);
+            var lookupTasks = new List<Task>();
 
-            await Task.WhenAll(characterLookup, /*outfitLookup,*/ weaponLookup);
+            Task<IEnumerable<CharacterSearchResult>> characterLookup = null;
 
-            var characters = characterLookup.Result;
-            var outfits = outfitLookup.Result;
+            if (query.Length >= 3)
+            {
+                characterLookup = _characterService.LookupCharactersByName(query, 10);
+                lookupTasks.Add(characterLookup);
+            }
+
+            var outfitNameLookup = _outfitService.LookupOutfitsByName(query, 5);
+            var outfitAliasLookup = _outfitService.LookupOutfitByAlias(query);
+
+            var weaponLookup = _itemService.LookupItemsByName(query, 5);
+
+            lookupTasks.Add(outfitNameLookup);
+            lookupTasks.Add(outfitAliasLookup);
+            lookupTasks.Add(weaponLookup);
+
+            await Task.WhenAll(lookupTasks);
+
+            var characters = characterLookup?.Result ?? Enumerable.Empty<CharacterSearchResult>();
+            var outfits = outfitNameLookup.Result;
             var weapons = weaponLookup.Result;
+
+            if (outfitAliasLookup.Result != null && !outfits.Any(o => o.Id == outfitAliasLookup.Result.Id))
+            {
+                outfits.Concat(new[] { outfitAliasLookup.Result });
+            }
 
             var searchResults = new List<SearchResult>();
 
@@ -89,8 +109,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var orderedResults = new List<SearchResult>();
 
-            //Exact match
+            //Exact match outfit alias
             foreach (var result in searchResults)
+            {
+                if (result.Alias == query)
+                {
+                    orderedResults.Add(result);
+                }
+            }
+
+            //Exact match
+            foreach (var result in searchResults.Except(orderedResults))
             {
                 if (result.Name == query)
                 {
