@@ -6,7 +6,6 @@ COPY *.sln ./
 COPY ./src/Voidwell.DaybreakGames/*.csproj ./src/Voidwell.DaybreakGames/
 COPY ./src/Voidwell.Cache/*.csproj ./src/Voidwell.Cache/
 COPY ./src/Voidwell.DaybreakGames.Data/*.csproj ./src/Voidwell.DaybreakGames.Data/
-COPY ./src/Voidwell.Logging/*.csproj ./src/Voidwell.Logging/
 COPY ./test/Voidwell.DaybreakGames.Test/*.csproj ./test/Voidwell.DaybreakGames.Test/
 
 RUN dotnet restore
