@@ -25,12 +25,12 @@
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.18" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.6.0" />
+    <PackageReference Include="Voidwell.Logging" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
-    <ProjectReference Include="..\Voidwell.Logging\Voidwell.Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
