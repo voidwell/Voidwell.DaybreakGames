@@ -6,7 +6,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IFunctionalRepository
     {
-        Task<IEnumerable<WeaponAggregate>> GetWeaponAggregates();
         Task<IEnumerable<CharacterLastSession>> GetPSBLastOnline();
     }
 }
