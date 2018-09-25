@@ -108,19 +108,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             var characterTask = GetCharacterDetailsAsync(characterId);
-            var aggregateTask = _weaponAggregateService.GetAggregates();
             var sanctionedWeaponsTask = _weaponService.GetAllSanctionedWeaponIds();
 
-            await Task.WhenAll(characterTask, aggregateTask, sanctionedWeaponsTask);
+            await Task.WhenAll(characterTask, sanctionedWeaponsTask);
 
             var character = characterTask.Result;
-            var aggregates = aggregateTask.Result;
             var sanctionedWeaponIds = sanctionedWeaponsTask.Result;
 
             if (character == null)
             {
                 return null;
             }
+
+            var weaponIds = character.WeaponStats.Where(a => a.ItemId != 0).Select(a => a.ItemId);
+            var aggregates = await _weaponAggregateService.GetAggregates(weaponIds);
 
             var times = new CharacterDetailsTimes
             {
