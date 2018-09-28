@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
-using Voidwell.DaybreakGames.Websocket.Models;
+using Voidwell.DaybreakGames.CensusStream.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {

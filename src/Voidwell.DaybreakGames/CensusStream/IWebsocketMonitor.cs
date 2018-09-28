@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Websocket
+﻿namespace Voidwell.DaybreakGames.CensusStream
 {
     public interface IWebsocketMonitor : IStatefulHostedService
     {

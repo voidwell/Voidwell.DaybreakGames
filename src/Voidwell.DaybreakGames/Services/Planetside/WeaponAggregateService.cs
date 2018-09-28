@@ -46,7 +46,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<Dictionary<string, WeaponAggregate>> GetAggregates(IEnumerable<int> itemIds)
         {
-            var aggregates = await Task.WhenAll(itemIds.Select(GetAggregateForItem));
+            var aggregates = await Task.WhenAll(itemIds.Distinct().Select(GetAggregateForItem));
 
             return aggregates.Where(a => a != null).ToDictionary(a => $"{a.ItemId}-{a.VehicleId}", a => a);
         }

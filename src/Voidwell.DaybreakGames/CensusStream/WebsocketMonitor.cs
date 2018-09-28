@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
-using Voidwell.DaybreakGames.Websocket.Models;
+using Voidwell.DaybreakGames.CensusStream.Models;
 
-namespace Voidwell.DaybreakGames.Websocket
+namespace Voidwell.DaybreakGames.CensusStream
 {
     public class WebsocketMonitor : StatefulHostedService, IWebsocketMonitor, IDisposable
     {

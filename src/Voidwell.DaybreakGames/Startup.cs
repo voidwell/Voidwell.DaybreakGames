@@ -7,7 +7,7 @@ using Newtonsoft.Json.Serialization;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Services.Planetside;
-using Voidwell.DaybreakGames.Websocket;
+using Voidwell.DaybreakGames.CensusStream;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +15,8 @@ using Voidwell.DaybreakGames.HostedServices;
 using IdentityServer4.AccessTokenValidation;
 using System;
 using Voidwell.Logging;
+using Voidwell.DaybreakGames.WebsocketServer;
+using Voidwell.DaybreakGames.WebsocketServer.Handlers;
 
 namespace Voidwell.DaybreakGames
 {
@@ -74,6 +76,7 @@ namespace Voidwell.DaybreakGames
 
             services.AddCensusHelpers();
             services.AddUpdateableTasks();
+            services.AddWebSocketManager();
 
             services.AddTransient<IItemService, ItemService>();
             services.AddTransient<IMapService, MapService>();
@@ -104,6 +107,8 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
 
+            services.AddSingleton<PlanetsideMessageHandler>();
+
             services.AddHostedService<StoreUpdaterSchedulerHostedService>();
             services.AddHostedService<WebsocketMonitorHostedService>();
             services.AddHostedService<CharacterUpdaterHostedService>();
@@ -123,12 +128,15 @@ namespace Voidwell.DaybreakGames
         public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             app.InitializeDatabases();
+            app.UseWebSockets();
 
-            app.UseLoggingMiddleware(); 
+            app.UseLoggingMiddleware();
 
             app.UseAuthentication();
 
             app.UseMvc();
+
+            app.UseWebSocketManager("/ws/ps2", app.ApplicationServices.GetService<PlanetsideMessageHandler>());
         }
     }
 }

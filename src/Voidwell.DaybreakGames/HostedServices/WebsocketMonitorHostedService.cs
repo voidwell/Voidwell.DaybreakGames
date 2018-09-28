@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Websocket;
+﻿using Voidwell.DaybreakGames.CensusStream;
 
 namespace Voidwell.DaybreakGames.HostedServices
 {

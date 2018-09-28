@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
-namespace Voidwell.DaybreakGames.Websocket
+namespace Voidwell.DaybreakGames.CensusStream
 {
     public interface IWebsocketEventHandler
     {

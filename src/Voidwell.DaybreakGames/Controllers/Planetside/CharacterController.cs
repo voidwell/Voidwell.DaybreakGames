@@ -8,10 +8,12 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
     public class CharacterController : Controller
     {
         private readonly ICharacterService _characterService;
+        private readonly IPlayerMonitor _playerMonitor;
 
-        public CharacterController(ICharacterService characterService)
+        public CharacterController(ICharacterService characterService, IPlayerMonitor playerMonitor)
         {
             _characterService = characterService;
+            _playerMonitor = playerMonitor;
         }
 
         [HttpGet("{characterId}")]
@@ -37,6 +39,13 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         public async Task<ActionResult> GetCharacterSessionsById(string characterId, int sessionId)
         {
             var result = await _characterService.GetSession(characterId, sessionId);
+            return Ok(result);
+        }
+
+        [HttpGet("{characterId}/state")]
+        public async Task<ActionResult> GetCharacterOnlineState(string characterId)
+        {
+            var result = await _playerMonitor.GetAsync(characterId);
             return Ok(result);
         }
 

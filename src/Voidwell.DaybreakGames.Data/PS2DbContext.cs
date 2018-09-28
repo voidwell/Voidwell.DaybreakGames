@@ -128,7 +128,8 @@ namespace Voidwell.DaybreakGames.Data
 
         private static string ToSnakeCase(string input)
         {
-            var result = Regex.Replace(input, ".[A-Z]", m => m.Value[0] + "_" + m.Value[1]);
+            var matches = Regex.Matches(input, "([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)");
+            var result = string.Join("_", matches.Select(a => a.Value));
 
             return result.ToLower();
         }
