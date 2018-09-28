@@ -870,64 +870,49 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<SimpleCharacterDetails> GetCharacterByName(string characterName)
         {
-            var characterId = await GetCharacterIdByName(characterName);
-            if (characterId == null)
-            {
-                return null;
-            }
-
-            var stats = await GetCharacterDetails(characterId);
-            if (stats == null)
+            var character = await GetCharacterDetailsByNameAsync(characterName);
+            if (character == null)
             {
                 return null;
             }
 
             var details =  new SimpleCharacterDetails
             {
-                Id = characterId,
-                Name = stats.Name,
-                World = stats.World,
-                LastSaved = stats.Times?.LastSaveDate,
-                FactionId = stats.FactionId,
-                FactionName = stats.Faction,
-                FactionImageId = stats.FactionImageId,
-                BattleRank = stats.BattleRank,
-                OutfitAlias = stats.Outfit?.Alias,
-                OutfitName = stats.Outfit?.Name,
-                Kills = stats.LifetimeStats.Kills,
-                Deaths = stats.LifetimeStats.Deaths,
-                Score = stats.LifetimeStats.Score,
-                PlayTime = stats.LifetimeStats.PlayTime,
-                IVIScore = stats.InfantryStats.IVIScore.GetValueOrDefault(),
-                Prestige = stats.PrestigeLevel
+                Id = character.Id,
+                Name = character.Name,
+                World = character.World,
+                LastSaved = character.Times?.LastSaveDate,
+                FactionId = character.FactionId,
+                FactionName = character.Faction,
+                FactionImageId = character.FactionImageId,
+                BattleRank = character.BattleRank,
+                OutfitAlias = character.Outfit?.Alias,
+                OutfitName = character.Outfit?.Name,
+                Kills = character.LifetimeStats.Kills,
+                Deaths = character.LifetimeStats.Deaths,
+                Score = character.LifetimeStats.Score,
+                PlayTime = character.LifetimeStats.PlayTime,
+                IVIScore = character.InfantryStats.IVIScore.GetValueOrDefault(),
+                Prestige = character.PrestigeLevel
             };
 
             details.KillDeathRatio = (double)details.Kills / details.Deaths;
-            details.HeadshotRatio = (double)stats.LifetimeStats.Headshots / details.Kills;
+            details.HeadshotRatio = (double)character.LifetimeStats.Headshots / details.Kills;
             details.KillsPerHour = details.Kills / (details.PlayTime / 3600.0);
-            details.SiegeLevel = (double)stats.LifetimeStats.FacilityCaptureCount / stats.LifetimeStats.FacilityDefendedCount * 100;
+            details.SiegeLevel = (double)character.LifetimeStats.FacilityCaptureCount / character.LifetimeStats.FacilityDefendedCount * 100;
 
             return details;
         }
 
         public async Task<CharacterWeaponDetails> GetCharacterWeaponByName(string characterName, string weaponName)
         {
-            var characterId = await GetCharacterIdByName(characterName);
-            if (characterId == null)
+            var character = await GetCharacterDetailsByNameAsync(characterName);
+            if (character == null)
             {
                 return null;
             }
 
-            var stats = await GetCharacterDetails(characterId);
-            if (stats == null)
-            {
-                return null;
-            }
-
-            var weaponStats = stats.WeaponStats
-                .Where(a => a.Name != null && a.Stats.PlayTime.GetValueOrDefault() > 0)
-                .OrderBy(a => a.Name)
-                .FirstOrDefault(a => a.Name.ToLower().Contains(weaponName.ToLower()));
+            var weaponStats = FindCharacterWeaponStatsByNameOrId(character.WeaponStats, weaponName);
             if (weaponStats == null)
             {
                 return null;
@@ -935,8 +920,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var details = new CharacterWeaponDetails
             {
-                CharacterId = characterId,
-                CharacterName = stats.Name,
+                CharacterId = character.Id,
+                CharacterName = character.Name,
                 ItemId = weaponStats.ItemId,
                 WeaponName = weaponStats.Name,
                 WeaponImageId = weaponStats.ImageId,
@@ -957,6 +942,38 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
 
             return details;
+        }
+
+        private async Task<CharacterDetails> GetCharacterDetailsByNameAsync(string characterName)
+        {
+            var characterId = await GetCharacterIdByName(characterName);
+            if (characterId == null)
+            {
+                return null;
+            }
+
+            return await GetCharacterDetails(characterId);
+        }
+
+        private static CharacterDetailsWeaponStat FindCharacterWeaponStatsByNameOrId(IEnumerable<CharacterDetailsWeaponStat> stats, string weaponSearch)
+        {
+            CharacterDetailsWeaponStat weaponStats = null;
+
+            var validStats = stats.Where(a => a.Name != null && a.Stats.PlayTime.GetValueOrDefault() > 0);
+
+            if (int.TryParse(weaponSearch, out int weaponId))
+            {
+                weaponStats = validStats.FirstOrDefault(a => a.ItemId == weaponId);
+            }
+
+            if (weaponStats == null)
+            {
+                weaponStats = validStats
+                    .OrderBy(a => a.Name)
+                    .FirstOrDefault(a => a.Name.ToLower().Contains(weaponSearch.ToLower()));
+            }
+
+            return weaponStats;
         }
     }
 }
