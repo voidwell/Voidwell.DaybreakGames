@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
-using Voidwell.DaybreakGames.Websocket;
+using Voidwell.DaybreakGames.CensusStream;
 
 namespace Voidwell.DaybreakGames.Controllers
 {

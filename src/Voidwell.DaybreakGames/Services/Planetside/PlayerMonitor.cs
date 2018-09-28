@@ -57,18 +57,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return onlineCharacter;
         }
 
-        public async Task SetOfflineAsync(string characterId, DateTime timestamp)
+        public async Task<OnlineCharacter> SetOfflineAsync(string characterId, DateTime timestamp)
         {
             var character = await _characterService.GetCharacter(characterId);
             if (character == null)
             {
-                return;
+                return null;
             }
 
             var onlineCharacter = await _cache.GetAsync<OnlineCharacter>(GetPlayerCacheKey(characterId));
             if (onlineCharacter == null)
             {
-                return;
+                return null;
             }
 
             var duration = timestamp - onlineCharacter.LoginDate;
@@ -88,9 +88,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await Task.WhenAll(_playerSessionRepository.AddAsync(dataModel),
                 RemoveFromCacheList(character),
                 _characterRatingService.SaveCachedRatingAsync(characterId));
+
+            return onlineCharacter;
         }
 
-        public async Task SetLastSeenAsync(string characterId, int zoneId, DateTime timestamp)
+        public async Task<OnlineCharacter> SetLastSeenAsync(string characterId, int zoneId, DateTime timestamp)
         {
             var onlineCharacter = await GetAsync(characterId);
             if (onlineCharacter == null)
@@ -98,12 +100,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 onlineCharacter = await SetOnlineAsync(characterId, timestamp);
                 if (onlineCharacter == null)
                 {
-                    return;
+                    return null;
                 }
             }
 
             onlineCharacter.UpdateLastSeen(timestamp, zoneId);
             await _cache.SetAsync(GetPlayerCacheKey(characterId), onlineCharacter, CacheIdleDuration);
+
+            return onlineCharacter;
         }
 
         public async Task<IEnumerable<OnlineCharacter>> GetAllAsync(int worldId, int? zoneId = null)

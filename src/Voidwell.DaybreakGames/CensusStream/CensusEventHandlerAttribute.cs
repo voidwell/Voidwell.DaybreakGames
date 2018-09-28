@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Voidwell.DaybreakGames.Websocket
+namespace Voidwell.DaybreakGames.CensusStream
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class CensusEventHandlerAttribute : Attribute

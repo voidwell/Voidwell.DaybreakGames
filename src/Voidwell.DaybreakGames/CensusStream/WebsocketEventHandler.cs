@@ -14,9 +14,11 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
-using Voidwell.DaybreakGames.Websocket.Models;
+using Voidwell.DaybreakGames.CensusStream.Models;
+using Voidwell.DaybreakGames.WebsocketServer.Handlers;
+using Voidwell.DaybreakGames.WebsocketServer.Models;
 
-namespace Voidwell.DaybreakGames.Websocket
+namespace Voidwell.DaybreakGames.CensusStream
 {
     public class WebsocketEventHandler : IWebsocketEventHandler
     {
@@ -27,6 +29,7 @@ namespace Voidwell.DaybreakGames.Websocket
         private readonly ICharacterService _characterService;
         private readonly IAlertService _alertService;
         private readonly ICharacterRatingService _characterRatingService;
+        private readonly PlanetsideMessageHandler _planetsideMessageHandler;
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
 
@@ -47,7 +50,8 @@ namespace Voidwell.DaybreakGames.Websocket
 
         public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor,
             IPlayerMonitor playerMonitor, ICharacterService characterService, IAlertService alertService,
-            ICharacterRatingService characterRatingService, ILogger<WebsocketEventHandler> logger)
+            ICharacterRatingService characterRatingService, PlanetsideMessageHandler planetsideMessageHandler,
+            ILogger<WebsocketEventHandler> logger)
         {
             _eventRepository = eventRepository;
             _alertRepository = alertRepository;
@@ -56,6 +60,7 @@ namespace Voidwell.DaybreakGames.Websocket
             _characterService = characterService;
             _alertService = alertService;
             _characterRatingService = characterRatingService;
+            _planetsideMessageHandler = planetsideMessageHandler;
             _logger = logger;
 
             _processMethods = GetType()
@@ -221,30 +226,30 @@ namespace Voidwell.DaybreakGames.Websocket
         [CensusEventHandler("Death", typeof(Models.Death))]
         private async Task Process(Models.Death payload)
         {
-            List<Task> PreProcessTasks = new List<Task>();
+            List<Task> TaskList = new List<Task>();
             Task<OutfitMember> AttackerOutfitTask = null;
             Task<OutfitMember> VictimOutfitTask = null;
 
             if (payload.AttackerCharacterId != null && payload.AttackerCharacterId.Length > 18)
             {
                 AttackerOutfitTask = _characterService.GetCharactersOutfit(payload.AttackerCharacterId);
-                PreProcessTasks.Add(AttackerOutfitTask);
+                TaskList.Add(AttackerOutfitTask);
             }
 
             if (payload.CharacterId != null && payload.CharacterId.Length > 18)
             {
                 VictimOutfitTask = _characterService.GetCharactersOutfit(payload.CharacterId);
-                PreProcessTasks.Add(VictimOutfitTask);
+                TaskList.Add(VictimOutfitTask);
             }
 
             if (payload.AttackerCharacterId != null && payload.CharacterId != null &&
                 payload.AttackerCharacterId != payload.CharacterId &&
                 payload.AttackerCharacterId.Length > 18 && payload.CharacterId.Length > 18)
             {
-                PreProcessTasks.Add(_characterRatingService.CalculateRatingAsync(payload.AttackerCharacterId, payload.CharacterId));
+                TaskList.Add(_characterRatingService.CalculateRatingAsync(payload.AttackerCharacterId, payload.CharacterId));
             }
 
-            await Task.WhenAll(PreProcessTasks);
+            await Task.WhenAll(TaskList);
 
             var dataModel = new Data.Models.Planetside.Events.Death
             {
@@ -263,9 +268,12 @@ namespace Voidwell.DaybreakGames.Websocket
                 ZoneId = payload.ZoneId.Value
             };
 
-            await Task.WhenAll(_eventRepository.AddAsync(dataModel),
-                _playerMonitor.SetLastSeenAsync(dataModel.AttackerCharacterId, dataModel.ZoneId, dataModel.Timestamp),
-                _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
+            var attackerTask = _playerMonitor.SetLastSeenAsync(payload.AttackerCharacterId, payload.ZoneId.Value, payload.Timestamp);
+            var victimTask = _playerMonitor.SetLastSeenAsync(payload.CharacterId, payload.ZoneId.Value, payload.Timestamp);
+
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), attackerTask, victimTask);
+
+            await SendPlayerDeathMessage(attackerTask.Result, victimTask.Result, payload.ZoneId);
         }
 
         [CensusEventHandler("FacilityControl", typeof(FacilityControl))]
@@ -476,8 +484,9 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId
             };
 
-            await Task.WhenAll(_eventRepository.AddAsync(dataModel),
-                _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp));
+            var character = await _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp);
+
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), SendPlayerOnlineMessage(character));
         }
 
         [CensusEventHandler("PlayerLogout", typeof(Models.PlayerLogout))]
@@ -490,8 +499,9 @@ namespace Voidwell.DaybreakGames.Websocket
                 WorldId = payload.WorldId
             };
 
-            await Task.WhenAll(_eventRepository.AddAsync(dataModel),
-                _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp));
+            var character = await _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp);
+
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), SendPlayerOfflineMessage(character));
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]
@@ -513,6 +523,65 @@ namespace Voidwell.DaybreakGames.Websocket
             };
 
             await _eventRepository.AddAsync(dataModel);
+        }
+
+        private async Task SendPlayerDeathMessage(OnlineCharacter attackerCharacter, OnlineCharacter victimCharacter, int? zoneId)
+        {
+            var message = new PlayerDeathMessage
+            {
+                AttackerCharacterId = attackerCharacter?.Character?.CharacterId,
+                AttackerCharacterName = attackerCharacter?.Character?.Name,
+                VictimCharacterId = victimCharacter?.Character?.CharacterId,
+                VictimCharacterName = victimCharacter?.Character?.Name,
+                ZoneId = zoneId
+            };
+
+            var messageTasks = new List<Task>();
+
+            if (attackerCharacter != null)
+            {
+                messageTasks.Add(_planetsideMessageHandler.SendOnlineCharacterMessage(message.AttackerCharacterId, message));
+            }
+
+            if (victimCharacter != null)
+            {
+                messageTasks.Add(_planetsideMessageHandler.SendOnlineCharacterMessage(message.VictimCharacterId, message));
+            }
+
+            if (messageTasks.Any())
+            {
+                await Task.WhenAll(messageTasks);
+            }
+        }
+
+        private async Task SendPlayerOnlineMessage(OnlineCharacter character)
+        {
+            if (character == null)
+            {
+                return;
+            }
+
+            var message = new PlayerOnlineMessage
+            {
+                Name = character.Character?.Name
+            };
+
+            await _planetsideMessageHandler.SendOnlineCharacterMessage(character.Character?.CharacterId, message);
+        }
+
+        private async Task SendPlayerOfflineMessage(OnlineCharacter character)
+        {
+            if (character == null)
+            {
+                return;
+            }
+
+            var message = new PlayerOfflineMessage
+            {
+                Name = character.Character?.Name
+            };
+
+            await _planetsideMessageHandler.SendOnlineCharacterMessage(character.Character?.CharacterId, message);
         }
     }
 }

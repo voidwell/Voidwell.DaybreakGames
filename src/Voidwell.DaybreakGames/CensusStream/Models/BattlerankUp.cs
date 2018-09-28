@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Websocket.Models
+﻿namespace Voidwell.DaybreakGames.CensusStream.Models
 {
     public class BattlerankUp : PayloadBase
     {
