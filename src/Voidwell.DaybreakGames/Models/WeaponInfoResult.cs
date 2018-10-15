@@ -15,14 +15,14 @@ namespace Voidwell.DaybreakGames.Models
         public int FireRateMs { get; set; }
         public int ClipSize { get; set; }
         public int Capacity { get; set; }
-        public int MuzzleVelocity { get; set; }
+        public int? MuzzleVelocity { get; set; }
         public int MinDamage { get; set; }
         public int MaxDamage { get; set; }
         public int MinDamageRange { get; set; }
         public int MaxDamageRange { get; set; }
         public int MinReloadSpeed { get; set; }
         public int MaxReloadSpeed { get; set; }
-        public float IronSightZoom { get; set; }
+        public float? IronSightZoom { get; set; }
         public IEnumerable<string> FireModes { get; set; }
         public AccuracyState HipAcc { get; set; }
         public AccuracyState AimAcc { get; set; }
