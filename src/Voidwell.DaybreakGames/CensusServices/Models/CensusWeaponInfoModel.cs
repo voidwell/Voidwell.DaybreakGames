@@ -25,6 +25,12 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
             public int FireRateMs { get; set; }
             public int ClipSize { get; set; }
             public int Capacity { get; set; }
+            public int DirectDamage { get; set; }
+            public int IndirectDamage { get; set; }
+            public int DamageMin { get; set; }
+            public int DamageMax { get; set; }
+            public int ReloadMsMin { get; set; }
+            public int ReloadMsMax { get; set; }
         }
 
         public class WeaponFireMode
@@ -32,15 +38,23 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
             public string Type { get; set; }
             public MultiLanguageString Description { get; set; }
             public int Speed { get; set; }
-            public int DamageMin { get; set; }
-            public int DamageMax { get; set; }
-            public int DamageMinRange { get; set; }
-            public int DamageMaxRange { get; set; }
-            public int ReloadTimeMs { get; set; }
-            public int ReloadChamberTimeMs { get; set; }
+            public int? Damage { get; set; }
+            public int? DamageMin { get; set; }
+            public int? DamageMax { get; set; }
+            public int? DamageMinRange { get; set; }
+            public int? DamageMaxRange { get; set; }
+            public int? ReloadTimeMs { get; set; }
+            public int? ReloadChamberTimeMs { get; set; }
             public float CofRecoil { get; set; }
             public IEnumerable<WeaponFireModeState> States { get; set; }
             public float DefaultZoom { get; set; }
+            public int? DamageRadius { get; set; }
+            public int? IndirectDamageMax { get; set; }
+            public int? IndirectDamageMaxRange { get; set; }
+            public int? IndirectDamageMin { get; set; }
+            public int? IndirectDamageMinRange { get; set; }
+            public int? IndirectDamageTargetType { get; set; }
+            public int? IndirectDamageResistType { get; set; }
         }
 
         public class WeaponFireModeState

@@ -52,6 +52,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var hipModes = info.FireMode.Where(m => m.Type == "primary");
             var aimModes = info.FireMode.Where(m => m.Type == "secondary");
 
+            var minDamage = info.FireMode.Min(m => m.DamageMin) ?? info.Datasheet.DamageMin;
+            var maxDamage = info.FireMode.Max(m => m.DamageMax) ?? info.Datasheet.DamageMax;
+
+            var minReloadSpeed = info.FireMode.Any(a => a.ReloadTimeMs.HasValue && a.ReloadChamberTimeMs.HasValue) ? info.FireMode.Min(m => m.ReloadTimeMs.Value + m.ReloadChamberTimeMs.Value) : info.Datasheet.ReloadMsMin;
+            var maxReloadSpeed = info.FireMode.Max(m => m.ReloadTimeMs) ?? info.Datasheet.ReloadMsMax;
+
             var weaponInfo = new WeaponInfoResult
             {
                 Name = info.Name.English,
@@ -66,15 +72,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 ClipSize = info.Datasheet.ClipSize,
                 Capacity = info.Datasheet.Capacity,
                 MuzzleVelocity = info.FireMode.FirstOrDefault()?.Speed,
-                MinDamage = info.FireMode.Min(m => m.DamageMin),
-                MaxDamage = info.FireMode.Max(m => m.DamageMax),
-                MinDamageRange = info.FireMode.Min(m => m.DamageMinRange),
-                MaxDamageRange = info.FireMode.Min(m => m.DamageMaxRange),
-                MinReloadSpeed = info.FireMode.Min(m => m.ReloadTimeMs + m.ReloadChamberTimeMs),
-                MaxReloadSpeed = info.FireMode.Max(m => m.ReloadTimeMs),
+                MinDamage = minDamage,
+                MaxDamage = maxDamage,
+                MinDamageRange = info.FireMode.Min(m => m.DamageMinRange).GetValueOrDefault(),
+                MaxDamageRange = info.FireMode.Min(m => m.DamageMaxRange).GetValueOrDefault(),
+                IndirectMinDamage = info.FireMode.Min(m => m.IndirectDamageMin),
+                IndirectMaxDamage = info.FireMode.Max(m => m.IndirectDamageMax),
+                IndirectMinDamageRange = info.FireMode.Min(m => m.IndirectDamageMinRange),
+                IndirectMaxDamageRange = info.FireMode.Max(m => m.IndirectDamageMaxRange),
+                MinReloadSpeed = minReloadSpeed,
+                MaxReloadSpeed = maxReloadSpeed,
                 IronSightZoom = aimModes.FirstOrDefault()?.DefaultZoom,
                 FireModes = hipModes.Select(m => m.Description.English),
-                IsVehicleWeapon = info.IsVehicleWeapon
+                IsVehicleWeapon = info.IsVehicleWeapon,
+                DamageRadius = info.FireMode.Max(m => m.DamageRadius)
             };
 
             if (hipModes.Any())

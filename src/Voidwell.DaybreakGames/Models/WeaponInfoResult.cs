@@ -20,6 +20,10 @@ namespace Voidwell.DaybreakGames.Models
         public int MaxDamage { get; set; }
         public int MinDamageRange { get; set; }
         public int MaxDamageRange { get; set; }
+        public int? IndirectMaxDamage { get; set; } 
+        public int? IndirectMinDamage { get; set; }
+        public int? IndirectMaxDamageRange { get; set; }
+        public int? IndirectMinDamageRange { get; set; }
         public int MinReloadSpeed { get; set; }
         public int MaxReloadSpeed { get; set; }
         public float? IronSightZoom { get; set; }
@@ -27,6 +31,7 @@ namespace Voidwell.DaybreakGames.Models
         public AccuracyState HipAcc { get; set; }
         public AccuracyState AimAcc { get; set; }
         public bool IsVehicleWeapon { get; set; }
+        public int? DamageRadius { get; set; }
     }
 
     public class AccuracyState
