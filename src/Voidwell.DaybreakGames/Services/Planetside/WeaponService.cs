@@ -65,19 +65,19 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 FireRateMs = info.Datasheet.FireRateMs,
                 ClipSize = info.Datasheet.ClipSize,
                 Capacity = info.Datasheet.Capacity,
-                MuzzleVelocity = info.FireMode.First().Speed,
+                MuzzleVelocity = info.FireMode.FirstOrDefault()?.Speed,
                 MinDamage = info.FireMode.Min(m => m.DamageMin),
                 MaxDamage = info.FireMode.Max(m => m.DamageMax),
                 MinDamageRange = info.FireMode.Min(m => m.DamageMinRange),
                 MaxDamageRange = info.FireMode.Min(m => m.DamageMaxRange),
                 MinReloadSpeed = info.FireMode.Min(m => m.ReloadTimeMs + m.ReloadChamberTimeMs),
                 MaxReloadSpeed = info.FireMode.Max(m => m.ReloadTimeMs),
-                IronSightZoom = aimModes.First().DefaultZoom,
+                IronSightZoom = aimModes.FirstOrDefault()?.DefaultZoom,
                 FireModes = hipModes.Select(m => m.Description.English),
                 IsVehicleWeapon = info.IsVehicleWeapon
             };
 
-            if (hipModes != null)
+            if (hipModes.Any())
             {
                 weaponInfo.HipAcc = new AccuracyState
                 {
@@ -89,7 +89,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 };
             }
 
-            if (aimModes != null)
+            if (aimModes.Any())
             {
                 weaponInfo.AimAcc = new AccuracyState
                 {

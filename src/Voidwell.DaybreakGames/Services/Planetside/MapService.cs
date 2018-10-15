@@ -156,7 +156,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public async Task<ZoneSnapshot> GetZoneSnapshotByDateTime(int worldId, int zoneId, DateTime timestamp)
         {
             var snapshotRegions = await _mapRepository.GetZoneSnapshotByDateTime(worldId, zoneId, timestamp);
-            if (snapshotRegions == null || snapshotRegions.Count() == 0)
+            if (snapshotRegions == null || !snapshotRegions.Any())
             {
                 return null;
             }
