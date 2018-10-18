@@ -51,6 +51,7 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<DailyWeaponStats> DailyWeaponStats { get; set; }
         public DbSet<Experience> Experience { get; set; }
         public DbSet<WeaponAggregate> WeaponAggregates { get; set; }
+        public DbSet<DailyPopulation> DailyPopulations { get; set; }
 
         public DbSet<AchievementEarned> AchievementEarnedEvents { get; set; }
         public DbSet<BattlerankUp> BattleRankUpEvents { get; set; }
@@ -111,17 +112,17 @@ namespace Voidwell.DaybreakGames.Data
 
                 foreach (var key in entity.GetKeys())
                 {
-                    key.Relational().Name = ToSnakeCase(key.Relational().Name);
+                    key.Relational().Name = $"p_k_{ToSnakeCase(key.Relational().Name)}";
                 }
 
                 foreach (var key in entity.GetForeignKeys())
                 {
-                    key.Relational().Name = ToSnakeCase(key.Relational().Name);
+                    key.Relational().Name = $"f_k_{ToSnakeCase(key.Relational().Name)}";
                 }
 
                 foreach (var index in entity.GetIndexes())
                 {
-                    index.Relational().Name = ToSnakeCase(index.Relational().Name);
+                    index.Relational().Name = $"i_x_{ToSnakeCase(index.Relational().Name)}";
                 }
             }
         }

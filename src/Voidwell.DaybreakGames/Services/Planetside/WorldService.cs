@@ -46,6 +46,45 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return worlds;
         }
 
+        public async Task<Dictionary<int, IEnumerable<DailyPopulation>>> GetWorldPopulationHistory(IEnumerable<int> worldIds, DateTime start, DateTime end)
+        {
+            var popTasks = worldIds.Select(id => GetWorldPopulationHistory(id, start, end)).ToArray();
+            await Task.WhenAll(popTasks);
+
+            var popDict = new Dictionary<int, IEnumerable<DailyPopulation>>();
+            for (var i = 0; i < worldIds.Count(); i++)
+            {
+                popDict[worldIds.ToArray()[i]] = popTasks.ToArray()[i].Result;
+            }
+
+            return popDict;
+        }
+
+        private readonly KeyedSemaphoreSlim _worldPopulationLock = new KeyedSemaphoreSlim();
+
+        private async Task<IEnumerable<DailyPopulation>> GetWorldPopulationHistory(int worldId, DateTime start, DateTime end)
+        {
+            var cacheKey = $"{_cacheKeyPrefix}_{worldId}_{start.Year}-{start.Month}-{start.Day}_{end.Year}-{end.Month}-{end.Day}";
+
+            using (await _worldPopulationLock.WaitAsync(cacheKey))
+            {
+
+                var populations = await _cache.GetAsync<IEnumerable<DailyPopulation>>(cacheKey);
+                if (populations != null)
+                {
+                    return populations;
+                }
+
+                populations = await _worldRepository.GetDailyPopulationsByWorldIdAsync(worldId);
+                if (populations != null)
+                {
+                    await _cache.SetAsync(cacheKey, populations, _cacheExpiration);
+                }
+
+                return populations;
+            }
+        }
+
         public async Task RefreshStore()
         {
             var worlds = await _censusWorld.GetAllWorlds();
