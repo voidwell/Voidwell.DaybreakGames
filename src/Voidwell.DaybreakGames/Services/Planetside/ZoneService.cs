@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private const string _cacheKeyPrefix = "ps2.zoneService";
         private readonly string _playableZonesCacheKey = $"{_cacheKeyPrefix}-playable-zones";
-        private readonly TimeSpan _zoneCacheExpiration = TimeSpan.FromHours(8);
+        private readonly TimeSpan _zoneCacheExpiration = TimeSpan.FromMinutes(30);
 
         private readonly int[] _playableZoneIds = new[] { 2, 4, 6, 8 };
 
