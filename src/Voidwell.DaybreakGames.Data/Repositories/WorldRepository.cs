@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
@@ -21,6 +22,18 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 var dbContext = factory.GetDbContext();
 
                 return await dbContext.Worlds.ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<DailyPopulation>> GetDailyPopulationsByWorldIdAsync(int worldId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.DailyPopulations
+                    .Where(a => a.WorldId == worldId)
+                    .ToListAsync();
             }
         }
 

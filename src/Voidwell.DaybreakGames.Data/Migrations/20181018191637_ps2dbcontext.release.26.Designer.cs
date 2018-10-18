@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Voidwell.DaybreakGames.Data;
@@ -9,9 +10,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20181018191637_ps2dbcontext.release.26")]
+    partial class ps2dbcontextrelease26
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -725,23 +727,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("WorldId")
                         .HasColumnName("world_id");
 
-                    b.Property<int>("AvgPlayTime")
-                        .HasColumnName("avg_play_time");
-
-                    b.Property<int>("NcAvgPlayTime")
-                        .HasColumnName("nc_avg_play_time");
-
                     b.Property<int>("NcCount")
                         .HasColumnName("nc_count");
 
-                    b.Property<int>("TrAvgPlayTime")
-                        .HasColumnName("tr_avg_play_time");
-
                     b.Property<int>("TrCount")
                         .HasColumnName("tr_count");
-
-                    b.Property<int>("VsAvgPlayTime")
-                        .HasColumnName("vs_avg_play_time");
 
                     b.Property<int>("VsCount")
                         .HasColumnName("vs_count");

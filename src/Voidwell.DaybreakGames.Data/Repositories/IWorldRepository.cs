@@ -8,5 +8,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
     {
         Task UpsertRangeAsync(IEnumerable<World> entities);
         Task<IEnumerable<World>> GetAllWorldsAsync();
+        Task<IEnumerable<DailyPopulation>> GetDailyPopulationsByWorldIdAsync(int worldId);
     }
 }
