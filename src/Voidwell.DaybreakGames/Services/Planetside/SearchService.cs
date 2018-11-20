@@ -63,7 +63,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (outfitAliasLookup.Result != null && !outfits.Any(o => o.Id == outfitAliasLookup.Result.Id))
             {
-                outfits.Concat(new[] { outfitAliasLookup.Result });
+                outfits.Append(outfitAliasLookup.Result);
             }
 
             var searchResults = new List<SearchResult>();

@@ -21,7 +21,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var outfit = await dbContext.Outfits.FirstOrDefaultAsync(a => a.Alias == outfitAlias);
+                var outfit = await dbContext.Outfits
+                    .OrderByDescending(a => a.CreatedDate)
+                    .FirstOrDefaultAsync(a => a.Alias == outfitAlias);
 
                 return outfit?.Id;
             }
@@ -102,7 +104,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.Outfits.FirstOrDefaultAsync(o => o.Alias == alias);
+                return await dbContext.Outfits
+                    .OrderByDescending(a => a.CreatedDate)
+                    .FirstOrDefaultAsync(o => o.Alias == alias);
             }
         }
 
@@ -112,7 +116,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.Outfits.Where(o => o.Name.StartsWith(name))
+                return await dbContext.Outfits
+                    .OrderByDescending(a => a.CreatedDate)
+                    .Where(o => o.Name.StartsWith(name))
                     .Take(limit)
                     .ToListAsync();
             }
