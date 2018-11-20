@@ -58,12 +58,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             await Task.WhenAll(lookupTasks);
 
             var characters = characterLookup?.Result ?? Enumerable.Empty<CharacterSearchResult>();
-            var outfits = outfitNameLookup.Result;
+            var outfits = outfitNameLookup.Result.ToList();
             var weapons = weaponLookup.Result;
 
-            if (outfitAliasLookup.Result != null && !outfits.Any(o => o.Id == outfitAliasLookup.Result.Id))
+            var outfitAliasResult = outfitAliasLookup.Result; 
+            if (outfitAliasResult != null && !outfits.Any(o => o.Id == outfitAliasResult.Id))
             {
-                outfits.Append(outfitAliasLookup.Result);
+                outfits.Add(outfitAliasResult);
             }
 
             var searchResults = new List<SearchResult>();
