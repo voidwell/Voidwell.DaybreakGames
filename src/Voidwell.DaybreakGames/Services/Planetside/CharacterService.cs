@@ -959,7 +959,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             CharacterDetailsWeaponStat weaponStats = null;
 
-            var validStats = stats.Where(a => a.Name != null && a.Stats.PlayTime.GetValueOrDefault() > 0);
+            var validStats = stats.Where(a => a.Name != null);
 
             if (int.TryParse(weaponSearch, out int weaponId))
             {
@@ -969,7 +969,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             if (weaponStats == null)
             {
                 weaponStats = validStats
-                    .OrderBy(a => a.Name)
+                    .OrderByDescending(a => a.Stats.Kills)
+                    .ThenBy(a => a.Name)
                     .FirstOrDefault(a => a.Name.ToLower().Contains(weaponSearch.ToLower()));
             }
 
