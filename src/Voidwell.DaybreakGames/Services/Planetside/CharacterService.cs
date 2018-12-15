@@ -959,7 +959,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             CharacterDetailsWeaponStat weaponStats = null;
 
-            var validStats = stats.Where(a => a.Name != null);
+            var validStats = stats.Where(a => a.Name != null && (a.Stats.Kills.GetValueOrDefault() > 0 || a.Stats.PlayTime.GetValueOrDefault() > 0));
 
             if (int.TryParse(weaponSearch, out int weaponId))
             {
