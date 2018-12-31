@@ -293,7 +293,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (events != null && events.Any())
             {
-                for(var i = 0; i < 4; i++)
+                for(var i = 0; i < 12; i++)
                 {
                     var lastEvent = events.OrderBy(a => a.Timestamp).First();
                     var additionalEvents = await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId, lastEvent.Timestamp);

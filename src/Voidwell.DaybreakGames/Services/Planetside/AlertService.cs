@@ -7,6 +7,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.CensusStream.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -18,6 +19,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IMapService _mapService;
         private readonly IWorldMonitor _worldMonitor;
         private readonly ICache _cache;
+        private readonly ILogger<AlertService> _logger;
 
         private enum METAGAME_EVENT_STATE
         {
@@ -33,7 +35,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(5);
 
         public AlertService(IAlertRepository alertRepository, IMetagameEventService metagameEventService,
-            ICombatReportService combatReportService, IMapService mapService, IWorldMonitor worldMonitor, ICache cache)
+            ICombatReportService combatReportService, IMapService mapService, IWorldMonitor worldMonitor,
+            ICache cache, ILogger<AlertService> logger)
         {
             _alertRepository = alertRepository;
             _metagameEventService = metagameEventService;
@@ -41,6 +44,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _mapService = mapService;
             _worldMonitor = worldMonitor;
             _cache = cache;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<Alert>> GetAlerts(int pageNumber, int? worldId = null, int limit = 10)
@@ -171,26 +175,33 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LastFactionTr = metagameEvent.FactionTr
             };
 
-            await Task.WhenAll(_alertRepository.AddAsync(dataModel), CreateAlertZoneSnapshot(metagameEvent));
+            _logger.LogInformation("Starting alert {worldId}.{metagameInstanceId}", dataModel.WorldId, dataModel.MetagameInstanceId);
+
+            await _alertRepository.AddAsync(dataModel);
+            await CreateAlertZoneSnapshot(metagameEvent);
         }
 
         private async Task EndAlert(MetagameEvent metagameEvent)
         {
             var alert = await _alertRepository.GetAlert(metagameEvent.WorldId, metagameEvent.InstanceId);
+
+            if (metagameEvent.ZoneId != null || alert?.ZoneId != null)
+            {
+                var zoneId = metagameEvent.ZoneId ?? alert.ZoneId;
+                _worldMonitor.UpdateZoneAlert(metagameEvent.WorldId, (int)zoneId);
+            }
+
             if (alert == null)
             {
                 return;
-            }
-
-            if (alert.ZoneId != null)
-            {
-                _worldMonitor.UpdateZoneAlert(metagameEvent.WorldId, (int)alert.ZoneId);
             }
 
             alert.EndDate = metagameEvent.Timestamp;
             alert.LastFactionVs = metagameEvent.FactionVs;
             alert.LastFactionNc = metagameEvent.FactionNc;
             alert.LastFactionTr = metagameEvent.FactionTr;
+
+            _logger.LogInformation("Ending alert {worldId}.{metagameInstanceId}", alert.WorldId, alert.MetagameInstanceId);
 
             await _alertRepository.UpdateAsync(alert);
         }
