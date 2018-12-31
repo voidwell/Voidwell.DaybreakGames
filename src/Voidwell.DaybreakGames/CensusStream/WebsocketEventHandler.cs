@@ -29,6 +29,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         private readonly ICharacterService _characterService;
         private readonly IAlertService _alertService;
         private readonly ICharacterRatingService _characterRatingService;
+        private readonly IMetagameEventService _metagameEventService;
         private readonly PlanetsideMessageHandler _planetsideMessageHandler;
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
@@ -50,8 +51,8 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor,
             IPlayerMonitor playerMonitor, ICharacterService characterService, IAlertService alertService,
-            ICharacterRatingService characterRatingService, PlanetsideMessageHandler planetsideMessageHandler,
-            ILogger<WebsocketEventHandler> logger)
+            ICharacterRatingService characterRatingService, IMetagameEventService metagameEventService,
+            PlanetsideMessageHandler planetsideMessageHandler, ILogger<WebsocketEventHandler> logger)
         {
             _eventRepository = eventRepository;
             _alertRepository = alertRepository;
@@ -60,6 +61,7 @@ namespace Voidwell.DaybreakGames.CensusStream
             _characterService = characterService;
             _alertService = alertService;
             _characterRatingService = characterRatingService;
+            _metagameEventService = metagameEventService;
             _planetsideMessageHandler = planetsideMessageHandler;
             _logger = logger;
 
@@ -404,9 +406,13 @@ namespace Voidwell.DaybreakGames.CensusStream
             await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
         }
 
+        private static int[] EsamirLockingMetagameEventIds = new[] { 2, 126, 127, 128, 150, 151, 152, 176, 186, 190 };
+
         [CensusEventHandler("MetagameEvent", typeof(MetagameEvent))]
         private async Task Process(MetagameEvent payload)
         {
+            var metagameCategory = await _metagameEventService.GetMetagameEvent(payload.MetagameEventId);
+
             var dataModel = new Data.Models.Planetside.Events.MetagameEvent
             {
                 InstanceId = payload.InstanceId,
@@ -418,8 +424,43 @@ namespace Voidwell.DaybreakGames.CensusStream
                 ExperienceBonus = (int)payload.ExperienceBonus,
                 Timestamp = payload.Timestamp,
                 WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId
+                ZoneId = payload.ZoneId ?? metagameCategory.ZoneId
             };
+
+            //Bypass Esamir not returning continent lock/unlock events.
+            if (dataModel.MetagameEventState == "135" && dataModel.MetagameEventId == 160)
+            {
+                var unlockPayload = new ContinentUnlock
+                {
+                    Timestamp = dataModel.Timestamp,
+                    EventName = "ContinentUnlock",
+                    MetagameEventId = dataModel.MetagameEventId.GetValueOrDefault(),
+                    TriggeringFaction = 0,
+                    WorldId = dataModel.WorldId,
+                    ZoneId = dataModel.ZoneId
+                };
+                await Process(unlockPayload);
+            }
+            else if (dataModel.MetagameEventState == "138" && EsamirLockingMetagameEventIds.Contains(dataModel.MetagameEventId.GetValueOrDefault()))
+            {
+                var maxZoneControl = Math.Max(Math.Max(dataModel.ZoneControlVs.GetValueOrDefault(), dataModel.ZoneControlNc.GetValueOrDefault()), dataModel.ZoneControlTr.GetValueOrDefault());
+                var winner = maxZoneControl == dataModel.ZoneControlVs ? 1 : (maxZoneControl == dataModel.ZoneControlNc ? 2 : 3);
+
+                var lockPayload = new ContinentLock
+                {
+                    Timestamp = dataModel.Timestamp,
+                    EventName = "ContinentLock",
+                    MetagameEventId = dataModel.MetagameEventId.GetValueOrDefault(),
+                    TriggeringFaction = winner,
+                    WorldId = dataModel.WorldId,
+                    ZoneId = dataModel.ZoneId,
+                    VsPopulation = dataModel.ZoneControlVs.GetValueOrDefault(),
+                    NcPopulation = dataModel.ZoneControlNc.GetValueOrDefault(),
+                    TrPopulation = dataModel.ZoneControlTr.GetValueOrDefault()
+                    
+                };
+                await Process(lockPayload);
+            }
 
             await Task.WhenAll(_eventRepository.AddAsync(dataModel), _alertService.ProcessMetagameEvent(payload));
         }
