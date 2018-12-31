@@ -108,7 +108,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnershipFromHistory(int worldId, int zoneId)
         {
-            using (await _zoneHistoryLock.WaitAsync(zoneId.ToString()))
+            using (await _zoneHistoryLock.WaitAsync(worldId.ToString()))
             {
                 var regionsTask = _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
                 var eventsTask = GetCensusFacilityWorldEventsByZoneId(worldId, zoneId);
@@ -277,7 +277,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var events = await _cache.GetAsync<IEnumerable<CensusFacilityWorldEventModel>>(cacheKey);
             if (events == null)
             {
-                events = await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId);
+                events = await GetAllCensusFacilityWorldEvents(worldId);
                 if (events != null)
                 {
                     await _cache.SetAsync(cacheKey, events, _facilityWorldEventCacheExpiration);
@@ -285,6 +285,23 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return events?.Where(a => a.ZoneId == zoneId) ?? Enumerable.Empty<CensusFacilityWorldEventModel>();
+        }
+
+        private async Task<IEnumerable<CensusFacilityWorldEventModel>> GetAllCensusFacilityWorldEvents(int worldId)
+        {
+            var events = (await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId))?.ToList();
+
+            if (events != null && events.Any())
+            {
+                for(var i = 0; i < 4; i++)
+                {
+                    var lastEvent = events.OrderBy(a => a.Timestamp).First();
+                    var additionalEvents = await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId, lastEvent.Timestamp);
+                    events.AddRange(additionalEvents);
+                }
+            }
+
+            return events;
         }
 
         private MapHex ConvertToDbModel(CensusMapHexModel censusModel)

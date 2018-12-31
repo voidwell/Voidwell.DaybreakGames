@@ -127,7 +127,7 @@ namespace Voidwell.DaybreakGames.Models
             {
                 UpdateLockState(new ZoneLockState(DateTime.UtcNow, null, warpgateFactions.First()));
             }
-            else if (warpgateFactions.Count() > 1)
+            else if (LockState?.State == ZoneLockStateEnum.LOCKED && warpgateFactions.Count() > 1)
             {
                 UpdateLockState(new ZoneLockState(DateTime.UtcNow));
             }

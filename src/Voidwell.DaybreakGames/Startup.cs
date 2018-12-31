@@ -79,7 +79,6 @@ namespace Voidwell.DaybreakGames
             services.AddWebSocketManager();
 
             services.AddTransient<IItemService, ItemService>();
-            services.AddTransient<IMapService, MapService>();
             services.AddTransient<IProfileService, ProfileService>();
             services.AddTransient<ITitleService, TitleService>();
             services.AddTransient<IVehicleService, VehicleService>();
@@ -102,6 +101,7 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IWeaponAggregateService, WeaponAggregateService>();
             services.AddSingleton<IPSBUtilityService, PSBUtilityService>();
             services.AddSingleton<ICharacterRatingService, CharacterRatingService>();
+            services.AddSingleton<IMapService, MapService>();
 
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
