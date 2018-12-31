@@ -290,5 +290,31 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     .ToListAsync();
             }
         }
+
+        public async Task<IEnumerable<ContinentUnlock>> GetAllLatestZoneUnlocks()
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.ContinentUnlockEvents
+                    .GroupBy(a => new { a.ZoneId, a.WorldId })
+                    .Select(a => a.OrderByDescending(b => b.Timestamp).First())
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<ContinentLock>> GetAllLatestZoneLocks()
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.ContinentLockEvents
+                    .GroupBy(a => new { a.ZoneId, a.WorldId })
+                    .Select(a => a.OrderByDescending(b => b.Timestamp).First())
+                    .ToListAsync();
+            }
+        }
     }
 }

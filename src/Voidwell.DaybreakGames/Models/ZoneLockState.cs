@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
 
 namespace Voidwell.DaybreakGames.Models
 {
@@ -6,13 +8,28 @@ namespace Voidwell.DaybreakGames.Models
     {
         public ZoneLockState(DateTime timestamp, int? metagameEventId, int? triggeringFaction)
         {
+            State = ZoneLockStateEnum.LOCKED;
             Timestamp = timestamp;
             MetagameEventId = metagameEventId;
             TriggeringFaction = triggeringFaction;
         }
 
-        public DateTime Timestamp { get; set; }
-        public int? MetagameEventId { get; set; }
-        public int? TriggeringFaction { get; set; }
+        public ZoneLockState(DateTime timestamp)
+        {
+            State = ZoneLockStateEnum.UNLOCKED;
+            Timestamp = timestamp;
+        }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ZoneLockStateEnum State { get; }
+        public DateTime Timestamp { get; }
+        public int? MetagameEventId { get; }
+        public int? TriggeringFaction { get; }
+    }
+
+    public enum ZoneLockStateEnum
+    {
+        LOCKED,
+        UNLOCKED
     }
 }

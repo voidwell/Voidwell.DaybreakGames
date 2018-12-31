@@ -150,7 +150,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await _worldStates[facilityControl.WorldId].UpdateZoneFacilityFaction(facilityControl.ZoneId.Value, facilityControl.FacilityId, facilityControl.NewFactionId);
         }
 
-        public void UpdateZoneLock(int worldId, int zoneId, ZoneLockState lockState = null)
+        public void UpdateZoneLock(int worldId, int zoneId, ZoneLockState lockState)
         {
             if (!_worldStates.ContainsKey(worldId))
             {
@@ -300,6 +300,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var ownership = ownershipTask.Result;
             var zoneMap = zoneMapTask.Result;
 
+            if (ownership == null)
+            {
+                _logger.LogInformation($"Ownship is null for worldId {worldId} zoneId {zone.Id}, attempting to use historical data");
+
+                ownership = await _mapService.GetMapOwnershipFromHistory(worldId, zone.Id);
+            }
+
             if (ownership == null || zoneMap == null || zoneMap.Regions == null || zoneMap.Links == null)
             {
                 var errors = new List<string>();
@@ -338,6 +345,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 RetryingWorlds[worldId].Remove(zone.Id);
             }
+
+            var lockStater = await _mapService.GetZoneStateHistoricals();
+
+            var lastLockState = lockStater.GetLastLockState(worldId, zone.Id);
+            _worldStates[worldId].UpdateZoneLockState(zone.Id, lastLockState);
 
             return true;
         }

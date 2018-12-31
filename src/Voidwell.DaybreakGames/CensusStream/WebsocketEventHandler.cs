@@ -209,7 +209,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                 ZoneId = payload.ZoneId.Value
             };
 
-            _worldMonitor.UpdateZoneLock(model.WorldId, model.ZoneId);
+            _worldMonitor.UpdateZoneLock(model.WorldId, model.ZoneId, new ZoneLockState(model.Timestamp));
 
             await _continentUnlockSemaphore.WaitAsync();
 

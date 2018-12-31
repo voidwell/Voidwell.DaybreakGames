@@ -21,5 +21,15 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             return await query.GetListAsync<CensusMetagameWorldEventModel>();
         }
+
+        public async Task<IEnumerable<CensusFacilityWorldEventModel>> GetFacilityWorldEventsByWorldId(int worldId)
+        {
+            var query = _queryFactory.Create("world_event");
+            query.Where("type").Equals("FACILITY");
+            query.Where("world_id").Equals(worldId);
+            query.SetLimit(1000);
+
+            return await query.GetListAsync<CensusFacilityWorldEventModel>();
+        }
     }
 }
