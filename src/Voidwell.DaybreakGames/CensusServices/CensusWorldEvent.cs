@@ -33,7 +33,7 @@ namespace Voidwell.DaybreakGames.CensusServices
                 query.Where("before").Equals(beforeTimestamp.Value);
             }
 
-            query.SetLimit(1000);
+            query.SetLimit(500);
 
             return await query.GetListAsync<CensusFacilityWorldEventModel>();
         }

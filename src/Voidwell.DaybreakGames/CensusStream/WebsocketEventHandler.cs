@@ -415,7 +415,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             var dataModel = new Data.Models.Planetside.Events.MetagameEvent
             {
-                InstanceId = payload.InstanceId,
+                InstanceId = int.Parse($"{payload.InstanceId}18"),
                 MetagameEventId = payload.MetagameEventId,
                 MetagameEventState = payload.MetagameEventState,
                 ZoneControlVs = payload.FactionVs,
