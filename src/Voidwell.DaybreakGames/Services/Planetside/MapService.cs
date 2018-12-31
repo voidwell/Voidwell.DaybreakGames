@@ -8,27 +8,36 @@ using System.Collections.Generic;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.Cache;
+using System.Threading;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class MapService : IMapService
     {
         private readonly IMapRepository _mapRepository;
+        private readonly IEventRepository _eventRepository;
         private readonly CensusMap _censusMap;
+        private readonly CensusWorldEvent _censusWorldEvent;
         private readonly ICache _cache;
 
         public string ServiceName => "MapService";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
         private readonly KeyedSemaphoreSlim _zoneMapLock = new KeyedSemaphoreSlim();
+        private readonly KeyedSemaphoreSlim _zoneHistoryLock = new KeyedSemaphoreSlim();
+        private readonly SemaphoreSlim _zoneStateLock = new SemaphoreSlim(1);
 
         private const string _cacheKeyPrefix = "ps2.map_service";
         private TimeSpan _zoneMapCacheExpiration = TimeSpan.FromHours(24);
+        private TimeSpan _facilityWorldEventCacheExpiration = TimeSpan.FromSeconds(10);
+        private TimeSpan _zoneStateCacheExpiration = TimeSpan.FromSeconds(30);
 
-        public MapService(IMapRepository mapRepository, CensusMap censusMap, ICache cache)
+        public MapService(IMapRepository mapRepository, IEventRepository eventRepository, CensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
         {
             _mapRepository = mapRepository;
+            _eventRepository = eventRepository;
             _censusMap = censusMap;
+            _censusWorldEvent = censusWorldEvent;
             _cache = cache;
         }
 
@@ -95,6 +104,43 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var ownership = await _censusMap.GetMapOwnership(worldId, zoneId);
 
             return ownership?.Regions.Row.Select(o => new ZoneRegionOwnership(o.RowData.RegionId, o.RowData.FactionId));
+        }
+
+        public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnershipFromHistory(int worldId, int zoneId)
+        {
+            using (await _zoneHistoryLock.WaitAsync(zoneId.ToString()))
+            {
+                var regionsTask = _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
+                var eventsTask = GetCensusFacilityWorldEventsByZoneId(worldId, zoneId);
+
+                await Task.WhenAll(regionsTask, eventsTask);
+
+                var regions = regionsTask.Result;
+                var facilityEvents = eventsTask.Result;
+
+                var regionMapping = new Dictionary<int, ZoneRegionOwnership>();
+
+                foreach (var facilityEvent in facilityEvents.OrderBy(a => a.Timestamp))
+                {
+                    var region = regions.FirstOrDefault(a => a.FacilityId == facilityEvent.FacilityId);
+                    if (region == null)
+                    {
+                        continue;
+                    }
+
+                    regionMapping[region.Id] = new ZoneRegionOwnership(region.Id, facilityEvent.FactionNew);
+                }
+
+                foreach (var region in regions)
+                {
+                    if (!regionMapping.ContainsKey(region.Id))
+                    {
+                        regionMapping.Add(region.Id, new ZoneRegionOwnership(region.Id, 0));
+                    }
+                }
+
+                return regionMapping.Values;
+            }
         }
 
         public Task<IEnumerable<MapRegion>> FindRegions(params int[] facilityIds)
@@ -170,6 +216,36 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
+        public async Task<ZoneStateHistorical> GetZoneStateHistoricals()
+        {
+            var cacheKey = $"{_cacheKeyPrefix}_zonestatehistorical";
+
+            await _zoneStateLock.WaitAsync();
+
+            try
+            {
+                var results = await _cache.GetAsync<ZoneStateHistorical>(cacheKey);
+                if (results != null)
+                {
+                    return results;
+                }
+
+                var zoneLocks = _eventRepository.GetAllLatestZoneLocks();
+                var zoneUnlocks = _eventRepository.GetAllLatestZoneUnlocks();
+
+                await Task.WhenAll(zoneLocks, zoneUnlocks);
+
+                results = new ZoneStateHistorical(zoneLocks.Result, zoneUnlocks.Result);
+                await _cache.SetAsync(cacheKey, results, _zoneStateCacheExpiration);
+
+                return results;
+            }
+            finally
+            {
+                _zoneStateLock.Release();
+            }
+        }
+
         public async Task RefreshStore()
         {
             var mapHexs = await _censusMap.GetAllMapHexs();
@@ -192,6 +268,23 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 await _mapRepository.UpsertRangeAsync(facilityLinks.Select(ConvertToDbModel));
             }
+        }
+
+        private async Task<IEnumerable<CensusFacilityWorldEventModel>> GetCensusFacilityWorldEventsByZoneId(int worldId, int zoneId)
+        {
+            var cacheKey = $"{_cacheKeyPrefix}_facility_world_events_{worldId}";
+
+            var events = await _cache.GetAsync<IEnumerable<CensusFacilityWorldEventModel>>(cacheKey);
+            if (events == null)
+            {
+                events = await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId);
+                if (events != null)
+                {
+                    await _cache.SetAsync(cacheKey, events, _facilityWorldEventCacheExpiration);
+                }
+            }
+
+            return events?.Where(a => a.ZoneId == zoneId) ?? Enumerable.Empty<CensusFacilityWorldEventModel>();
         }
 
         private MapHex ConvertToDbModel(CensusMapHexModel censusModel)

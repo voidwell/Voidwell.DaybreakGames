@@ -57,7 +57,7 @@ namespace Voidwell.DaybreakGames.Models
         public void DisableTracking()
         {
             IsTracking = false;
-            UpdateLockState();
+            UpdateLockState(null);
             UpdateAlertState();
         }
 
@@ -81,13 +81,19 @@ namespace Voidwell.DaybreakGames.Models
             }
         }
 
-        public void UpdateLockState(ZoneLockState lockState = null)
+        public void UpdateLockState(ZoneLockState lockState)
         {
             LockState = lockState;
 
-            if (LockState != null)
+            if (LockState?.State == ZoneLockStateEnum.LOCKED)
             {
                 UpdateAlertState();
+
+                if (!MapRegionOwnership.All(a => a.Value == lockState.TriggeringFaction.Value))
+                {
+                    MapRegionOwnership.Keys.ToList().ForEach(key => MapRegionOwnership[key] = lockState.TriggeringFaction.Value);
+                    PostMapUpdate();
+                }
             }
         }
 
@@ -123,7 +129,7 @@ namespace Voidwell.DaybreakGames.Models
             }
             else if (warpgateFactions.Count() > 1)
             {
-                UpdateLockState();
+                UpdateLockState(new ZoneLockState(DateTime.UtcNow));
             }
         }
 

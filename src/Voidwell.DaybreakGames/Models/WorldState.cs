@@ -109,7 +109,7 @@ namespace Voidwell.DaybreakGames.Models
             return ZoneStates[zoneId].MapScore;
         }
 
-        public void UpdateZoneLockState(int zoneId, ZoneLockState lockState = null)
+        public void UpdateZoneLockState(int zoneId, ZoneLockState lockState)
         {
             if (!ZoneStates.ContainsKey(zoneId))
             {

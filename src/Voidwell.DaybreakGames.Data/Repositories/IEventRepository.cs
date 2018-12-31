@@ -19,5 +19,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<IEnumerable<VehicleDestroy>> GetVehicleDeathEventsByDateAsync(int worldId, int zoneId, DateTime startDate, DateTime? endDate);
         Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, int zoneId, DateTime startDate, DateTime? endDate);
         Task<IEnumerable<DailyWeaponStats>> GetDailyWeaponAggregatesByWeaponIdAsync(int itemId, DateTime start, DateTime end);
+        Task<IEnumerable<ContinentUnlock>> GetAllLatestZoneUnlocks();
+        Task<IEnumerable<ContinentLock>> GetAllLatestZoneLocks();
     }
 }
