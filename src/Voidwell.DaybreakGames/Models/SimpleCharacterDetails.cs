@@ -16,10 +16,12 @@ namespace Voidwell.DaybreakGames.Models
         public int Kills { get; set; }
         public int Deaths { get; set; }
         public int PlayTime { get; set; }
+        public int TotalPlayTimeMinutes { get; set; }
         public int Score { get; set; }
         public double KillDeathRatio { get; set; }
         public double HeadshotRatio { get; set; }
         public double KillsPerHour { get; set; }
+        public double TotalKillsPerHour { get; set; }
         public double SiegeLevel { get; set; }
         public int IVIScore { get; set; }
         public DateTime? LastSaved { get; set; }

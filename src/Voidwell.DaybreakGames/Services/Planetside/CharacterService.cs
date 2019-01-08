@@ -892,6 +892,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Deaths = character.LifetimeStats.Deaths,
                 Score = character.LifetimeStats.Score,
                 PlayTime = character.LifetimeStats.PlayTime,
+                TotalPlayTimeMinutes = character.Times.MinutesPlayed,
                 IVIScore = character.InfantryStats.IVIScore.GetValueOrDefault(),
                 Prestige = character.PrestigeLevel
             };
@@ -899,6 +900,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             details.KillDeathRatio = (double)details.Kills / details.Deaths;
             details.HeadshotRatio = (double)character.LifetimeStats.Headshots / details.Kills;
             details.KillsPerHour = details.Kills / (details.PlayTime / 3600.0);
+            details.TotalKillsPerHour = details.Kills / (details.TotalPlayTimeMinutes / 60.0);
             details.SiegeLevel = (double)character.LifetimeStats.FacilityCaptureCount / character.LifetimeStats.FacilityDefendedCount * 100;
 
             return details;
