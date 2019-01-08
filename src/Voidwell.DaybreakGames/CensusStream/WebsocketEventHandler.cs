@@ -411,11 +411,14 @@ namespace Voidwell.DaybreakGames.CensusStream
         [CensusEventHandler("MetagameEvent", typeof(MetagameEvent))]
         private async Task Process(MetagameEvent payload)
         {
+            // Daybreak reset their instance_id counter
+            payload.InstanceId = int.Parse($"{payload.InstanceId}18");
+
             var metagameCategory = await _metagameEventService.GetMetagameEvent(payload.MetagameEventId);
 
             var dataModel = new Data.Models.Planetside.Events.MetagameEvent
             {
-                InstanceId = int.Parse($"{payload.InstanceId}18"),
+                InstanceId = payload.InstanceId,
                 MetagameEventId = payload.MetagameEventId,
                 MetagameEventState = payload.MetagameEventState,
                 ZoneControlVs = payload.FactionVs,
