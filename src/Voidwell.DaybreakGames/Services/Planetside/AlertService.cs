@@ -67,6 +67,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return alerts;
         }
 
+        public Task<IEnumerable<Alert>> GetActiveAlertsByWorldId(int worldId)
+        {
+            return _alertRepository.GetActiveAlertsByWorldId(worldId);
+        }
+
         public async Task<AlertResult> GetAlert(int worldId, int instanceId)
         {
             var cacheKey = $"{_cacheKey}_alert_{worldId}_{instanceId}";

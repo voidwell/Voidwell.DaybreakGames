@@ -7,6 +7,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
     public interface IAlertRepository
     {
         Task<Alert> GetActiveAlert(int worldId, int zoneId);
+        Task<IEnumerable<Alert>> GetActiveAlertsByWorldId(int worldId);
         Task<IEnumerable<Alert>> GetAlerts(int pageNumber, int limit, int? worldId);
         Task UpdateAsync(Alert entity);
         Task AddAsync(Alert dataModel);

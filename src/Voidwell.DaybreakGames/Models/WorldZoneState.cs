@@ -18,8 +18,8 @@ namespace Voidwell.DaybreakGames.Models
         public MapScore MapScore { get; private set; }
         public Dictionary<int, int> MapRegionOwnership { get; private set; } = new Dictionary<int, int>();
         public ZoneLockState LockState { get; private set; }
-        public ZoneAlertState AlertState { get; private set; }
 
+        private ZoneAlertState _alertState { get; set; }
         private readonly SemaphoreSlim _facilityFactionChangeLock = new SemaphoreSlim(1);
 
         public WorldZoneState(int worldId, Zone zone)
@@ -99,7 +99,7 @@ namespace Voidwell.DaybreakGames.Models
 
         public void UpdateAlertState(ZoneAlertState alertState = null)
         {
-            AlertState = alertState;
+            _alertState = alertState;
         }
 
         public IEnumerable<ZoneRegionOwnership> GetMapOwnership()
@@ -111,6 +111,19 @@ namespace Voidwell.DaybreakGames.Models
 
             return Map.Regions
                 .Select(a => new ZoneRegionOwnership(a.RegionId, MapRegionOwnership[a.RegionId]));
+        }
+
+        public ZoneAlertState GetAlertState()
+        {
+            if (_alertState != null) {
+                if (LockState?.State == ZoneLockStateEnum.LOCKED ||
+                    (_alertState.MetagameEvent.Duration.HasValue && DateTime.UtcNow - _alertState.Timestamp > _alertState.MetagameEvent.Duration.Value))
+                {
+                    UpdateAlertState();
+                }
+            } 
+
+            return _alertState;
         }
 
         public WorldZoneRegion GetRegionByFacilityId(int facilityId)

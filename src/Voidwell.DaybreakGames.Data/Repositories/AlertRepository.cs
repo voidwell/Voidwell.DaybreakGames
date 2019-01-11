@@ -39,6 +39,26 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<Alert>> GetActiveAlertsByWorldId(int worldId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                var query = (from alert in dbContext.Alerts
+
+                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
+
+                             where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && metagameEvent.Type != 5
+                             select new { alert, metagameEvent });
+                var results = await query.ToListAsync();
+                results?.ForEach(a => a.alert.MetagameEvent = a.metagameEvent);
+
+                return results?.Select(a => a.alert);
+            }
+        }
+
         public async Task<IEnumerable<Alert>> GetAlerts(int pageNumber, int limit, int? worldId)
         {
             using (var factory = _dbContextHelper.GetFactory())

@@ -110,6 +110,20 @@ namespace Voidwell.DaybreakGames.CensusStream
                 var isWorldOnline = message.Value<bool>("online");
 
                 await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
+
+                if (isWorldOnline)
+                {
+                    var activeAlerts = await _alertService.GetActiveAlertsByWorldId(worldId);
+                    if (activeAlerts != null)
+                    {
+                        foreach(var alert in activeAlerts)
+                        {
+                            var metagameEvent = await _metagameEventService.GetMetagameEvent(alert.MetagameEventId.Value);
+                            var alertState = new ZoneAlertState(alert.StartDate.Value, alert.MetagameInstanceId, metagameEvent);
+                            _worldMonitor.UpdateZoneAlert(alert.WorldId, alert.ZoneId.Value, alertState);
+                        }
+                    }
+                }
             };
         }
 

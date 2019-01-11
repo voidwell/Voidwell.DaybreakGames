@@ -85,7 +85,7 @@ namespace Voidwell.DaybreakGames.Models
                 Name = zoneState.Name,
                 IsTracking = zoneState.IsTracking,
                 LockState = zoneState.LockState,
-                AlertState = zoneState.AlertState
+                AlertState = zoneState.GetAlertState()
             };
         }
         
