@@ -14,7 +14,7 @@
     
   <ItemGroup>
     <PackageReference Include="DaybreakGames.Census" Version="1.1.0" />
-    <PackageReference Include="Glicko-2RankingSystem" Version="1.0.21" />
+    <PackageReference Include="Glicko-2RankingSystem" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.1.2" />

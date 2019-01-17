@@ -34,35 +34,42 @@ namespace Voidwell.DaybreakGames
 
         public virtual async Task StartAsync(CancellationToken cancellationToken)
         {
-            await UpdateState(true);
+            await UpdateStateAsync(true);
             await StartInternalAsync(cancellationToken);
         }
 
         public virtual async Task StopAsync(CancellationToken cancellationToken)
         {
-            await UpdateState(false);
+            await UpdateStateAsync(false);
             await StopInternalAsync(cancellationToken);
         }
         
-        public virtual Task<ServiceState> GetStatus(CancellationToken cancellationToken)
+        public async Task<ServiceState> GetStateAsync(CancellationToken cancellationToken)
         {
-            var state = new ServiceState
+            var details = await GetStatusAsync(cancellationToken);
+
+            return new ServiceState
             {
                 Name = ServiceName,
-                IsEnabled = _isRunning
+                IsEnabled = _isRunning,
+                Details = details
             };
-            return Task.FromResult(state);
+        }
+
+        protected async Task UpdateStateAsync(bool isEnabled)
+        {
+            _isRunning = isEnabled;
+            var state = await GetStateAsync(CancellationToken.None);
+            await _cache.SetAsync(GetCacheKey(), state);
+        }
+
+        protected virtual Task<object> GetStatusAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(null as object);
         }
 
         public abstract Task StartInternalAsync(CancellationToken cancellationToken);
         public abstract Task StopInternalAsync(CancellationToken cancellationToken);
-
-        private async Task UpdateState(bool isEnabled)
-        {
-            _isRunning = isEnabled;
-            var state = await GetStatus(CancellationToken.None);
-            await _cache.SetAsync(GetCacheKey(), state);
-        }
 
         private string GetCacheKey()
         {
