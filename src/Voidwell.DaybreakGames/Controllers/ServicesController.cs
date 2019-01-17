@@ -2,94 +2,84 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Models;
-using Voidwell.DaybreakGames.Services.Planetside;
-using Voidwell.DaybreakGames.CensusStream;
+using System.Reflection;
+using System.Linq;
+using System;
 
 namespace Voidwell.DaybreakGames.Controllers
 {
     [Route("services")]
     public class ServicesController : Controller
     {
-        private readonly IWebsocketMonitor _websocketMonitor;
-        private readonly ICharacterUpdaterService _characterUpdaterService;
+        private readonly IEnumerable<IStatefulHostedService> _services;
 
-        public ServicesController(IWebsocketMonitor websocketMonitor, ICharacterUpdaterService characterUpdaterService)
+        public ServicesController(IServiceProvider serviceProvider)
         {
-            _websocketMonitor = websocketMonitor;
-            _characterUpdaterService = characterUpdaterService;
+            var statefulHostedTypes = typeof(IStatefulHostedService).GetTypeInfo().Assembly.GetTypes()
+                .Where(a => typeof(IStatefulHostedService).IsAssignableFrom(a) && !typeof(IStatefulHostedService).IsEquivalentTo(a));
+
+            var statefulHostedServiceTypes = statefulHostedTypes.Where(a => a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract);
+
+            _services = statefulHostedTypes.Where(a => a.GetTypeInfo().IsInterface && statefulHostedServiceTypes.Any(t => a.IsAssignableFrom(t)))
+                .Select(a => serviceProvider.GetService(a) as IStatefulHostedService)
+                .Where(a => a != null)
+                .OrderBy(a => a.ServiceName);
         }
 
         [HttpGet("status")]
         public async Task<ActionResult> GetAllServiceStatus()
         {
-            var states = new List<ServiceState>();
+            var serviceStateTasks = _services.Select(a => a.GetStateAsync(CancellationToken.None));
 
-            var characterUpdaterState = _characterUpdaterService.GetStatus(CancellationToken.None);
-            var websocketMonitorState = _websocketMonitor.GetStatus(CancellationToken.None);
-
-            await Task.WhenAll(characterUpdaterState, websocketMonitorState);
-
-            states.Add(characterUpdaterState.Result);
-            states.Add(websocketMonitorState.Result);
+            var states = await Task.WhenAll(serviceStateTasks);
 
             return Ok(states);
         }
 
-        [HttpGet("{service}/status")]
-        public async Task<ActionResult> GetServiceStatus(string service)
+        [HttpGet("{serviceName}/status")]
+        public async Task<ActionResult> GetServiceStatus(string serviceName)
         {
-            ServiceState status = null;
-
-            if (service == _characterUpdaterService.ServiceName)
+            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
+            if (service == null)
             {
-                status = await _characterUpdaterService.GetStatus(CancellationToken.None);
-            }
-            else if (service == _websocketMonitor.ServiceName)
-            {
-                status = await _websocketMonitor.GetStatus(CancellationToken.None);
+                return NotFound();
             }
 
-            if (status != null)
-            {
-                return Ok(status);
-            }
+            var status = await service.GetStateAsync(CancellationToken.None);
 
-            return NotFound();
+            return Ok(status);
         }
 
-        [HttpPost("{service}/enable")]
-        public async Task<ActionResult> PostEnableService(string service)
+        [HttpPost("{serviceName}/enable")]
+        public async Task<ActionResult> PostEnableService(string serviceName)
         {
-            if (service == _characterUpdaterService.ServiceName)
+            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
+            if (service == null)
             {
-                await _characterUpdaterService.StartAsync(CancellationToken.None);
-                return Ok(await _characterUpdaterService.GetStatus(CancellationToken.None));
-            }
-            else if (service == _websocketMonitor.ServiceName)
-            {
-                await _websocketMonitor.StartAsync(CancellationToken.None);
-                return Ok(await _websocketMonitor.GetStatus(CancellationToken.None));
+                return NotFound();
             }
 
-            return NotFound();
+            await service.StartAsync(CancellationToken.None);
+
+            var status = await service.GetStateAsync(CancellationToken.None);
+
+            return Ok(status);
         }
 
-        [HttpPost("{service}/disable")]
-        public async Task<ActionResult> PostDisableService(string service)
+        [HttpPost("{serviceName}/disable")]
+        public async Task<ActionResult> PostDisableService(string serviceName)
         {
-            if (service == _characterUpdaterService.ServiceName)
+            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
+            if (service == null)
             {
-                await _characterUpdaterService.StopAsync(CancellationToken.None);
-                return Ok(await _characterUpdaterService.GetStatus(CancellationToken.None));
-            }
-            else if (service == _websocketMonitor.ServiceName)
-            {
-                await _websocketMonitor.StopAsync(CancellationToken.None);
-                return Ok(await _websocketMonitor.GetStatus(CancellationToken.None));
+                return NotFound();
             }
 
-            return NotFound();
+            await service.StopAsync(CancellationToken.None);
+
+            var status = await service.GetStateAsync(CancellationToken.None);
+
+            return Ok(status);
         }
     }
 }

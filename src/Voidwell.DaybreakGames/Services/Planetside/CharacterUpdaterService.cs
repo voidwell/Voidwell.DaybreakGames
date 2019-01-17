@@ -8,7 +8,6 @@ using Voidwell.Cache;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -76,14 +75,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return Task.CompletedTask;
         }
 
-        public override async Task<ServiceState> GetStatus(CancellationToken cancellationToken)
+        protected override async Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
-            var status = await base.GetStatus(cancellationToken);
-
             int count = await _characterUpdaterRepository.GetQueueLengthAsync();
-            status.Details = new { QueueLength = count };
-
-            return status;
+            return new { QueueLength = count };
         }
 
         private async void ExecuteAsync(Object stateInfo)

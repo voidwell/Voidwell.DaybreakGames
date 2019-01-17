@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames
         Task OnApplicationShutdown(CancellationToken cancellationToken);
         Task StartAsync(CancellationToken cancellationToken);
         Task StopAsync(CancellationToken cancellationToken);
-        Task<ServiceState> GetStatus(CancellationToken cancellationToken);
+        Task<ServiceState> GetStateAsync(CancellationToken cancellationToken);
         string ServiceName { get; }
     }
 }

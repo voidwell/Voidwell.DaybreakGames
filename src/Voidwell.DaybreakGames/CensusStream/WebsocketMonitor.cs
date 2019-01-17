@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.CensusStream.Models;
 
@@ -74,7 +73,17 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             _logger.LogInformation("Starting census stream monitor");
 
-            await _client.ConnectAsync();
+            try
+            {
+                await _client.ConnectAsync();
+            }
+            catch(Exception ex)
+            {
+                await _client?.DisconnectAsync();
+                await UpdateStateAsync(false);
+
+                _logger.LogError(91435, ex, "Failed to establish initial connection to Census. Will not attempt to reconnect.");
+            }
         }
 
         public override async Task StopInternalAsync(CancellationToken cancellationToken)
@@ -94,13 +103,9 @@ namespace Voidwell.DaybreakGames.CensusStream
             await _client?.DisconnectAsync();
         }
 
-        public override async Task<ServiceState> GetStatus(CancellationToken cancellationToken)
+        protected override Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
-            var status = await base.GetStatus(cancellationToken);
-
-            status.Details = _lastHeartbeat;
-
-            return status;
+            return Task.FromResult((object)_lastHeartbeat);
         }
 
         private async Task OnMessage(string message)
