@@ -445,6 +445,7 @@ namespace Voidwell.DaybreakGames.CensusStream
             };
 
             //Bypass Esamir not returning continent lock/unlock events.
+            /*
             if (dataModel.MetagameEventState == "135" && dataModel.MetagameEventId == 160)
             {
                 var unlockPayload = new ContinentUnlock
@@ -478,6 +479,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                 };
                 await Process(lockPayload);
             }
+            */
 
             await Task.WhenAll(_eventRepository.AddAsync(dataModel), _alertService.ProcessMetagameEvent(payload));
         }

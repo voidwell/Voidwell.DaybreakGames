@@ -88,12 +88,6 @@ namespace Voidwell.DaybreakGames.Models
             if (LockState?.State == ZoneLockStateEnum.LOCKED)
             {
                 UpdateAlertState();
-
-                if (!MapRegionOwnership.All(a => a.Value == lockState.TriggeringFaction.Value))
-                {
-                    MapRegionOwnership.Keys.ToList().ForEach(key => MapRegionOwnership[key] = lockState.TriggeringFaction.Value);
-                    PostMapUpdate();
-                }
             }
         }
 
