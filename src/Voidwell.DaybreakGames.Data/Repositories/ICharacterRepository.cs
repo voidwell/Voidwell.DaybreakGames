@@ -11,6 +11,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<string> GetCharacterIdByName(string characterName);
         Task<Character> GetCharacterAsync(string characterId);
         Task<Character> GetCharacterWithDetailsAsync(string characterId);
+        Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params string[] characterIds);
         Task<CharacterRating> GetCharacterRatingAsync(string characterId);
         Task<Character> UpsertAsync(Character entity);
         Task<CharacterTime> UpsertAsync(CharacterTime entity);

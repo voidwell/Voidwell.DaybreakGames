@@ -26,5 +26,11 @@ namespace Voidwell.DaybreakGames.Models
         public int IVIScore { get; set; }
         public DateTime? LastSaved { get; set; }
         public int Prestige { get; set; }
+        public string MostPlayedWeaponName { get; set; }
+        public int? MostPlayedWeaponId { get; set; }
+        public int? MostPlayedWeaponKills { get; set; }
+        public string MostPlayedClassName { get; set; }
+        public int? MostPlayedClassId { get; set; }
+        public int PlayTimeInMax { get; set; }
     }
 }
