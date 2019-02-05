@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Data.Repositories.Models;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -73,6 +73,12 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<Character> GetCharacterWithDetailsAsync(string characterId)
         {
+            var results = await GetCharacterWithDetailsAsync(new[] { characterId });
+            return results.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params string[] characterIds)
+        {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
@@ -97,7 +103,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                             join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
                             from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
 
-                            where c.Id == characterId
+                            where characterIds.Contains(c.Id)
                             select new Character
                             {
                                 Id = c.Id,
@@ -117,7 +123,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                 LifetimeStatsByFaction = lifetimeStatsByFaction,
                                 OutfitMembership = (from om in dbContext.OutfitMembers
                                                     join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
-                                                    where om.CharacterId == characterId
+                                                    where om.CharacterId == c.Id
                                                     select new OutfitMember
                                                     {
                                                         CharacterId = om.CharacterId,
@@ -237,7 +243,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                                              Vehicle = vehicle
                                                          }).ToList()
                              };
-                var result = query.FirstOrDefault();
+
+                var result = query.ToList();
 
                 return await Task.FromResult(result);
             }

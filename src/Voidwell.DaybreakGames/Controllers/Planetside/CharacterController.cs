@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Services.Planetside;
 
@@ -69,6 +71,14 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             {
                 return NotFound($"Unable to find character weapon stats with character: '{characterName}' or weapon '{weaponName}'");
             }
+
+            return Ok(result);
+        }
+
+        [HttpPost("byname")]
+        public async Task<ActionResult> GetMultipleCharacterStatsByName([FromBody] IEnumerable<string> characterNames)
+        {
+            var result = await _characterService.GetCharactersByName(characterNames.Take(25).ToArray());
 
             return Ok(result);
         }
