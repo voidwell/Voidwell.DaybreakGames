@@ -1007,6 +1007,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 PlayTime = character.LifetimeStats.PlayTime,
                 TotalPlayTimeMinutes = character.Times.MinutesPlayed,
                 IVIScore = character.InfantryStats != null ? character.InfantryStats.IVIScore.GetValueOrDefault() : 0,
+                IVIKillDeathRatio = character.InfantryStats != null ? character.InfantryStats.KillDeathRatio.GetValueOrDefault() : 0,
                 Prestige = character.PrestigeLevel,
                 MostPlayedWeaponName = mostPlayedWeapon?.Name,
                 MostPlayedWeaponId = mostPlayedWeapon?.ItemId,
