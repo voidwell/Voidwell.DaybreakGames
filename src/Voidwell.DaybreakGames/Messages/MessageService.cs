@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.Messages
         public MessageService(IAuthenticatedHttpClientFactory authenticatedHttpClientFactory, IZoneService zoneService, IWorldService worldService, IOptions<DaybreakGamesOptions> options)
         {
             _httpClient = authenticatedHttpClientFactory.GetHttpClient();
-            _httpClient.BaseAddress = new Uri("http://messagewell:5000");
+            _httpClient.BaseAddress = new Uri("http://voidwellmessagewell:5000");
 
             _options = options.Value;
             _zoneService = zoneService;
