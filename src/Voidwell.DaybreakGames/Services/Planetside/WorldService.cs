@@ -46,6 +46,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return worlds;
         }
 
+        public async Task<World> GetWorld(int worldId)
+        {
+            var worlds = await GetAllWorlds();
+            return worlds.FirstOrDefault(a => a.Id == worldId);
+        }
+
         public async Task<Dictionary<int, IEnumerable<DailyPopulation>>> GetWorldPopulationHistory(IEnumerable<int> worldIds, DateTime start, DateTime end)
         {
             var popTasks = worldIds.Select(id => GetWorldPopulationHistory(id, start, end)).ToArray();
