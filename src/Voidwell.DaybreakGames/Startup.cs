@@ -55,8 +55,6 @@ namespace Voidwell.DaybreakGames
 
             services.AddOptions();
             services.Configure<DaybreakGamesOptions>(Configuration);
-
-            DaybreakGamesOptions daybreakGamesOptions = null;
             services.Configure<DaybreakGamesOptions>(options =>
             {
                 var eventNames = Configuration.GetValue<string>("CensusWebsocketServices");
@@ -68,7 +66,6 @@ namespace Voidwell.DaybreakGames
                 {
                     options.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
                 }
-                daybreakGamesOptions = options;
             });
 
             services.AddEntityFrameworkContext(Configuration);
