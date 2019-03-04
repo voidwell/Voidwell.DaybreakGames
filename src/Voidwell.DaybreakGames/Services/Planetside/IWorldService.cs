@@ -8,6 +8,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IWorldService : IUpdateable
     {
         Task<IEnumerable<World>> GetAllWorlds();
+        Task<World> GetWorld(int worldId);
         Task<Dictionary<int, IEnumerable<DailyPopulation>>> GetWorldPopulationHistory(IEnumerable<int> worldIds, DateTime start, DateTime end);
     }
 }

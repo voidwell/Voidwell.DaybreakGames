@@ -8,6 +8,8 @@ using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.CensusStream.Models;
 using Microsoft.Extensions.Logging;
+using Voidwell.DaybreakGames.Messages;
+using Voidwell.DaybreakGames.Messages.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -18,6 +20,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICombatReportService _combatReportService;
         private readonly IMapService _mapService;
         private readonly IWorldMonitor _worldMonitor;
+        private readonly IMessageService _messageService;
         private readonly ICache _cache;
         private readonly ILogger<AlertService> _logger;
 
@@ -36,13 +39,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public AlertService(IAlertRepository alertRepository, IMetagameEventService metagameEventService,
             ICombatReportService combatReportService, IMapService mapService, IWorldMonitor worldMonitor,
-            ICache cache, ILogger<AlertService> logger)
+            IMessageService messageService, ICache cache, ILogger<AlertService> logger)
         {
             _alertRepository = alertRepository;
             _metagameEventService = metagameEventService;
             _combatReportService = combatReportService;
             _mapService = mapService;
             _worldMonitor = worldMonitor;
+            _messageService = messageService;
             _cache = cache;
             _logger = logger;
         }
@@ -182,13 +186,32 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             _logger.LogInformation("Starting alert {worldId}.{metagameInstanceId}", dataModel.WorldId, dataModel.MetagameInstanceId);
 
-            await _alertRepository.AddAsync(dataModel);
+            var eventMessage = new AlertStartMessage
+            {
+                Timestamp = metagameEvent.Timestamp,
+                WorldId = metagameEvent.WorldId,
+                ZoneId = metagameEvent.ZoneId.GetValueOrDefault(),
+                MetagameEventDescription = category?.Description,
+                MetagameEventId = metagameEvent.MetagameEventId,
+                MetagameInstanceId = metagameEvent.InstanceId,
+                ScoreFactionVS = metagameEvent.FactionVs,
+                ScoreFactionNC = metagameEvent.FactionNc,
+                ScoreFactionTR = metagameEvent.FactionTr
+            };
+
+            await Task.WhenAll(_alertRepository.AddAsync(dataModel), _messageService.PublishAlertEvent(metagameEvent.WorldId, metagameEvent.InstanceId, eventMessage));
             await CreateAlertZoneSnapshot(metagameEvent);
         }
 
         private async Task EndAlert(MetagameEvent metagameEvent)
         {
-            var alert = await _alertRepository.GetAlert(metagameEvent.WorldId, metagameEvent.InstanceId);
+            var categoryTask = _metagameEventService.GetMetagameEvent(metagameEvent.MetagameEventId);
+            var alertTask = _alertRepository.GetAlert(metagameEvent.WorldId, metagameEvent.InstanceId);
+
+            await Task.WhenAll(categoryTask, alertTask);
+
+            var category = categoryTask.Result;
+            var alert = alertTask.Result;
 
             if (metagameEvent.ZoneId != null || alert?.ZoneId != null)
             {
@@ -208,7 +231,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             _logger.LogInformation("Ending alert {worldId}.{metagameInstanceId}", alert.WorldId, alert.MetagameInstanceId);
 
-            await _alertRepository.UpdateAsync(alert);
+            var eventMessage = new AlertEndMessage
+            {
+                Timestamp = metagameEvent.Timestamp,
+                WorldId = metagameEvent.WorldId,
+                ZoneId = metagameEvent.ZoneId.GetValueOrDefault(),
+                MetagameEventId = metagameEvent.MetagameEventId,
+                MetagameInstanceId = metagameEvent.InstanceId,
+                MetagameEventDescription = category?.Description,
+                ScoreFactionVS = metagameEvent.FactionVs,
+                ScoreFactionNC = metagameEvent.FactionNc,
+                ScoreFactionTR = metagameEvent.FactionTr,
+            };
+
+            await Task.WhenAll(_alertRepository.UpdateAsync(alert), _messageService.PublishAlertEvent(metagameEvent.WorldId, metagameEvent.InstanceId, eventMessage));
         }
 
         private async Task CreateAlertZoneSnapshot(MetagameEvent metagameEvent)

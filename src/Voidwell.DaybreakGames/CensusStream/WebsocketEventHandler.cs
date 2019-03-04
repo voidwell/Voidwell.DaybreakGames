@@ -15,8 +15,8 @@ using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.CensusStream.Models;
-using Voidwell.DaybreakGames.WebsocketServer.Handlers;
-using Voidwell.DaybreakGames.WebsocketServer.Models;
+using Voidwell.DaybreakGames.Messages;
+using Voidwell.DaybreakGames.Messages.Models;
 
 namespace Voidwell.DaybreakGames.CensusStream
 {
@@ -30,7 +30,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         private readonly IAlertService _alertService;
         private readonly ICharacterRatingService _characterRatingService;
         private readonly IMetagameEventService _metagameEventService;
-        private readonly PlanetsideMessageHandler _planetsideMessageHandler;
+        private readonly IMessageService _messageService;
         private readonly ILogger<WebsocketEventHandler> _logger;
         private Dictionary<string, MethodInfo> _processMethods;
 
@@ -52,7 +52,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor,
             IPlayerMonitor playerMonitor, ICharacterService characterService, IAlertService alertService,
             ICharacterRatingService characterRatingService, IMetagameEventService metagameEventService,
-            PlanetsideMessageHandler planetsideMessageHandler, ILogger<WebsocketEventHandler> logger)
+            MessageService messageService, ILogger<WebsocketEventHandler> logger)
         {
             _eventRepository = eventRepository;
             _alertRepository = alertRepository;
@@ -62,7 +62,7 @@ namespace Voidwell.DaybreakGames.CensusStream
             _alertService = alertService;
             _characterRatingService = characterRatingService;
             _metagameEventService = metagameEventService;
-            _planetsideMessageHandler = planetsideMessageHandler;
+            _messageService = messageService;
             _logger = logger;
 
             _processMethods = GetType()
@@ -289,7 +289,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             await Task.WhenAll(_eventRepository.AddAsync(dataModel), attackerTask, victimTask);
 
-            await SendPlayerDeathMessage(attackerTask.Result, victimTask.Result, payload.ZoneId);
+            var messageTask = SendPlayerDeathMessage(attackerTask.Result, victimTask.Result, dataModel);
         }
 
         [CensusEventHandler("FacilityControl", typeof(FacilityControl))]
@@ -535,7 +535,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         }
 
         [CensusEventHandler("PlayerLogin", typeof(Models.PlayerLogin))]
-        private async Task Process(Models.PlayerLogin payload)
+        private Task Process(Models.PlayerLogin payload)
         {
             var dataModel = new Data.Models.Planetside.Events.PlayerLogin
             {
@@ -544,13 +544,11 @@ namespace Voidwell.DaybreakGames.CensusStream
                 WorldId = payload.WorldId
             };
 
-            var character = await _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp);
-
-            await Task.WhenAll(_eventRepository.AddAsync(dataModel), SendPlayerOnlineMessage(character));
+            return Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp));
         }
 
         [CensusEventHandler("PlayerLogout", typeof(Models.PlayerLogout))]
-        private async Task Process(Models.PlayerLogout payload)
+        private Task Process(Models.PlayerLogout payload)
         {
             var dataModel = new Data.Models.Planetside.Events.PlayerLogout
             {
@@ -559,9 +557,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                 WorldId = payload.WorldId
             };
 
-            var character = await _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp);
-
-            await Task.WhenAll(_eventRepository.AddAsync(dataModel), SendPlayerOfflineMessage(character));
+            return Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp));
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]
@@ -585,63 +581,42 @@ namespace Voidwell.DaybreakGames.CensusStream
             await _eventRepository.AddAsync(dataModel);
         }
 
-        private async Task SendPlayerDeathMessage(OnlineCharacter attackerCharacter, OnlineCharacter victimCharacter, int? zoneId)
+        private async Task SendPlayerDeathMessage(OnlineCharacter attackerCharacter, OnlineCharacter victimCharacter, Data.Models.Planetside.Events.Death model)
         {
             var message = new PlayerDeathMessage
             {
                 AttackerCharacterId = attackerCharacter?.Character?.CharacterId,
+                AttackerFactionId = attackerCharacter?.Character?.FactionId,
                 AttackerCharacterName = attackerCharacter?.Character?.Name,
+                AttackerOutfitId = model.AttackerOutfitId,
                 VictimCharacterId = victimCharacter?.Character?.CharacterId,
+                VictimFactionId = victimCharacter?.Character?.FactionId,
                 VictimCharacterName = victimCharacter?.Character?.Name,
-                ZoneId = zoneId
+                VictimOutfitId = model.CharacterOutfitId,
+                AttackerWeaponId = model.AttackerWeaponId,
+                IsHeadshot = model.IsHeadshot,
+                AttackerVehicleId = model.AttackerVehicleId,
+                ZoneId = model.ZoneId,
+                Timestamp = model.Timestamp,
+                WorldId = model.WorldId
             };
 
             var messageTasks = new List<Task>();
 
             if (attackerCharacter != null)
             {
-                messageTasks.Add(_planetsideMessageHandler.SendOnlineCharacterMessage(message.AttackerCharacterId, message));
+                messageTasks.Add(_messageService.PublishCharacterEvent(message.AttackerCharacterId, message));
             }
 
             if (victimCharacter != null)
             {
-                messageTasks.Add(_planetsideMessageHandler.SendOnlineCharacterMessage(message.VictimCharacterId, message));
+                messageTasks.Add(_messageService.PublishCharacterEvent(message.VictimCharacterId, message));
             }
 
             if (messageTasks.Any())
             {
                 await Task.WhenAll(messageTasks);
             }
-        }
-
-        private async Task SendPlayerOnlineMessage(OnlineCharacter character)
-        {
-            if (character == null)
-            {
-                return;
-            }
-
-            var message = new PlayerOnlineMessage
-            {
-                Name = character.Character?.Name
-            };
-
-            await _planetsideMessageHandler.SendOnlineCharacterMessage(character.Character?.CharacterId, message);
-        }
-
-        private async Task SendPlayerOfflineMessage(OnlineCharacter character)
-        {
-            if (character == null)
-            {
-                return;
-            }
-
-            var message = new PlayerOfflineMessage
-            {
-                Name = character.Character?.Name
-            };
-
-            await _planetsideMessageHandler.SendOnlineCharacterMessage(character.Character?.CharacterId, message);
         }
     }
 }

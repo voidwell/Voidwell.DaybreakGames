@@ -15,8 +15,9 @@ using Voidwell.DaybreakGames.HostedServices;
 using IdentityServer4.AccessTokenValidation;
 using System;
 using Voidwell.Logging;
-using Voidwell.DaybreakGames.WebsocketServer;
-using Voidwell.DaybreakGames.WebsocketServer.Handlers;
+using Voidwell.DaybreakGames.HttpAuthenticatedClient;
+using System.Collections.Generic;
+using Voidwell.DaybreakGames.Messages;
 
 namespace Voidwell.DaybreakGames
 {
@@ -54,17 +55,20 @@ namespace Voidwell.DaybreakGames
 
             services.AddOptions();
             services.Configure<DaybreakGamesOptions>(Configuration);
-            services.Configure<DaybreakGamesOptions>(daybreakOptions =>
+
+            DaybreakGamesOptions daybreakGamesOptions = null;
+            services.Configure<DaybreakGamesOptions>(options =>
             {
                 var eventNames = Configuration.GetValue<string>("CensusWebsocketServices");
                 var experienceIds = Configuration.GetValue<string>("CensusWebsocketExperienceIds");
 
-                daybreakOptions.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
+                options.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
 
                 if (experienceIds != null)
                 {
-                    daybreakOptions.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
+                    options.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
                 }
+                daybreakGamesOptions = options;
             });
 
             services.AddEntityFrameworkContext(Configuration);
@@ -76,7 +80,6 @@ namespace Voidwell.DaybreakGames
 
             services.AddCensusHelpers();
             services.AddUpdateableTasks();
-            services.AddWebSocketManager();
 
             services.AddTransient<IItemService, ItemService>();
             services.AddTransient<IProfileService, ProfileService>();
@@ -102,16 +105,26 @@ namespace Voidwell.DaybreakGames
             services.AddSingleton<IPSBUtilityService, PSBUtilityService>();
             services.AddSingleton<ICharacterRatingService, CharacterRatingService>();
             services.AddSingleton<IMapService, MapService>();
+            services.AddSingleton<IMessageService, MessageService>();
 
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
 
-            services.AddSingleton<PlanetsideMessageHandler>();
-
             services.AddHostedService<StoreUpdaterSchedulerHostedService>();
             services.AddHostedService<WebsocketMonitorHostedService>();
             services.AddHostedService<CharacterUpdaterHostedService>();
+
+            services.AddAuthenticatedHttpClient(options =>
+            {
+                options.TokenServiceAddress = "http://voidwellauth:5000/connect/token";
+                options.ClientId = Configuration.GetValue<string>("ClientId");
+                options.ClientSecret = Configuration.GetValue<string>("ClientSecret");
+                options.Scopes = new List<string>
+                    {
+                        "voidwell-messagewell-publish"
+                    };
+            });
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(options =>
@@ -128,15 +141,12 @@ namespace Voidwell.DaybreakGames
         public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             app.InitializeDatabases();
-            app.UseWebSockets();
 
             app.UseLoggingMiddleware();
 
             app.UseAuthentication();
 
             app.UseMvc();
-
-            app.UseWebSocketManager("/ws/ps2", app.ApplicationServices.GetService<PlanetsideMessageHandler>());
         }
     }
 }

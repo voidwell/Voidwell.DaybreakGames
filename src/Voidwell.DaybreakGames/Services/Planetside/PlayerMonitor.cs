@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Messages;
+using Voidwell.DaybreakGames.Messages.Models;
 using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
@@ -15,6 +17,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICharacterUpdaterService _updaterService;
         private readonly IPlayerSessionRepository _playerSessionRepository;
         private readonly ICharacterRatingService _characterRatingService;
+        private readonly IMessageService _messageService;
         private readonly ICache _cache;
 
         private static readonly Func<int, string> GetListCacheKey = worldId => $"ps2.online-players_world_{worldId}";
@@ -23,12 +26,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private static readonly TimeSpan MaximumIdleDuration = TimeSpan.FromMinutes(10);
 
         public PlayerMonitor(ICharacterService characterService, ICharacterUpdaterService updaterService,
-            IPlayerSessionRepository playerSessionRepository, ICharacterRatingService characterRatingService, ICache cache)
+            IPlayerSessionRepository playerSessionRepository, ICharacterRatingService characterRatingService,
+            IMessageService messageService, ICache cache)
         {
             _characterService = characterService;
             _updaterService = updaterService;
             _playerSessionRepository = playerSessionRepository;
             _characterRatingService = characterRatingService;
+            _messageService = messageService;
             _cache = cache;
         }
 
@@ -52,7 +57,19 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LoginDate = timestamp
             };
 
-            await Task.WhenAll(_cache.AddToListAsync(GetListCacheKey(character.WorldId), character.Id), _cache.SetAsync(GetPlayerCacheKey(character.Id), onlineCharacter, CacheIdleDuration));
+            var characterEvent = new PlayerOnlineMessage
+            {
+                Timestamp = timestamp,
+                WorldId = character.WorldId,
+                CharacterId = character.Id,
+                CharacterName = character.Name,
+                FactionId = character.FactionId
+            };
+
+            await Task.WhenAll(
+                _cache.AddToListAsync(GetListCacheKey(character.WorldId), character.Id),
+                _cache.SetAsync(GetPlayerCacheKey(character.Id), onlineCharacter, CacheIdleDuration),
+                _messageService.PublishCharacterEvent(characterId, characterEvent));
 
             return onlineCharacter;
         }
@@ -85,9 +102,20 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Duration = (int)duration.TotalMilliseconds
             };
 
-            await Task.WhenAll(_playerSessionRepository.AddAsync(dataModel),
+            var characterEvent = new PlayerOfflineMessage
+            {
+                Timestamp = timestamp,
+                WorldId = character.WorldId,
+                CharacterId = character.Id,
+                CharacterName = character.Name,
+                FactionId = character.FactionId
+            };
+
+            await Task.WhenAll(
+                _playerSessionRepository.AddAsync(dataModel),
                 RemoveFromCacheList(character),
-                _characterRatingService.SaveCachedRatingAsync(characterId));
+                _characterRatingService.SaveCachedRatingAsync(characterId),
+                _messageService.PublishCharacterEvent(characterId, characterEvent));
 
             return onlineCharacter;
         }
