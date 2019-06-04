@@ -41,6 +41,7 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<OutfitMember> OutfitMembers { get; set; }
         public DbSet<PlayerSession> PlayerSessions { get; set; }
         public DbSet<Profile> Profiles { get; set; }
+        public DbSet<Loadout> Loadouts { get; set; }
         public DbSet<Title> Titles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<VehicleFaction> VehicleFactions { get; set; }

@@ -25,6 +25,24 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             return Ok(result);
         }
 
+        [HttpGet("activity")]
+        public async Task<ActionResult> GetWorldActivity([FromQuery(Name = "worldId")]int? worldId, [FromQuery(Name = "period")]int? hours)
+        {
+            if (!worldId.HasValue)
+            {
+                return BadRequest("Missing required 'worldId' query parameter");
+            }
+
+            if (!hours.HasValue || hours > 24)
+            {
+                return BadRequest("Missing or invalid required 'period' query parameter.");
+            }
+
+            var result = await _worldService.GetWorldActivity(worldId.Value, hours.Value);
+
+            return Ok(result);
+        }
+
         [HttpGet("population")]
         public async Task<ActionResult> GetWorldPopulationHistory([FromQuery(Name = "q")]string sWorldIds)
         {

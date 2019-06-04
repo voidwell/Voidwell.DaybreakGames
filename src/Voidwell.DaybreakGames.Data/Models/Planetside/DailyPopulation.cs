@@ -15,9 +15,11 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int VsCount { get; set; }
         public int NcCount { get; set; }
         public int TrCount { get; set; }
+        public int NsCount { get; set; }
         public int VsAvgPlayTime { get; set; }
         public int NcAvgPlayTime { get; set; }
         public int TrAvgPlayTime { get; set; }
+        public int NsAvgPlayTime { get; set; }
         public int AvgPlayTime { get; set; }
     }
 

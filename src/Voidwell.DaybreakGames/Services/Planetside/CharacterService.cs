@@ -18,7 +18,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         private readonly ICharacterRepository _characterRepository;
         private readonly IPlayerSessionRepository _playerSessionRepository;
-        private readonly IEventRepository _eventRepository;
+        private readonly IWorldEventsService _worldEventService;
         private readonly CensusCharacter _censusCharacter;
         private readonly ICache _cache;
         private readonly IOutfitService _outfitService;
@@ -38,12 +38,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly SemaphoreSlim _characterStatsLock = new SemaphoreSlim(10);
 
         public CharacterService(ICharacterRepository characterRepository, IPlayerSessionRepository playerSessionRepository,
-            IEventRepository eventRepository, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
+            IWorldEventsService worldEventService, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
             IWeaponAggregateService weaponAggregateService, IGradeService gradeService, IWeaponService weaponService, ILogger<CharacterService> logger)
         {
             _characterRepository = characterRepository;
             _playerSessionRepository = playerSessionRepository;
-            _eventRepository = eventRepository;
+            _worldEventService = worldEventService;
             _censusCharacter = censusCharacter;
             _cache = cache;
             _outfitService = outfitService;
@@ -607,11 +607,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<List<PlayerSessionEvent>> GetSessionEventsForCharacter(string characterId, DateTime start, DateTime end)
         {
-            var sessionDeathsTask = _eventRepository.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionFacilityCapturesTask = _eventRepository.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionFacilityDefendsTask = _eventRepository.GetFacilityDefendEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionBattleRankUpsTask = _eventRepository.GetBattleRankUpEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionVehicleDestroysTask = _eventRepository.GetVehicleDestroyEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionDeathsTask = _worldEventService.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionFacilityCapturesTask = _worldEventService.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionFacilityDefendsTask = _worldEventService.GetFacilityDefendEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionBattleRankUpsTask = _worldEventService.GetBattleRankUpEventsForCharacterIdByDateAsync(characterId, start, end);
+            var sessionVehicleDestroysTask = _worldEventService.GetVehicleDestroyEventsForCharacterIdByDateAsync(characterId, start, end);
 
             await Task.WhenAll(sessionDeathsTask, sessionFacilityCapturesTask, sessionFacilityDefendsTask, sessionBattleRankUpsTask, sessionVehicleDestroysTask);
 

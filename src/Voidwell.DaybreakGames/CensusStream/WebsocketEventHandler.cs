@@ -52,7 +52,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         public WebsocketEventHandler(IEventRepository eventRepository, IAlertRepository alertRepository, IWorldMonitor worldMonitor,
             IPlayerMonitor playerMonitor, ICharacterService characterService, IAlertService alertService,
             ICharacterRatingService characterRatingService, IMetagameEventService metagameEventService,
-            MessageService messageService, ILogger<WebsocketEventHandler> logger)
+            IMessageService messageService, ILogger<WebsocketEventHandler> logger)
         {
             _eventRepository = eventRepository;
             _alertRepository = alertRepository;
@@ -300,9 +300,11 @@ namespace Voidwell.DaybreakGames.CensusStream
             float scoreVs = 0f;
             float scoreNc = 0f;
             float scoreTr = 0f;
+            float scoreNs = 0f;
             int popVs = 0;
             int popNc = 0;
             int popTr = 0;
+            int popNs = 0;
 
             try
             {
@@ -321,6 +323,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                     scoreVs = score.ConnectedTerritories.Vs.Percent * 100;
                     scoreNc = score.ConnectedTerritories.Nc.Percent * 100;
                     scoreTr = score.ConnectedTerritories.Tr.Percent * 100;
+                    scoreNs = score.ConnectedTerritories.Ns.Percent * 100;
                 }
 
                 if (zonePopulation != null)
@@ -328,6 +331,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                     popVs = zonePopulation.VS;
                     popNc = zonePopulation.NC;
                     popTr = zonePopulation.TR;
+                    popNs = zonePopulation.NS;
                 }
 
                 var dataModel = new Data.Models.Planetside.Events.FacilityControl
@@ -343,9 +347,11 @@ namespace Voidwell.DaybreakGames.CensusStream
                     ZoneControlVs = scoreVs,
                     ZoneControlNc = scoreNc,
                     ZoneControlTr = scoreTr,
+                    ZoneControlNs = scoreNs,
                     ZonePopulationVs = popVs,
                     ZonePopulationNc = popNc,
-                    ZonePopulationTr = popTr
+                    ZonePopulationTr = popTr,
+                    ZonePopulationNs = popNs
                 };
 
                 await _eventRepository.AddAsync(dataModel);
@@ -363,30 +369,35 @@ namespace Voidwell.DaybreakGames.CensusStream
                         alert.LastFactionVs = score.ConnectedTerritories.Vs.Percent * 100;
                         alert.LastFactionNc = score.ConnectedTerritories.Nc.Percent * 100;
                         alert.LastFactionTr = score.ConnectedTerritories.Tr.Percent * 100;
+                        alert.LastFactionNs = score.ConnectedTerritories.Ns.Percent * 100;
                     }
                     else if (alert.MetagameEventId == 9 || alert.MetagameEventId == 12 || alert.MetagameEventId == 14 || alert.MetagameEventId == 18)
                     {
                         alert.LastFactionVs = score.AmpStations.Vs.Value;
                         alert.LastFactionNc = score.AmpStations.Nc.Value;
                         alert.LastFactionTr = score.AmpStations.Tr.Value;
+                        alert.LastFactionNs = score.AmpStations.Ns.Value;
                     }
                     else if (alert.MetagameEventId == 8 || alert.MetagameEventId == 11 || alert.MetagameEventId == 17)
                     {
                         alert.LastFactionVs = score.TechPlants.Vs.Value;
                         alert.LastFactionNc = score.TechPlants.Nc.Value;
                         alert.LastFactionTr = score.TechPlants.Tr.Value;
+                        alert.LastFactionNs = score.TechPlants.Ns.Value;
                     }
                     else if (alert.MetagameEventId == 7 || alert.MetagameEventId == 10 || alert.MetagameEventId == 13 || alert.MetagameEventId == 16)
                     {
                         alert.LastFactionVs = score.BioLabs.Vs.Value;
                         alert.LastFactionNc = score.BioLabs.Nc.Value;
                         alert.LastFactionTr = score.BioLabs.Tr.Value;
+                        alert.LastFactionNs = score.BioLabs.Ns.Value;
                     }
                     else if (alert.MetagameEventId == 180 || alert.MetagameEventId == 181 || alert.MetagameEventId == 182 || alert.MetagameEventId == 183)
                     {
                         alert.LastFactionVs = score.LargeOutposts.Vs.Value;
                         alert.LastFactionNc = score.LargeOutposts.Nc.Value;
                         alert.LastFactionTr = score.LargeOutposts.Tr.Value;
+                        alert.LastFactionNs = score.LargeOutposts.Ns.Value;
                     }
                     else
                     {
@@ -407,6 +418,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         {
             var dataModel = new Data.Models.Planetside.Events.GainExperience
             {
+                Id = Guid.NewGuid(),
                 ExperienceId = payload.ExperienceId,
                 CharacterId = payload.CharacterId,
                 Amount = payload.Amount,

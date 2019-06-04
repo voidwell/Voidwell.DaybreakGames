@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Voidwell.DaybreakGames.Data;
@@ -9,9 +10,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20190603144401_ps2dbcontext.release.28")]
+    partial class ps2dbcontextrelease28
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,9 +35,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<float?>("LastFactionNc")
                         .HasColumnName("last_faction_nc");
 
-                    b.Property<float?>("LastFactionNs")
-                        .HasColumnName("last_faction_ns");
-
                     b.Property<float?>("LastFactionTr")
                         .HasColumnName("last_faction_tr");
 
@@ -50,9 +49,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<float?>("StartFactionNc")
                         .HasColumnName("start_faction_nc");
-
-                    b.Property<float?>("StartFactionNs")
-                        .HasColumnName("start_faction_ns");
 
                     b.Property<float?>("StartFactionTr")
                         .HasColumnName("start_faction_tr");
@@ -1003,9 +999,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<float?>("ZoneControlNc")
                         .HasColumnName("zone_control_nc");
 
-                    b.Property<float?>("ZoneControlNs")
-                        .HasColumnName("zone_control_ns");
-
                     b.Property<float?>("ZoneControlTr")
                         .HasColumnName("zone_control_tr");
 
@@ -1017,9 +1010,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.Property<int?>("ZonePopulationNc")
                         .HasColumnName("zone_population_nc");
-
-                    b.Property<int?>("ZonePopulationNs")
-                        .HasColumnName("zone_population_ns");
 
                     b.Property<int?>("ZonePopulationTr")
                         .HasColumnName("zone_population_tr");
@@ -1035,9 +1025,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Events.GainExperience", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnName("id");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnName("timestamp");
 
@@ -1062,7 +1049,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("ZoneId")
                         .HasColumnName("zone_id");
 
-                    b.HasKey("Id", "Timestamp", "CharacterId", "ExperienceId", "OtherId")
+                    b.HasKey("Timestamp", "CharacterId", "ExperienceId", "OtherId")
                         .HasName("p_k_event_gain_experience");
 
                     b.HasIndex("WorldId", "ZoneId", "Timestamp")
@@ -1355,26 +1342,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasName("p_k_item_category");
 
                     b.ToTable("item_category");
-                });
-
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Loadout", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnName("id");
-
-                    b.Property<string>("CodeName")
-                        .HasColumnName("code_name");
-
-                    b.Property<int>("FactionId")
-                        .HasColumnName("faction_id");
-
-                    b.Property<int>("ProfileId")
-                        .HasColumnName("profile_id");
-
-                    b.HasKey("Id")
-                        .HasName("p_k_loadout");
-
-                    b.ToTable("loadout");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.MapHex", b =>

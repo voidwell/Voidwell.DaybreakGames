@@ -146,12 +146,12 @@ namespace Voidwell.DaybreakGames.Models
             {
                 Dictionary<int, int> _ownership = ownership;
 
-                var territories = new[] { 0, 0, 0, 0 };
-                var ampStations = new[] { 0, 0, 0, 0 };
-                var techPlants = new[] { 0, 0, 0, 0 };
-                var bioLabs = new[] { 0, 0, 0, 0 };
-                var largeOutposts = new[] { 0, 0, 0, 0 };
-                var smallOutposts = new[] { 0, 0, 0, 0 };
+                var territories = new[] { 0, 0, 0, 0, 0 };
+                var ampStations = new[] { 0, 0, 0, 0, 0 };
+                var techPlants = new[] { 0, 0, 0, 0, 0 };
+                var bioLabs = new[] { 0, 0, 0, 0, 0 };
+                var largeOutposts = new[] { 0, 0, 0, 0, 0 };
+                var smallOutposts = new[] { 0, 0, 0, 0, 0 };
 
                 foreach (var region in ownership)
                 {
@@ -182,19 +182,19 @@ namespace Voidwell.DaybreakGames.Models
 
                 return new MapScore
                 {
-                    Territories = new OwnershipScoreFactions(territories[1], territories[2], territories[3], territories[0]),
-                    ConnectedTerritories = new OwnershipScoreFactions(connectedTerritories[1], connectedTerritories[2], connectedTerritories[3], connectedTerritories[0]),
-                    AmpStations = new OwnershipScoreFactions(ampStations[1], ampStations[2], ampStations[3], ampStations[0]),
-                    TechPlants = new OwnershipScoreFactions(techPlants[1], techPlants[2], techPlants[3], techPlants[0]),
-                    BioLabs = new OwnershipScoreFactions(bioLabs[1], bioLabs[2], bioLabs[3], bioLabs[0]),
-                    LargeOutposts = new OwnershipScoreFactions(largeOutposts[1], largeOutposts[2], largeOutposts[3], largeOutposts[0]),
-                    SmallOutposts = new OwnershipScoreFactions(smallOutposts[1], smallOutposts[2], smallOutposts[3], smallOutposts[0])
+                    Territories = new OwnershipScoreFactions(territories[1], territories[2], territories[3], territories[4], territories[0]),
+                    ConnectedTerritories = new OwnershipScoreFactions(connectedTerritories[1], connectedTerritories[2], connectedTerritories[3], connectedTerritories[4], connectedTerritories[0]),
+                    AmpStations = new OwnershipScoreFactions(ampStations[1], ampStations[2], ampStations[3], ampStations[4], ampStations[0]),
+                    TechPlants = new OwnershipScoreFactions(techPlants[1], techPlants[2], techPlants[3], techPlants[4], techPlants[0]),
+                    BioLabs = new OwnershipScoreFactions(bioLabs[1], bioLabs[2], bioLabs[3], bioLabs[4], bioLabs[0]),
+                    LargeOutposts = new OwnershipScoreFactions(largeOutposts[1], largeOutposts[2], largeOutposts[3], largeOutposts[4], largeOutposts[0]),
+                    SmallOutposts = new OwnershipScoreFactions(smallOutposts[1], smallOutposts[2], smallOutposts[3], smallOutposts[4], smallOutposts[0])
                 };
             }
 
             private static int[] CalculateConnectedTerritories(WorldZone zoneMap, Dictionary<int, int> ownership)
             {
-                var connectedTerritories = new[] { 0, 0, 0, 0 };
+                var connectedTerritories = new[] { 0, 0, 0, 0, 0 };
                 var factionsChecked = new Dictionary<int, bool>();
 
                 foreach (var warpgate in zoneMap.Warpgates)

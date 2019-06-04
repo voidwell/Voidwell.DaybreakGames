@@ -20,8 +20,10 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
         public float? ZoneControlVs { get; set; }
         public float? ZoneControlNc { get; set; }
         public float? ZoneControlTr { get; set; }
+        public float? ZoneControlNs { get; set; }
         public int? ZonePopulationVs { get; set; }
         public int? ZonePopulationNc { get; set; }
         public int? ZonePopulationTr { get; set; }
+        public int? ZonePopulationNs { get; set; }
     }
 }

@@ -7,5 +7,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface IProfileService : IUpdateable
     {
         Task<IEnumerable<Profile>> GetAllProfiles();
+        Task<int> GetProfileIdFromLoadoutAsync(int loadoutId);
     }
 }

@@ -38,7 +38,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Death>> GetDeathEventsByDateAsync(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
+        public async Task<IEnumerable<Death>> GetDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
@@ -49,7 +49,28 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     endDate = DateTime.UtcNow;
                 }
 
-                return await dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
+                var query = dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate); ;
+                if (zoneId.HasValue)
+                {
+                    query = query.Where(e => e.ZoneId == zoneId);
+                }
+
+                return await query.ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<Death>> GetDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                if (endDate == null)
+                {
+                    endDate = DateTime.UtcNow;
+                }
+
+                return await dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate)
                     .ToListAsync();
             }
         }
@@ -233,7 +254,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
+        public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
@@ -244,8 +265,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     endDate = DateTime.UtcNow;
                 }
 
-                return await dbContext.EventFacilityControls.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
-                    .ToListAsync();
+                var query = dbContext.EventFacilityControls.Where(e => e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate);
+                if (zoneId.HasValue)
+                {
+                    query = query.Where(e => e.ZoneId == zoneId);
+                }
+
+                return await query.ToListAsync();
             }
         }
 
@@ -264,7 +290,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<VehicleDestroy>> GetVehicleDeathEventsByDateAsync(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
+        public async Task<IEnumerable<VehicleDestroy>> GetVehicleDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
@@ -275,8 +301,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     endDate = DateTime.UtcNow;
                 }
 
-                return await dbContext.EventVehicleDestroys.Where(e => e.WorldId == worldId && e.ZoneId == zoneId && e.Timestamp < endDate && e.Timestamp > startDate)
-                    .ToListAsync();
+                var query = dbContext.EventVehicleDestroys.Where(e => e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate);
+                if (zoneId.HasValue)
+                {
+                    query = query.Where(e => e.ZoneId == zoneId);
+                }
+
+                return await query.ToListAsync();
             }
         }
 
@@ -314,6 +345,27 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     .GroupBy(a => new { a.ZoneId, a.WorldId })
                     .Select(a => a.OrderByDescending(b => b.Timestamp).First())
                     .ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<GainExperience>> GetExperienceByDateAsync(int experienceId, int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                if (endDate == null)
+                {
+                    endDate = DateTime.UtcNow;
+                }
+
+                var query = dbContext.GainExperienceEvents.Where(e => e.ExperienceId == experienceId && e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate);
+                if (zoneId.HasValue)
+                {
+                    query = query.Where(e => e.ZoneId == zoneId);
+                }
+
+                return await query.ToListAsync();
             }
         }
     }

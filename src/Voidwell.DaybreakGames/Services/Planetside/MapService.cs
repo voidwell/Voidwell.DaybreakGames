@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class MapService : IMapService
     {
         private readonly IMapRepository _mapRepository;
-        private readonly IEventRepository _eventRepository;
+        private readonly IWorldEventsService _worldEventsService;
         private readonly CensusMap _censusMap;
         private readonly CensusWorldEvent _censusWorldEvent;
         private readonly ICache _cache;
@@ -32,10 +32,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private TimeSpan _facilityWorldEventCacheExpiration = TimeSpan.FromSeconds(10);
         private TimeSpan _zoneStateCacheExpiration = TimeSpan.FromSeconds(30);
 
-        public MapService(IMapRepository mapRepository, IEventRepository eventRepository, CensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
+        public MapService(IMapRepository mapRepository, IWorldEventsService worldEventsService, CensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
         {
             _mapRepository = mapRepository;
-            _eventRepository = eventRepository;
+            _worldEventsService = worldEventsService;
             _censusMap = censusMap;
             _censusWorldEvent = censusWorldEvent;
             _cache = cache;
@@ -230,8 +230,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return results;
                 }
 
-                var zoneLocks = _eventRepository.GetAllLatestZoneLocks();
-                var zoneUnlocks = _eventRepository.GetAllLatestZoneUnlocks();
+                var zoneLocks = _worldEventsService.GetAllLatestZoneLocks();
+                var zoneUnlocks = _worldEventsService.GetAllLatestZoneUnlocks();
 
                 await Task.WhenAll(zoneLocks, zoneUnlocks);
 

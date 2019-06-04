@@ -18,6 +18,6 @@ namespace Voidwell.DaybreakGames.Models
         public bool IsTracking { get; set; }
         public ZoneLockState LockState { get; set; }
         public ZoneAlertState AlertState { get; set; }
-        public ZonePopulation Population { get; set; }
+        public PopulationPeriod Population { get; set; }
     }
 }

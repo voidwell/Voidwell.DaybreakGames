@@ -34,6 +34,7 @@ namespace Voidwell.DaybreakGames.Data
             services.AddSingleton<IVehicleRepository, VehicleRepository>();
             services.AddSingleton<ITitleRepository, TitleRepository>();
             services.AddSingleton<IProfileRepository, ProfileRepository>();
+            services.AddSingleton<ILoadoutRepository, LoadoutRepository>();
             services.AddSingleton<IMetagameEventRepository, MetagameEventRepository>();
             services.AddSingleton<IMapRepository, MapRepository>();
             services.AddSingleton<ICharacterRepository, CharacterRepository>();
