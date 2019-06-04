@@ -9,5 +9,6 @@
         public float ScoreFactionVS { get; set; }
         public float ScoreFactionNC { get; set; }
         public float ScoreFactionTR { get; set; }
+        public float ScoreFactionNS { get; set; }
     }
 }

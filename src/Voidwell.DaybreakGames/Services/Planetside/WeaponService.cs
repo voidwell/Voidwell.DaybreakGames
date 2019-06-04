@@ -8,7 +8,6 @@ using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Data.Repositories.Models;
 using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
@@ -18,7 +17,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICharacterRepository _characterRepository;
         private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly ISanctionedWeaponsRepository _sanctionedWeaponsRepository;
-        private readonly IEventRepository _eventRepository;
+        private readonly IWorldEventsService _worldEventsService;
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
 
@@ -29,12 +28,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
 
         public WeaponService(ICharacterRepository characterRepository, IWeaponAggregateService weaponAggregateService,
-            ISanctionedWeaponsRepository sanctionedWeaponRepository, IEventRepository eventRepository, CensusItem censusItem, ICache cache)
+            ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService, CensusItem censusItem, ICache cache)
         {
             _characterRepository = characterRepository;
             _weaponAggregateService = weaponAggregateService;
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
-            _eventRepository = eventRepository;
+            _worldEventsService = worldEventsService;
             _censusItem = censusItem;
             _cache = cache;
         }
@@ -185,7 +184,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return stats;
                 }
 
-                stats = await _eventRepository.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end);
+                stats = await _worldEventsService.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end);
                 if (stats != null)
                 {
                     await _cache.SetAsync(cacheKey, stats, TimeSpan.FromHours(1));

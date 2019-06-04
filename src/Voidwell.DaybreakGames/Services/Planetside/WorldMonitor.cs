@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.CensusStream.Models;
 
@@ -13,9 +12,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WorldMonitor : IWorldMonitor
     {
-        private readonly IEventRepository _eventRepository;
         private readonly IZoneService _zoneService;
         private readonly IWorldService _worldService;
+        private readonly IWorldEventsService _worldEventService;
         private readonly IMapService _mapService;
         private readonly IPlayerMonitor _playerMonitor;
         private readonly ILogger<WorldMonitor> _logger;
@@ -23,12 +22,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private static ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
         private static ConcurrentDictionary<int, Dictionary<int, Zone>> RetryingWorlds = new ConcurrentDictionary<int, Dictionary<int, Zone>>();
 
-        public WorldMonitor(IEventRepository eventRepository, IZoneService zoneService, IWorldService worldService, IMapService mapService,
+        public WorldMonitor(IWorldEventsService worldEventService, IZoneService zoneService, IWorldService worldService, IMapService mapService,
             IPlayerMonitor playerMonitor, ILogger<WorldMonitor> logger)
         {
-            _eventRepository = eventRepository;
             _zoneService = zoneService;
             _worldService = worldService;
+            _worldEventService = worldEventService;
             _mapService = mapService;
             _playerMonitor = playerMonitor;
             _logger = logger;
@@ -182,15 +181,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<float>> GetTerritoryFromDate(int worldId, int zoneId, DateTime date)
         {
-            var fcEvent = await _eventRepository.GetLatestFacilityControl(worldId, zoneId, date);            
+            var fcEvent = await _worldEventService.GetLatestFacilityControl(worldId, zoneId, date);
 
-            var sum = fcEvent.ZoneControlVs.GetValueOrDefault() + fcEvent.ZoneControlNc.GetValueOrDefault() + fcEvent.ZoneControlTr.GetValueOrDefault();
+            var sum = fcEvent.ZoneControlVs.GetValueOrDefault() + fcEvent.ZoneControlNc.GetValueOrDefault() + fcEvent.ZoneControlTr.GetValueOrDefault() + fcEvent.ZoneControlNs.GetValueOrDefault();
 
             return new[] {
                 100 - sum,
                 fcEvent.ZoneControlVs.GetValueOrDefault(),
                 fcEvent.ZoneControlNc.GetValueOrDefault(),
-                fcEvent.ZoneControlTr.GetValueOrDefault()
+                fcEvent.ZoneControlTr.GetValueOrDefault(),
+                fcEvent.ZoneControlNs.GetValueOrDefault()
             };
         }
 
@@ -204,7 +204,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await _playerMonitor.GetAllAsync(worldId);
         }
 
-        public async Task<ZonePopulation> GetZonePopulation(int worldId, int zoneId)
+        public async Task<PopulationPeriod> GetZonePopulation(int worldId, int zoneId)
         {
             if (!_worldStates.ContainsKey(worldId))
             {
@@ -213,16 +213,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (!_worldStates[worldId].IsOnline)
             {
-                return new ZonePopulation();
+                return new PopulationPeriod();
             }
 
             var zonePlayers = await _playerMonitor.GetAllAsync(worldId, zoneId);
 
-            return new ZonePopulation
+            return new PopulationPeriod
             {
                 VS = zonePlayers.Count(a => a.Character.FactionId == 1),
                 NC = zonePlayers.Count(a => a.Character.FactionId == 2),
-                TR = zonePlayers.Count(a => a.Character.FactionId == 3)
+                TR = zonePlayers.Count(a => a.Character.FactionId == 3),
+                NS = zonePlayers.Count(a => a.Character.FactionId == 4)
             };
         }
 
@@ -252,7 +253,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _worldStates[worldId].GetZoneMapOwnership(zoneId);
         }
 
-        private async Task<WorldOnlineState> GetWorldState(int worldId)
+        public async Task<WorldOnlineState> GetWorldState(int worldId)
         {
             if (!_worldStates.ContainsKey(worldId))
             {

@@ -17,9 +17,15 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet]
-        public Task<IEnumerable<WorldOnlineState>> GetWorldState()
+        public Task<IEnumerable<WorldOnlineState>> GetWorldStates()
         {
             return _worldMonitor.GetWorldStates();
+        }
+
+        [HttpGet("{worldId}")]
+        public Task<WorldOnlineState> GetWorldState(int worldId)
+        {
+            return _worldMonitor.GetWorldState(worldId);
         }
 
         [HttpGet("{worldId}/players")]

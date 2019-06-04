@@ -17,9 +17,11 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public float? StartFactionVs { get; set; }
         public float? StartFactionNc { get; set; }
         public float? StartFactionTr { get; set; }
+        public float? StartFactionNs { get; set; }
         public float? LastFactionVs { get; set; }
         public float? LastFactionNc { get; set; }
         public float? LastFactionTr { get; set; }
+        public float? LastFactionNs { get; set; }
 
         public MetagameEventCategory MetagameEvent { get; set; }
     }

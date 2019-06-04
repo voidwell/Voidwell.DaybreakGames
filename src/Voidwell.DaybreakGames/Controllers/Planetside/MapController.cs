@@ -30,7 +30,7 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
         }
 
         [HttpGet("population/{worldId}/{zoneId}")]
-        public Task<ZonePopulation> GetWorldPopulation(int worldId, int zoneId)
+        public Task<PopulationPeriod> GetWorldPopulation(int worldId, int zoneId)
         {
             return _worldMonitor.GetZonePopulation(worldId, zoneId);
         }

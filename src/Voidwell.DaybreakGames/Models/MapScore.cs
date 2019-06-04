@@ -25,18 +25,20 @@
 
     public class OwnershipScoreFactions
     {
-        public OwnershipScoreFactions(int vsScore, int ncScore, int trScore, int neuturalScore)
+        public OwnershipScoreFactions(int vsScore, int ncScore, int trScore, int nsScore, int neuturalScore)
         {
-            float scoreSum = vsScore + ncScore + trScore + neuturalScore;
+            float scoreSum = vsScore + ncScore + trScore + nsScore + neuturalScore;
             Vs = new OwnershipScoreBreakdown(vsScore, vsScore / scoreSum);
             Nc = new OwnershipScoreBreakdown(ncScore, ncScore / scoreSum);
             Tr = new OwnershipScoreBreakdown(trScore, trScore / scoreSum);
+            Ns = new OwnershipScoreBreakdown(nsScore, nsScore / scoreSum);
             Neutural = new OwnershipScoreBreakdown(neuturalScore, neuturalScore / scoreSum);
         }
 
         public OwnershipScoreBreakdown Vs { get; private set; }
         public OwnershipScoreBreakdown Nc { get; private set; }
         public OwnershipScoreBreakdown Tr { get; private set; }
+        public OwnershipScoreBreakdown Ns { get; private set; }
         public OwnershipScoreBreakdown Neutural { get; private set; }
     }
 }

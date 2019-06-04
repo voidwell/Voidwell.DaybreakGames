@@ -105,7 +105,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             float neuturalScore = 0.0f;
             if (alert.MetagameEvent?.Type == 1 || alert.MetagameEvent?.Type == 8 || alert.MetagameEvent?.Type == 9)
             {
-                neuturalScore = 100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault());
+                neuturalScore = 100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault() + alert.LastFactionNs.GetValueOrDefault());
             }
 
             alertResult = new AlertResult
@@ -119,16 +119,19 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 StartFactionVS = alert.StartFactionVs.GetValueOrDefault(),
                 StartFactionNC = alert.StartFactionNc.GetValueOrDefault(),
                 StartFactionTR = alert.StartFactionTr.GetValueOrDefault(),
+                StartFactionNS = alert.StartFactionNs.GetValueOrDefault(),
                 LastFactionVS = alert.LastFactionVs.GetValueOrDefault(),
                 LastFactionNC = alert.LastFactionNc.GetValueOrDefault(),
                 LastFactionTR = alert.LastFactionTr.GetValueOrDefault(),
+                LastFactionNS = alert.LastFactionNs.GetValueOrDefault(),
                 MetagameEvent = alert.MetagameEvent,
                 Log = combatReportTask.Result,
                 Score = new[] {
                     neuturalScore,
                     alert.LastFactionVs.GetValueOrDefault(),
                     alert.LastFactionNc.GetValueOrDefault(),
-                    alert.LastFactionTr.GetValueOrDefault()
+                    alert.LastFactionTr.GetValueOrDefault(),
+                    alert.LastFactionNs.GetValueOrDefault()
                 },
                 ServerId = alert.WorldId.ToString(),
                 MapId = alert.ZoneId.ToString(),
@@ -241,7 +244,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 MetagameEventDescription = category?.Description,
                 ScoreFactionVS = metagameEvent.FactionVs,
                 ScoreFactionNC = metagameEvent.FactionNc,
-                ScoreFactionTR = metagameEvent.FactionTr,
+                ScoreFactionTR = metagameEvent.FactionTr
             };
 
             await Task.WhenAll(_alertRepository.UpdateAsync(alert), _messageService.PublishAlertEvent(metagameEvent.WorldId, metagameEvent.InstanceId, eventMessage));

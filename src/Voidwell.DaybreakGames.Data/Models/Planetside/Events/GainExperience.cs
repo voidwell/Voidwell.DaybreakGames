@@ -6,6 +6,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events
     public class GainExperience
     {
         [Required]
+        public Guid Id { get; set; }
+        [Required]
         public string CharacterId { get; set; }
         [Required]
         public int ExperienceId { get; set; }
