@@ -16,8 +16,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICache _cache;
         private readonly ILogger _logger;
 
-        private readonly string _cacheKey = "ps2.search";
-        private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
+        private readonly string _cacheKeyPrefix = "ps2.search";
+        private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(5);
 
         public SearchService(ICharacterService characterService, IOutfitService outfitService, IItemService itemService, ICache cache, ILogger<SearchService> logger)
         {
@@ -28,84 +28,85 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _logger = logger;
         }
 
-        public async Task<IEnumerable<SearchResult>> SearchPlanetside(string query)
+        public async Task<IEnumerable<SearchResult>> SearchPlanetside(string category, string query)
         {
-            var cacheResult = await _cache.GetAsync<List<SearchResult>>($"{_cacheKey}_{query}");
+            var cacheKey = $"{_cacheKeyPrefix}_{category}_{query}";
+
+            var cacheResult = await _cache.GetAsync<List<SearchResult>>(cacheKey);
             if (cacheResult != null)
             {
                 return cacheResult;
             }
 
-            var lookupTasks = new List<Task>();
-
-            Task<IEnumerable<CharacterSearchResult>> characterLookup = null;
-
-            if (query.Length >= 3)
-            {
-                characterLookup = _characterService.LookupCharactersByName(query, 10);
-                lookupTasks.Add(characterLookup);
-            }
-
-            var outfitNameLookup = _outfitService.LookupOutfitsByName(query, 5);
-            var outfitAliasLookup = _outfitService.LookupOutfitByAlias(query);
-
-            var weaponLookup = _itemService.LookupItemsByName(query, 5);
-
-            lookupTasks.Add(outfitNameLookup);
-            lookupTasks.Add(outfitAliasLookup);
-            lookupTasks.Add(weaponLookup);
-
-            await Task.WhenAll(lookupTasks);
-
-            var characters = characterLookup?.Result ?? Enumerable.Empty<CharacterSearchResult>();
-            var outfits = outfitNameLookup.Result.ToList();
-            var weapons = weaponLookup.Result;
-
-            var outfitAliasResult = outfitAliasLookup.Result; 
-            if (outfitAliasResult != null && !outfits.Any(o => o.Id == outfitAliasResult.Id))
-            {
-                outfits.Add(outfitAliasResult);
-            }
-
             var searchResults = new List<SearchResult>();
 
-            foreach (var character in characters)
+            switch (category)
             {
-                searchResults.Add(new SearchResult
-                {
-                    Type = "character",
-                    Name = character.Name,
-                    Id = character.Id,
-                    FactionId = character.FactionId,
-                    WorldId = character.WorldId,
-                    BattleRank = character.BattleRank
-                });
-            }
+                case "character":
+                    var characters = await _characterService.LookupCharactersByName(query, 10);
 
-            foreach (var outfit in outfits)
-            {
-                searchResults.Add(new SearchResult
-                {
-                    Type = "outfit",
-                    Name = outfit.Name,
-                    Id = outfit.Id,
-                    FactionId = outfit.FactionId,
-                    WorldId = outfit.WorldId,
-                    Alias = outfit.Alias,
-                    MemberCount = outfit.MemberCount
-                });
-            }
+                    if (characters != null)
+                    {
+                        foreach (var character in characters)
+                        {
+                            searchResults.Add(new SearchResult
+                            {
+                                Type = category,
+                                Name = character.Name,
+                                Id = character.Id,
+                                FactionId = character.FactionId,
+                                WorldId = character.WorldId,
+                                BattleRank = character.BattleRank
+                            });
+                        }
+                    }
 
-            foreach (var weapon in weapons)
-            {
-                searchResults.Add(new SearchResult
-                {
-                    Type = "item",
-                    Name = weapon.Name,
-                    Id = weapon.Id.ToString(),
-                    FactionId = weapon.FactionId,
-                    CategoryId = weapon.ItemCategoryId.ToString()
-                });
+                    break;
+                case "outfit":
+                    var outfitNameLookup = _outfitService.LookupOutfitsByName(query, 10);
+                    var outfitAliasLookup = _outfitService.LookupOutfitByAlias(query);
+
+                    await Task.WhenAll(outfitNameLookup, outfitAliasLookup);
+
+                    var outfits = outfitNameLookup.Result.ToList();
+
+                    var outfitAliasResult = outfitAliasLookup.Result;
+                    if (outfitAliasResult != null && !outfits.Any(o => o.Id == outfitAliasResult.Id))
+                    {
+                        outfits.Add(outfitAliasResult);
+                    }
+
+                    foreach (var outfit in outfits)
+                    {
+                        searchResults.Add(new SearchResult
+                        {
+                            Type = category,
+                            Name = outfit.Name,
+                            Id = outfit.Id,
+                            FactionId = outfit.FactionId,
+                            WorldId = outfit.WorldId,
+                            Alias = outfit.Alias,
+                            MemberCount = outfit.MemberCount
+                        });
+                    }
+
+                    break;
+                case "item":
+                    var weapons = await _itemService.LookupItemsByName(query, 10);
+
+                    foreach (var weapon in weapons)
+                    {
+                        searchResults.Add(new SearchResult
+                        {
+                            Type = category,
+                            Name = weapon.Name,
+                            Id = weapon.Id.ToString(),
+                            FactionId = weapon.FactionId,
+                            CategoryId = weapon.ItemCategoryId.ToString()
+                        });
+                    }
+
+                    break;
             }
 
             var orderedResults = new List<SearchResult>();
@@ -164,7 +165,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 }
             }
 
-            await _cache.SetAsync($"{_cacheKey}_{query}", orderedResults, _cacheExpiration);
+            //Everything else
+            orderedResults.AddRange(searchResults.Except(orderedResults));
+
+            await _cache.SetAsync(cacheKey, orderedResults, _cacheExpiration);
 
             return orderedResults;
         }

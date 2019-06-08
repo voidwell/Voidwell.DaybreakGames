@@ -14,10 +14,10 @@ namespace Voidwell.DaybreakGames.Controllers.Planetside
             _searchService = searchService;
         }
 
-        [HttpGet("{query}")]
-        public async Task<ActionResult> Search(string query)
+        [HttpGet("{category}/{query}")]
+        public async Task<ActionResult> Search(string category, string query)
         {
-            var results = await _searchService.SearchPlanetside(query);
+            var results = await _searchService.SearchPlanetside(category, query);
             return Ok(results);
         }
     }
