@@ -21,11 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames\Voidwell.DaybreakGames.csproj" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.App\Voidwell.DaybreakGames.App.csproj" />
   </ItemGroup>
 
   <ItemGroup>

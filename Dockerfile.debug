@@ -18,14 +18,14 @@ RUN curl -sSL https://aka.ms/getclrdbgsh | bash /dev/stdin vs2015u2 ~/clrdbg
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 ENV ASPNETCORE_ENVIRONMENT Development
 
-COPY ./src/Voidwell.DaybreakGames/*.csproj /tmp/
+COPY ./src/Voidwell.DaybreakGames.Api/*.csproj /tmp/
 COPY ./Directory.Build.props /
 
 WORKDIR /tmp
 
 RUN dotnet restore
 
-WORKDIR /app/Voidwell.DaybreakGames
+WORKDIR /app/Voidwell.DaybreakGames.Api
 
 EXPOSE 5000 22
 
