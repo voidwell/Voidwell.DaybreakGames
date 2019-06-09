@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
@@ -27,10 +27,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private const string _cacheKeyPrefix = "ps2.worldService";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
-        private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromMinutes(1);
+        private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromSeconds(15);
+
+        private readonly TimeSpan ActivityPopulationOffset = TimeSpan.FromHours(6);
+        private readonly TimeSpan ActivityPopulationPeriodInterval = TimeSpan.FromSeconds(16);
 
         private readonly KeyedSemaphoreSlim _worldPopulationLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _activityPopulationLock = new KeyedSemaphoreSlim();
+
+        private readonly Stopwatch _stopwatch = new Stopwatch();
 
         public WorldService(IWorldRepository worldRepository, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, CensusWorld censusWorld, ICache cache)
         {
@@ -100,8 +105,35 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 var combatStatsTask = _combatReportService.GetCombatStats(worldId, startDate, endDate);
                 var experienceTask = GetWorldActivityExperience(worldId, startDate, endDate);
+                var populationPeriodsTask = GetPopulationPeriods(worldId, startDate, endDate);
 
-                await Task.WhenAll(combatStatsTask, experienceTask);
+
+
+                await Task.WhenAll(combatStatsTask, experienceTask, populationPeriodsTask);
+
+                /*
+
+                _stopwatch.Start();
+
+                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Getting Combat Stats");
+                await combatStatsTask;
+                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Got Combat Stats");
+
+                _stopwatch.Restart();
+
+                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Getting population periods");
+                await populationPeriodsTask;
+                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Got population periods");
+
+                _stopwatch.Restart();
+
+                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Getting experience stats");
+                await experienceTask;
+                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Got experience stats");
+
+                _stopwatch.Reset();
+
+                */
 
                 var combatStats = combatStatsTask.Result;
 
@@ -111,6 +143,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 activity.TopPlayers = combatStats.Participants.OrderByDescending(a => a.Kills).Take(25);
                 activity.TopOutfits = combatStats.Outfits.Where(a => a.ParticipantCount > 4).OrderByDescending(a => a.Kills / a.ParticipantCount).Take(10);
                 activity.TopWeapons = combatStats.Weapons.OrderByDescending(a => a.Kills).Take(20);
+                activity.HistoricalPopulations = populationPeriodsTask.Result;
                 activity.TopExperience = experienceTask.Result;
 
                 await _cache.SetAsync(cacheKey, activity, _activityCacheExpiration);
@@ -281,6 +314,58 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Id = censusModel.WorldId,
                 Name = censusModel.Name.English
             };
+        }
+
+        private async Task<IEnumerable<PopulationPeriod>> GetPopulationPeriods(int worldId, DateTime startDate, DateTime endDate)
+        {
+            var populationStartDate = startDate.Add(-ActivityPopulationOffset);
+
+            
+
+            var playerLoginEventsTask = _worldEventsService.GetPlayerLoginEventsAsync(worldId, populationStartDate, endDate);
+            var playerLogoutEventsTask = _worldEventsService.GetPlayerLogoutEventsAsync(worldId, populationStartDate, endDate);
+
+            await Task.WhenAll(playerLoginEventsTask, playerLogoutEventsTask);
+
+            var loginEvents = playerLoginEventsTask.Result.OrderBy(a => a.Timestamp).ToList();
+            var logoutEvents = playerLogoutEventsTask.Result.OrderBy(a => a.Timestamp).ToList();
+
+            var populationPeriods = new List<PopulationPeriod>();
+
+            var distinctCharacterIds = loginEvents.Select(a => a.CharacterId).Concat(logoutEvents.Select(a => a.CharacterId)).Distinct();
+            var characters = await _characterService.FindCharacters(distinctCharacterIds);
+            var charactersFaction = characters.ToDictionary(a => a.Id, a => a.FactionId);
+
+            var onlinePlayers = new Dictionary<string, bool>();
+
+            for (var i = populationStartDate; i < endDate; i = i.Add(ActivityPopulationPeriodInterval))
+            {
+                var relativeUpper = i.Add(ActivityPopulationPeriodInterval);
+
+                var relativeLoginEvents = loginEvents.Where(a => a.Timestamp >= i && a.Timestamp < relativeUpper).ToList();
+                var relativeLogoutEvents = logoutEvents.Where(a => a.Timestamp >= i && a.Timestamp < relativeUpper).ToList();
+
+                foreach (var loginEvent in relativeLoginEvents)
+                {
+                    onlinePlayers[loginEvent.CharacterId] = true;
+                }
+
+                foreach (var logoutEvent in relativeLogoutEvents)
+                {
+                    onlinePlayers.Remove(logoutEvent.CharacterId);
+                }
+
+                populationPeriods.Add(new PopulationPeriod
+                {
+                    Timestamp = relativeUpper,
+                    VS = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 1),
+                    NC = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 2),
+                    TR = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 3),
+                    NS = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 4)
+                });
+            }
+
+            return populationPeriods.OrderByDescending(a => a.Timestamp).Where(a => a.Timestamp >= startDate && a.Timestamp <= endDate).ToList();
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Voidwell.DaybreakGames.Data
 
             builder.UseNpgsql(connectionString, o =>
             {
-                o.CommandTimeout(3600);
+                o.CommandTimeout(7200);
             });
 
             return new PS2DbContext(builder.Options);

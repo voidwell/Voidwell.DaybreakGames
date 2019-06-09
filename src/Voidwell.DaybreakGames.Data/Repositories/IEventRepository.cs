@@ -22,5 +22,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<IEnumerable<ContinentUnlock>> GetAllLatestZoneUnlocks();
         Task<IEnumerable<ContinentLock>> GetAllLatestZoneLocks();
         Task<IEnumerable<GainExperience>> GetExperienceByDateAsync(int experienceId, int worldId, DateTime startDate, DateTime? endDate, int? zoneId);
+        Task<IEnumerable<PlayerLogin>> GetPlayerLoginEventsAsync(int worldId, DateTime startDate, DateTime? endDate);
+        Task<IEnumerable<PlayerLogout>> GetPlayerLogoutEventsAsync(int worldId, DateTime startDate, DateTime? endDate);
     }
 }

@@ -66,6 +66,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _eventRepository.GetLatestFacilityControl(worldId, zoneId, date);
         }
 
+        public Task<IEnumerable<PlayerLogin>> GetPlayerLoginEventsAsync(int worldId, DateTime startDate, DateTime? endDate)
+        {
+            return _eventRepository.GetPlayerLoginEventsAsync(worldId, startDate, endDate);
+        }
+
+        public Task<IEnumerable<PlayerLogout>> GetPlayerLogoutEventsAsync(int worldId, DateTime startDate, DateTime? endDate)
+        {
+            return _eventRepository.GetPlayerLogoutEventsAsync(worldId, startDate, endDate);
+        }
+
         public Task<IEnumerable<VehicleDestroy>> GetVehicleDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
         {
             return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, startDate, endDate, zoneId);

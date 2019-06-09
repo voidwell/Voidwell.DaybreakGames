@@ -368,5 +368,37 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 return await query.ToListAsync();
             }
         }
+
+        public async Task<IEnumerable<PlayerLogin>> GetPlayerLoginEventsAsync(int worldId, DateTime startDate, DateTime? endDate)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                if (endDate == null)
+                {
+                    endDate = DateTime.UtcNow;
+                }
+
+                return await dbContext.PlayerLoginEvents.Where(a => a.WorldId == worldId && a.Timestamp >= startDate && a.Timestamp <= endDate)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<PlayerLogout>> GetPlayerLogoutEventsAsync(int worldId, DateTime startDate, DateTime? endDate)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                if (endDate == null)
+                {
+                    endDate = DateTime.UtcNow;
+                }
+
+                return await dbContext.PlayerLogoutEvents.Where(a => a.WorldId == worldId && a.Timestamp >= startDate && a.Timestamp <= endDate)
+                    .ToListAsync();
+            }
+        }
     }
 }
