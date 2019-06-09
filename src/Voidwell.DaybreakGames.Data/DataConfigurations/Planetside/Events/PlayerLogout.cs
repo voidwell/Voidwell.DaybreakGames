@@ -10,6 +10,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.ToTable("EventPlayerLogout");
 
             builder.HasKey(a => new { a.Timestamp, a.CharacterId });
+
+            builder.HasIndex(a => new { a.Timestamp, a.WorldId });
         }
     }
 }

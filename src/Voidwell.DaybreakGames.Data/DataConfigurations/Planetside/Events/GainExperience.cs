@@ -9,9 +9,10 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("EventGainExperience");
 
-            builder.HasKey(a => new {a.Id, a.Timestamp, a.CharacterId, a.ExperienceId, a.OtherId });
+            builder.HasKey(a => a.Id);
 
-            builder.HasIndex(a => new { a.WorldId, a.ZoneId, a.Timestamp });
+            builder.HasIndex(a => new { a.Timestamp, a.WorldId, a.ExperienceId, a.ZoneId });
+            builder.HasIndex(a => new { a.Timestamp, a.CharacterId, a.ExperienceId });
         }
     }
 }
