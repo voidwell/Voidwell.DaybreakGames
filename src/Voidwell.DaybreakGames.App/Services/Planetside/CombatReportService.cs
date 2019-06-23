@@ -98,6 +98,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 if (death.AttackerLoadoutId != null)
                 {
                     var attackerProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.AttackerLoadoutId.Value);
+                    death.AttackerLoadoutId = attackerProfileId;
                     if (!classHash.ContainsKey(attackerProfileId))
                     {
                         classHash.Add(attackerProfileId, new CombatReportClassStats(attackerProfileId));
@@ -107,6 +108,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 if (death.CharacterLoadoutId != null)
                 {
                     var victimProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.CharacterLoadoutId.Value);
+                    death.CharacterLoadoutId = victimProfileId;
                     if (!classHash.ContainsKey(victimProfileId))
                     {
                         classHash.Add(victimProfileId, new CombatReportClassStats(victimProfileId));
@@ -221,14 +223,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 if (death.AttackerLoadoutId != null)
                 {
-                    var attackerProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.AttackerLoadoutId.Value);
-                    classHash.TryGetValue(attackerProfileId, out attackerClass);
+                    classHash.TryGetValue(death.AttackerLoadoutId.Value, out attackerClass);
                 }
 
                 if (death.CharacterLoadoutId != null)
                 {
-                    var victimProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.CharacterLoadoutId.Value);
-                    classHash.TryGetValue(victimProfileId, out victimClass);
+                    classHash.TryGetValue(death.CharacterLoadoutId.Value, out victimClass);
                 }
 
                 if (attacker.Character.Id == victim.Character.Id || attacker.Character.Id == "0")
@@ -292,6 +292,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 if (death.AttackerLoadoutId != null)
                 {
                     var attackerProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.AttackerLoadoutId.Value);
+                    death.AttackerLoadoutId = attackerProfileId;
                     if (classHash.ContainsKey(attackerProfileId))
                     {
                         classHash[attackerProfileId].VehicleKills++;
