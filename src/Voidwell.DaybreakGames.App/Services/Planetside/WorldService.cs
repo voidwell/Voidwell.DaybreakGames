@@ -27,7 +27,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private const string _cacheKeyPrefix = "ps2.worldService";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
-        private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromSeconds(15);
+        private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromSeconds(10);
 
         private readonly TimeSpan _activityPopulationOffset = TimeSpan.FromHours(6);
         private readonly TimeSpan _activityPopulationPeriodInterval = TimeSpan.FromSeconds(16);
@@ -91,13 +91,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             using (await _activityPopulationLock.WaitAsync(cacheKey))
             {
-                /*
-                var activity = await _cache.GetAsync<WorldActivity>(cacheKey);
-                if (activity != null)
+                var cachedActivity = await _cache.GetAsync<WorldActivity>(cacheKey);
+                if (cachedActivity != null)
                 {
-                    return activity;
+                    return cachedActivity;
                 }
-                */
 
                 var activity = new WorldActivity();
 
