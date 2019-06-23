@@ -138,7 +138,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             foreach (var outfit in outfitsTask.Result)
             {
                 outfitHash[outfit.Id].Outfit.Name = outfit.Name;
-                outfitHash[outfit.Id].Outfit.FactionId = outfit.FactionId.HasValue ? outfit.FactionId.Value : 0;
+                outfitHash[outfit.Id].Outfit.FactionId = outfit.FactionId ?? 0;
                 outfitHash[outfit.Id].Outfit.Alias = outfit.Alias;
             }
 
@@ -150,6 +150,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 hashCharacter.Character.FactionId = character.FactionId;
                 hashCharacter.Character.BattleRank = character.BattleRank;
                 hashCharacter.Character.PrestigeLevel = character.PrestigeLevel;
+                hashCharacter.Character.WorldId = character.WorldId;
 
                 if (hashCharacter.Outfit != null)
                 {
@@ -160,7 +161,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             foreach (var weapon in weaponsTask.Result)
             {
                 weaponHash[weapon.Id].Item.Name = weapon.Name;
-                weaponHash[weapon.Id].Item.FactionId = weapon.FactionId.HasValue ? weapon.FactionId.Value : 0;
+                weaponHash[weapon.Id].Item.FactionId = weapon.FactionId ?? 0;
             }
 
             foreach(var vehicle in vehiclesTask.Result)
@@ -312,6 +313,32 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 outfitHash[outfit.Key].ParticipantCount = participantHash.Values.Count(a => a.Outfit?.Id == outfit.Key);
             }
+
+            deaths.Where(a =>
+                    a.AttackerCharacterId != a.CharacterId && !string.IsNullOrEmpty(a.AttackerCharacterId) &&
+                    !string.IsNullOrEmpty(a.CharacterId) && participantHash.ContainsKey(a.AttackerCharacterId))
+                .GroupBy(a => a.AttackerCharacterId)
+                .ToList()
+                .ForEach(d =>
+                {
+                    var topWeaponId = d.GroupBy(b => b.AttackerWeaponId).OrderByDescending(b => b.Count())
+                        .FirstOrDefault()?.Key;
+                    var topLoadoutId = d.GroupBy(b => b.AttackerLoadoutId).OrderByDescending(b => b.Count())
+                        .FirstOrDefault()?.Key;
+
+                    participantHash[d.Key].TopWeaponId = topWeaponId;
+                    participantHash[d.Key].TopLoadoutId = topLoadoutId;
+
+                    if (weaponHash.TryGetValue(topWeaponId.GetValueOrDefault(), out var weapon))
+                    {
+                        participantHash[d.Key].TopWeaponName = weapon.Item?.Name;
+                    }
+
+                    if (classHash.TryGetValue(topLoadoutId.GetValueOrDefault(), out var loadout))
+                    {
+                        participantHash[d.Key].TopLoadoutName = loadout.Profile?.Name;
+                    }
+                });
 
             return new CombatReportStats
             {

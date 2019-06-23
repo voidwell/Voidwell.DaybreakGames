@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
+using Voidwell.DaybreakGames.App.Models;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -29,13 +29,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromSeconds(15);
 
-        private readonly TimeSpan ActivityPopulationOffset = TimeSpan.FromHours(6);
-        private readonly TimeSpan ActivityPopulationPeriodInterval = TimeSpan.FromSeconds(16);
+        private readonly TimeSpan _activityPopulationOffset = TimeSpan.FromHours(6);
+        private readonly TimeSpan _activityPopulationPeriodInterval = TimeSpan.FromSeconds(16);
 
         private readonly KeyedSemaphoreSlim _worldPopulationLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _activityPopulationLock = new KeyedSemaphoreSlim();
-
-        private readonly Stopwatch _stopwatch = new Stopwatch();
 
         public WorldService(IWorldRepository worldRepository, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, CensusWorld censusWorld, ICache cache)
         {
@@ -105,45 +103,36 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 var combatStatsTask = _combatReportService.GetCombatStats(worldId, startDate, endDate);
                 var experienceTask = GetWorldActivityExperience(worldId, startDate, endDate);
-                var populationPeriodsTask = GetPopulationPeriods(worldId, startDate, endDate);
+                var playerSessionsTask = GetPlayerSessions(worldId, startDate, endDate);
 
-
-
-                await Task.WhenAll(combatStatsTask, experienceTask, populationPeriodsTask);
-
-                /*
-
-                _stopwatch.Start();
-
-                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Getting Combat Stats");
-                await combatStatsTask;
-                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Got Combat Stats");
-
-                _stopwatch.Restart();
-
-                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Getting population periods");
-                await populationPeriodsTask;
-                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Got population periods");
-
-                _stopwatch.Restart();
-
-                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Getting experience stats");
-                await experienceTask;
-                Console.WriteLine($"[{_stopwatch.ElapsedMilliseconds}] Got experience stats");
-
-                _stopwatch.Reset();
-
-                */
+                await Task.WhenAll(combatStatsTask, experienceTask, playerSessionsTask);
 
                 var combatStats = combatStatsTask.Result;
+                var playerSessions = playerSessionsTask.Result;
+
+
+                var topPlayers = combatStats.Participants.OrderByDescending(a => a.Kills).Take(25).ToList();
+
+                var sessionsDic = playerSessions.GroupBy(a => a.CharacterId)
+                    .ToDictionary(a => a.Key, a => a.OrderByDescending(b => b.LoginDate));
+
+                topPlayers.ForEach(player =>
+                    {
+                        if (sessionsDic.TryGetValue(player.Character.Id, out var sessions))
+                        {
+                            var latestSession = sessions.FirstOrDefault();
+                            player.LoginDate = latestSession.LoginDate;
+                            player.LogoutDate = latestSession.LogoutDate;
+                        }
+                    });
 
                 activity.Stats = CreateWorldActivityStats(combatStats.Participants);
                 activity.ClassStats = combatStats.Classes.OrderBy(a => a.Profile.TypeId);
                 activity.TopVehicles = combatStats.Vehicles.OrderByDescending(a => a.Kills).Where(a => a.Kills > 0).Take(20);
-                activity.TopPlayers = combatStats.Participants.OrderByDescending(a => a.Kills).Take(25);
+                activity.TopPlayers = topPlayers;
                 activity.TopOutfits = combatStats.Outfits.Where(a => a.ParticipantCount > 4).OrderByDescending(a => a.Kills / a.ParticipantCount).Take(10);
                 activity.TopWeapons = combatStats.Weapons.OrderByDescending(a => a.Kills).Take(20);
-                activity.HistoricalPopulations = populationPeriodsTask.Result;
+                activity.HistoricalPopulations = GetPopulationPeriods(playerSessions, startDate, endDate);
                 activity.TopExperience = experienceTask.Result;
 
                 await _cache.SetAsync(cacheKey, activity, _activityCacheExpiration);
@@ -156,10 +145,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             var stats = new WorldActivityStats();
 
-            var vsPlayers = participants.Where(a => a.Character.FactionId == 1);
-            var ncPlayers = participants.Where(a => a.Character.FactionId == 2);
-            var trPlayers = participants.Where(a => a.Character.FactionId == 3);
-            var nsPlayers = participants.Where(a => a.Character.FactionId == 4);
+            var factionGroups = participants.Where(a => a.Character?.FactionId != null).GroupBy(a => a.Character.FactionId).ToDictionary(a => a.Key, a => a.ToList());
+
+            var vsPlayers = factionGroups.GetValueOrDefault(1) ?? Enumerable.Empty<CombatReportParticipantStats>();
+            var ncPlayers = factionGroups.GetValueOrDefault(2) ?? Enumerable.Empty<CombatReportParticipantStats>();
+            var trPlayers = factionGroups.GetValueOrDefault(3) ?? Enumerable.Empty<CombatReportParticipantStats>();
+            var nsPlayers = factionGroups.GetValueOrDefault(4) ?? Enumerable.Empty<CombatReportParticipantStats>();
 
             stats.Kills.VS = vsPlayers.Sum(a => a.Kills);
             stats.Kills.NC = ncPlayers.Sum(a => a.Kills);
@@ -264,13 +255,22 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private WorldActivityExperienceFactions ConvertToWorldActivityExperienceFactions(IEnumerable<WorldActivityExperienceItem> items)
         {
-            return new WorldActivityExperienceFactions
+            var result = new WorldActivityExperienceFactions();
+
+            foreach (var item in items.GroupBy(a => a.CharacterFactionId))
             {
-                VS = items.Where(a => a.CharacterFactionId == 1).Take(5),
-                NC = items.Where(a => a.CharacterFactionId == 2).Take(5),
-                TR = items.Where(a => a.CharacterFactionId == 3).Take(5),
-                NS = items.Where(a => a.CharacterFactionId == 4).Take(5)
-            };
+                var topStats = item.Take(5);
+
+                switch (item.Key)
+                {
+                    case 1: { result.VS = topStats; break; }
+                    case 2: { result.NC = topStats; break; }
+                    case 3: { result.TR = topStats; break; }
+                    case 4: { result.NS = topStats; break; }
+                }
+            }
+
+            return result;
         }
 
         private async Task<IEnumerable<DailyPopulation>> GetWorldPopulationHistory(int worldId, DateTime start, DateTime end)
@@ -316,52 +316,66 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private async Task<IEnumerable<PopulationPeriod>> GetPopulationPeriods(int worldId, DateTime startDate, DateTime endDate)
+        private async Task<IEnumerable<PlayerActivitySession>> GetPlayerSessions(int worldId, DateTime startDate, DateTime endDate)
         {
-            var populationStartDate = startDate.Add(-ActivityPopulationOffset);
-
-            
+            var populationStartDate = startDate.Add(-_activityPopulationOffset);
 
             var playerLoginEventsTask = _worldEventsService.GetPlayerLoginEventsAsync(worldId, populationStartDate, endDate);
             var playerLogoutEventsTask = _worldEventsService.GetPlayerLogoutEventsAsync(worldId, populationStartDate, endDate);
 
             await Task.WhenAll(playerLoginEventsTask, playerLogoutEventsTask);
 
-            var loginEvents = playerLoginEventsTask.Result.OrderBy(a => a.Timestamp).ToList();
-            var logoutEvents = playerLogoutEventsTask.Result.OrderBy(a => a.Timestamp).ToList();
+            var loginEvents = playerLoginEventsTask.Result.OrderBy(a => a.Timestamp).GroupBy(a => a.CharacterId).ToList();
+            var logoutEvents = playerLogoutEventsTask.Result.OrderBy(a => a.Timestamp).GroupBy(a => a.CharacterId).ToList();
+
+            var distinctCharacterIds = loginEvents.Select(a => a.Key).Concat(logoutEvents.Select(a => a.Key)).Distinct();
+            var characters = (await _characterService.FindCharacters(distinctCharacterIds))?.ToDictionary(a => a.Id, a => a);
+
+            var sessions = new List<PlayerActivitySession>();
+            foreach (var loginGroup in loginEvents)
+            {
+                if (!characters.TryGetValue(loginGroup.Key, out var character))
+                {
+                    continue;
+                }
+
+                var groupLogoutEvents = logoutEvents.Where(a => a.Key == character.Id).SelectMany(a => a)
+                    .OrderBy(a => a.Timestamp)
+                    .ToList();
+
+                sessions.AddRange(loginGroup.OrderBy(a => a.Timestamp)
+                    .Select(loginEvent => new PlayerActivitySession
+                    {
+                        CharacterId = character.Id,
+                        FactionId = character.FactionId,
+                        LoginDate = loginEvent.Timestamp,
+                        LogoutDate = groupLogoutEvents.FirstOrDefault(a => a.Timestamp >= loginEvent.Timestamp)?.Timestamp
+                    }));
+            }
+
+            return sessions;
+        }
+
+        private IEnumerable<PopulationPeriod> GetPopulationPeriods(IEnumerable<PlayerActivitySession> sessions, DateTime startDate, DateTime endDate)
+        {
+            var populationStartDate = startDate.Add(-_activityPopulationOffset);
 
             var populationPeriods = new List<PopulationPeriod>();
 
-            var distinctCharacterIds = loginEvents.Select(a => a.CharacterId).Concat(logoutEvents.Select(a => a.CharacterId)).Distinct();
-            var characters = await _characterService.FindCharacters(distinctCharacterIds);
-            var charactersFaction = characters.ToDictionary(a => a.Id, a => a.FactionId);
-
-            var onlinePlayers = new Dictionary<string, bool>();
-
-            for (var i = populationStartDate; i < endDate; i = i.Add(ActivityPopulationPeriodInterval))
+            for (var i = populationStartDate; i < endDate; i = i.Add(_activityPopulationPeriodInterval))
             {
-                var relativeUpper = i.Add(ActivityPopulationPeriodInterval);
+                var relativeUpper = i.Add(_activityPopulationPeriodInterval);
 
-                var relativeLoginEvents = loginEvents.Where(a => a.Timestamp >= i && a.Timestamp < relativeUpper).ToList();
-                var relativeLogoutEvents = logoutEvents.Where(a => a.Timestamp >= i && a.Timestamp < relativeUpper).ToList();
-
-                foreach (var loginEvent in relativeLoginEvents)
-                {
-                    onlinePlayers[loginEvent.CharacterId] = true;
-                }
-
-                foreach (var logoutEvent in relativeLogoutEvents)
-                {
-                    onlinePlayers.Remove(logoutEvent.CharacterId);
-                }
+                var relativeSessions =
+                    sessions.Where(a => a.LoginDate <= relativeUpper && (a.LogoutDate >= relativeUpper || a.LogoutDate == null)).ToList();
 
                 populationPeriods.Add(new PopulationPeriod
                 {
                     Timestamp = relativeUpper,
-                    VS = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 1),
-                    NC = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 2),
-                    TR = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 3),
-                    NS = onlinePlayers.Keys.Count(a => charactersFaction.TryGetValue(a, out int factionId) && factionId == 4)
+                    VS = relativeSessions.Count(a => a.FactionId == 1),
+                    NC = relativeSessions.Count(a => a.FactionId == 2),
+                    TR = relativeSessions.Count(a => a.FactionId == 3),
+                    NS = relativeSessions.Count(a => a.FactionId == 4)
                 });
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Voidwell.DaybreakGames.Models
 {
@@ -32,6 +33,12 @@ namespace Voidwell.DaybreakGames.Models
         public int Suicides { get; set; }
         public int Teamkills { get; set; }
         public int VehicleKills { get; set; }
+        public int? TopWeaponId { get; set; }
+        public string TopWeaponName { get; set; }
+        public int? TopLoadoutId { get; set; }
+        public string TopLoadoutName { get; set; }
+        public DateTime? LoginDate { get; set; }
+        public DateTime? LogoutDate { get; set; }
     }
 
     public class CombatReportOutfitStats
@@ -65,7 +72,6 @@ namespace Voidwell.DaybreakGames.Models
         public int Suicides { get; set; }
         public int Teamkills { get; set; }
         public int VehicleKills { get; set; }
-        public int ParticipantCount { get; set; }
     }
 
     public class CombatReportWeaponStats
@@ -101,6 +107,7 @@ namespace Voidwell.DaybreakGames.Models
 
         public int? BattleRank { get; set; }
         public int? PrestigeLevel { get; set; }
+        public int? WorldId { get; set; }
     }
 
     public class CombatReportOutfitDetail : CombatReportItemDetail
