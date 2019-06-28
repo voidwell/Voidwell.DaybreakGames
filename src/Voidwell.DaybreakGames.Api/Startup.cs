@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data;
-using Microsoft.Extensions.Hosting;
 using IdentityServer4.AccessTokenValidation;
 using System;
 using Voidwell.Logging;
