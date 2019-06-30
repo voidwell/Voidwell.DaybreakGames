@@ -62,7 +62,6 @@ namespace Voidwell.DaybreakGames.App
             services.AddTransient<ISearchService, SearchService>();
             services.AddTransient<IGradeService, GradeService>();
             services.AddTransient<IExperienceService, ExperienceService>();
-            services.AddTransient<IWorldEventsService, WorldEventsService>();
 
             services.AddSingleton<IMessageService, MessageService>();
             services.AddSingleton<ICharacterService, CharacterService>();
@@ -75,6 +74,7 @@ namespace Voidwell.DaybreakGames.App
             services.AddSingleton<ICharacterRatingService, CharacterRatingService>();
             services.AddSingleton<IMapService, MapService>();
             services.AddSingleton<IProfileService, ProfileService>();
+            services.AddSingleton<IWorldEventsService, WorldEventsService>();
 
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();

@@ -7,9 +7,11 @@ using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class WorldEventsService : IWorldEventsService
+    public class WorldEventsService : IWorldEventsService, IDisposable
     {
         private readonly IEventRepository _eventRepository;
+
+        private readonly KeyedSemaphoreSlim _facilityControlsByDateSemaphore = new KeyedSemaphoreSlim();
 
         public WorldEventsService(IEventRepository eventRepository)
         {
@@ -41,7 +43,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _eventRepository.GetDeathEventsByDateAsync(worldId, startDate, endDate, zoneId);
         }
 
-        public Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+        public Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime? end)
         {
             return _eventRepository.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
         }
@@ -51,9 +53,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _eventRepository.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
         }
 
-        public Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
+        public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
         {
-            return _eventRepository.GetFacilityControlsByDateAsync(worldId, startDate, endDate, zoneId);
+            using (await _facilityControlsByDateSemaphore.WaitAsync($"{worldId}_{startDate}_{endDate}_{zoneId}"))
+            {
+                return await _eventRepository.GetFacilityControlsByDateAsync(worldId, startDate, endDate, zoneId);
+            }
         }
 
         public Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
@@ -104,6 +109,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public Task<IEnumerable<GainExperience>> GetSquadBeaconKillExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
         {
             return _eventRepository.GetExperienceByDateAsync(Experience.SquadBeaconKill, worldId, startDate, endDate, zoneId);
+        }
+
+        public void Dispose()
+        {
+            _facilityControlsByDateSemaphore.Dispose();
         }
 
         private static class Experience
