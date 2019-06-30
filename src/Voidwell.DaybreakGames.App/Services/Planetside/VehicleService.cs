@@ -54,7 +54,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private Vehicle ConvertToDbModel(CensusVehicleModel censusModel)
+        private static Vehicle ConvertToDbModel(CensusVehicleModel censusModel)
         {
             return new Vehicle
             {
@@ -67,7 +67,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private VehicleFaction ConvertToDbModel(CensusVehicleFactionModel censusModel)
+        private static VehicleFaction ConvertToDbModel(CensusVehicleFactionModel censusModel)
         {
             return new VehicleFaction
             {

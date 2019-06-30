@@ -83,7 +83,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private void PreLoadCombatStatTrackers(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths, Dictionary<string, CombatReportParticipantStats> participantHash,
+        private static void PreLoadCombatStatTrackers(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths, Dictionary<string, CombatReportParticipantStats> participantHash,
             Dictionary<string, CombatReportOutfitStats> outfitHash, Dictionary<int, CombatReportVehicleStats> vehicleHash, Dictionary<int, CombatReportWeaponStats> weaponHash, 
             Dictionary<int, CombatReportClassStats> loadoutHash)
         {
@@ -219,7 +219,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private void CalculateCombatStats(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths,
+        private static void CalculateCombatStats(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths,
             IEnumerable<FacilityControl> facilityControls,
             Dictionary<string, CombatReportParticipantStats> participantHash,
             Dictionary<string, CombatReportOutfitStats> outfitHash,
@@ -347,7 +347,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private void SetCombatStatTopItems(List<Death> deaths,
+        private static void SetCombatStatTopItems(List<Death> deaths,
             Dictionary<string, CombatReportParticipantStats> participantHash,
             Dictionary<int, CombatReportWeaponStats> weaponHash,
             Dictionary<int, CombatReportClassStats> loadoutHash)

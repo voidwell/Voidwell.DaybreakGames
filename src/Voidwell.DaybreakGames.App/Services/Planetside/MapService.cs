@@ -301,7 +301,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return events;
         }
 
-        private MapHex ConvertToDbModel(CensusMapHexModel censusModel)
+        private static MapHex ConvertToDbModel(CensusMapHexModel censusModel)
         {
             return new MapHex
             {
@@ -314,7 +314,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private MapRegion ConvertToDbModel(CensusMapRegionModel censusModel)
+        private static MapRegion ConvertToDbModel(CensusMapRegionModel censusModel)
         {
             return new MapRegion
             {
@@ -330,7 +330,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private FacilityLink ConvertToDbModel(CensusFacilityLinkModel censusModel)
+        private static FacilityLink ConvertToDbModel(CensusFacilityLinkModel censusModel)
         {
             return new FacilityLink
             {
@@ -341,7 +341,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private string GetCacheKey(string id)
+        private static string GetCacheKey(string id)
         {
             return $"{_cacheKeyPrefix}-{id}";
         }

@@ -22,13 +22,14 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var query = (from alert in dbContext.Alerts
+                var query = from alert in dbContext.Alerts
 
-                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                             where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != 5
-                             select new { alert, metagameEvent });
+                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != 5
+                    select new { alert, metagameEvent };
+
                 var result = await query.FirstOrDefaultAsync();
                 if (result != null)
                 {
@@ -45,13 +46,14 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var query = (from alert in dbContext.Alerts
+                var query = from alert in dbContext.Alerts
 
-                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                             where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && metagameEvent.Type != 5
-                             select new { alert, metagameEvent });
+                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && metagameEvent.Type != 5
+                    select new { alert, metagameEvent };
+
                 var results = await query.ToListAsync();
                 results?.ForEach(a => a.alert.MetagameEvent = a.metagameEvent);
 
@@ -65,17 +67,17 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var query = (from alert in dbContext.Alerts
+                var query = from alert in dbContext.Alerts
 
-                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                             join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
-                             from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
+                    join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
+                    from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
 
-                             where metagameEvent.Type != 5
-                             orderby alert.StartDate descending
-                             select new { alert, metagameEvent, metagameEventZone });
+                    where metagameEvent.Type != 5
+                    orderby alert.StartDate descending
+                    select new { alert, metagameEvent, metagameEventZone };
 
                 if (worldId != null)
                 {
@@ -103,16 +105,16 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
-                var query = (from alert in dbContext.Alerts
+                var query = from alert in dbContext.Alerts
 
-                             join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                             from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                             join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
-                             from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
+                    join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
+                    from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
 
-                             where alert.WorldId == worldId && alert.MetagameInstanceId == instanceId
-                             select new { alert, metagameEvent, metagameEventZone });
+                    where alert.WorldId == worldId && alert.MetagameInstanceId == instanceId
+                    select new { alert, metagameEvent, metagameEventZone };
 
                 var result = await query.FirstOrDefaultAsync();
                 if (result == null)

@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
     {
         private readonly AuthenticatedHttpClientOptions _options;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger _logger;
+        private readonly ILogger<AuthenticatedHttpMessageHandler> _logger;
 
         private readonly SemaphoreSlim _semaphoreSlim;
         private readonly HttpMessageInvoker _httpMessageInvoker;
@@ -33,7 +33,7 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
             _logger = logger;
 
             _tokenClient = new HttpClient();
-            _tokenRequest = new ClientCredentialsTokenRequest()
+            _tokenRequest = new ClientCredentialsTokenRequest
             {
                 Address = _options.TokenServiceAddress,
                 ClientId = _options.ClientId,
@@ -51,16 +51,16 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken callerCancellationToken)
         {
-            CancellationTokenSource messageHandlerTimeoutCancellationTokenSource =
+            var messageHandlerTimeoutCancellationTokenSource =
                 new CancellationTokenSource(_options.MessageHandlerTimeout);
-            CancellationTokenSource linkedCancelationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            var linkedCancelationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
                 callerCancellationToken, messageHandlerTimeoutCancellationTokenSource.Token);
 
             try
             {
                 await GetTokenIfNeededAsync(linkedCancelationTokenSource.Token);
 
-                CancellationTokenSource cancellationTokenWithHttpAbortedSource = CancellationTokenSource.CreateLinkedTokenSource(
+                var cancellationTokenWithHttpAbortedSource = CancellationTokenSource.CreateLinkedTokenSource(
                     linkedCancelationTokenSource.Token, _httpContextAccessor?.HttpContext?.RequestAborted ?? CancellationToken.None);
 
                 return await SetAuthAndSendAsync(request, cancellationTokenWithHttpAbortedSource.Token);
@@ -124,7 +124,7 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
                     tokenServiceTimeoutCancellationTokenSource = new CancellationTokenSource(_options.TokenServiceTimeout);
 
                     // Creates a cancelation source 
-                    CancellationTokenSource linkedCancellationTokenSource = CancellationTokenSource
+                    var linkedCancellationTokenSource = CancellationTokenSource
                         .CreateLinkedTokenSource(callerCancellationToken, tokenServiceTimeoutCancellationTokenSource.Token);
 
                     _resetTokenAfter = null;
@@ -153,7 +153,7 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
             catch (TokenServiceResponseException ex) when (tokenServiceTimeoutCancellationTokenSource.Token.IsCancellationRequested)
             {
                 //Only catches when tokenServiceTimeoutCancellationTokenSource is canceled, not when caller cancels
-                string msg = $"{nameof(AuthenticatedHttpMessageHandler)} exceeded the time out of {_options.TokenServiceTimeout} ms when attempting to call token service.";
+                var msg = $"{nameof(AuthenticatedHttpMessageHandler)} exceeded the time out of {_options.TokenServiceTimeout} ms when attempting to call token service.";
 
                 _logger.LogError(25, ex, msg);
 

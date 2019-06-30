@@ -20,8 +20,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
 
-        private readonly string _weaponInfoCacheKey = "ps2.weaponinfo";
-        private readonly string _sanctionedWeaponsCacheKey = "ps2.sanctionedWeapons";
+        private const string _weaponInfoCacheKey = "ps2.weaponinfo";
+        private const string _sanctionedWeaponsCacheKey = "ps2.sanctionedWeapons";
         private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(8);
         private readonly TimeSpan _weaponLeaderboardCacheExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
@@ -193,7 +193,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private WeaponLeaderboardRow ConvertToResult(CharacterWeaponStat model, WeaponAggregate aggregate)
+        private static WeaponLeaderboardRow ConvertToResult(CharacterWeaponStat model, WeaponAggregate aggregate)
         {
             double? kdrDelta = null;
             double? accuDelta = null;
@@ -205,22 +205,22 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 if (model.Deaths > 0 && aggregate.STDKdr > 0)
                 {
-                    kdrDelta = (((double)model.Kills / (double)model.Deaths) - aggregate.AVGKdr) / aggregate.STDKdr;
+                    kdrDelta = ((double)model.Kills / (double)model.Deaths - aggregate.AVGKdr) / aggregate.STDKdr;
                 }
 
                 if (model.FireCount > 0 && aggregate.STDAccuracy > 0)
                 {
-                    accuDelta = (((double)model.HitCount / (double)model.FireCount) - aggregate.AVGAccuracy) / aggregate.STDAccuracy;
+                    accuDelta = ((double)model.HitCount / (double)model.FireCount - aggregate.AVGAccuracy) / aggregate.STDAccuracy;
                 }
 
                 if (model.Kills > 0 && aggregate.STDHsr > 0)
                 {
-                    hsrDelta = (((double)model.Headshots / (double)model.Kills) - aggregate.AVGHsr) / aggregate.STDHsr;
+                    hsrDelta = ((double)model.Headshots / (double)model.Kills - aggregate.AVGHsr) / aggregate.STDHsr;
                 }
 
                 if (model.PlayTime > 0 && aggregate.STDKph > 0)
                 {
-                    kphDelta = (((double)model.Kills / ((double)model.PlayTime / 3600)) - aggregate.AVGKph) / aggregate.STDKph;
+                    kphDelta = ((double)model.Kills / ((double)model.PlayTime / 3600) - aggregate.AVGKph) / aggregate.STDKph;
                 }
             }
 

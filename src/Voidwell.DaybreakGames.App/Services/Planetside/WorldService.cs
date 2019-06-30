@@ -158,7 +158,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
         
-        private WorldActivityStats CreateWorldActivityStats(IEnumerable<CombatReportParticipantStats> participants)
+        private static WorldActivityStats CreateWorldActivityStats(IEnumerable<CombatReportParticipantStats> participants)
         {
             var stats = new WorldActivityStats();
 
@@ -252,7 +252,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private void SetCharacterOnExperienceItem(Character character, WorldActivityExperienceItem item)
+        private static void SetCharacterOnExperienceItem(Character character, WorldActivityExperienceItem item)
         {
             item.CharacterName = character.Name;
             item.CharacterBattleRank = character.BattleRank;
@@ -261,7 +261,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             item.CharacterOutfitAlias = character.OutfitMembership?.Outfit?.Alias;
         }
 
-        private List<WorldActivityExperienceItem> ConvertToWorldActivityExperienceItem(IEnumerable<GainExperience> events)
+        private static List<WorldActivityExperienceItem> ConvertToWorldActivityExperienceItem(IEnumerable<GainExperience> events)
         {
             return events
                 .GroupBy(a => a.CharacterId)
@@ -270,7 +270,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 .ToList();
         }
 
-        private WorldActivityExperienceFactions ConvertToWorldActivityExperienceFactions(IEnumerable<WorldActivityExperienceItem> items)
+        private static WorldActivityExperienceFactions ConvertToWorldActivityExperienceFactions(IEnumerable<WorldActivityExperienceItem> items)
         {
             var result = new WorldActivityExperienceFactions();
 
@@ -324,7 +324,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private World ConvertToDbModel(CensusWorldModel censusModel)
+        private static World ConvertToDbModel(CensusWorldModel censusModel)
         {
             return new World
             {
@@ -403,7 +403,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return characterDeathEvents.Count(a => a.AttackerCharacterId == characterId && a.AttackerCharacterId != a.CharacterId && a.AttackerCharacter?.FactionId != a.Character?.FactionId);
         }
 
-        private IEnumerable<PlayerActivitySession> MergeSessionReconnects(IEnumerable<PlayerActivitySession> sessions)
+        private static IEnumerable<PlayerActivitySession> MergeSessionReconnects(IEnumerable<PlayerActivitySession> sessions)
         {
             PlayerActivitySession currentSession = null;
             var uniqueSessions = new List<PlayerActivitySession>();

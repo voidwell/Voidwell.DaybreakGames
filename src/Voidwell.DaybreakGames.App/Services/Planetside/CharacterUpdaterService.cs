@@ -77,11 +77,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         protected override async Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
-            int count = await _characterUpdaterRepository.GetQueueLengthAsync();
+            var count = await _characterUpdaterRepository.GetQueueLengthAsync();
             return new { QueueLength = count };
         }
 
-        private async void ExecuteAsync(Object stateInfo)
+        private async void ExecuteAsync(object stateInfo)
         {
             if (_isWorking)
                 return;

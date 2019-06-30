@@ -25,8 +25,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IGradeService _gradeService;
         private readonly IWeaponService _weaponService;
 
-        private static readonly string _cacheKey = "ps2.character";
-        private readonly Func<string, string> _getDetailsCacheKey = (characterId) => $"{_cacheKey}_details_{characterId}";
+        private const string _cacheKey = "ps2.character";
+        private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
         private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
         private readonly TimeSpan _cacheCharacterNameExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
@@ -393,7 +393,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 OneLifeMax = a.OneLifeMax,
                 Day = JToken.Parse(a.Day).ToObject<IEnumerable<int>>(),
                 Week = JToken.Parse(a.Week).ToObject<IEnumerable<int>>(),
-                Month = JToken.Parse(a.Month).ToObject<IEnumerable<int>>(),
+                Month = JToken.Parse(a.Month).ToObject<IEnumerable<int>>()
             }).ToList();
 
             var details = new CharacterDetails
@@ -422,7 +422,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (lifetimeStats.Deaths > 0 && details.InfantryStats != null)
             {
-                details.InfantryStats.KDRPadding = (lifetimeStats.Kills / (double)lifetimeStats.Deaths) - details.InfantryStats.KillDeathRatio.GetValueOrDefault();
+                details.InfantryStats.KDRPadding = lifetimeStats.Kills / (double)lifetimeStats.Deaths - details.InfantryStats.KillDeathRatio.GetValueOrDefault();
             }
 
             character.WeaponStats?.Where(a => a.VehicleId != 0 && a.ItemId == 0).GroupBy(a => a.VehicleId).ToList().ForEach(item =>
@@ -505,7 +505,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 infantryStats.KillsPerMinute = sumKills / ((double)sumPlayTime / 60);
             }
 
-            infantryStats.IVIScore = (int)Math.Round((infantryStats.HeadshotRatio.GetValueOrDefault() * 100) * (infantryStats.Accuracy.GetValueOrDefault() * 100), 0);
+            infantryStats.IVIScore = (int)Math.Round(infantryStats.HeadshotRatio.GetValueOrDefault() * 100 * (infantryStats.Accuracy.GetValueOrDefault() * 100), 0);
 
             return infantryStats;
         }
@@ -966,7 +966,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await Task.WhenAll(characters.Select(MapToSimpleCharacterDetailsAsync));
         }
 
-        private Task<SimpleCharacterDetails> MapToSimpleCharacterDetailsAsync(CharacterDetails character)
+        private static Task<SimpleCharacterDetails> MapToSimpleCharacterDetailsAsync(CharacterDetails character)
         {
             var mostPlayedWeapon = character.WeaponStats.OrderByDescending(a => a.Stats.Kills)
                     .FirstOrDefault();
@@ -1082,7 +1082,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var validStats = stats.Where(a => a.Name != null && (a.Stats.Kills.GetValueOrDefault() > 0 || a.Stats.PlayTime.GetValueOrDefault() > 0)).ToList();
 
-            if (int.TryParse(weaponSearch, out int weaponId))
+            if (int.TryParse(weaponSearch, out var weaponId))
             {
                 weaponStats = validStats.FirstOrDefault(a => a.ItemId == weaponId);
             }

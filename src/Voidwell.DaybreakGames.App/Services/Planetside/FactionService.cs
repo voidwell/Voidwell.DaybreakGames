@@ -32,7 +32,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }        
 
-        private Faction ConvertToDbModel(CensusFactionModel censusModel)
+        private static Faction ConvertToDbModel(CensusFactionModel censusModel)
         {
             return new Faction
             {

@@ -22,7 +22,7 @@ namespace Voidwell.DaybreakGames.Data
             {
                 if (direction == SortDirection.Descending) orderMethodName += "Descending";
 
-                Type t = typeof(T);
+                var t = typeof(T);
 
                 var param = Expression.Parameter(t);
                 var property = t.GetProperty(attribute);

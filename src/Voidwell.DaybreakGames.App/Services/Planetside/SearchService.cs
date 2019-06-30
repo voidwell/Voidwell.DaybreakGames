@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IItemService _itemService;
         private readonly ICache _cache;
 
-        private readonly string _cacheKeyPrefix = "ps2.search";
+        private const string _cacheKeyPrefix = "ps2.search";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(5);
 
         public SearchService(ICharacterService characterService, IOutfitService outfitService, IItemService itemService, ICache cache)
@@ -138,7 +138,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             //Case insensitive exact match
             foreach (var result in searchResults.Except(orderedResults))
             {
-                if (result.Name.ToLower() == query.ToLower())
+                if (string.Equals(result.Name, query, StringComparison.CurrentCultureIgnoreCase))
                 {
                     orderedResults.Add(result);
                 }

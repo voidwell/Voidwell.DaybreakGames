@@ -51,7 +51,7 @@ namespace Voidwell.DaybreakGames.Messages
             var worldTask = _worldService.GetWorld(message.WorldId);
             Task<Zone> zoneTask = null;
 
-            List<Task> tasks = new List<Task>{
+            var tasks = new List<Task>{
                 worldTask
             };
 

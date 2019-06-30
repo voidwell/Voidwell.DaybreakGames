@@ -111,7 +111,7 @@ namespace Voidwell.DaybreakGames.Models
         {
             if (_alertState != null) {
                 if (LockState?.State == ZoneLockStateEnum.LOCKED ||
-                    (_alertState.MetagameEvent.Duration.HasValue && DateTime.UtcNow - _alertState.Timestamp > _alertState.MetagameEvent.Duration.Value))
+                    _alertState.MetagameEvent.Duration.HasValue && DateTime.UtcNow - _alertState.Timestamp > _alertState.MetagameEvent.Duration.Value)
                 {
                     UpdateAlertState();
                 }
@@ -144,7 +144,7 @@ namespace Voidwell.DaybreakGames.Models
         {
             public static MapScore Calculate(WorldZone zoneMap, Dictionary<int, int> ownership)
             {
-                Dictionary<int, int> _ownership = ownership;
+                var _ownership = ownership;
 
                 var territories = new[] { 0, 0, 0, 0, 0 };
                 var ampStations = new[] { 0, 0, 0, 0, 0 };

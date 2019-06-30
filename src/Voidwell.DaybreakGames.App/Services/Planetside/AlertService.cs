@@ -31,9 +31,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             CANCELED = 137,
             ENDED = 138,
             XPCHANGE = 139
-        };
+        }
 
-        private readonly string _cacheKey = "ps2.alert";
+        private const string _cacheKey = "ps2.alert";
         private readonly TimeSpan _cacheAlertsExpiration = TimeSpan.FromMinutes(1);
         private readonly TimeSpan _cacheAlertExpiration = TimeSpan.FromMinutes(5);
 
@@ -102,7 +102,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
-            float neuturalScore = 0.0f;
+            var neuturalScore = 0.0f;
             if (alert.MetagameEvent?.Type == 1 || alert.MetagameEvent?.Type == 8 || alert.MetagameEvent?.Type == 9)
             {
                 neuturalScore = 100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault() + alert.LastFactionNs.GetValueOrDefault());
