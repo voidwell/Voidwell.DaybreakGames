@@ -128,7 +128,7 @@ namespace Voidwell.DaybreakGames.Models
     {
         protected override PlayerSessionEvent Create(Type objectType, JObject jsonObject)
         {
-            var typeName = (jsonObject["eventType"]).ToString();
+            var typeName = jsonObject["eventType"].ToString();
             var eventType = Enum.Parse(typeof(PlayerSessionEventType), typeName);
             switch (eventType)
             {

@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly string _playableZonesCacheKey = $"{_cacheKeyPrefix}-playable-zones";
         private readonly TimeSpan _zoneCacheExpiration = TimeSpan.FromMinutes(30);
 
-        private readonly int[] _playableZoneIds = new[] { 2, 4, 6, 8 };
+        private readonly int[] _playableZoneIds = { 2, 4, 6, 8 };
 
         public ZoneService(IZoneRepository zoneRepository, CensusZone censusZone, ICache cache)
         {
@@ -84,7 +84,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private Zone ConvertToDbModel(CensusZoneModel censusModel)
+        private static Zone ConvertToDbModel(CensusZoneModel censusModel)
         {
             return new Zone
             {

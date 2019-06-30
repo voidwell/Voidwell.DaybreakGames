@@ -61,8 +61,8 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
 
         private static Dictionary<int, IEnumerable<DailyPopulation>> PadPeriods(Dictionary<int, IEnumerable<DailyPopulation>> stats)
         {
-            DateTime minDate = DateTime.MaxValue;
-            DateTime maxDate = DateTime.MinValue;
+            var minDate = DateTime.MaxValue;
+            var maxDate = DateTime.MinValue;
 
             foreach (var stat in stats)
             {

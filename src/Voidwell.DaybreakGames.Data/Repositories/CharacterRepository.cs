@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     .Include(a => a.Time)
                     .Where(a => a.Time != null)
                     .OrderByDescending(a => a.Time.CreatedDate)
-                    .FirstOrDefaultAsync(a => a.Name.ToLower() == characterName.ToLower());
+                    .FirstOrDefaultAsync(a => string.Equals(a.Name, characterName, StringComparison.CurrentCultureIgnoreCase));
 
                 return character?.Id;
             }

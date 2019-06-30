@@ -100,7 +100,7 @@ namespace Voidwell.DaybreakGames.Test.MapTests
 
         private static T LoadJson<T>(string filename, string rootProperty) where T : class
         {
-            using (StreamReader r = new StreamReader(filename))
+            using (var r = new StreamReader(filename))
             {
                 return JToken.Parse(r.ReadToEnd())
                     .SelectToken(rootProperty)

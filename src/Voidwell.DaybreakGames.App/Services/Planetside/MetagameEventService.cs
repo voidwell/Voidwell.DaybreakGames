@@ -75,7 +75,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private MetagameEventCategory ConvertToDbModel(CensusMetagameEventCategoryModel model)
+        private static MetagameEventCategory ConvertToDbModel(CensusMetagameEventCategoryModel model)
         {
             return new MetagameEventCategory
             {
@@ -87,7 +87,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private MetagameEventState ConvertToDbModel(CensusMetagameEventStateModel model)
+        private static MetagameEventState ConvertToDbModel(CensusMetagameEventStateModel model)
         {
             return new MetagameEventState
             {

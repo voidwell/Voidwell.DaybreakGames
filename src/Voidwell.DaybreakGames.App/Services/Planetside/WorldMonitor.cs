@@ -367,7 +367,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 return Task.CompletedTask;
             }
-            else if (!_retryingWorlds[worldId].Any())
+
+            if (!_retryingWorlds[worldId].Any())
             {
                 _retryingWorlds.TryRemove(worldId, out _);
                 return Task.CompletedTask;

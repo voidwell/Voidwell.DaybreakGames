@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly CensusItem _censusItem;
         private readonly CensusItemCategory _censusItemCategory;
 
-        private readonly string _categoryItemsCacheKey = "ps2.categoryItems";
+        private const string _categoryItemsCacheKey = "ps2.categoryItems";
         private readonly TimeSpan _categoryItemsCacheExpiration = TimeSpan.FromHours(1);
 
         public string ServiceName => "ItemService";
@@ -77,7 +77,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private Item ConvertToDbModel(CensusItemModel item)
+        private static Item ConvertToDbModel(CensusItemModel item)
         {
             return new Item
             {
@@ -93,7 +93,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private ItemCategory ConvertToDbModel(CensusItemCategoryModel itemCat)
+        private static ItemCategory ConvertToDbModel(CensusItemCategoryModel itemCat)
         {
             return new ItemCategory
             {

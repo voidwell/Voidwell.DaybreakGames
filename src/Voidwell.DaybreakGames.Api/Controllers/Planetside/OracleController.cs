@@ -73,8 +73,8 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
 
         private static Dictionary<int, IEnumerable<OracleStat>> PadPeriods(Dictionary<int, IEnumerable<OracleStat>> stats)
         {
-            DateTime minDate = DateTime.MaxValue;
-            DateTime maxDate = DateTime.MinValue;
+            var minDate = DateTime.MaxValue;
+            var maxDate = DateTime.MinValue;
 
             foreach(var stat in stats)
             {
@@ -152,7 +152,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             return name;
         }
 
-        private static readonly Dictionary<string, Func<DailyWeaponStats, float>> OracleStatTransforms = new Dictionary<string, Func<DailyWeaponStats, float>>()
+        private static readonly Dictionary<string, Func<DailyWeaponStats, float>> OracleStatTransforms = new Dictionary<string, Func<DailyWeaponStats, float>>
         {
             { "kills", a => a.Kills },
             { "uniques", a => a.Uniques },
@@ -175,7 +175,8 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             { "akph", a => a.AircraftKills / (float)24 }
         };
 
-        private static readonly Dictionary<string, IEnumerable<int>> OracleCategoryMap = new Dictionary<string, IEnumerable<int>>() {
+        private static readonly Dictionary<string, IEnumerable<int>> OracleCategoryMap = new Dictionary<string, IEnumerable<int>>
+        {
             { "melee", new[] { 2 } },
             { "sidearms", new[] { 3, 24 } },
             { "shotguns", new[] { 4 } },

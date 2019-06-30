@@ -118,10 +118,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private static class Experience
         {
-            public static readonly int Heal = 4;
-            public static readonly int Revive = 7;
-            public static readonly int Roadkill = 26;
-            public static readonly int SquadBeaconKill = 270;
+            public const int Heal = 4;
+            public const int Revive = 7;
+            public const int Roadkill = 26;
+            public const int SquadBeaconKill = 270;
         }
     }
 }

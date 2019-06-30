@@ -77,7 +77,7 @@ namespace Voidwell.DaybreakGames.HostedServices
             if (_updaterTimers.ContainsKey(updater.ServiceName))
                 return;
 
-            TimeSpan remainingInterval = TimeSpan.Zero;
+            var remainingInterval = TimeSpan.Zero;
             if (updaterHistory?.LastUpdateDate != default(DateTime))
             {
                 var offset = updaterHistory.LastUpdateDate.Add(updater.UpdateInterval) - DateTime.UtcNow;
@@ -87,11 +87,11 @@ namespace Voidwell.DaybreakGames.HostedServices
                 }
             }
 
-            Timer timer = new Timer(HandleTimer, updaterPair, remainingInterval, updater.UpdateInterval);
+            var timer = new Timer(HandleTimer, updaterPair, remainingInterval, updater.UpdateInterval);
             _updaterTimers.Add(updater.ServiceName, timer);
         }
 
-        private async void HandleTimer(Object stateInfo)
+        private async void HandleTimer(object stateInfo)
         {
             if (_isWorking)
             {

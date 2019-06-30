@@ -11,7 +11,7 @@ namespace Voidwell.Cache
     public class Cache : ICache, IDisposable
     {
         private readonly CacheOptions _options;
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
         private ConnectionMultiplexer _redis;
         private IDatabase _db;
 
@@ -44,7 +44,7 @@ namespace Voidwell.Cache
             try
             {
                 var sValue = JsonConvert.SerializeObject(value);
-                await db.StringSetAsync(KeyFormatter(key), sValue, expiry: expires);
+                await db.StringSetAsync(KeyFormatter(key), sValue, expires);
             }
             catch (Exception)
             {

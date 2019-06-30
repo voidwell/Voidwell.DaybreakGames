@@ -91,7 +91,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private Profile ConvertToDbModel(CensusProfileModel censusModel)
+        private static Profile ConvertToDbModel(CensusProfileModel censusModel)
         {
             return new Profile
             {
@@ -103,7 +103,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        private Loadout ConvertToDbModel(CensusLoadoutModel censusModel)
+        private static Loadout ConvertToDbModel(CensusLoadoutModel censusModel)
         {
             return new Loadout
             {

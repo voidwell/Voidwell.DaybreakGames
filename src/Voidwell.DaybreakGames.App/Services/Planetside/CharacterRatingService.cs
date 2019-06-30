@@ -19,7 +19,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private const double DefaultDeviation = 100;
         private const double DefaultVolatility = 0.02;
 
-        private Func<string, string> GetCacheKey => (characterId) => $"ps2.characterRating_{characterId}";
+        private static Func<string, string> GetCacheKey => characterId => $"ps2.characterRating_{characterId}";
         private const string _leaderboardCacheKey = "ps2.characterRatingLeaderboard";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
         private readonly TimeSpan _leaderboardCacheExpiration = TimeSpan.FromMinutes(5);
@@ -92,15 +92,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<RatingCharacterModel>> GetRatingsLeaderboardAsync(int limit)
         {
-            var leaderboard = await _cache.GetAsync<IEnumerable<RatingCharacterModel>>(_leaderboardCacheKey);
-            if (leaderboard != null)
+            var cacheLeaderboard = await _cache.GetAsync<IEnumerable<RatingCharacterModel>>(_leaderboardCacheKey);
+            if (cacheLeaderboard != null)
             {
-                return leaderboard;
+                return cacheLeaderboard;
             }
 
             var results = await _characterRepository.GetCharacterRatingLeaderboardAsync(limit);
 
-            leaderboard = results.Select(a => new RatingCharacterModel
+            var leaderboard = results.Select(a => new RatingCharacterModel
             {
                 CharacterId = a.CharacterId,
                 Rating = a.Rating,
@@ -108,8 +108,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Name = a.Character?.Name,
                 BattleRank = a.Character?.BattleRank,
                 WorldId = a.Character?.WorldId,
-                FactionId = a.Character?.FactionId,
-            });
+                FactionId = a.Character?.FactionId
+            }).ToList();
 
             if (leaderboard.Any())
             {

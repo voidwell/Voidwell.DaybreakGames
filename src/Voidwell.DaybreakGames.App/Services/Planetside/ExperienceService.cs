@@ -31,7 +31,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
         }
 
-        private Experience ConvertToDbModel(CensusExperienceModel experience)
+        private static Experience ConvertToDbModel(CensusExperienceModel experience)
         {
             return new Experience
             {

@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICache _cache;
         private readonly ILogger<OutfitService> _logger;
 
-        private readonly string _cacheKey = "ps2.outfit";
+        private const string _cacheKey = "ps2.outfit";
         private readonly TimeSpan _cacheOutfitExpiration = TimeSpan.FromMinutes(15);
         private readonly TimeSpan _cacheOutfitNameExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheOutfitMemberExpiration = TimeSpan.FromMinutes(10);
@@ -84,9 +84,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LeaderCharacterId = outfit.LeaderCharacterId,
                 LeaderName = outfit.LeaderCharacter?.Name,
                 TrackedMemberCount = outfitMembers.Count(),
-                Activity7Days = outfitMembers.Count(a => (DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault()) <= TimeSpan.FromDays(7)),
-                Activity30Days = outfitMembers.Count(a => (DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault()) <= TimeSpan.FromDays(30)),
-                Activity90Days = outfitMembers.Count(a => (DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault()) <= TimeSpan.FromDays(90))
+                Activity7Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(7)),
+                Activity30Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(30)),
+                Activity90Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(90))
             };
 
             await _cache.SetAsync(cacheKey, details, _cacheOutfitDetailsExpiration);
@@ -360,7 +360,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return outfit;
         }
 
-        private string GetCacheKey(string outfitId)
+        private static string GetCacheKey(string outfitId)
         {
             return $"{_cacheKey}_outfit_{outfitId}";
         }

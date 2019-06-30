@@ -146,7 +146,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var characters = (await Task.WhenAll(taskList))?.Where(a => a != null);
 
-            var timedOutCharacters = idList.Where(characterId => !characters.Any(a => a.Character.CharacterId == characterId));
+            var timedOutCharacters = idList.Where(characterId => !characters.Any(a => a.Character.CharacterId == characterId)).ToList();
             if (timedOutCharacters.Any())
             {
                 var clearTimedOutTasks = timedOutCharacters.Select(characterId => _cache.RemoveFromListAsync(GetListCacheKey(worldId), characterId));
@@ -158,7 +158,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return characters;
             }
 
-            return characters.Where(a => a.LastSeen?.ZoneId == zoneId && (DateTime.UtcNow - a.LastSeen.Timestamp <= MaximumIdleDuration));
+            return characters.Where(a => a.LastSeen?.ZoneId == zoneId && DateTime.UtcNow - a.LastSeen.Timestamp <= MaximumIdleDuration);
         }
 
         public Task<long> GetPlayerCountAsync(int worldId)

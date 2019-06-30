@@ -39,6 +39,8 @@ namespace Voidwell.DaybreakGames.CensusStream
         private readonly SemaphoreSlim _playerFacilityDefendSemaphore;
         private readonly SemaphoreSlim _facilityControlSemaphore;
 
+        private const string RegServer = @"EventServerEndpoint_(.*)_(.*)";
+
         private readonly JsonSerializer _payloadDeserializer = JsonSerializer.Create(new JsonSerializerSettings
         {
             ContractResolver = new UnderscorePropertyNamesContractResolver(),
@@ -99,9 +101,8 @@ namespace Voidwell.DaybreakGames.CensusStream
         {
             var detail = message.Value<string>("detail");
 
-            var regServer = @"EventServerEndpoint_(.*)_(.*)";
-            Regex r = new Regex(regServer);
-            Match m = r.Match(detail);
+            var r = new Regex(RegServer);
+            var m = r.Match(detail);
 
             var worldName = m.Groups[1].Value;
 
@@ -242,7 +243,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         [CensusEventHandler("Death", typeof(Death))]
         private async Task Process(Death payload)
         {
-            List<Task> TaskList = new List<Task>();
+            var TaskList = new List<Task>();
             Task<OutfitMember> AttackerOutfitTask = null;
             Task<OutfitMember> VictimOutfitTask = null;
 
@@ -297,14 +298,14 @@ namespace Voidwell.DaybreakGames.CensusStream
         {
             await _facilityControlSemaphore.WaitAsync();
 
-            float scoreVs = 0f;
-            float scoreNc = 0f;
-            float scoreTr = 0f;
-            float scoreNs = 0f;
-            int popVs = 0;
-            int popNc = 0;
-            int popTr = 0;
-            int popNs = 0;
+            var scoreVs = 0f;
+            var scoreNc = 0f;
+            var scoreTr = 0f;
+            var scoreNs = 0f;
+            var popVs = 0;
+            var popNc = 0;
+            var popTr = 0;
+            var popNs = 0;
 
             try
             {
@@ -432,7 +433,7 @@ namespace Voidwell.DaybreakGames.CensusStream
             await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
         }
 
-        private static int[] EsamirLockingMetagameEventIds = new[] { 2, 126, 127, 128, 150, 151, 152, 176, 186, 190 };
+        private static int[] EsamirLockingMetagameEventIds = { 2, 126, 127, 128, 150, 151, 152, 176, 186, 190 };
 
         [CensusEventHandler("MetagameEvent", typeof(MetagameEvent))]
         private async Task Process(MetagameEvent payload)
