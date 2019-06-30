@@ -71,7 +71,7 @@ namespace Voidwell.DaybreakGames.Messages
 
         private void RunPublishAsync<T>(string category, string channel, T message) where T : PlanetsideMessage
         {
-            RunPublishAsync<T>(category, channel, null, message);
+            RunPublishAsync(category, channel, null, message);
         }
 
         private void RunPublishAsync<T>(string category, string channel, string id, T message) where T : PlanetsideMessage

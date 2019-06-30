@@ -17,15 +17,7 @@ namespace Voidwell.DaybreakGames.CensusServices
         {
             var query = _queryFactory.Create("outfit");
 
-            query.ShowFields(new[]
-            {
-                "outfit_id",
-                "name",
-                "alias",
-                "time_created",
-                "leader_character_id",
-                "member_count"
-            });
+            query.ShowFields("outfit_id", "name", "alias", "time_created", "leader_character_id", "member_count");
 
             query.Where("outfit_id").Equals(outfitId);
 

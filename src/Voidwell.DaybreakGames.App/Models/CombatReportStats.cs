@@ -18,8 +18,7 @@ namespace Voidwell.DaybreakGames.Models
 
         public CombatReportParticipantStats(string characterId, string outfitId = null)
         {
-            Character = new CombatReportCharacterDetail(characterId);
-            Character.Name = characterId;
+            Character = new CombatReportCharacterDetail(characterId) {Name = characterId};
 
             if (!string.IsNullOrEmpty(outfitId))
             {

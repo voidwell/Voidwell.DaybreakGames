@@ -18,13 +18,7 @@ namespace Voidwell.DaybreakGames.CensusServices
         {
             var query = _queryFactory.Create("loadout");
 
-            query.ShowFields(new[]
-            {
-                "loadout_id",
-                "profile_id",
-                "faction_id",
-                "code_name"
-            });
+            query.ShowFields("loadout_id", "profile_id", "faction_id", "code_name");
 
             return await query.GetBatchAsync<CensusLoadoutModel>();
         }

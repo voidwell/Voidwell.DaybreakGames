@@ -385,14 +385,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var relativeSessions =
                     sessions.Where(a => a.LoginDate <= relativeUpper && (a.LogoutDate >= relativeUpper || a.LogoutDate == null)).ToList();
 
-                populationPeriods.Add(new PopulationPeriod
-                {
-                    Timestamp = relativeUpper,
-                    VS = relativeSessions.Count(a => a.FactionId == 1),
-                    NC = relativeSessions.Count(a => a.FactionId == 2),
-                    TR = relativeSessions.Count(a => a.FactionId == 3),
-                    NS = relativeSessions.Count(a => a.FactionId == 4)
-                });
+                var vsCount = relativeSessions.Count(a => a.FactionId == 1);
+                var ncCount = relativeSessions.Count(a => a.FactionId == 2);
+                var trCount = relativeSessions.Count(a => a.FactionId == 3);
+                var nsCount = relativeSessions.Count(a => a.FactionId == 4);
+
+                populationPeriods.Add(new PopulationPeriod(relativeUpper, vsCount, ncCount, trCount, nsCount));
             }
 
             return populationPeriods.OrderByDescending(a => a.Timestamp).ToList();

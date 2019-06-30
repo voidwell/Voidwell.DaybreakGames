@@ -12,7 +12,7 @@ namespace Voidwell.DaybreakGames
 
         public abstract string ServiceName { get; }
 
-        public StatefulHostedService(ICache cache)
+        protected StatefulHostedService(ICache cache)
         {
             _cache = cache;
         }

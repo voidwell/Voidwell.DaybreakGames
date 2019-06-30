@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class GradeService : IGradeService
     {
-        private readonly IEnumerable<StatGrade> _grades = new StatGrade[] {
+        private readonly IEnumerable<StatGrade> _grades = new[] {
                 new StatGrade { Grade = "S", Delta = 4.01 },
                 new StatGrade { Grade = "M**", Delta = 3.5 },
                 new StatGrade { Grade = "M*", Delta = 3.25 },

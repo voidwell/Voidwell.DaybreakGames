@@ -19,15 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("vehicle");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "vehicle_id",
-                "name",
-                "description",
-                "cost",
-                "cost_resource_id",
-                "image_id"
-            });
+            query.ShowFields("vehicle_id", "name", "description", "cost", "cost_resource_id", "image_id");
 
             return await query.GetBatchAsync<CensusVehicleModel>();
         }
@@ -37,11 +29,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("vehicle_faction");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "vehicle_id",
-                "faction_id"
-            });
+            query.ShowFields("vehicle_id", "faction_id");
 
             return await query.GetBatchAsync<CensusVehicleFactionModel>();
         }

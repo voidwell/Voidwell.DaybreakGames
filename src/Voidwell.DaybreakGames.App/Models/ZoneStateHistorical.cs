@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 namespace Voidwell.DaybreakGames.Models
@@ -56,12 +55,13 @@ namespace Voidwell.DaybreakGames.Models
         {
             var lastLock = GetLastLock(worldId, zoneId);
             var lastUnlock = GetLastUnlock(worldId, zoneId);
-
-            if ((lastLock != null && lastUnlock == null) || (lastLock.Timestamp > lastUnlock.Timestamp))
+            
+            if (lastLock != null && lastUnlock == null || lastLock != null && lastLock.Timestamp > lastUnlock.Timestamp)
             {
                 return new ZoneLockState(lastLock.Timestamp, lastLock.MetagameEventId, lastLock.TriggeringFaction);
             }
-            else if ((lastLock == null && lastUnlock != null) || (lastUnlock.Timestamp > lastLock.Timestamp))
+
+            if (lastLock == null && lastUnlock != null || lastLock != null && lastLock.Timestamp < lastUnlock.Timestamp)
             {
                 return new ZoneLockState(lastUnlock.Timestamp);
             }

@@ -87,7 +87,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             var alert = await _alertRepository.GetAlert(worldId, instanceId);
-            if (alert == null || !alert.ZoneId.HasValue || !alert.StartDate.HasValue)
+            if (alert?.ZoneId == null || !alert.StartDate.HasValue)
             {
                 return null;
             }

@@ -19,8 +19,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IPlayerMonitor _playerMonitor;
         private readonly ILogger<WorldMonitor> _logger;
 
-        private static ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
-        private static ConcurrentDictionary<int, Dictionary<int, Zone>> RetryingWorlds = new ConcurrentDictionary<int, Dictionary<int, Zone>>();
+        private static readonly ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
+        private static readonly ConcurrentDictionary<int, Dictionary<int, Zone>> _retryingWorlds = new ConcurrentDictionary<int, Dictionary<int, Zone>>();
 
         public WorldMonitor(IWorldEventsService worldEventService, IZoneService zoneService, IWorldService worldService, IMapService mapService,
             IPlayerMonitor playerMonitor, ILogger<WorldMonitor> logger)
@@ -32,7 +32,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _playerMonitor = playerMonitor;
             _logger = logger;
 
-            Task.Run(() => InitializeWorlds());
+            Task.Run(InitializeWorlds);
         }
 
         private async Task InitializeWorlds()
@@ -97,24 +97,24 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             if (!_worldStates[worldId].IsOnline)
             {
-                if (RetryingWorlds.ContainsKey(worldId))
+                if (_retryingWorlds.ContainsKey(worldId))
                 {
-                    RetryingWorlds.TryRemove(worldId, out var value);
+                    _retryingWorlds.TryRemove(worldId, out _);
                 }
                 return;
             }
 
-            var zones = RetryingWorlds.GetValueOrDefault(worldId)?.Values ?? await _zoneService.GetPlayableZones();
+            var zones = _retryingWorlds.GetValueOrDefault(worldId)?.Values ?? await _zoneService.GetPlayableZones();
 
             await Task.WhenAll(zones.Select(zone => SetupWorldZone(worldId, zone)));
 
-            if (RetryingWorlds.ContainsKey(worldId) && RetryingWorlds[worldId].Any())
+            if (_retryingWorlds.ContainsKey(worldId) && _retryingWorlds[worldId].Any())
             {
                 SetupWorldDelay(worldId);
             }
-            else if (RetryingWorlds.ContainsKey(worldId))
+            else if (_retryingWorlds.ContainsKey(worldId))
             {
-                RetryingWorlds.TryRemove(worldId, out var value);
+                _retryingWorlds.TryRemove(worldId, out var value);
             }
         }
 
@@ -218,13 +218,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var zonePlayers = await _playerMonitor.GetAllAsync(worldId, zoneId);
 
-            return new PopulationPeriod
-            {
-                VS = zonePlayers.Count(a => a.Character.FactionId == 1),
-                NC = zonePlayers.Count(a => a.Character.FactionId == 2),
-                TR = zonePlayers.Count(a => a.Character.FactionId == 3),
-                NS = zonePlayers.Count(a => a.Character.FactionId == 4)
-            };
+            var vsCount = zonePlayers.Count(a => a.Character.FactionId == 1);
+            var ncCount = zonePlayers.Count(a => a.Character.FactionId == 2);
+            var trCount = zonePlayers.Count(a => a.Character.FactionId == 3);
+            var nsCount = zonePlayers.Count(a => a.Character.FactionId == 4);
+
+            return new PopulationPeriod(vsCount, ncCount, trCount, nsCount);
         }
 
         public async Task<IEnumerable<WorldOnlineState>> GetWorldStates()
@@ -310,7 +309,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
             */
 
-            if (ownership == null || zoneMap == null || zoneMap.Regions == null || zoneMap.Links == null)
+            if (ownership == null || zoneMap?.Regions == null || zoneMap.Links == null)
             {
                 var errors = new List<string>();
                 if (ownership == null) errors.Add("Ownership is null");
@@ -328,12 +327,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 if (retry)
                 {
-                    if (!RetryingWorlds.ContainsKey(worldId))
+                    if (!_retryingWorlds.ContainsKey(worldId))
                     {
-                        RetryingWorlds[worldId] = new Dictionary<int, Zone>();
+                        _retryingWorlds[worldId] = new Dictionary<int, Zone>();
                     }
 
-                    RetryingWorlds[worldId][zone.Id] = zone;
+                    _retryingWorlds[worldId][zone.Id] = zone;
                 }
 
                 return false;
@@ -344,9 +343,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return false;
             }
 
-            if (RetryingWorlds.ContainsKey(worldId) && RetryingWorlds[worldId].ContainsKey(zone.Id))
+            if (_retryingWorlds.ContainsKey(worldId) && _retryingWorlds[worldId].ContainsKey(zone.Id))
             {
-                RetryingWorlds[worldId].Remove(zone.Id);
+                _retryingWorlds[worldId].Remove(zone.Id);
             }
 
             var lockStater = await _mapService.GetZoneStateHistoricals();
@@ -364,13 +363,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private Task SetupWorldZonesRetry(int worldId)
         {
-            if (!RetryingWorlds.ContainsKey(worldId))
+            if (!_retryingWorlds.ContainsKey(worldId))
             {
                 return Task.CompletedTask;
             }
-            else if (!RetryingWorlds[worldId].Any())
+            else if (!_retryingWorlds[worldId].Any())
             {
-                RetryingWorlds.TryRemove(worldId, out var value);
+                _retryingWorlds.TryRemove(worldId, out _);
                 return Task.CompletedTask;
             }
 

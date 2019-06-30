@@ -20,7 +20,10 @@ namespace Voidwell.DaybreakGames.HostedServices
         private readonly IServiceProvider _serviceProvider;
         private readonly DaybreakGamesOptions _options;
         private readonly ILogger<StoreUpdaterSchedulerHostedService> _logger;
-        private Dictionary<string, Timer> _updaterTimers = new Dictionary<string, Timer>();
+        private readonly Dictionary<string, Timer> _updaterTimers = new Dictionary<string, Timer>();
+
+        private readonly List<object> _pendingWork = new List<object>();
+        private bool _isWorking = false;
 
         public StoreUpdaterSchedulerHostedService(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider,
             IOptions<DaybreakGamesOptions> options, ILogger<StoreUpdaterSchedulerHostedService> logger)
@@ -75,7 +78,7 @@ namespace Voidwell.DaybreakGames.HostedServices
                 return;
 
             TimeSpan remainingInterval = TimeSpan.Zero;
-            if (updaterHistory != null && updaterHistory.LastUpdateDate != null)
+            if (updaterHistory?.LastUpdateDate != default(DateTime))
             {
                 var offset = updaterHistory.LastUpdateDate.Add(updater.UpdateInterval) - DateTime.UtcNow;
                 if (offset.TotalMilliseconds > 0)
@@ -87,9 +90,6 @@ namespace Voidwell.DaybreakGames.HostedServices
             Timer timer = new Timer(HandleTimer, updaterPair, remainingInterval, updater.UpdateInterval);
             _updaterTimers.Add(updater.ServiceName, timer);
         }
-
-        private List<Object> _pendingWork = new List<object>();
-        private bool _isWorking = false;
 
         private async void HandleTimer(Object stateInfo)
         {

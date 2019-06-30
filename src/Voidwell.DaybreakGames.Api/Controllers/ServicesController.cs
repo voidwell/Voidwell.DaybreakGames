@@ -20,7 +20,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers
 
             var statefulHostedServiceTypes = statefulHostedTypes.Where(a => a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract);
 
-            _services = statefulHostedTypes.Where(a => a.GetTypeInfo().IsInterface && statefulHostedServiceTypes.Any(t => a.IsAssignableFrom(t)))
+            _services = statefulHostedTypes.Where(a => a.GetTypeInfo().IsInterface && statefulHostedServiceTypes.Any(a.IsAssignableFrom))
                 .Select(a => serviceProvider.GetService(a) as IStatefulHostedService)
                 .Where(a => a != null)
                 .OrderBy(a => a.ServiceName);

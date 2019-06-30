@@ -32,12 +32,12 @@ namespace Voidwell.DaybreakGames.CensusStream
         private readonly IMetagameEventService _metagameEventService;
         private readonly IMessageService _messageService;
         private readonly ILogger<WebsocketEventHandler> _logger;
-        private Dictionary<string, MethodInfo> _processMethods;
+        private readonly Dictionary<string, MethodInfo> _processMethods;
 
-        private SemaphoreSlim _continentUnlockSemaphore;
-        private SemaphoreSlim _playerFacilityCaptureSemaphore;
-        private SemaphoreSlim _playerFacilityDefendSemaphore;
-        private SemaphoreSlim _facilityControlSemaphore;
+        private readonly SemaphoreSlim _continentUnlockSemaphore;
+        private readonly SemaphoreSlim _playerFacilityCaptureSemaphore;
+        private readonly SemaphoreSlim _playerFacilityDefendSemaphore;
+        private readonly SemaphoreSlim _facilityControlSemaphore;
 
         private readonly JsonSerializer _payloadDeserializer = JsonSerializer.Create(new JsonSerializerSettings
         {
@@ -124,7 +124,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                         }
                     }
                 }
-            };
+            }
         }
 
         private async Task ProcessServiceEvent(JToken message)
@@ -165,8 +165,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             }
         }
 
-        [CensusEventHandler("AchievementEarned", typeof(Models.AchievementEarned))]
-        private Task Process(Models.AchievementEarned payload)
+        [CensusEventHandler("AchievementEarned", typeof(AchievementEarned))]
+        private Task Process(AchievementEarned payload)
         {
             var dataModel = new Data.Models.Planetside.Events.AchievementEarned
             {
@@ -193,8 +193,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetLastSeenAsync(dataModel.CharacterId, dataModel.ZoneId, dataModel.Timestamp));
         }
 
-        [CensusEventHandler("ContinentLock", typeof(Models.ContinentLock))]
-        private Task Process(Models.ContinentLock payload)
+        [CensusEventHandler("ContinentLock", typeof(ContinentLock))]
+        private Task Process(ContinentLock payload)
         {
             var model = new Data.Models.Planetside.Events.ContinentLock
             {
@@ -239,8 +239,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             }
         }
 
-        [CensusEventHandler("Death", typeof(Models.Death))]
-        private async Task Process(Models.Death payload)
+        [CensusEventHandler("Death", typeof(Death))]
+        private async Task Process(Death payload)
         {
             List<Task> TaskList = new List<Task>();
             Task<OutfitMember> AttackerOutfitTask = null;
@@ -496,8 +496,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             await Task.WhenAll(_eventRepository.AddAsync(dataModel), _alertService.ProcessMetagameEvent(payload));
         }
 
-        [CensusEventHandler("PlayerFacilityCapture", typeof(Models.PlayerFacilityCapture))]
-        private async Task Proces(Models.PlayerFacilityCapture payload)
+        [CensusEventHandler("PlayerFacilityCapture", typeof(PlayerFacilityCapture))]
+        private async Task Proces(PlayerFacilityCapture payload)
         {
             var dataModel = new Data.Models.Planetside.Events.PlayerFacilityCapture
             {
@@ -546,8 +546,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             }
         }
 
-        [CensusEventHandler("PlayerLogin", typeof(Models.PlayerLogin))]
-        private Task Process(Models.PlayerLogin payload)
+        [CensusEventHandler("PlayerLogin", typeof(PlayerLogin))]
+        private Task Process(PlayerLogin payload)
         {
             var dataModel = new Data.Models.Planetside.Events.PlayerLogin
             {
@@ -559,8 +559,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             return Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp));
         }
 
-        [CensusEventHandler("PlayerLogout", typeof(Models.PlayerLogout))]
-        private Task Process(Models.PlayerLogout payload)
+        [CensusEventHandler("PlayerLogout", typeof(PlayerLogout))]
+        private Task Process(PlayerLogout payload)
         {
             var dataModel = new Data.Models.Planetside.Events.PlayerLogout
             {
@@ -572,8 +572,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             return Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp));
         }
 
-        [CensusEventHandler("VehicleDestroy", typeof(Models.VehicleDestroy))]
-        private async Task Process(Models.VehicleDestroy payload)
+        [CensusEventHandler("VehicleDestroy", typeof(VehicleDestroy))]
+        private async Task Process(VehicleDestroy payload)
         {
             var dataModel = new Data.Models.Planetside.Events.VehicleDestroy
             {
@@ -629,6 +629,14 @@ namespace Voidwell.DaybreakGames.CensusStream
             {
                 await Task.WhenAll(messageTasks);
             }
+        }
+
+        public void Dispose()
+        {
+            _continentUnlockSemaphore.Dispose();
+            _playerFacilityCaptureSemaphore.Dispose();
+            _playerFacilityDefendSemaphore.Dispose();
+            _facilityControlSemaphore.Dispose();
         }
     }
 }

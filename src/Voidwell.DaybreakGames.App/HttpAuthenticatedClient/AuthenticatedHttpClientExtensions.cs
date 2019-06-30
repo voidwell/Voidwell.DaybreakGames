@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
             services.TryAddSingleton<AuthenticatedHttpMessageHandler>();
 
             services.AddTransient<Func<AuthenticatedHttpMessageHandler>>(
-                sp => () => sp.GetService<AuthenticatedHttpMessageHandler>());
+                sp => sp.GetService<AuthenticatedHttpMessageHandler>);
 
             services.AddTransient<IAuthenticatedHttpClientFactory, AuthenticatedHttpClientFactory>();
         }

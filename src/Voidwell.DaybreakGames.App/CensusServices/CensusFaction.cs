@@ -19,14 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("faction");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "faction_id",
-                "name",
-                "image_id",
-                "code_tag",
-                "user_selectable"
-            });
+            query.ShowFields("faction_id", "name", "image_id", "code_tag", "user_selectable");
 
             return await query.GetBatchAsync<CensusFactionModel>();
         }

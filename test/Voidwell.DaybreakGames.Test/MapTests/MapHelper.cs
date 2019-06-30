@@ -72,35 +72,29 @@ namespace Voidwell.DaybreakGames.Test.MapTests
         private static IEnumerable<FacilityLink> GetFacilityLinks(int zoneId)
         {
             var model = LoadJson<IEnumerable<CensusFacilityLinkModel>>($"{DataRoot}FacilityLinks.json", "facility_link_list");
-            return model.Select(a =>
+            return model.Select(a => new FacilityLink
             {
-                return new FacilityLink
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    ZoneId = a.ZoneId,
-                    FacilityIdA = a.FacilityIdA,
-                    FacilityIdB = a.FacilityIdB
-                };
+                Id = Guid.NewGuid().ToString(),
+                ZoneId = a.ZoneId,
+                FacilityIdA = a.FacilityIdA,
+                FacilityIdB = a.FacilityIdB
             }).Where(a => a.ZoneId == zoneId);
         }
 
         private static IEnumerable<MapRegion> GetMapRegions(int zoneId)
         {
             var model = LoadJson<IEnumerable<CensusMapRegionModel>>($"{DataRoot}MapRegions.json", "map_region_list");
-            return model.Select(a =>
+            return model.Select(a => new MapRegion
             {
-                return new MapRegion
-                {
-                    Id = a.MapRegionId,
-                    ZoneId = a.ZoneId,
-                    FacilityId = a.FacilityId,
-                    FacilityName = a.FacilityName,
-                    FacilityType = a.FacilityType,
-                    FacilityTypeId = a.FacilityTypeId,
-                    XPos = a.LocationX,
-                    YPos = a.LocationY,
-                    ZPos = a.LocationZ
-                };
+                Id = a.MapRegionId,
+                ZoneId = a.ZoneId,
+                FacilityId = a.FacilityId,
+                FacilityName = a.FacilityName,
+                FacilityType = a.FacilityType,
+                FacilityTypeId = a.FacilityTypeId,
+                XPos = a.LocationX,
+                YPos = a.LocationY,
+                ZPos = a.LocationZ
             }).Where(a => a.ZoneId == zoneId);
         }
 

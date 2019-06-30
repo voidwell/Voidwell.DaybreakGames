@@ -146,7 +146,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var repoWeapons = await _sanctionedWeaponsRepository.GetAllSanctionedWeapons();
             weapons = repoWeapons.Select(a => a.Id);
             
-            if (weapons != null)
+            if (weapons.Any())
             {
                 await _cache.SetAsync(_sanctionedWeaponsCacheKey, weapons, _sanctionedWeaponsCacheExpiration);
             }

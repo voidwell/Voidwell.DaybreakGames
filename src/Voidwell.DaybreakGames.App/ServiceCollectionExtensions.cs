@@ -26,7 +26,7 @@ namespace Voidwell.DaybreakGames.App
 
                 if (experienceIds != null)
                 {
-                    options.CensusWebsocketExperienceIds = experienceIds?.Replace(" ", "").Split(",");
+                    options.CensusWebsocketExperienceIds = experienceIds.Replace(" ", "").Split(",");
                 }
             });
 

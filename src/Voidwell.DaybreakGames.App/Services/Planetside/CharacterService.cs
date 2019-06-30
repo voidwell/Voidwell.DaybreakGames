@@ -7,7 +7,6 @@ using System;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Microsoft.Extensions.Logging;
 using DaybreakGames.Census.Exceptions;
 using Newtonsoft.Json.Linq;
 using System.Threading;
@@ -25,10 +24,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly IGradeService _gradeService;
         private readonly IWeaponService _weaponService;
-        private readonly ILogger<CharacterService> _logger;
 
         private static readonly string _cacheKey = "ps2.character";
-        private Func<string, string> getDetailsCacheKey = (characterId) => $"{_cacheKey}_details_{characterId}";
+        private readonly Func<string, string> _getDetailsCacheKey = (characterId) => $"{_cacheKey}_details_{characterId}";
         private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
         private readonly TimeSpan _cacheCharacterNameExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
@@ -39,7 +37,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public CharacterService(ICharacterRepository characterRepository, IPlayerSessionRepository playerSessionRepository,
             IWorldEventsService worldEventService, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
-            IWeaponAggregateService weaponAggregateService, IGradeService gradeService, IWeaponService weaponService, ILogger<CharacterService> logger)
+            IWeaponAggregateService weaponAggregateService, IGradeService gradeService, IWeaponService weaponService)
         {
             _characterRepository = characterRepository;
             _playerSessionRepository = playerSessionRepository;
@@ -50,13 +48,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _weaponAggregateService = weaponAggregateService;
             _gradeService = gradeService;
             _weaponService = weaponService;
-            _logger = logger;
         }
 
         public async Task<IEnumerable<CharacterSearchResult>> LookupCharactersByName(string query, int limit = 12)
         {
             var characterList = await _censusCharacter.LookupCharactersByName(query, limit);
-            return characterList.Select(c => CharacterSearchResult.LoadFromCensusCharacter(c));
+            return characterList.Select(CharacterSearchResult.LoadFromCensusCharacter);
         }
 
         public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)
@@ -66,7 +63,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<Character> GetCharacter(string characterId)
         {
-            Character character = null;
+            Character character;
 
             using (await _characterLock.WaitAsync(characterId))
             {
@@ -136,7 +133,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             var cachedDetails = (await Task.WhenAll(characterIds.Select(GetCharacterDetailsFromCacheAsync))).Where(a => a != null);
 
-            var remainingCharacterIds = characterIds.Where(a => !cachedDetails.Any(b => b.Id == a));
+            var remainingCharacterIds = characterIds.Where(a => cachedDetails.All(b => b.Id != a));
             if (!remainingCharacterIds.Any())
             {
                 return cachedDetails;
@@ -168,13 +165,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private Task<CharacterDetails> GetCharacterDetailsFromCacheAsync(string characterId)
         {
-            var cacheKey = getDetailsCacheKey(characterId);
+            var cacheKey = _getDetailsCacheKey(characterId);
             return _cache.GetAsync<CharacterDetails>(cacheKey);
         }
 
         private Task SaveCharacterDetailsInCacheAsync(CharacterDetails details)
         {
-            var cacheKey = getDetailsCacheKey(details.Id);
+            var cacheKey = _getDetailsCacheKey(details.Id);
             return _cache.SetAsync(cacheKey, details, _cacheCharacterDetailsExpiration);
         }
 
@@ -356,7 +353,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var characterVehicleStats = character.WeaponStats?.Where(a => a.VehicleId != 0).GroupBy(a => a.VehicleId).Select(s =>
             {
                 var vehicleWeaponStats = s.Where(a => a.ItemId != 0);
-                var vehicleStats = s.Where(a => a.ItemId == 0).FirstOrDefault();
+                var vehicleStats = s.FirstOrDefault(a => a.ItemId == 0);
 
                 return new CharacterDetailsVehicleStat
                 {
@@ -375,31 +372,28 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     Score = vehicleWeaponStats.Sum(a => a.Score.GetValueOrDefault()),
 
                     // Pilot stats
-                    PilotDamageGiven = vehicleStats?.DamageGiven.Value,
-                    PilotDamageTakenBy = vehicleStats?.DamageTakenBy.Value,
-                    PilotDeaths = vehicleStats?.Deaths.Value,
-                    PilotFireCount = vehicleStats?.FireCount.Value,
-                    PilotHitCount = vehicleStats?.HitCount.Value,
-                    PilotVehicleKills = vehicleStats?.VehicleKills.Value,
-                    PilotHeadshots = vehicleStats?.Headshots.Value,
-                    PilotKilledBy = vehicleStats?.KilledBy.Value,
-                    PilotKills = vehicleStats?.Kills.Value,
-                    PilotPlayTime = vehicleStats?.PlayTime.Value,
-                    PilotScore = vehicleStats?.Score.Value
+                    PilotDamageGiven = vehicleStats?.DamageGiven.GetValueOrDefault(),
+                    PilotDamageTakenBy = vehicleStats?.DamageTakenBy.GetValueOrDefault(),
+                    PilotDeaths = vehicleStats?.Deaths.GetValueOrDefault(),
+                    PilotFireCount = vehicleStats?.FireCount.GetValueOrDefault(),
+                    PilotHitCount = vehicleStats?.HitCount.GetValueOrDefault(),
+                    PilotVehicleKills = vehicleStats?.VehicleKills.GetValueOrDefault(),
+                    PilotHeadshots = vehicleStats?.Headshots.GetValueOrDefault(),
+                    PilotKilledBy = vehicleStats?.KilledBy.GetValueOrDefault(),
+                    PilotKills = vehicleStats?.Kills.GetValueOrDefault(),
+                    PilotPlayTime = vehicleStats?.PlayTime.GetValueOrDefault(),
+                    PilotScore = vehicleStats?.Score.GetValueOrDefault()
                 };
             }).ToList();
 
-            var characterStatsHistory = character.StatsHistory?.Select(a =>
+            var characterStatsHistory = character.StatsHistory?.Select(a => new CharacterDetailsStatsHistory
             {
-                return new CharacterDetailsStatsHistory
-                {
-                    StatName = a.StatName,
-                    AllTime = a.AllTime,
-                    OneLifeMax = a.OneLifeMax,
-                    Day = JToken.Parse(a.Day).ToObject<IEnumerable<int>>(),
-                    Week = JToken.Parse(a.Week).ToObject<IEnumerable<int>>(),
-                    Month = JToken.Parse(a.Month).ToObject<IEnumerable<int>>(),
-                };
+                StatName = a.StatName,
+                AllTime = a.AllTime,
+                OneLifeMax = a.OneLifeMax,
+                Day = JToken.Parse(a.Day).ToObject<IEnumerable<int>>(),
+                Week = JToken.Parse(a.Week).ToObject<IEnumerable<int>>(),
+                Month = JToken.Parse(a.Month).ToObject<IEnumerable<int>>(),
             }).ToList();
 
             var details = new CharacterDetails
@@ -435,7 +429,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 var vehicleStats = item.FirstOrDefault();
 
-                var stat = details.VehicleStats.Where(a => a.VehicleId == item.Key).FirstOrDefault();
+                var stat = details.VehicleStats.FirstOrDefault(a => a.VehicleId == item.Key);
                 if (stat != null)
                 {
                     stat.PilotKills = vehicleStats.Kills.GetValueOrDefault();
@@ -477,17 +471,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var sumHitCount = sanctionedWeapons.Sum(a => a.Stats.HitCount);
             var sumFireCount = sanctionedWeapons.Sum(a => a.Stats.FireCount);
             var sumKills = sanctionedWeapons.Sum(a => a.Stats.Kills);
-            var sumDeaths = sanctionedWeapons.Sum(a => a.Stats.Deaths);
             var sumHeadshots = sanctionedWeapons.Sum(a => a.Stats.Headshots);
             var sumPlayTime = sanctionedWeapons.Sum(a => a.Stats.PlayTime);
 
-            var sumUnsanctionedKills = unSanctionedWeapons.Sum(a => a.Stats.Kills);
-            var sumUnsanctionedDeaths = unSanctionedWeapons.Sum(a => a.Stats.Deaths);
-
             var infantryStats = new InfantryStats
             {
-                Weapons = sanctionedWeapons.Count(),
-                UnsanctionedWeapons = unSanctionedWeapons.Count(),
+                Weapons = sanctionedWeapons.Count,
+                UnsanctionedWeapons = unSanctionedWeapons.Count,
                 Kills = sumKills,
                 AccuracyDelta = sanctionedWeapons.Average(a => a.Stats.AccuracyDelta),
                 HeadshotRatioDelta = sanctionedWeapons.Average(a => a.Stats.HsrDelta),
@@ -635,12 +625,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private async Task<Character> GetCharacterDetailsAsync(string characterId)
         {
             var character = await _characterRepository.GetCharacterWithDetailsAsync(characterId);
-            if (character != null && character.Time != null)
+            if (character?.Time != null)
             {
                 return character;
             }
 
-            await UpdateAllCharacterInfo(characterId, null);
+            await UpdateAllCharacterInfo(characterId);
 
             return await _characterRepository.GetCharacterWithDetailsAsync(characterId);
         }
@@ -655,7 +645,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (missingCharacterIds.Any())
             {
-                var updateTasks = missingCharacterIds.Select(a => UpdateAllCharacterInfo(a, null));
+                var updateTasks = missingCharacterIds.Select(a => UpdateAllCharacterInfo(a));
 
                 await Task.WhenAll(updateTasks);
 
@@ -936,11 +926,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return characterId;
             }
 
-            characterId = await _characterRepository.GetCharacterIdByName(characterName);
-            if (characterId == null)
-            {
-                characterId = await _censusCharacter.GetCharacterIdByName(characterName);
-            }
+            characterId = await _characterRepository.GetCharacterIdByName(characterName) ?? await _censusCharacter.GetCharacterIdByName(characterName);
 
             if (characterId != null)
             {
@@ -1006,8 +992,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Score = character.LifetimeStats.Score,
                 PlayTime = character.LifetimeStats.PlayTime,
                 TotalPlayTimeMinutes = character.Times.MinutesPlayed,
-                IVIScore = character.InfantryStats != null ? character.InfantryStats.IVIScore.GetValueOrDefault() : 0,
-                IVIKillDeathRatio = character.InfantryStats != null ? character.InfantryStats.KillDeathRatio.GetValueOrDefault() : 0,
+                IVIScore = character.InfantryStats?.IVIScore ?? 0,
+                IVIKillDeathRatio = character.InfantryStats?.KillDeathRatio ?? 0,
                 Prestige = character.PrestigeLevel,
                 MostPlayedWeaponName = mostPlayedWeapon?.Name,
                 MostPlayedWeaponId = mostPlayedWeapon?.ItemId,
@@ -1101,15 +1087,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 weaponStats = validStats.FirstOrDefault(a => a.ItemId == weaponId);
             }
 
-            if (weaponStats == null)
-            {
-                weaponStats = validStats
-                    .OrderByDescending(a => a.Stats.Kills)
-                    .ThenBy(a => a.Name)
-                    .FirstOrDefault(a => a.Name.ToLower().Contains(weaponSearch.ToLower()));
-            }
-
-            return weaponStats;
+            return weaponStats ?? validStats
+                       .OrderByDescending(a => a.Stats.Kills)
+                       .ThenBy(a => a.Name)
+                       .FirstOrDefault(a => a.Name.ToLower().Contains(weaponSearch.ToLower()));
         }
     }
 }

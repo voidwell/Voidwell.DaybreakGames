@@ -18,7 +18,8 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
 
         private readonly SemaphoreSlim _semaphoreSlim;
         private readonly HttpMessageInvoker _httpMessageInvoker;
-        private CustomTokenClient _tokenClient;
+        private readonly HttpClient _tokenClient;
+        private readonly ClientCredentialsTokenRequest _tokenRequest;
 
         private DateTimeOffset? _resetTokenAfter;
         private string _token;
@@ -31,10 +32,15 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
 
-            _tokenClient = new CustomTokenClient(_options.TokenServiceAddress,
-                        _options.ClientId,
-                        _options.TokenServiceMessageHandler ?? new HttpClientHandler(),
-                        AuthenticationStyle.BasicAuthentication);
+            _tokenClient = new HttpClient();
+            _tokenRequest = new ClientCredentialsTokenRequest()
+            {
+                Address = _options.TokenServiceAddress,
+                ClientId = _options.ClientId,
+                ClientSecret = _options.ClientSecret,
+                ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader,
+                Scope = string.Join(" ", _options.Scopes)
+            };
 
             _semaphoreSlim = new SemaphoreSlim(1, 1);
             _resetTokenAfter = null;
@@ -123,12 +129,7 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
 
                     _resetTokenAfter = null;
 
-                    // Build scope string
-                    var scopes = string.Join(" ", _options.Scopes);
-                    _tokenClient.ClientSecret = _options.ClientSecret;
-
-                    var response = await _tokenClient.RequestClientCredentialsAsync(scopes,
-                        cancellationToken: linkedCancellationTokenSource.Token);
+                    var response = await _tokenClient.RequestClientCredentialsTokenAsync(_tokenRequest, linkedCancellationTokenSource.Token);
 
                     ValidateTokenResponse(response);
 
@@ -152,8 +153,7 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
             catch (TokenServiceResponseException ex) when (tokenServiceTimeoutCancellationTokenSource.Token.IsCancellationRequested)
             {
                 //Only catches when tokenServiceTimeoutCancellationTokenSource is canceled, not when caller cancels
-                string msg = string.Format("{0} exceeded the time out of {1} ms when attempting to call token service.",
-                    nameof(AuthenticatedHttpMessageHandler), _options.TokenServiceTimeout);
+                string msg = $"{nameof(AuthenticatedHttpMessageHandler)} exceeded the time out of {_options.TokenServiceTimeout} ms when attempting to call token service.";
 
                 _logger.LogError(25, ex, msg);
 

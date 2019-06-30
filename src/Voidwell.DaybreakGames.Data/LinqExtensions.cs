@@ -31,7 +31,7 @@ namespace Voidwell.DaybreakGames.Data
                     Expression.Call(
                         typeof(Queryable),
                         orderMethodName,
-                        new Type[] { t, property.PropertyType },
+                        new[] { t, property.PropertyType },
                         query.Expression,
                         Expression.Quote(
                             Expression.Lambda(

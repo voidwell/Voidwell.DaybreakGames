@@ -9,7 +9,7 @@ namespace Voidwell.DaybreakGames.Data
 {
     public static class DatabaseExtensions
     {
-        private static string _migrationAssembly = typeof(DatabaseExtensions).GetTypeInfo().Assembly.GetName().Name;
+        private static readonly string _migrationAssembly = typeof(DatabaseExtensions).GetTypeInfo().Assembly.GetName().Name;
 
         public static IServiceCollection AddEntityFrameworkContext(this IServiceCollection services, IConfiguration configuration)
         {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,7 +13,6 @@ namespace Voidwell.DaybreakGames.Models
         public bool IsOnline { get; private set; } = false;
 
         private ConcurrentDictionary<int, WorldZoneState> ZoneStates { get; set; }
-        private static readonly TimeSpan MaximumIdleDuration = TimeSpan.FromMinutes(10);
 
         public WorldState(int worldId, string worldName)
         {

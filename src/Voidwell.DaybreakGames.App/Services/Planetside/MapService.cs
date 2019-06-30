@@ -28,9 +28,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly SemaphoreSlim _zoneStateLock = new SemaphoreSlim(1);
 
         private const string _cacheKeyPrefix = "ps2.map_service";
-        private TimeSpan _zoneMapCacheExpiration = TimeSpan.FromHours(24);
-        private TimeSpan _facilityWorldEventCacheExpiration = TimeSpan.FromSeconds(10);
-        private TimeSpan _zoneStateCacheExpiration = TimeSpan.FromSeconds(30);
+        private readonly TimeSpan _zoneMapCacheExpiration = TimeSpan.FromHours(24);
+        private readonly TimeSpan _facilityWorldEventCacheExpiration = TimeSpan.FromSeconds(10);
+        private readonly TimeSpan _zoneStateCacheExpiration = TimeSpan.FromSeconds(30);
 
         public MapService(IMapRepository mapRepository, IWorldEventsService worldEventsService, CensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
         {
@@ -165,17 +165,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
             }
 
-            var snapshotRegions = zoneOwnership.Select(a =>
+            var snapshotRegions = zoneOwnership.Select(a => new ZoneOwnershipSnapshot
             {
-                return new ZoneOwnershipSnapshot
-                {
-                    Timestamp = timestamp.Value,
-                    WorldId = worldId,
-                    ZoneId = zoneId,
-                    MetagameInstanceId = metagameInstanceId,
-                    RegionId = a.RegionId,
-                    FactionId = a.FactionId
-                };
+                Timestamp = timestamp.Value,
+                WorldId = worldId,
+                ZoneId = zoneId,
+                MetagameInstanceId = metagameInstanceId,
+                RegionId = a.RegionId,
+                FactionId = a.FactionId
             });
 
             await _mapRepository.InsertRangeAsync(snapshotRegions);
@@ -184,7 +181,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public async Task<ZoneSnapshot> GetZoneSnapshotByMetagameEvent(int worldId, int metagameInstanceId)
         {
             var snapshotRegions = await _mapRepository.GetZoneSnapshotByMetagameEvent(worldId, metagameInstanceId);
-            if (snapshotRegions == null || snapshotRegions.Count() == 0)
+            if (snapshotRegions == null || !snapshotRegions.Any())
             {
                 return null;
             }
