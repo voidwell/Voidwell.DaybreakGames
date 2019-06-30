@@ -37,15 +37,7 @@ namespace Voidwell.DaybreakGames.CensusServices
         {
             var query = _queryFactory.Create("map_hex");
 
-            query.ShowFields(new[]
-            {
-                "zone_id",
-                "map_region_id",
-                "x",
-                "y",
-                "hex_type",
-                "type_name"
-            });
+            query.ShowFields("zone_id", "map_region_id", "x", "y", "hex_type", "type_name");
 
             return await query.GetBatchAsync<CensusMapHexModel>();
         }
@@ -54,18 +46,7 @@ namespace Voidwell.DaybreakGames.CensusServices
         {
             var query = _queryFactory.Create("map_region");
 
-            query.ShowFields(new[]
-            {
-                "map_region_id",
-                "zone_id",
-                "facility_id",
-                "facility_name",
-                "facility_type_id",
-                "facility_type",
-                "location_x",
-                "location_y",
-                "location_z"
-            });
+            query.ShowFields("map_region_id", "zone_id", "facility_id", "facility_name", "facility_type_id", "facility_type", "location_x", "location_y", "location_z");
 
             return await query.GetBatchAsync<CensusMapRegionModel>();
         }
@@ -74,13 +55,7 @@ namespace Voidwell.DaybreakGames.CensusServices
         {
             var query = _queryFactory.Create("facility_link");
 
-            query.ShowFields(new[]
-            {
-                "zone_id",
-                "facility_id_a",
-                "facility_id_b",
-                "description"
-            });
+            query.ShowFields("zone_id", "facility_id_a", "facility_id_b", "description");
 
             return await query.GetBatchAsync<CensusFacilityLinkModel>();
         }

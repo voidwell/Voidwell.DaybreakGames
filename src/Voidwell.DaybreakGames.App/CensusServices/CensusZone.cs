@@ -19,14 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("zone");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "zone_id",
-                "code",
-                "name",
-                "description",
-                "hex_size"
-            });
+            query.ShowFields("zone_id", "code", "name", "description", "hex_size");
 
             return await query.GetBatchAsync<CensusZoneModel>();
         }

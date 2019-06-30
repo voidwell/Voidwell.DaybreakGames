@@ -10,7 +10,7 @@ namespace Voidwell.Cache
 {
     public class Cache : ICache, IDisposable
     {
-        private CacheOptions _options;
+        private readonly CacheOptions _options;
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         private ConnectionMultiplexer _redis;
         private IDatabase _db;
@@ -33,9 +33,8 @@ namespace Voidwell.Cache
             }
             catch (Exception)
             {
-                return;
+                // ignored
             }
-            
         }
 
         public async Task SetAsync(string key, object value, TimeSpan expires)
@@ -49,7 +48,7 @@ namespace Voidwell.Cache
             }
             catch (Exception)
             {
-                return;
+                // ignored
             }
         }
 
@@ -63,7 +62,7 @@ namespace Voidwell.Cache
             }
             catch (Exception)
             {
-                return;
+                // ignored
             }
         }
 
@@ -77,7 +76,7 @@ namespace Voidwell.Cache
             }
             catch (Exception)
             {
-                return;
+                // ignored
             }
         }
 
@@ -135,9 +134,9 @@ namespace Voidwell.Cache
             {
                 await db.KeyDeleteAsync(KeyFormatter(key));
             }
-            catch(Exception)
+            catch (Exception)
             {
-                return;
+                // ignored
             }
         }
 

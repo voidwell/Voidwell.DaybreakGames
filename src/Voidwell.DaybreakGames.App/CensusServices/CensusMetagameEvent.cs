@@ -19,14 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("metagame_event");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "metagame_event_id",
-                "name",
-                "description",
-                "type",
-                "experience_bonus"
-            });
+            query.ShowFields("metagame_event_id", "name", "description", "type", "experience_bonus");
 
             return await query.GetBatchAsync<CensusMetagameEventCategoryModel>();
         }
@@ -36,11 +29,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("metagame_event_state");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "metagame_event_state_id",
-                "name"
-            });
+            query.ShowFields("metagame_event_state_id", "name");
 
             return await query.GetBatchAsync<CensusMetagameEventStateModel>();
         }

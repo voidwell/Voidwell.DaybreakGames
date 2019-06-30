@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Api
 {
     public class Startup
     {
-        public Startup(Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -62,7 +62,7 @@ namespace Voidwell.DaybreakGames.Api
             services.ConfigureApplicationServices(Configuration);
         }
 
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.InitializeDatabases();
 

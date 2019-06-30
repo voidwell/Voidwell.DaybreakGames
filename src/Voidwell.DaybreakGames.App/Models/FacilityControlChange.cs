@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Voidwell.DaybreakGames.Models
+﻿namespace Voidwell.DaybreakGames.Models
 {
     public class FacilityControlChange
     {

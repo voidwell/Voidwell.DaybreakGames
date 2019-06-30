@@ -142,7 +142,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             var idList = await _cache.GetListAsync(GetListCacheKey(worldId));
 
-            var taskList = idList.Select(characterId => _cache.GetAsync<OnlineCharacter>(GetPlayerCacheKey(characterId)));
+            var taskList = idList.Select(characterId => _cache.GetAsync<OnlineCharacter>(GetPlayerCacheKey(characterId))).ToList();
 
             var characters = (await Task.WhenAll(taskList))?.Where(a => a != null);
 

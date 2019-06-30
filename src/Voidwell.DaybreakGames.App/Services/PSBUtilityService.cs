@@ -16,7 +16,7 @@ namespace Voidwell.DaybreakGames.Services
         private const string _cacheKey = "ps2.psb-online-accounts";
         private readonly TimeSpan _lastOnlineAccountsExpiration = TimeSpan.FromMinutes(5);
 
-        private SemaphoreSlim _lastOnlineAccountsLock = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _lastOnlineAccountsLock = new SemaphoreSlim(1);
 
         public PSBUtilityService(IFunctionalRepository functionalRepository, ICache cache)
         {

@@ -19,11 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("item_category");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "item_category_id",
-                "name"
-            });
+            query.ShowFields("item_category_id", "name");
 
             return await query.GetBatchAsync<CensusItemCategoryModel>();
         }

@@ -46,7 +46,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         [HttpGet("population")]
         public async Task<ActionResult> GetWorldPopulationHistory([FromQuery(Name = "q")]string sWorldIds)
         {
-            var worldIds = sWorldIds.Split(",").Select(a => int.Parse(a));
+            var worldIds = sWorldIds.Split(",").Select(int.Parse);
             if (!worldIds.Any())
             {
                 return BadRequest("Must select at least one server");

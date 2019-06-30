@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
@@ -28,11 +27,5 @@ namespace Voidwell.DaybreakGames.HttpAuthenticatedClient
         /// The number of milliseconds a message has to be handled (including getting the access token) before a timeout
         /// </summary>
         public int MessageHandlerTimeout { get; set; } = 60000;
-
-        public string GetTokenServiceServer()
-        {
-            var uri = new Uri(TokenServiceAddress);
-            return $"{uri.Scheme}://{uri.Authority}";
-        }
     }
 }

@@ -6,12 +6,10 @@ namespace Voidwell.DaybreakGames.Data
 {
     public class DbContextHelper : IDbContextHelper
     {
-        private readonly DbContextOptions<PS2DbContext> _options;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public DbContextHelper(DbContextOptions<PS2DbContext> options, IServiceScopeFactory scopeFactory)
+        public DbContextHelper(IServiceScopeFactory scopeFactory)
         {
-            _options = options;
             _scopeFactory = scopeFactory;
         }
 

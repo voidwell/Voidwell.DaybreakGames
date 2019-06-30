@@ -57,7 +57,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
                 return BadRequest($"Invalid stat type '{statId}'");
             }
 
-            var weaponIds = sWeaponIds.Split(",").Select(a => int.Parse(a));
+            var weaponIds = sWeaponIds.Split(",").Select(int.Parse);
             if (!weaponIds.Any())
             {
                 return BadRequest("Must select at least one weapon");

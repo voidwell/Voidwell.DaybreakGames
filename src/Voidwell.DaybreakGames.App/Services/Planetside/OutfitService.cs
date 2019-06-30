@@ -150,34 +150,31 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var members = await _outfitRepository.GetOutfitMembersAsync(outfitId);
 
-            memberDetails = members.Where(a => a.Character.Time != null).Select(a =>
+            memberDetails = members.Where(a => a.Character.Time != null).Select(a => new OutfitMemberDetails
             {
-                return new OutfitMemberDetails
+                CharacterId = a.CharacterId,
+                MemberSinceDate = a.MemberSinceDate.Value,
+                Rank = a.Rank,
+                RankOrdinal = a.RankOrdinal.Value,
+                Name = a.Character?.Name,
+                BattleRank = a.Character?.BattleRank,
+                LastLoginDate = a.Character?.Time?.LastLoginDate,
+                LifetimeStats = new OutfitMemberDetailsStats
                 {
-                    CharacterId = a.CharacterId,
-                    MemberSinceDate = a.MemberSinceDate.Value,
-                    Rank = a.Rank,
-                    RankOrdinal = a.RankOrdinal.Value,
-                    Name = a.Character?.Name,
-                    BattleRank = a.Character?.BattleRank,
-                    LastLoginDate = a.Character?.Time?.LastLoginDate,
-                    LifetimeStats = new OutfitMemberDetailsStats
-                    {
-                        FacilityCaptureCount = a.Character.LifetimeStats.FacilityCaptureCount,
-                        FacilityDefendedCount = a.Character.LifetimeStats.FacilityDefendedCount,
-                        WeaponKills = a.Character.LifetimeStats.WeaponKills,
-                        WeaponDeaths = a.Character.LifetimeStats.WeaponDeaths,
-                        WeaponFireCount = a.Character.LifetimeStats.WeaponFireCount,
-                        WeaponHeadshots = a.Character.LifetimeStats.WeaponHeadshots,
-                        WeaponHitCount = a.Character.LifetimeStats.WeaponHitCount,
-                        WeaponPlayTime = a.Character.LifetimeStats.WeaponPlayTime,
-                        WeaponScore = a.Character.LifetimeStats.WeaponScore,
-                        WeaponVehicleKills = a.Character.LifetimeStats.WeaponVehicleKills,
-                        AssistCount = a.Character.LifetimeStats.AssistCount,
-                        RevengeCount = a.Character.LifetimeStats.RevengeCount,
-                        DominationCount = a.Character.LifetimeStats.DominationCount
-                    }
-                };
+                    FacilityCaptureCount = a.Character.LifetimeStats.FacilityCaptureCount,
+                    FacilityDefendedCount = a.Character.LifetimeStats.FacilityDefendedCount,
+                    WeaponKills = a.Character.LifetimeStats.WeaponKills,
+                    WeaponDeaths = a.Character.LifetimeStats.WeaponDeaths,
+                    WeaponFireCount = a.Character.LifetimeStats.WeaponFireCount,
+                    WeaponHeadshots = a.Character.LifetimeStats.WeaponHeadshots,
+                    WeaponHitCount = a.Character.LifetimeStats.WeaponHitCount,
+                    WeaponPlayTime = a.Character.LifetimeStats.WeaponPlayTime,
+                    WeaponScore = a.Character.LifetimeStats.WeaponScore,
+                    WeaponVehicleKills = a.Character.LifetimeStats.WeaponVehicleKills,
+                    AssistCount = a.Character.LifetimeStats.AssistCount,
+                    RevengeCount = a.Character.LifetimeStats.RevengeCount,
+                    DominationCount = a.Character.LifetimeStats.DominationCount
+                }
             });
 
             await _cache.SetAsync(cacheKey, memberDetails, _cacheOutfitMemberDetailsExpiration);
@@ -197,7 +194,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<OutfitMember> UpdateCharacterOutfitMembership(Character character)
         {
-            OutfitMember outfitMember = null;
+            OutfitMember outfitMember;
 
             using (await _outfitMembershipLock.WaitAsync(character.Id))
             {
@@ -209,7 +206,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return outfitMember.OutfitId != null ? outfitMember : null;
                 }
 
-                CensusOutfitMemberModel membership = null;
+                CensusOutfitMemberModel membership;
 
                 try
                 {
@@ -253,7 +250,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<Outfit> GetLatestOutfit(string outfitId, Character character)
         {
-            Outfit outfit = null;
+            Outfit outfit;
 
             using (await _outfitLock.WaitAsync(outfitId))
             {
@@ -280,7 +277,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<Outfit> GetOutfitAsync(string outfitId, Character member = null)
         {
-            Outfit outfit = null;
+            Outfit outfit;
 
             using (await _outfitLock.WaitAsync(outfitId))
             {

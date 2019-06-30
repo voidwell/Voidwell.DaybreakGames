@@ -19,11 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("title");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "title_id",
-                "name"
-            });
+            query.ShowFields("title_id", "name");
 
             return await query.GetBatchAsync<CensusTitleModel>();
         }

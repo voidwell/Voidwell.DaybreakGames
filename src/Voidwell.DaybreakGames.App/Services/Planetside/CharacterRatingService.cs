@@ -65,11 +65,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var rating = await _cache.GetAsync<CharacterRating>(cacheKey);
             if (rating == null)
             {
-                rating = await _characterRepository.GetCharacterRatingAsync(characterId);
-                if (rating == null)
-                {
-                    rating = new CharacterRating { CharacterId = characterId, Rating = DefaultRating, Deviation = DefaultDeviation, Volatility = DefaultVolatility };
-                }
+                rating = await _characterRepository.GetCharacterRatingAsync(characterId) ?? new CharacterRating { CharacterId = characterId, Rating = DefaultRating, Deviation = DefaultDeviation, Volatility = DefaultVolatility };
 
                 await _cache.SetAsync(cacheKey, rating, _cacheExpiration);
             }
@@ -115,7 +111,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 FactionId = a.Character?.FactionId,
             });
 
-            if (leaderboard != null && leaderboard.Any())
+            if (leaderboard.Any())
             {
                 await _cache.SetAsync(_leaderboardCacheKey, leaderboard, _leaderboardCacheExpiration);
             }

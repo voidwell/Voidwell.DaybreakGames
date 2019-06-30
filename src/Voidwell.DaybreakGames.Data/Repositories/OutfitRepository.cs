@@ -154,7 +154,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
         public async Task<Outfit> UpsertAsync(Outfit entity)
         {
-            Outfit result = null;
+            Outfit result;
 
             using (var factory = _dbContextHelper.GetFactory())
             {

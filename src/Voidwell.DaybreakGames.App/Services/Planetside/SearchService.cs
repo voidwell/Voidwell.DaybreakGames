@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,18 +13,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IOutfitService _outfitService;
         private readonly IItemService _itemService;
         private readonly ICache _cache;
-        private readonly ILogger _logger;
 
         private readonly string _cacheKeyPrefix = "ps2.search";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(5);
 
-        public SearchService(ICharacterService characterService, IOutfitService outfitService, IItemService itemService, ICache cache, ILogger<SearchService> logger)
+        public SearchService(ICharacterService characterService, IOutfitService outfitService, IItemService itemService, ICache cache)
         {
             _characterService = characterService;
             _outfitService = outfitService;
             _itemService = itemService;
             _cache = cache;
-            _logger = logger;
         }
 
         public async Task<IEnumerable<SearchResult>> SearchPlanetside(string category, string query)
@@ -71,7 +68,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     var outfits = outfitNameLookup.Result.ToList();
 
                     var outfitAliasResult = outfitAliasLookup.Result;
-                    if (outfitAliasResult != null && !outfits.Any(o => o.Id == outfitAliasResult.Id))
+                    if (outfitAliasResult != null && outfits.All(o => o.Id != outfitAliasResult.Id))
                     {
                         outfits.Add(outfitAliasResult);
                     }

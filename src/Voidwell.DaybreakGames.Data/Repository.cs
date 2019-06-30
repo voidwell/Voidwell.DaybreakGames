@@ -16,16 +16,6 @@ namespace Voidwell.DaybreakGames.Data
             _dbContextHelper = dbContextHelper;
         }
 
-        protected DbContext GetDbContext()
-        {
-            return _dbContextHelper.GetFactory().GetDbContext();
-        }
-
-        protected T GetDbContext<T>() where T: DbContext
-        {
-            return _dbContextHelper.GetFactory().GetDbContext() as T;
-        }
-
         protected async Task<TEntity> UpsertAsync<TEntity>(TEntity entity, Expression<Func<TEntity, bool>> predicate, bool ignoreNullProperties = false) where TEntity : class
         {
             using (var factory = _dbContextHelper.GetFactory())

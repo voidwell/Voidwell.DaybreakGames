@@ -24,7 +24,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                dbContext.Add<T>(entity);
+                dbContext.Add(entity);
 
                 try
                 {
@@ -33,7 +33,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 catch (DbUpdateException ex) when ((ex.InnerException as PostgresException)?.SqlState == "23505")
                 {
                     // Ignore unique constraint errors (https://www.postgresql.org/docs/current/static/errcodes-appendix.html)
-                    return;
                 }
             }
         }

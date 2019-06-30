@@ -19,14 +19,7 @@ namespace Voidwell.DaybreakGames.CensusServices
             var query = _queryFactory.Create("profile");
             query.SetLanguage("en");
 
-            query.ShowFields(new[]
-            {
-                "profile_id",
-                "profile_type_id",
-                "faction_id",
-                "name",
-                "image_id"
-            });
+            query.ShowFields("profile_id", "profile_type_id", "faction_id", "name", "image_id");
 
             return await query.GetBatchAsync<CensusProfileModel>();
         }

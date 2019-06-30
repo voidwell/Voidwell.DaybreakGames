@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,16 +12,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         private readonly IWeaponAggregateRepository _weaponAggregateRepository;
         private readonly ICache _cache;
-        private readonly ILogger<WeaponAggregateService> _logger;
 
         private const string _cacheKey = "ps2.weaponAggregates";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(8);
 
-        public WeaponAggregateService(IWeaponAggregateRepository weaponAggregateRepository, ICache cache, ILogger<WeaponAggregateService> logger)
+        public WeaponAggregateService(IWeaponAggregateRepository weaponAggregateRepository, ICache cache)
         {
             _weaponAggregateRepository = weaponAggregateRepository;
             _cache = cache;
-            _logger = logger;
         }
 
         public async Task<WeaponAggregate> GetAggregateForItem(int itemId)

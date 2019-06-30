@@ -18,12 +18,7 @@ namespace Voidwell.DaybreakGames.CensusServices
         {
             var query = _queryFactory.Create("experience");
 
-            query.ShowFields(new[]
-            {
-                "experience_id",
-                "description",
-                "xp"
-            });
+            query.ShowFields("experience_id", "description", "xp");
 
             return await query.GetBatchAsync<CensusExperienceModel>();
         }

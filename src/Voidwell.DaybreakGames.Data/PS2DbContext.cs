@@ -82,7 +82,7 @@ namespace Voidwell.DaybreakGames.Data
         {
             var applyGenericMethods = typeof(ModelBuilder).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
             var applyGenericApplyConfigurationMethods = applyGenericMethods.Where(a => a.IsGenericMethod && a.Name.Equals("ApplyConfiguration", StringComparison.OrdinalIgnoreCase));
-            var applyGenericMethod = applyGenericApplyConfigurationMethods.Where(a => a.GetParameters().FirstOrDefault().ParameterType.Name == "IEntityTypeConfiguration`1").FirstOrDefault();
+            var applyGenericMethod = applyGenericApplyConfigurationMethods.FirstOrDefault(a => a.GetParameters().FirstOrDefault()?.ParameterType.Name == "IEntityTypeConfiguration`1");
 
             foreach (var type in Assembly.GetExecutingAssembly().GetTypes().Where(c => c.IsClass && !c.IsAbstract && !c.ContainsGenericParameters))
             {
@@ -91,7 +91,7 @@ namespace Voidwell.DaybreakGames.Data
                     if (iface.IsConstructedGenericType && iface.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>))
                     {
                         var applyConcreteMethod = applyGenericMethod.MakeGenericMethod(iface.GenericTypeArguments[0]);
-                        applyConcreteMethod.Invoke(builder, new object[] { Activator.CreateInstance(type) });
+                        applyConcreteMethod.Invoke(builder, new[] { Activator.CreateInstance(type) });
                         break;
                     }
                 }

@@ -51,11 +51,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return new ZoneMetagameEvent
             {
                 Id = category.Id,
-                TypeId = category.Type.Value,
+                TypeId = category.Type.GetValueOrDefault(),
                 Name = category.Name,
                 Description = category.Description,
                 ZoneId = zoneTask.Result,
-                Duration = _metagameTypeDurations.GetValueOrDefault(category.Type.Value, TimeSpan.FromMinutes(45))
+                Duration = _metagameTypeDurations.GetValueOrDefault(category.Type.GetValueOrDefault(), TimeSpan.FromMinutes(45))
             };
         }
 

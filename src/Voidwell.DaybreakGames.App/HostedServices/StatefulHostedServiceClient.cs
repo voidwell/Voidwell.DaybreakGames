@@ -8,7 +8,7 @@ namespace Voidwell.DaybreakGames.HostedServices
     {
         private IStatefulHostedService _hostedService { get; set; }
 
-        public StatefulHostedServiceClient(IStatefulHostedService hostedService)
+        protected StatefulHostedServiceClient(IStatefulHostedService hostedService)
         {
             _hostedService = hostedService;
         }
