@@ -34,7 +34,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 var dbContext = factory.GetDbContext();
 
                 return await dbContext.Items.Where(i => i.Name.ToLower().Contains(name.ToLower()))
-                    .Where(a => a.ItemCategoryId < 99 )
+                    .Where(a => a.ItemCategoryId < 99 || (a.ItemCategoryId > 108 && a.ItemCategoryId < 133) || a.ItemCategoryId == 138 || a.ItemCategoryId == 144 || a.ItemCategoryId == 147 || a.ItemCategoryId == 157)
                     .Take(limit)
                     .ToListAsync();
             }
