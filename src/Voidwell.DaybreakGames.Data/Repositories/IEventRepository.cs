@@ -8,7 +8,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public interface IEventRepository
     {
-        Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper);
+        Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime startDate, DateTime? endDate);
         Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper);
         Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper);
         Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper);
@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<FacilityControl> GetLatestFacilityControl(int worldId, int zoneId, DateTime date);
         Task<IEnumerable<Death>> GetDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId);
         Task<IEnumerable<VehicleDestroy>> GetVehicleDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId);
-        Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId);
+        Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null);
         Task<IEnumerable<DailyWeaponStats>> GetDailyWeaponAggregatesByWeaponIdAsync(int itemId, DateTime start, DateTime end);
         Task<IEnumerable<ContinentUnlock>> GetAllLatestZoneUnlocks();
         Task<IEnumerable<ContinentLock>> GetAllLatestZoneLocks();

@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Voidwell.DaybreakGames.Models
 {
     public class WorldActivity
     {
+        public DateTime ActivityPeriodStart { get; set; }
+        public DateTime ActivityPeriodEnd { get; set; }
         public IEnumerable<PopulationPeriod> HistoricalPopulations { get; set; }
         public WorldActivityStats Stats { get; set; }
         public IEnumerable<CombatReportClassStats> ClassStats { get; set; }

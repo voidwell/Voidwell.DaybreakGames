@@ -14,6 +14,8 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportParticipantStats
     {
+        public CombatReportParticipantStats() { }
+
         public CombatReportParticipantStats(string characterId, string outfitId = null)
         {
             Character = new CombatReportCharacterDetail(characterId);
@@ -35,14 +37,18 @@ namespace Voidwell.DaybreakGames.Models
         public int VehicleKills { get; set; }
         public int? TopWeaponId { get; set; }
         public string TopWeaponName { get; set; }
-        public int? TopLoadoutId { get; set; }
-        public string TopLoadoutName { get; set; }
+        public int? TopProfileId { get; set; }
+        public string TopProfileName { get; set; }
+        public int? TopProfileImageId { get; set; }
         public DateTime? LoginDate { get; set; }
         public DateTime? LogoutDate { get; set; }
+        public int SessionKills { get; set; }
     }
 
     public class CombatReportOutfitStats
     {
+        public CombatReportOutfitStats() { }
+
         public CombatReportOutfitStats(string outfitId)
         {
             Outfit = new CombatReportOutfitDetail(outfitId);
@@ -56,13 +62,16 @@ namespace Voidwell.DaybreakGames.Models
         public int Teamkills { get; set; }
         public int VehicleKills { get; set; }
         public int ParticipantCount { get; set; }
+        public int FacilityCaptures { get; set; }
     }
 
     public class CombatReportClassStats
     {
-        public CombatReportClassStats(int profileId)
+        public CombatReportClassStats() { }
+
+        public CombatReportClassStats(int loadoutId)
         {
-            Profile = new CombatReportClassDetail(profileId);
+            Profile = new CombatReportClassDetail(loadoutId);
         }
 
         public CombatReportClassDetail Profile { get; set; }
@@ -76,6 +85,8 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportWeaponStats
     {
+        public CombatReportWeaponStats() { }
+
         public CombatReportWeaponStats(int weaponItemId)
         {
             Item = new CombatReportItemDetail(weaponItemId);
@@ -89,6 +100,8 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportVehicleStats
     {
+        public CombatReportVehicleStats() { }
+
         public CombatReportVehicleStats(int vehicleId)
         {
             Vehicle = new CombatReportItemDetail(vehicleId);
@@ -102,6 +115,8 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportCharacterDetail : CombatReportItemDetail
     {
+        public CombatReportCharacterDetail() { }
+
         public CombatReportCharacterDetail(string characterId) : base(characterId)
         { }
 
@@ -112,6 +127,8 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportOutfitDetail : CombatReportItemDetail
     {
+        public CombatReportOutfitDetail() { }
+
         public CombatReportOutfitDetail(string outfitId) : base(outfitId)
         { }
 
@@ -120,17 +137,19 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CombatReportClassDetail : CombatReportItemDetail
     {
-        public CombatReportClassDetail(int profileId) : base(profileId)
+        public CombatReportClassDetail() { }
+
+        public CombatReportClassDetail(int loadoutId) : base(loadoutId)
         { }
 
-        public int? TypeId { get; set; }
+        public int? ProfileId { get; set; }
+        public int? ProfileTypeId { get; set; }
+        public int? ProfileImageId { get; set; }
     }
 
     public class CombatReportItemDetail
     {
-        public CombatReportItemDetail()
-        {
-        }
+        public CombatReportItemDetail() { }
 
         public CombatReportItemDetail(object id)
         {

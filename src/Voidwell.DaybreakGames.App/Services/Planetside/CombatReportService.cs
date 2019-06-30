@@ -51,18 +51,42 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             var characterDeathsTask = GetCharacterDeaths(worldId, startDate, endDate, zoneId);
             var vehicleDeathsTask = GetVehicleDeaths(worldId, startDate, endDate, zoneId);
+            var facilityControlsTask = _worldEventsService.GetFacilityControlsByDateAsync(worldId, startDate, endDate, zoneId);
 
-            await Task.WhenAll(characterDeathsTask, vehicleDeathsTask);
+            await Task.WhenAll(characterDeathsTask, vehicleDeathsTask, facilityControlsTask);
 
-            var deaths = characterDeathsTask.Result;
-            var vehicleDeaths = vehicleDeathsTask.Result;
+            var deaths = characterDeathsTask.Result.ToList();
+            var vehicleDeaths = vehicleDeathsTask.Result.ToList();
+            var facilityControls = facilityControlsTask.Result.ToList();
 
             var participantHash = new Dictionary<string, CombatReportParticipantStats>();
             var outfitHash = new Dictionary<string, CombatReportOutfitStats>();
             var vehicleHash = new Dictionary<int, CombatReportVehicleStats>();
             var weaponHash = new Dictionary<int, CombatReportWeaponStats>();
-            var classHash = new Dictionary<int, CombatReportClassStats>();
+            var loadoutHash = new Dictionary<int, CombatReportClassStats>();
 
+            PreLoadCombatStatTrackers(deaths, vehicleDeaths, participantHash, outfitHash, vehicleHash, weaponHash, loadoutHash);
+
+            await LoadCombatStatDetails(participantHash, outfitHash, vehicleHash, weaponHash, loadoutHash);
+
+            CalculateCombatStats(deaths, vehicleDeaths, facilityControls, participantHash, outfitHash, vehicleHash, weaponHash, loadoutHash);
+
+            SetCombatStatTopItems(deaths, participantHash, weaponHash, loadoutHash);
+
+            return new CombatReportStats
+            {
+                Participants = participantHash.Values.ToArray(),
+                Outfits = outfitHash.Values.ToArray(),
+                Weapons = weaponHash.Values.ToArray(),
+                Vehicles = vehicleHash.Values.ToArray(),
+                Classes = loadoutHash.Values.ToArray()
+            };
+        }
+
+        private void PreLoadCombatStatTrackers(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths, Dictionary<string, CombatReportParticipantStats> participantHash,
+            Dictionary<string, CombatReportOutfitStats> outfitHash, Dictionary<int, CombatReportVehicleStats> vehicleHash, Dictionary<int, CombatReportWeaponStats> weaponHash, 
+            Dictionary<int, CombatReportClassStats> loadoutHash)
+        {
             foreach (var death in deaths)
             {
                 if (!participantHash.ContainsKey(death.AttackerCharacterId))
@@ -95,24 +119,14 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     vehicleHash.Add(death.AttackerVehicleId.Value, new CombatReportVehicleStats(death.AttackerVehicleId.Value));
                 }
 
-                if (death.AttackerLoadoutId != null)
+                if (death.AttackerLoadoutId != null && !loadoutHash.ContainsKey(death.AttackerLoadoutId.Value))
                 {
-                    var attackerProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.AttackerLoadoutId.Value);
-                    death.AttackerLoadoutId = attackerProfileId;
-                    if (!classHash.ContainsKey(attackerProfileId))
-                    {
-                        classHash.Add(attackerProfileId, new CombatReportClassStats(attackerProfileId));
-                    }
+                    loadoutHash.Add(death.AttackerLoadoutId.Value, new CombatReportClassStats(death.AttackerLoadoutId.Value));
                 }
 
-                if (death.CharacterLoadoutId != null)
+                if (death.CharacterLoadoutId != null && !loadoutHash.ContainsKey(death.CharacterLoadoutId.Value))
                 {
-                    var victimProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.CharacterLoadoutId.Value);
-                    death.CharacterLoadoutId = victimProfileId;
-                    if (!classHash.ContainsKey(victimProfileId))
-                    {
-                        classHash.Add(victimProfileId, new CombatReportClassStats(victimProfileId));
-                    }
+                    loadoutHash.Add(death.CharacterLoadoutId.Value, new CombatReportClassStats(death.CharacterLoadoutId.Value));
                 }
             }
 
@@ -128,20 +142,31 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     vehicleHash.Add(death.VehicleId.Value, new CombatReportVehicleStats(death.VehicleId.Value));
                 }
             }
+        }
 
+        private async Task LoadCombatStatDetails(Dictionary<string, CombatReportParticipantStats> participantHash,
+            Dictionary<string, CombatReportOutfitStats> outfitHash,
+            Dictionary<int, CombatReportVehicleStats> vehicleHash,
+            Dictionary<int, CombatReportWeaponStats> weaponHash,
+            Dictionary<int, CombatReportClassStats> loadoutHash)
+        {
             var charactersTask = _characterService.FindCharacters(participantHash.Keys);
             var outfitsTask = _outfitService.FindOutfits(outfitHash.Keys);
             var weaponsTask = _itemService.FindItems(weaponHash.Keys);
             var vehiclesTask = _vehicleService.GetAllVehicles();
-            var profilesTask = _profileService.GetAllProfiles();
 
-            await Task.WhenAll(charactersTask, outfitsTask, weaponsTask, vehiclesTask, profilesTask);
+            await Task.WhenAll(charactersTask, outfitsTask, weaponsTask, vehiclesTask);
 
             foreach (var outfit in outfitsTask.Result)
             {
                 outfitHash[outfit.Id].Outfit.Name = outfit.Name;
                 outfitHash[outfit.Id].Outfit.FactionId = outfit.FactionId ?? 0;
                 outfitHash[outfit.Id].Outfit.Alias = outfit.Alias;
+            }
+
+            if (outfitHash.ContainsKey(""))
+            {
+                outfitHash[""].Outfit.Name = "No Outfit";
             }
 
             foreach (var character in charactersTask.Result)
@@ -166,7 +191,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 weaponHash[weapon.Id].Item.FactionId = weapon.FactionId ?? 0;
             }
 
-            foreach(var vehicle in vehiclesTask.Result)
+            foreach (var vehicle in vehiclesTask.Result)
             {
                 if (vehicleHash.ContainsKey(vehicle.Id))
                 {
@@ -178,18 +203,31 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 }
             }
 
-            foreach(var profile in profilesTask.Result)
+            foreach (var loadoutId in loadoutHash.Keys)
             {
-                if (classHash.ContainsKey(profile.Id))
+                var profile = await _profileService.GetProfileFromLoadoutIdAsync(loadoutId);
+                if (profile == null)
                 {
-                    classHash[profile.Id].Profile.Name = profile.Name;
-                    classHash[profile.Id].Profile.TypeId = profile.ProfileTypeId;
-                    classHash[profile.Id].Profile.FactionId = profile.FactionId;
-
+                    continue;
                 }
-            }
 
-            foreach(var death in deaths)
+                loadoutHash[loadoutId].Profile.ProfileId = profile.Id;
+                loadoutHash[loadoutId].Profile.Name = profile.Name;
+                loadoutHash[loadoutId].Profile.ProfileTypeId = profile.ProfileTypeId;
+                loadoutHash[loadoutId].Profile.ProfileImageId = profile.ImageId;
+                loadoutHash[loadoutId].Profile.FactionId = profile.FactionId;
+            }
+        }
+
+        private void CalculateCombatStats(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths,
+            IEnumerable<FacilityControl> facilityControls,
+            Dictionary<string, CombatReportParticipantStats> participantHash,
+            Dictionary<string, CombatReportOutfitStats> outfitHash,
+            Dictionary<int, CombatReportVehicleStats> vehicleHash,
+            Dictionary<int, CombatReportWeaponStats> weaponHash,
+            Dictionary<int, CombatReportClassStats> loadoutHash)
+        {
+            foreach (var death in deaths)
             {
                 CombatReportOutfitStats attackerOutfit = null;
                 CombatReportOutfitStats victimOutfit = null;
@@ -197,9 +235,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 CombatReportVehicleStats vehicle = null;
                 CombatReportClassStats attackerClass = null;
                 CombatReportClassStats victimClass = null;
-
-                participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
-                participantHash.TryGetValue(death.CharacterId, out var victim);
 
                 if (death.AttackerOutfitId != null)
                 {
@@ -223,80 +258,76 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 if (death.AttackerLoadoutId != null)
                 {
-                    classHash.TryGetValue(death.AttackerLoadoutId.Value, out attackerClass);
+                    loadoutHash.TryGetValue(death.AttackerLoadoutId.Value, out attackerClass);
                 }
 
                 if (death.CharacterLoadoutId != null)
                 {
-                    classHash.TryGetValue(death.CharacterLoadoutId.Value, out victimClass);
+                    loadoutHash.TryGetValue(death.CharacterLoadoutId.Value, out victimClass);
                 }
 
-                if (attacker.Character.Id == victim.Character.Id || attacker.Character.Id == "0")
+                if (participantHash.TryGetValue(death.CharacterId, out var victim))
                 {
-                    victim.Suicides++;
-
-                    if (victimOutfit != null) { victimOutfit.Suicides++; }
-                    if (victimClass != null) { victimClass.Suicides++; }
-                }
-                else
-                {
-                    if (attacker.Character.FactionId == victim.Character.FactionId)
+                    if (death.AttackerCharacterId == death.CharacterId || death.AttackerCharacterId == "0")
                     {
-                        attacker.Teamkills++;
+                        victim.Suicides++;
 
-                        if (attackerOutfit != null) { attackerOutfit.Teamkills++; }
-                        if (attackerClass != null) { attackerClass.Teamkills++; }
-                        if (weapon != null) { weapon.Teamkills++; }
-                        if (vehicle != null) { vehicle.Teamkills++; }
+                        if (victimOutfit != null) { victimOutfit.Suicides++; }
+                        if (victimClass != null) { victimClass.Suicides++; }
                     }
-                    else
+                    else if (participantHash.TryGetValue(death.AttackerCharacterId, out var attacker))
                     {
-                        attacker.Kills++;
-
-                        if (attackerOutfit != null) { attackerOutfit.Kills++; }
-                        if (attackerClass != null) { attackerClass.Kills++; }
-                        if (weapon != null) { weapon.Kills++; }
-                        if (vehicle != null) { vehicle.Kills++; }
-
-                        if (death.IsHeadshot)
+                        if (attacker.Character.FactionId == victim.Character.FactionId)
                         {
-                            attacker.Headshots++;
+                            attacker.Teamkills++;
 
-                            if (attackerOutfit != null) { attackerOutfit.Headshots++; }
-                            if (attackerClass != null) { attackerClass.Headshots++; }
-                            if (weapon != null) { weapon.Headshots++; }
+                            if (attackerOutfit != null) { attackerOutfit.Teamkills++; }
+                            if (attackerClass != null) { attackerClass.Teamkills++; }
+                            if (weapon != null) { weapon.Teamkills++; }
+                            if (vehicle != null) { vehicle.Teamkills++; }
+                        }
+                        else
+                        {
+                            attacker.Kills++;
+
+                            if (attackerOutfit != null) { attackerOutfit.Kills++; }
+                            if (attackerClass != null) { attackerClass.Kills++; }
+                            if (weapon != null) { weapon.Kills++; }
+                            if (vehicle != null) { vehicle.Kills++; }
+
+                            if (death.IsHeadshot)
+                            {
+                                attacker.Headshots++;
+
+                                if (attackerOutfit != null) { attackerOutfit.Headshots++; }
+                                if (attackerClass != null) { attackerClass.Headshots++; }
+                                if (weapon != null) { weapon.Headshots++; }
+                            }
                         }
                     }
-                }
 
-                victim.Deaths++;
+                    victim.Deaths++;
+                }
 
                 if (victimOutfit != null) { victimOutfit.Deaths++; }
                 if (victimClass != null) { victimClass.Deaths++; }
             }
 
-            foreach(var death in vehicleDeaths)
+            foreach (var death in vehicleDeaths)
             {
-                CombatReportOutfitStats attackerOutfit = null;
-                participantHash.TryGetValue(death.AttackerCharacterId, out var attacker);
-
-                if (attacker != null) {
+                if (participantHash.TryGetValue(death.AttackerCharacterId, out var attacker))
+                {
                     attacker.VehicleKills++;
 
-                    if (attacker.Outfit?.Id != null && outfitHash.TryGetValue(attacker.Outfit.Id, out attackerOutfit))
+                    if (attacker.Outfit?.Id != null && outfitHash.ContainsKey(attacker.Outfit.Id))
                     {
-                        attackerOutfit.VehicleKills++;
+                        outfitHash[attacker.Outfit.Id].VehicleKills++;
                     }
                 }
 
-                if (death.AttackerLoadoutId != null)
+                if (death.AttackerLoadoutId != null && loadoutHash.ContainsKey(death.AttackerLoadoutId.Value))
                 {
-                    var attackerProfileId = await _profileService.GetProfileIdFromLoadoutAsync(death.AttackerLoadoutId.Value);
-                    death.AttackerLoadoutId = attackerProfileId;
-                    if (classHash.ContainsKey(attackerProfileId))
-                    {
-                        classHash[attackerProfileId].VehicleKills++;
-                    }
+                    loadoutHash[death.AttackerLoadoutId.Value].VehicleKills++;
                 }
 
                 if (death.AttackerVehicleId.HasValue && vehicleHash.ContainsKey(death.AttackerVehicleId.Value))
@@ -305,50 +336,55 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 }
             }
 
-            if (outfitHash.ContainsKey(""))
-            {
-                outfitHash[""].Outfit.Name = "No Outfit";
-            }
+            var outfitFacilityCaptures = facilityControls.Where(a => a.NewFactionId != a.OldFactionId)
+                .GroupBy(a => a.OutfitId ?? "")
+                .ToDictionary(a => a.Key, a => a.Count());
 
             foreach (var outfit in outfitHash)
             {
+                outfitHash[outfit.Key].FacilityCaptures = outfitFacilityCaptures.GetValueOrDefault(outfit.Key, 0);
                 outfitHash[outfit.Key].ParticipantCount = participantHash.Values.Count(a => a.Outfit?.Id == outfit.Key);
             }
+        }
 
-            deaths.Where(a =>
-                    a.AttackerCharacterId != a.CharacterId && !string.IsNullOrEmpty(a.AttackerCharacterId) &&
-                    !string.IsNullOrEmpty(a.CharacterId) && participantHash.ContainsKey(a.AttackerCharacterId))
+        private void SetCombatStatTopItems(List<Death> deaths,
+            Dictionary<string, CombatReportParticipantStats> participantHash,
+            Dictionary<int, CombatReportWeaponStats> weaponHash,
+            Dictionary<int, CombatReportClassStats> loadoutHash)
+        {
+            var attackerKillGroups = deaths.Where(a =>
+                    !string.IsNullOrEmpty(a.AttackerCharacterId) &&
+                    !string.IsNullOrEmpty(a.CharacterId) &&
+                    a.AttackerCharacterId != a.CharacterId &&
+                    participantHash.ContainsKey(a.AttackerCharacterId))
                 .GroupBy(a => a.AttackerCharacterId)
-                .ToList()
-                .ForEach(d =>
-                {
-                    var topWeaponId = d.GroupBy(b => b.AttackerWeaponId).OrderByDescending(b => b.Count())
-                        .FirstOrDefault()?.Key;
-                    var topLoadoutId = d.GroupBy(b => b.AttackerLoadoutId).OrderByDescending(b => b.Count())
-                        .FirstOrDefault()?.Key;
+                .ToList();
 
-                    participantHash[d.Key].TopWeaponId = topWeaponId;
-                    participantHash[d.Key].TopLoadoutId = topLoadoutId;
-
-                    if (weaponHash.TryGetValue(topWeaponId.GetValueOrDefault(), out var weapon))
-                    {
-                        participantHash[d.Key].TopWeaponName = weapon.Item?.Name;
-                    }
-
-                    if (classHash.TryGetValue(topLoadoutId.GetValueOrDefault(), out var loadout))
-                    {
-                        participantHash[d.Key].TopLoadoutName = loadout.Profile?.Name;
-                    }
-                });
-
-            return new CombatReportStats
+            foreach (var attackerKills in attackerKillGroups)
             {
-                Participants = participantHash.Values.ToArray(),
-                Outfits = outfitHash.Values.ToArray(),
-                Weapons = weaponHash.Values.ToArray(),
-                Vehicles = vehicleHash.Values.ToArray(),
-                Classes = classHash.Values.ToArray()
-            };
+                var characterId = attackerKills.Key;
+
+                var topWeaponId = attackerKills.GroupBy(b => b.AttackerWeaponId).OrderByDescending(b => b.Count())
+                    .FirstOrDefault()?.Key;
+
+                var topLoadoutId = attackerKills.GroupBy(b => b.AttackerLoadoutId).OrderByDescending(b => b.Count())
+                    .FirstOrDefault()?.Key;
+
+                participantHash[characterId].TopWeaponId = topWeaponId;
+                participantHash[characterId].TopProfileId = topLoadoutId;
+
+                if (topWeaponId != null && weaponHash.TryGetValue(topWeaponId.Value, out var weapon))
+                {
+                    participantHash[characterId].TopWeaponName = weapon.Item?.Name;
+                }
+
+                if (topLoadoutId != null && loadoutHash.TryGetValue(topLoadoutId.Value, out var loadout))
+                {
+                    participantHash[characterId].TopProfileId = loadout.Profile?.ProfileId;
+                    participantHash[characterId].TopProfileImageId = loadout.Profile?.ProfileImageId;
+                    participantHash[characterId].TopProfileName = loadout.Profile?.Name;
+                }
+            }
         }
 
         private Task<IEnumerable<Death>> GetCharacterDeaths(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
@@ -363,12 +399,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<IEnumerable<CaptureLogRow>> GetCaptureLog(int worldId, int zoneId, DateTime startDate, DateTime? endDate)
         {
-            var facilityControls = await _worldEventsService.GetFacilityControlsByDateAsync(worldId, zoneId, startDate, endDate);
+            var facilityControls = await _worldEventsService.GetFacilityControlsByDateAsync(worldId, startDate, endDate, zoneId);
 
             var facilityIds = facilityControls.Select(c => c.FacilityId).Distinct().ToArray();
             var mapRegions = await _mapService.FindRegions(facilityIds);
 
-            var controlOutfitIds = facilityControls.Select(a => a.OutfitId);
+            var controlOutfitIds = facilityControls.Select(a => a.OutfitId).Distinct().ToList();
             var outfits = controlOutfitIds.Any() ? await _outfitService.FindOutfits(controlOutfitIds) : Enumerable.Empty<Outfit>();
 
             return facilityControls.Select(control => {

@@ -49,7 +49,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     endDate = DateTime.UtcNow;
                 }
 
-                var query = dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate); ;
+                var query = dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate);
                 if (zoneId.HasValue)
                 {
                     query = query.Where(e => e.ZoneId == zoneId);
@@ -59,7 +59,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Death>> GetDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate)
+        public async Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime startDate, DateTime? endDate)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
@@ -69,17 +69,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 {
                     endDate = DateTime.UtcNow;
                 }
-
-                return await dbContext.EventDeaths.Where(e => e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate)
-                    .ToListAsync();
-            }
-        }
-
-        public async Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
 
                 var query = from e in dbContext.EventDeaths
 
@@ -92,8 +81,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                              join victimCharacter in dbContext.Characters on e.CharacterId equals victimCharacter.Id into victimCharacterQ
                              from victimCharacter in victimCharacterQ.DefaultIfEmpty()
 
-                             where (e.AttackerCharacterId == characterId || e.CharacterId == characterId) && e.Timestamp > lower && e.Timestamp < upper
-                             select new Death
+                             where (e.AttackerCharacterId == characterId || e.CharacterId == characterId) && e.Timestamp > startDate && e.Timestamp < endDate
+                            select new Death
                              {
                                  Timestamp = e.Timestamp,
                                  WorldId = e.WorldId,
@@ -254,7 +243,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
+        public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {

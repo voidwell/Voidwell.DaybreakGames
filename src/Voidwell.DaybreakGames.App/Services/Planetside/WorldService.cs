@@ -27,9 +27,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private const string _cacheKeyPrefix = "ps2.worldService";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
-        private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromSeconds(10);
+        private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromSeconds(15);
 
-        private readonly TimeSpan _activityPopulationOffset = TimeSpan.FromHours(6);
+        private readonly TimeSpan _activityPopulationOffset = TimeSpan.FromHours(12);
         private readonly TimeSpan _activityPopulationPeriodInterval = TimeSpan.FromSeconds(16);
 
         private readonly KeyedSemaphoreSlim _worldPopulationLock = new KeyedSemaphoreSlim();
@@ -97,7 +97,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return cachedActivity;
                 }
 
-                var activity = new WorldActivity();
+                var activity = new WorldActivity
+                {
+                    ActivityPeriodStart = startDate,
+                    ActivityPeriodEnd = endDate
+                };
 
                 var combatStatsTask = _combatReportService.GetCombatStats(worldId, startDate, endDate);
                 var experienceTask = GetWorldActivityExperience(worldId, startDate, endDate);
@@ -108,24 +112,39 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var combatStats = combatStatsTask.Result;
                 var playerSessions = playerSessionsTask.Result;
 
-
                 var topPlayers = combatStats.Participants.OrderByDescending(a => a.Kills).Take(25).ToList();
 
                 var sessionsDic = playerSessions.GroupBy(a => a.CharacterId)
-                    .ToDictionary(a => a.Key, a => a.OrderByDescending(b => b.LoginDate));
+                    .ToDictionary(a => a.Key, a => a.FirstOrDefault());
 
-                topPlayers.ForEach(player =>
+                var sessionKillsTasks = topPlayers.Select(a =>
+                {
+                    if (sessionsDic.TryGetValue(a.Character.Id, out var session) && session.LoginDate.HasValue)
                     {
-                        if (sessionsDic.TryGetValue(player.Character.Id, out var sessions))
-                        {
-                            var latestSession = sessions.FirstOrDefault();
-                            player.LoginDate = latestSession.LoginDate;
-                            player.LogoutDate = latestSession.LogoutDate;
-                        }
-                    });
+                        return GetKillCountByCharacterIdAsync(a.Character.Id, session.LoginDate.Value,
+                            session.LogoutDate);
+                    }
+
+                    return Task.FromResult(0);
+                });
+
+                var sessionKillsResults = await Task.WhenAll(sessionKillsTasks);
+
+                for (var i = 0; i < topPlayers.Count; i++)
+                {
+                    var player = topPlayers[i];
+
+                    player.SessionKills = sessionKillsResults[i];
+
+                    if (sessionsDic.TryGetValue(player.Character.Id, out var session))
+                    {
+                        player.LoginDate = session.LoginDate;
+                        player.LogoutDate = session.LogoutDate;
+                    }
+                }
 
                 activity.Stats = CreateWorldActivityStats(combatStats.Participants);
-                activity.ClassStats = combatStats.Classes.OrderBy(a => a.Profile.TypeId);
+                activity.ClassStats = combatStats.Classes.OrderBy(a => a.Profile.ProfileTypeId);
                 activity.TopVehicles = combatStats.Vehicles.OrderByDescending(a => a.Kills).Where(a => a.Kills > 0).Take(20);
                 activity.TopPlayers = topPlayers;
                 activity.TopOutfits = combatStats.Outfits.Where(a => a.ParticipantCount > 4).OrderByDescending(a => a.Kills / a.ParticipantCount).Take(10);
@@ -138,7 +157,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return activity;
             }
         }
-
+        
         private WorldActivityStats CreateWorldActivityStats(IEnumerable<CombatReportParticipantStats> participants)
         {
             var stats = new WorldActivityStats();
@@ -323,44 +342,43 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             await Task.WhenAll(playerLoginEventsTask, playerLogoutEventsTask);
 
-            var loginEvents = playerLoginEventsTask.Result.OrderBy(a => a.Timestamp).GroupBy(a => a.CharacterId).ToList();
-            var logoutEvents = playerLogoutEventsTask.Result.OrderBy(a => a.Timestamp).GroupBy(a => a.CharacterId).ToList();
-
-            var distinctCharacterIds = loginEvents.Select(a => a.Key).Concat(logoutEvents.Select(a => a.Key)).Distinct();
-            var characters = (await _characterService.FindCharacters(distinctCharacterIds))?.ToDictionary(a => a.Id, a => a);
+            var loginEvents = playerLoginEventsTask.Result.OrderBy(a => a.Timestamp).GroupBy(a => a.CharacterId).ToDictionary(a => a.Key, a => a.ToList());
+            var logoutEvents = playerLogoutEventsTask.Result.OrderBy(a => a.Timestamp).GroupBy(a => a.CharacterId).ToDictionary(a => a.Key, a => a.ToList());
 
             var sessions = new List<PlayerActivitySession>();
-            foreach (var loginGroup in loginEvents)
+            foreach (var characterId in loginEvents.Keys)
             {
-                if (!characters.TryGetValue(loginGroup.Key, out var character))
-                {
-                    continue;
-                }
-
-                var groupLogoutEvents = logoutEvents.Where(a => a.Key == character.Id).SelectMany(a => a)
-                    .OrderBy(a => a.Timestamp)
-                    .ToList();
-
-                sessions.AddRange(loginGroup.OrderBy(a => a.Timestamp)
+                sessions.AddRange(loginEvents[characterId]
                     .Select(loginEvent => new PlayerActivitySession
                     {
-                        CharacterId = character.Id,
-                        FactionId = character.FactionId,
+                        CharacterId = loginEvent.CharacterId,
                         LoginDate = loginEvent.Timestamp,
-                        LogoutDate = groupLogoutEvents.FirstOrDefault(a => a.Timestamp >= loginEvent.Timestamp)?.Timestamp
+                        LogoutDate = logoutEvents.GetValueOrDefault(characterId)?.FirstOrDefault(a => a.Timestamp >= loginEvent.Timestamp)?.Timestamp
                     }));
             }
 
-            return sessions;
+            var periodSessions = sessions.OrderByDescending(a => a.LoginDate)
+                .GroupBy(a => a.CharacterId)
+                .SelectMany(a => MergeSessionReconnects(a.ToList()))
+                .Where(a => a.LogoutDate == null || a.LogoutDate >= startDate)
+                .ToList();
+
+            var distinctCharacterIds = periodSessions.Select(a => a.CharacterId).Distinct();
+            var characterFactions = (await _characterService.FindCharacters(distinctCharacterIds))?.ToDictionary(a => a.Id, a => a.FactionId);
+
+            if (characterFactions != null)
+            {
+                periodSessions.ForEach(a => a.FactionId = characterFactions.ContainsKey(a.CharacterId) ? characterFactions[a.CharacterId] : (int?)null);
+            }
+
+            return periodSessions;
         }
 
         private IEnumerable<PopulationPeriod> GetPopulationPeriods(IEnumerable<PlayerActivitySession> sessions, DateTime startDate, DateTime endDate)
         {
-            var populationStartDate = startDate.Add(-_activityPopulationOffset);
-
             var populationPeriods = new List<PopulationPeriod>();
-
-            for (var i = populationStartDate; i < endDate; i = i.Add(_activityPopulationPeriodInterval))
+            
+            for (var i = startDate; i < endDate; i = i.Add(_activityPopulationPeriodInterval))
             {
                 var relativeUpper = i.Add(_activityPopulationPeriodInterval);
 
@@ -377,7 +395,41 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 });
             }
 
-            return populationPeriods.OrderByDescending(a => a.Timestamp).Where(a => a.Timestamp >= startDate && a.Timestamp <= endDate).ToList();
+            return populationPeriods.OrderByDescending(a => a.Timestamp).ToList();
+        }
+
+        private async Task<int> GetKillCountByCharacterIdAsync(string characterId, DateTime startDate, DateTime? endDate)
+        {
+            var characterDeathEvents = await _worldEventsService.GetDeathEventsForCharacterIdByDateAsync(characterId, startDate, endDate);
+
+            return characterDeathEvents.Count(a => a.AttackerCharacterId == characterId && a.AttackerCharacterId != a.CharacterId && a.AttackerCharacter?.FactionId != a.Character?.FactionId);
+        }
+
+        private IEnumerable<PlayerActivitySession> MergeSessionReconnects(IEnumerable<PlayerActivitySession> sessions)
+        {
+            PlayerActivitySession currentSession = null;
+            var uniqueSessions = new List<PlayerActivitySession>();
+
+            foreach (var session in sessions.OrderByDescending(a => a.LoginDate))
+            {
+                if (currentSession == null)
+                {
+                    currentSession = session;
+                }
+                else if (currentSession.LoginDate - session.LogoutDate <= TimeSpan.FromMinutes(5))
+                {
+                    currentSession.LoginDate = session.LoginDate;
+                }
+                else
+                {
+                    uniqueSessions.Add(currentSession);
+                    currentSession = session;
+                }
+            }
+
+            uniqueSessions.Add(currentSession);
+
+            return uniqueSessions;
         }
     }
 }
