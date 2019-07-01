@@ -22,8 +22,8 @@ namespace Voidwell.DaybreakGames.Models
         public int? MaxDamageRange { get; set; }
         public int? IndirectMaxDamage { get; set; } 
         public int? IndirectMinDamage { get; set; }
-        public int? IndirectMaxDamageRange { get; set; }
-        public int? IndirectMinDamageRange { get; set; }
+        public float? IndirectMaxDamageRange { get; set; }
+        public float? IndirectMinDamageRange { get; set; }
         public int MinReloadSpeed { get; set; }
         public int MaxReloadSpeed { get; set; }
         public float? IronSightZoom { get; set; }

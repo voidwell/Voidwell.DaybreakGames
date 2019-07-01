@@ -42,7 +42,7 @@ namespace Voidwell.DaybreakGames.Test.MapTests
             return new WorldZoneState(1, zone, zoneMap, ownership);
         }
 
-        private static ZoneMap GetZoneMap(int zoneId)
+        public static ZoneMap GetZoneMap(int zoneId)
         {
             var links = GetFacilityLinks(zoneId).Select(a => new ZoneLink { FacilityIdA = a.FacilityIdA, FacilityIdB = a.FacilityIdB });
             var regions = GetMapRegions(zoneId).Select(a => new ZoneRegion
@@ -63,13 +63,13 @@ namespace Voidwell.DaybreakGames.Test.MapTests
             };
         }
 
-        private static IEnumerable<ZoneRegionOwnership> GetMapOwnership(int zoneId)
+        public static IEnumerable<ZoneRegionOwnership> GetMapOwnership(int zoneId)
         {
             var mapList = LoadJson<IEnumerable<CensusMapModel>>($"{DataRoot}/MapOwnership.json", "map_list");
             return mapList.First(a => a.ZoneId == zoneId).Regions.Row.Select(a => new ZoneRegionOwnership(a.RowData.RegionId, a.RowData.FactionId));
         }
 
-        private static IEnumerable<FacilityLink> GetFacilityLinks(int zoneId)
+        public static IEnumerable<FacilityLink> GetFacilityLinks(int zoneId)
         {
             var model = LoadJson<IEnumerable<CensusFacilityLinkModel>>($"{DataRoot}FacilityLinks.json", "facility_link_list");
             return model.Select(a => new FacilityLink
@@ -81,7 +81,7 @@ namespace Voidwell.DaybreakGames.Test.MapTests
             }).Where(a => a.ZoneId == zoneId);
         }
 
-        private static IEnumerable<MapRegion> GetMapRegions(int zoneId)
+        public static IEnumerable<MapRegion> GetMapRegions(int zoneId)
         {
             var model = LoadJson<IEnumerable<CensusMapRegionModel>>($"{DataRoot}MapRegions.json", "map_region_list");
             return model.Select(a => new MapRegion

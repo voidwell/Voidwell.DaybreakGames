@@ -50,9 +50,9 @@ namespace Voidwell.DaybreakGames.CensusServices.Models
             public float DefaultZoom { get; set; }
             public int? DamageRadius { get; set; }
             public int? IndirectDamageMax { get; set; }
-            public int? IndirectDamageMaxRange { get; set; }
+            public float? IndirectDamageMaxRange { get; set; }
             public int? IndirectDamageMin { get; set; }
-            public int? IndirectDamageMinRange { get; set; }
+            public float? IndirectDamageMinRange { get; set; }
             public int? IndirectDamageTargetType { get; set; }
             public int? IndirectDamageResistType { get; set; }
         }
