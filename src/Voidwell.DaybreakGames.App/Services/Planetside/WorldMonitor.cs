@@ -287,6 +287,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return false;
             }
 
+            _logger.LogInformation(71611, "Setting up zone {0} for world {1}. Retry: {2}", zone.Id, worldId, retry);
+
             if (_worldStates[worldId].GetZoneState(zone.Id) == null)
             {
                 _worldStates[worldId].InitZoneState(zone);
