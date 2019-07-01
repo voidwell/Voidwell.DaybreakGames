@@ -12,14 +12,14 @@ namespace Voidwell.DaybreakGames.Models
         public string Description { get; set; }
         public int MaxStackSize { get; set; }
         public string Range { get; set; }
-        public int FireRateMs { get; set; }
-        public int ClipSize { get; set; }
-        public int Capacity { get; set; }
+        public int? FireRateMs { get; set; }
+        public int? ClipSize { get; set; }
+        public int? Capacity { get; set; }
         public int? MuzzleVelocity { get; set; }
         public int MinDamage { get; set; }
         public int MaxDamage { get; set; }
-        public int MinDamageRange { get; set; }
-        public int MaxDamageRange { get; set; }
+        public int? MinDamageRange { get; set; }
+        public int? MaxDamageRange { get; set; }
         public int? IndirectMaxDamage { get; set; } 
         public int? IndirectMinDamage { get; set; }
         public int? IndirectMaxDamageRange { get; set; }
