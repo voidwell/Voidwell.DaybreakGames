@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.CensusServices;
+using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
@@ -47,8 +48,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var info = await _censusItem.GetWeaponInfo(weaponItemId);
 
-            var hipModes = info.FireMode.Where(m => m.Type == "primary");
-            var aimModes = info.FireMode.Where(m => m.Type == "secondary");
+            var hipModes = info.FireMode.Where(m => m.Type == "primary").ToList();
+            var aimModes = info.FireMode.Where(m => m.Type == "secondary").ToList();
 
             var minDamage = info.FireMode.Min(m => m.DamageMin) ?? info.Datasheet.DamageMin;
             var maxDamage = info.FireMode.Max(m => m.DamageMax) ?? info.Datasheet.DamageMax;
@@ -58,61 +59,56 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var weaponInfo = new WeaponInfoResult
             {
-                Name = info.Name.English,
+                Name = info.Name?.English,
                 ItemId = weaponItemId,
-                Category = info.Category.Name.English,
+                Category = info.Category?.Name?.English,
                 FactionId = info.FactionId,
                 ImageId = info.ImageId,
-                Description = info.Description.English,
+                Description = info.Description?.English,
                 MaxStackSize = info.MaxStackSize,
-                Range = info.Datasheet.Range.English,
-                FireRateMs = info.Datasheet.FireRateMs,
-                ClipSize = info.Datasheet.ClipSize,
-                Capacity = info.Datasheet.Capacity,
-                MuzzleVelocity = info.FireMode.FirstOrDefault()?.Speed,
+                Range = info.Datasheet?.Range?.English,
+                FireRateMs = info.Datasheet?.FireRateMs,
+                ClipSize = info.Datasheet?.ClipSize,
+                Capacity = info.Datasheet?.Capacity,
+                MuzzleVelocity = info.FireMode?.FirstOrDefault()?.Speed,
                 MinDamage = minDamage,
                 MaxDamage = maxDamage,
-                MinDamageRange = info.FireMode.Min(m => m.DamageMinRange).GetValueOrDefault(),
-                MaxDamageRange = info.FireMode.Min(m => m.DamageMaxRange).GetValueOrDefault(),
-                IndirectMinDamage = info.FireMode.Min(m => m.IndirectDamageMin),
-                IndirectMaxDamage = info.FireMode.Max(m => m.IndirectDamageMax),
-                IndirectMinDamageRange = info.FireMode.Min(m => m.IndirectDamageMinRange),
-                IndirectMaxDamageRange = info.FireMode.Max(m => m.IndirectDamageMaxRange),
+                MinDamageRange = info.FireMode?.Min(m => m.DamageMinRange).GetValueOrDefault(),
+                MaxDamageRange = info.FireMode?.Min(m => m.DamageMaxRange).GetValueOrDefault(),
+                IndirectMinDamage = info.FireMode?.Min(m => m.IndirectDamageMin),
+                IndirectMaxDamage = info.FireMode?.Max(m => m.IndirectDamageMax),
+                IndirectMinDamageRange = info.FireMode?.Min(m => m.IndirectDamageMinRange),
+                IndirectMaxDamageRange = info.FireMode?.Max(m => m.IndirectDamageMaxRange),
                 MinReloadSpeed = minReloadSpeed,
                 MaxReloadSpeed = maxReloadSpeed,
-                IronSightZoom = aimModes.FirstOrDefault()?.DefaultZoom,
-                FireModes = hipModes.Select(m => m.Description.English),
+                IronSightZoom = aimModes?.FirstOrDefault()?.DefaultZoom,
+                FireModes = hipModes?.Select(m => m.Description?.English),
                 IsVehicleWeapon = info.IsVehicleWeapon,
-                DamageRadius = info.FireMode.Max(m => m.DamageRadius)
+                DamageRadius = info.FireMode?.Max(m => m.DamageRadius),
+                HipAcc = GetAccuracyStateFromFireMode(hipModes?.First()),
+                AimAcc = GetAccuracyStateFromFireMode(aimModes?.First())
             };
-
-            if (hipModes.Any())
-            {
-                weaponInfo.HipAcc = new AccuracyState
-                {
-                    Crouching = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "Crouching")?.MinConeOfFire,
-                    CrouchWalking = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "CrouchWalking")?.MinConeOfFire,
-                    Standing = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "Standing")?.MinConeOfFire,
-                    Running = hipModes.First().States.FirstOrDefault(s => s.PlayerState == "Running")?.MinConeOfFire,
-                    Cof = hipModes.First().CofRecoil
-                };
-            }
-
-            if (aimModes.Any())
-            {
-                weaponInfo.AimAcc = new AccuracyState
-                {
-                    Crouching = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "Crouching")?.MinConeOfFire,
-                    CrouchWalking = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "CrouchWalking")?.MinConeOfFire,
-                    Standing = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "Standing")?.MinConeOfFire,
-                    Running = aimModes.First().States.FirstOrDefault(s => s.PlayerState == "Running")?.MinConeOfFire,
-                    Cof = aimModes.First().CofRecoil
-                };
-            }
 
             await _cache.SetAsync($"{_weaponInfoCacheKey}_{weaponItemId}", weaponInfo, _weaponInfoCacheExpiration);
 
             return weaponInfo;
+        }
+
+        private static AccuracyState GetAccuracyStateFromFireMode(CensusWeaponInfoModel.WeaponFireMode mode)
+        {
+            if (mode == null)
+            {
+                return null;
+            }
+
+            return new AccuracyState
+            {
+                Crouching = mode.States.FirstOrDefault(s => s.PlayerState == "Crouching")?.MinConeOfFire,
+                CrouchWalking = mode.States.FirstOrDefault(s => s.PlayerState == "CrouchWalking")?.MinConeOfFire,
+                Standing = mode.States.FirstOrDefault(s => s.PlayerState == "Standing")?.MinConeOfFire,
+                Running = mode.States.FirstOrDefault(s => s.PlayerState == "Running")?.MinConeOfFire,
+                Cof = mode.CofRecoil
+            };
         }
 
         public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(int weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250)
