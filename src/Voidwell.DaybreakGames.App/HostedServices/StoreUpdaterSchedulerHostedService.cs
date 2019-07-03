@@ -78,7 +78,7 @@ namespace Voidwell.DaybreakGames.HostedServices
                 return;
 
             var remainingInterval = TimeSpan.Zero;
-            if (updaterHistory?.LastUpdateDate != default(DateTime))
+            if (updaterHistory?.LastUpdateDate != null)
             {
                 var offset = updaterHistory.LastUpdateDate.Add(updater.UpdateInterval) - DateTime.UtcNow;
                 if (offset.TotalMilliseconds > 0)

@@ -34,7 +34,7 @@ namespace Voidwell.DaybreakGames.Api
                     {
                         builder.AddGelf(options =>
                         {
-                            options.LogSource = "Voidwell.DaybreakGames";
+                            options.LogSource = context.Configuration.GetValue("ApplicationName", "Voidwell.DaybreakGames");
                         });
                     }
                     else

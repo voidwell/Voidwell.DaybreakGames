@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Data
             services.AddDbContextPool<PS2DbContext>(builder =>
                 builder.UseNpgsql(options.DBConnectionString, b => {
                     b.MigrationsAssembly(_migrationAssembly);
-                }), 100);
+                }), options.PoolSize);
 
             services.AddSingleton<IDbContextHelper, DbContextHelper>();
             services.AddSingleton<IUpdaterSchedulerRepository, UpdaterSchedulerRepository>();
