@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var outfit = await dbContext.Outfits
                     .OrderByDescending(a => a.CreatedDate)
-                    .FirstOrDefaultAsync(a => a.Alias == outfitAlias);
+                    .FirstOrDefaultAsync(a => string.Equals(a.Alias, outfitAlias, StringComparison.CurrentCultureIgnoreCase));
 
                 return outfit?.Id;
             }
