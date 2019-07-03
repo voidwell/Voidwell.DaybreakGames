@@ -25,9 +25,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 var character = await dbContext.Characters
                     .Include(a => a.Time)
-                    .Where(a => a.Time != null)
+                    .Where(a => a.Time != null && a.Name != null)
                     .OrderByDescending(a => a.Time.CreatedDate)
-                    .FirstOrDefaultAsync(a => string.Equals(a.Name, characterName, StringComparison.CurrentCultureIgnoreCase));
+                    .FirstOrDefaultAsync(a => a.Name.ToLower() == characterName.ToLower());
 
                 return character?.Id;
             }
