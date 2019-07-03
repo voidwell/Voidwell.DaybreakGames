@@ -44,6 +44,7 @@ namespace Voidwell.DaybreakGames.App
             services.AddCensusServices(options =>
             {
                 options.CensusServiceId = configuration.GetValue<string>("CensusServiceKey");
+                options.CensusServiceNamespace = configuration.GetValue<string>("CensusServiceNamespace");
             });
 
             services.AddCensusHelpers();

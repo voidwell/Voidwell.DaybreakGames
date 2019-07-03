@@ -46,7 +46,9 @@ namespace Voidwell.DaybreakGames.Api
                 });
 
             services.AddEntityFrameworkContext(Configuration);
-            services.AddCache(Configuration, "Voidwell.DaybreakGames");
+
+            var applicationName = Configuration.GetValue("ApplicationName", "Voidwell.DaybreakGames");
+            services.AddCache(Configuration, applicationName);
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(options =>
