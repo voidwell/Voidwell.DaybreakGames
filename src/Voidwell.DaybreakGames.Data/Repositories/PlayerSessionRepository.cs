@@ -36,7 +36,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit)
+        public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit, int page = 0)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
@@ -45,6 +45,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.LogoutDate != null && a.Duration > 300000)
                     .OrderByDescending(a => a.LoginDate)
                     .Take(limit)
+                    .Skip(page * limit)
                     .ToArrayAsync();
             }
         }

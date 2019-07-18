@@ -99,7 +99,7 @@ namespace Voidwell.DaybreakGames.Models
         public int Duration { get; set; } 
         public string Id { get; set; }
         public DateTime LoginDate { get; set; }
-        public DateTime LogoutDate { get; set; }
+        public DateTime? LogoutDate { get; set; }
     }
 
     public class PlayerSessionWeapon

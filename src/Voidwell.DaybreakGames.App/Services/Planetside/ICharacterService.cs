@@ -14,8 +14,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<CharacterDetails> GetCharacterDetails(string characterId);
         Task<IEnumerable<SimpleCharacterDetails>> GetCharactersByName(IEnumerable<string> characterNames);
         Task UpdateAllCharacterInfo(string characterId, DateTime? LastLoginDate = null);
-        Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetSessions(string characterId);
-        Task<Models.PlayerSession> GetSession(string characterId, int sessionId);
         Task<OutfitMember> GetCharactersOutfit(string characterId);
         Task<SimpleCharacterDetails> GetCharacterByName(string characterName);
         Task<CharacterWeaponDetails> GetCharacterWeaponByName(string characterName, string weaponName);

@@ -81,6 +81,16 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _eventRepository.GetPlayerLogoutEventsAsync(worldId, startDate, endDate);
         }
 
+        public Task<PlayerLogin> GetLastPlayerLoginEventAsync(string characterId)
+        {
+            return _eventRepository.GetLastPlayerLoginEventAsync(characterId);
+        }
+
+        public Task<PlayerLogout> GetLastPlayerLogoutEventAsync(string characterId)
+        {
+            return _eventRepository.GetLastPlayerLogoutEventAsync(characterId);
+        }
+
         public Task<IEnumerable<VehicleDestroy>> GetVehicleDeathEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
         {
             return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, startDate, endDate, zoneId);
