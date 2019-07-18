@@ -388,5 +388,29 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     .ToListAsync();
             }
         }
+
+        public async Task<PlayerLogin> GetLastPlayerLoginEventAsync(string characterId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.PlayerLoginEvents
+                    .OrderByDescending(a => a.Timestamp)
+                    .FirstOrDefaultAsync(a => a.CharacterId == characterId);
+            }
+        }
+
+        public async Task<PlayerLogout> GetLastPlayerLogoutEventAsync(string characterId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.PlayerLogoutEvents
+                    .OrderByDescending(a => a.Timestamp)
+                    .FirstOrDefaultAsync(a => a.CharacterId == characterId);
+            }
+        }
     }
 }

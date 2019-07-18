@@ -10,11 +10,13 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
     public class CharacterController : Controller
     {
         private readonly ICharacterService _characterService;
+        private readonly ICharacterSessionService _characterSessionService;
         private readonly IPlayerMonitor _playerMonitor;
 
-        public CharacterController(ICharacterService characterService, IPlayerMonitor playerMonitor)
+        public CharacterController(ICharacterService characterService, ICharacterSessionService characterSessionService, IPlayerMonitor playerMonitor)
         {
             _characterService = characterService;
+            _characterSessionService = characterSessionService;
             _playerMonitor = playerMonitor;
         }
 
@@ -31,16 +33,23 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         }
 
         [HttpGet("{characterId}/sessions")]
-        public async Task<ActionResult> GetCharacterSessionsById(string characterId)
+        public async Task<ActionResult> GetCharacterSessionsByCharacterId(string characterId, [FromQuery]int page = 0)
         {
-            var result = await _characterService.GetSessions(characterId);
+            var result = await _characterSessionService.GetSessions(characterId, page: page);
             return Ok(result);
         }
 
         [HttpGet("{characterId}/sessions/{sessionId}")]
-        public async Task<ActionResult> GetCharacterSessionsById(string characterId, int sessionId)
+        public async Task<ActionResult> GetCharacterSessionBySessionId(string characterId, int sessionId)
         {
-            var result = await _characterService.GetSession(characterId, sessionId);
+            var result = await _characterSessionService.GetSession(characterId, sessionId);
+            return Ok(result);
+        }
+
+        [HttpGet("{characterId}/sessions/live")]
+        public async Task<ActionResult> GetCharacterLiveSession(string characterId)
+        {
+            var result = await _characterSessionService.GetSession(characterId);
             return Ok(result);
         }
 

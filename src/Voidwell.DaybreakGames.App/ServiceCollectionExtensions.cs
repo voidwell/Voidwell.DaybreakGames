@@ -66,6 +66,7 @@ namespace Voidwell.DaybreakGames.App
 
             services.AddSingleton<IMessageService, MessageService>();
             services.AddSingleton<ICharacterService, CharacterService>();
+            services.AddSingleton<ICharacterSessionService, CharacterSessionService>();
             services.AddSingleton<IOutfitService, OutfitService>();
             services.AddSingleton<IWorldMonitor, WorldMonitor>();
             services.AddSingleton<IPlayerMonitor, PlayerMonitor>();

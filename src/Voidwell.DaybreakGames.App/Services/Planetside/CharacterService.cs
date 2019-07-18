@@ -16,8 +16,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public class CharacterService : ICharacterService
     {
         private readonly ICharacterRepository _characterRepository;
-        private readonly IPlayerSessionRepository _playerSessionRepository;
-        private readonly IWorldEventsService _worldEventService;
         private readonly CensusCharacter _censusCharacter;
         private readonly ICache _cache;
         private readonly IOutfitService _outfitService;
@@ -26,22 +24,22 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IWeaponService _weaponService;
 
         private const string _cacheKey = "ps2.character";
+        private readonly Func<string, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
         private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
+        private readonly Func<string, string> _getCharacterIdCacheKey = characterName => $"{_cacheKey}_name_{characterName.ToLower()}";
+
         private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
-        private readonly TimeSpan _cacheCharacterNameExpiration = TimeSpan.FromMinutes(30);
+        private readonly TimeSpan _cacheCharacterIdExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
-        private readonly TimeSpan _cacheCharacterSessionsExpiration = TimeSpan.FromMinutes(10);
 
         private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
         private readonly SemaphoreSlim _characterStatsLock = new SemaphoreSlim(10);
 
-        public CharacterService(ICharacterRepository characterRepository, IPlayerSessionRepository playerSessionRepository,
-            IWorldEventsService worldEventService, CensusCharacter censusCharacter, ICache cache, IOutfitService outfitService,
-            IWeaponAggregateService weaponAggregateService, IGradeService gradeService, IWeaponService weaponService)
+        public CharacterService(ICharacterRepository characterRepository, CensusCharacter censusCharacter, ICache cache,
+            IOutfitService outfitService, IWeaponAggregateService weaponAggregateService, IGradeService gradeService,
+            IWeaponService weaponService)
         {
             _characterRepository = characterRepository;
-            _playerSessionRepository = playerSessionRepository;
-            _worldEventService = worldEventService;
             _censusCharacter = censusCharacter;
             _cache = cache;
             _outfitService = outfitService;
@@ -67,7 +65,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             using (await _characterLock.WaitAsync(characterId))
             {
-                var cacheKey = $"{_cacheKey}_character_{characterId}";
+                var cacheKey = _getCharacterCacheKey(characterId);
 
                 character = await _cache.GetAsync<Character>(cacheKey);
                 if (character != null)
@@ -523,8 +521,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                                UpdateCharacterWeaponStats(characterId, lastLoginDate),
                                UpdateCharacterStatsHistory(characterId, lastLoginDate));
 
-            var characterCacheKey = $"{_cacheKey}_character_{characterId}";
-            var detailsCacheKey = $"{_cacheKey}_details_{characterId}";
+            var characterCacheKey = _getCharacterCacheKey(characterId);;
+            var detailsCacheKey = _getDetailsCacheKey(characterId);
             await Task.WhenAll(_cache.RemoveAsync(characterCacheKey), _cache.RemoveAsync(detailsCacheKey));
         }
 
@@ -537,89 +535,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return await _outfitService.UpdateCharacterOutfitMembership(character);
-        }
-
-        public async Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetSessions(string characterId)
-        {
-            var cacheKey = $"{_cacheKey}_sessions_{characterId}";
-
-            var sessions = await _cache.GetAsync<IEnumerable<Data.Models.Planetside.PlayerSession>>(cacheKey);
-            if (sessions != null)
-            {
-                return sessions;
-            }
-
-            sessions = await _playerSessionRepository.GetPlayerSessionsByCharacterIdAsync(characterId, 25);
-
-            await _cache.SetAsync(cacheKey, sessions, _cacheCharacterSessionsExpiration);
-
-            return sessions;
-        }
-
-        public async Task<Models.PlayerSession> GetSession(string characterId, int sessionId)
-        {
-            var cacheKey = $"{_cacheKey}_session_{characterId}_{sessionId}";
-
-            var sessionInfo = await _cache.GetAsync<Models.PlayerSession>(cacheKey);
-            if (sessionInfo != null)
-            {
-                return sessionInfo;
-            }
-
-            var playerSession = await _playerSessionRepository.GetPlayerSessionAsync(sessionId);
-            if (playerSession == null)
-            {
-                return null;
-            }
-
-            var sessionEvents = await GetSessionEventsForCharacter(characterId, playerSession.LoginDate, playerSession.LogoutDate);
-
-            sessionEvents.Insert(0, new PlayerSessionLoginEvent { Timestamp = playerSession.LoginDate });
-            sessionEvents.Add(new PlayerSessionLogoutEvent { Timestamp = playerSession.LogoutDate });
-
-            sessionInfo = new Models.PlayerSession
-            {
-                Events = sessionEvents,
-                Session = new PlayerSessionInfo
-                {
-                    CharacterId = playerSession.CharacterId,
-                    Id = playerSession.Id.ToString(),
-                    Duration = playerSession.Duration,
-                    LoginDate = playerSession.LoginDate,
-                    LogoutDate = playerSession.LogoutDate
-                }
-            };
-
-            await _cache.SetAsync(cacheKey, sessionInfo, _cacheCharacterSessionsExpiration);
-
-            return sessionInfo;
-        }
-
-        private async Task<List<PlayerSessionEvent>> GetSessionEventsForCharacter(string characterId, DateTime start, DateTime end)
-        {
-            var sessionDeathsTask = _worldEventService.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionFacilityCapturesTask = _worldEventService.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionFacilityDefendsTask = _worldEventService.GetFacilityDefendEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionBattleRankUpsTask = _worldEventService.GetBattleRankUpEventsForCharacterIdByDateAsync(characterId, start, end);
-            var sessionVehicleDestroysTask = _worldEventService.GetVehicleDestroyEventsForCharacterIdByDateAsync(characterId, start, end);
-
-            await Task.WhenAll(sessionDeathsTask, sessionFacilityCapturesTask, sessionFacilityDefendsTask, sessionBattleRankUpsTask, sessionVehicleDestroysTask);
-
-            var sessionDeaths = sessionDeathsTask.Result;
-            var sessionFacilityCaptures = sessionFacilityCapturesTask.Result;
-            var sessionFacilityDefends = sessionFacilityDefendsTask.Result;
-            var sessionBattleRankUps = sessionBattleRankUpsTask.Result;
-            var sessionVehicleDestroys = sessionVehicleDestroysTask.Result;
-
-            var sessionEvents = new List<PlayerSessionEvent>();
-
-            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionDeaths));
-            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionFacilityCaptures));
-            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionFacilityDefends));
-            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionBattleRankUps));
-            sessionEvents.AddRange(PlayerSessionEventMapper.ToPlayerSessionEvent(sessionVehicleDestroys));
-
-            return sessionEvents.OrderBy(a => a.Timestamp).ToList();
         }
 
         private async Task<Character> GetCharacterDetailsAsync(string characterId)
@@ -918,7 +833,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<string> GetCharacterIdByName(string characterName)
         {
-            var cacheKey = $"{_cacheKey}_name_{characterName.ToLower()}";
+            var cacheKey = _getCharacterIdCacheKey(characterName);
 
             var characterId = await _cache.GetAsync<string>(cacheKey);
             if (characterId != null)
@@ -930,7 +845,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             if (characterId != null)
             {
-                await _cache.SetAsync(cacheKey, characterId, _cacheCharacterNameExpiration);
+                await _cache.SetAsync(cacheKey, characterId, _cacheCharacterIdExpiration);
             }
 
             return characterId;
