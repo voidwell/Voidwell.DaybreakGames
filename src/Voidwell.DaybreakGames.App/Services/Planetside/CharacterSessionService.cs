@@ -113,6 +113,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var lastLogin = lastLoginTask.Result;
                 var lastLogout = lastLogoutTask.Result;
 
+                if (lastLogin == null || (lastLogout != null && lastLogout.Timestamp >= lastLogin.Timestamp) || (DateTime.UtcNow - lastLogin.Timestamp > TimeSpan.FromHours(48)))
+                {
+                    return null;
+                }
+
                 var sessionEvents = await GetSessionEventsForCharacter(characterId, lastLogin.Timestamp, DateTime.UtcNow);
 
                 sessionEvents.Insert(0, new PlayerSessionLoginEvent { Timestamp = lastLogin.Timestamp });
