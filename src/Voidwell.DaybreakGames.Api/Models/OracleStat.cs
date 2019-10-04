@@ -15,7 +15,7 @@ namespace Voidwell.DaybreakGames.Api.Models
         {
             if (ReferenceEquals(x, y)) return true;
 
-            return x != null && y != null & x.Period.Equals(y.Period);
+            return x != null && y != null && x.Period.Equals(y.Period);
         }
 
         public int GetHashCode(OracleStat obj)
