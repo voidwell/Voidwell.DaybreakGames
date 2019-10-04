@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         {
             if (ReferenceEquals(x, y)) return true;
 
-            return x != null && y != null & x.Date.Equals(y.Date);
+            return x != null && y != null && x.Date.Equals(y.Date);
         }
 
         public int GetHashCode(DailyPopulation obj)
