@@ -539,8 +539,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<Character> GetCharacterDetailsAsync(string characterId)
         {
-            var character = await _characterRepository.GetCharacterWithDetailsAsync(characterId);
-            if (character?.Time != null)
+            var characterDetailsTask = _characterRepository.GetCharacterWithDetailsAsync(characterId);
+            var censusCharacterTimesTask = _censusCharacter.GetCharacterTimes(characterId);
+
+            await Task.WhenAll(characterDetailsTask, censusCharacterTimesTask);
+
+            var character = characterDetailsTask.Result;
+            var censusTimes = censusCharacterTimesTask.Result;
+
+            if (character?.Time != null && (censusTimes == null || character?.Time?.LastSaveDate == censusTimes?.LastSaveDate))
             {
                 return character;
             }

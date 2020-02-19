@@ -113,7 +113,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var lastLogin = lastLoginTask.Result;
                 var lastLogout = lastLogoutTask.Result;
 
-                if (lastLogin == null || (lastLogout != null && lastLogout.Timestamp >= lastLogin.Timestamp) || (DateTime.UtcNow - lastLogin.Timestamp > TimeSpan.FromHours(48)))
+                if (lastLogin == null || (lastLogout != null && lastLogout.Timestamp >= lastLogin.Timestamp) || DateTime.UtcNow - lastLogin.Timestamp > TimeSpan.FromHours(24))
                 {
                     return null;
                 }
