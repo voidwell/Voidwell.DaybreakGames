@@ -138,7 +138,12 @@ namespace Voidwell.DaybreakGames.CensusStream
                 return;
             }
 
-            await _handler.Process(msg);
+            #pragma warning disable CS4014
+            Task.Run(() =>
+            {
+                _handler.Process(msg);
+            }).ConfigureAwait(false);
+            #pragma warning restore CS4014
         }
 
         private async Task OnDisconnect(string error)
