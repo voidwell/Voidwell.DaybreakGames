@@ -53,7 +53,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<PlayerSession> GetSession(string characterId, int sessionId)
         {
-            using (_characterSessionLock.WaitAsync($"{characterId}_{sessionId}"))
+            using (await _characterSessionLock.WaitAsync($"{characterId}_{sessionId}"))
             {
                 var cacheKey = _getSessionCacheKey(characterId, sessionId);
 
@@ -95,7 +95,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<PlayerSession> GetSession(string characterId)
         {
-            using (_characterLiveSessionLock.WaitAsync(characterId))
+            using (await _characterLiveSessionLock.WaitAsync(characterId))
             {
                 var cacheKey = _getLiveSessionCacheKey(characterId);
 
