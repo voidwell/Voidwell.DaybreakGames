@@ -107,20 +107,29 @@ namespace Voidwell.DaybreakGames.HostedServices
 
             _logger.LogInformation($"Updating {updaterService.ServiceName}.");
 
-            await updaterService.RefreshStore();
-
-            _logger.LogInformation($"Update complete for {updaterService.ServiceName}.");
-
-            var dataModel = new UpdaterScheduler { Id = updaterService.ServiceName, LastUpdateDate = DateTime.UtcNow };
-            await _updaterSchedulerRepository.UpsertAsync(dataModel);
-
-            _isWorking = false;
-
-            if (_pendingWork.Count > 0)
+            try
             {
-                var pendingWork = _pendingWork[0];
-                _pendingWork.RemoveAt(0);
-                HandleTimer(pendingWork);
+                await updaterService.RefreshStore();
+
+                _logger.LogInformation($"Update complete for {updaterService.ServiceName}.");
+
+                var dataModel = new UpdaterScheduler { Id = updaterService.ServiceName, LastUpdateDate = DateTime.UtcNow };
+                await _updaterSchedulerRepository.UpsertAsync(dataModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Update failed for {updaterService.ServiceName}: {ex}");
+            }
+            finally
+            {
+                _isWorking = false;
+
+                if (_pendingWork.Count > 0)
+                {
+                    var pendingWork = _pendingWork[0];
+                    _pendingWork.RemoveAt(0);
+                    HandleTimer(pendingWork);
+                }
             }
         }
     }
