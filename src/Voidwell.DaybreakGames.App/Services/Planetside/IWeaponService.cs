@@ -11,7 +11,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     {
         Task<WeaponInfoResult> GetWeaponInfo(int weaponItemId);
         Task<WeaponInfoResult> GetWeaponInfoByName(string weaponName);
-        Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(int weaponItemId, int page = 0, int limit = 50);
         Task<IEnumerable<int>> GetAllSanctionedWeaponIds();
         Task<Dictionary<int, IEnumerable<DailyWeaponStats>>> GetOracleStatsFromWeaponByDateAsync(IEnumerable<int> weaponId, DateTime start, DateTime end);
     }

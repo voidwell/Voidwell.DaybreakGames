@@ -977,22 +977,78 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return details;
         }
 
-        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50)
+        public async Task<IEnumerable<WeaponLeaderboardRow>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50)
         {
-            var result = await _cache.GetAsync<IEnumerable<CharacterWeaponStat>>(_getCharacterLeaderboardCacheKey(weaponItemId, page));
+            var result = await _cache.GetAsync<IEnumerable<WeaponLeaderboardRow>>(_getCharacterLeaderboardCacheKey(weaponItemId, page));
             if (result != null)
             {
                 return result;
             }
 
-            result = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
-
-            if (result != null && result.Any())
+            var stats = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
+            if (stats == null || !stats.Any())
             {
-                await _cache.SetAsync(_getCharacterLeaderboardCacheKey(weaponItemId, page), result);
+                return Enumerable.Empty<WeaponLeaderboardRow>();
             }
 
+            var aggregate = await _weaponAggregateService.GetAggregateForItem(weaponItemId);
+            result = stats.Select(s => ConvertToLeaderboardRow(s, aggregate));
+
+            await _cache.SetAsync(_getCharacterLeaderboardCacheKey(weaponItemId, page), result, _cacheCharacterLeaderboardExpiration);
+
             return result;
+        }
+
+        private static WeaponLeaderboardRow ConvertToLeaderboardRow(CharacterWeaponStat model, WeaponAggregate aggregate)
+        {
+            double? kdrDelta = null;
+            double? accuDelta = null;
+            double? hsrDelta = null;
+            double? kphDelta = null;
+
+            if (aggregate != null)
+            {
+
+                if (model.Deaths > 0 && aggregate.STDKdr > 0)
+                {
+                    kdrDelta = ((double)model.Kills / (double)model.Deaths - aggregate.AVGKdr) / aggregate.STDKdr;
+                }
+
+                if (model.FireCount > 0 && aggregate.STDAccuracy > 0)
+                {
+                    accuDelta = ((double)model.HitCount / (double)model.FireCount - aggregate.AVGAccuracy) / aggregate.STDAccuracy;
+                }
+
+                if (model.Kills > 0 && aggregate.STDHsr > 0)
+                {
+                    hsrDelta = ((double)model.Headshots / (double)model.Kills - aggregate.AVGHsr) / aggregate.STDHsr;
+                }
+
+                if (model.PlayTime > 0 && aggregate.STDKph > 0)
+                {
+                    kphDelta = ((double)model.Kills / ((double)model.PlayTime / 3600) - aggregate.AVGKph) / aggregate.STDKph;
+                }
+            }
+
+            return new WeaponLeaderboardRow
+            {
+                CharacterId = model.CharacterId,
+                Name = model.Character.Name,
+                FactionId = model.Character.FactionId,
+                WorldId = model.Character.WorldId,
+                Kills = model.Kills.GetValueOrDefault(),
+                Deaths = model.Deaths.GetValueOrDefault(),
+                Headshots = model.Headshots.GetValueOrDefault(),
+                ShotsFired = model.FireCount.GetValueOrDefault(),
+                ShotsHit = model.HitCount.GetValueOrDefault(),
+                PlayTime = model.PlayTime.GetValueOrDefault(),
+                Score = model.Score.GetValueOrDefault(),
+                VehicleKills = model.VehicleKills.GetValueOrDefault(),
+                KdrDelta = kdrDelta,
+                AccuracyDelta = accuDelta,
+                HsrDelta = hsrDelta,
+                KphDelta = kphDelta
+            };
         }
 
         private async Task<IEnumerable<CharacterDetails>> GetCharacterDetailsByNameAsync(IEnumerable<string> characterNames)

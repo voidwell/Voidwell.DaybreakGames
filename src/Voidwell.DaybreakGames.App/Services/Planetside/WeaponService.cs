@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
-using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
@@ -14,11 +13,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WeaponService : IWeaponService
     {
-        private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly ISanctionedWeaponsRepository _sanctionedWeaponsRepository;
         private readonly IWorldEventsService _worldEventsService;
         private readonly IItemService _itemService;
-        private readonly ICharacterService _characterService;
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
 
@@ -27,15 +24,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(8);
         private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
 
-        public WeaponService(IWeaponAggregateService weaponAggregateService, ISanctionedWeaponsRepository sanctionedWeaponRepository,
-            IWorldEventsService worldEventsService, IItemService itemService, ICharacterService characterService, CensusItem censusItem,
-            ICache cache)
+        public WeaponService(ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService,
+            IItemService itemService, CensusItem censusItem, ICache cache)
         {
-            _weaponAggregateService = weaponAggregateService;
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
             _worldEventsService = worldEventsService;
             _itemService = itemService;
-            _characterService = characterService;
             _censusItem = censusItem;
             _cache = cache;
         }
@@ -128,14 +122,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(int weaponItemId, int page = 0, int limit = 50)
-        {
-            var weaponStats = await _characterService.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
-            var aggregate = await _weaponAggregateService.GetAggregateForItem(weaponItemId);
-
-            return weaponStats.Select(s => ConvertToResult(s, aggregate));
-        }
-
         public async Task<IEnumerable<int>> GetAllSanctionedWeaponIds()
         {
             var weapons = await _cache.GetAsync<IEnumerable<int>>(_sanctionedWeaponsCacheKey);
@@ -192,58 +178,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 return stats;
             }
-        }
-
-        private static WeaponLeaderboardRow ConvertToResult(CharacterWeaponStat model, WeaponAggregate aggregate)
-        {
-            double? kdrDelta = null;
-            double? accuDelta = null;
-            double? hsrDelta = null;
-            double? kphDelta = null;
-
-            if (aggregate != null)
-            {
-
-                if (model.Deaths > 0 && aggregate.STDKdr > 0)
-                {
-                    kdrDelta = ((double)model.Kills / (double)model.Deaths - aggregate.AVGKdr) / aggregate.STDKdr;
-                }
-
-                if (model.FireCount > 0 && aggregate.STDAccuracy > 0)
-                {
-                    accuDelta = ((double)model.HitCount / (double)model.FireCount - aggregate.AVGAccuracy) / aggregate.STDAccuracy;
-                }
-
-                if (model.Kills > 0 && aggregate.STDHsr > 0)
-                {
-                    hsrDelta = ((double)model.Headshots / (double)model.Kills - aggregate.AVGHsr) / aggregate.STDHsr;
-                }
-
-                if (model.PlayTime > 0 && aggregate.STDKph > 0)
-                {
-                    kphDelta = ((double)model.Kills / ((double)model.PlayTime / 3600) - aggregate.AVGKph) / aggregate.STDKph;
-                }
-            }
-
-            return new WeaponLeaderboardRow
-            {
-                CharacterId = model.CharacterId,
-                Name = model.Character.Name,
-                FactionId = model.Character.FactionId,
-                WorldId = model.Character.WorldId,
-                Kills = model.Kills.GetValueOrDefault(),
-                Deaths = model.Deaths.GetValueOrDefault(),
-                Headshots = model.Headshots.GetValueOrDefault(),
-                ShotsFired = model.FireCount.GetValueOrDefault(),
-                ShotsHit = model.HitCount.GetValueOrDefault(),
-                PlayTime = model.PlayTime.GetValueOrDefault(),
-                Score = model.Score.GetValueOrDefault(),
-                VehicleKills = model.VehicleKills.GetValueOrDefault(),
-                KdrDelta = kdrDelta,
-                AccuracyDelta = accuDelta,
-                HsrDelta = hsrDelta,
-                KphDelta = kphDelta
-            };
         }
     }
 }
