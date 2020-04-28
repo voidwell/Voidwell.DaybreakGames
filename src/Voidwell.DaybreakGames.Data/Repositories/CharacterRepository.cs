@@ -56,7 +56,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, string sortColumn, SortDirection sortDirection, int rowStart, int limit)
+        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page, int limit)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
@@ -64,8 +64,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 
                 return await dbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId && s.Kills > 1)
                     .Include(i => i.Character)
-                    .OrderBy(sortColumn, sortDirection)
-                    .Skip(rowStart)
+                    .OrderByDescending(a => a.Kills)
+                    .Skip(page * limit)
                     .Take(limit)
                     .ToListAsync();
             }

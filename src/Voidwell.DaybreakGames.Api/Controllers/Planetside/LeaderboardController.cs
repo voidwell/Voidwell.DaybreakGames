@@ -15,9 +15,9 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         }
 
         [HttpGet("weapon/{weaponItemId}")]
-        public async Task<ActionResult> GetWeaponLeaderboard(int weaponItemId)
+        public async Task<ActionResult> GetWeaponLeaderboard(int weaponItemId, [FromQuery]int page = 0)
         {
-            var result = await _weaponService.GetLeaderboard(weaponItemId);
+            var result = await _weaponService.GetLeaderboard(weaponItemId, page);
             return Ok(result);
         }
     }

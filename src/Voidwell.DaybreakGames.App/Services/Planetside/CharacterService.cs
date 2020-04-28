@@ -10,6 +10,7 @@ using Voidwell.DaybreakGames.Data.Repositories;
 using DaybreakGames.Census.Exceptions;
 using Newtonsoft.Json.Linq;
 using System.Threading;
+using Voidwell.DaybreakGames.Data;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -27,10 +28,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly Func<string, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
         private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
         private readonly Func<string, string> _getCharacterIdCacheKey = characterName => $"{_cacheKey}_name_{characterName.ToLower()}";
+        private readonly Func<int, int, string> _getCharacterLeaderboardCacheKey = (weaponId, page) => $"{_cacheKey}_leaderboard_{weaponId}_{page}";
 
         private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
         private readonly TimeSpan _cacheCharacterIdExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
+        private readonly TimeSpan _cacheCharacterLeaderboardExpiration = TimeSpan.FromMinutes(5);
 
         private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
         private readonly SemaphoreSlim _characterStatsLock = new SemaphoreSlim(10);
@@ -972,6 +975,24 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
 
             return details;
+        }
+
+        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50)
+        {
+            var result = await _cache.GetAsync<IEnumerable<CharacterWeaponStat>>(_getCharacterLeaderboardCacheKey(weaponItemId, page));
+            if (result != null)
+            {
+                return result;
+            }
+
+            result = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
+
+            if (result != null && result.Any())
+            {
+                await _cache.SetAsync(_getCharacterLeaderboardCacheKey(weaponItemId, page), result);
+            }
+
+            return result;
         }
 
         private async Task<IEnumerable<CharacterDetails>> GetCharacterDetailsByNameAsync(IEnumerable<string> characterNames)

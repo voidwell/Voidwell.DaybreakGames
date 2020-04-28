@@ -20,5 +20,17 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             var result = await _weaponService.GetWeaponInfo(weaponItemId);
             return Ok(result);
         }
+
+        [HttpGet("byname/{weaponName}")]
+        public async Task<ActionResult> GetWeaponInfoByName(string weaponName)
+        {
+            var result = await _weaponService.GetWeaponInfoByName(weaponName);
+            if (result == null)
+            {
+                return NotFound($"Unable to find weapon info for '{weaponName}'");
+            }
+
+            return Ok(result);
+        }
     }
 }

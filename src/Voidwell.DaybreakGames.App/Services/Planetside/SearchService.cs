@@ -89,7 +89,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                     break;
                 case "item":
-                    var weapons = await _itemService.LookupItemsByName(query, 10);
+                    var weapons = await _itemService.LookupWeaponsByName(query, 10);
 
                     foreach (var weapon in weapons)
                     {
@@ -139,15 +139,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             foreach (var result in searchResults.Except(orderedResults))
             {
                 if (string.Equals(result.Name, query, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    orderedResults.Add(result);
-                }
-            }
-
-            //Case insensitive starts with
-            foreach (var result in searchResults.Except(orderedResults))
-            {
-                if (result.Name.ToLower().StartsWith(query.ToLower()))
                 {
                     orderedResults.Add(result);
                 }

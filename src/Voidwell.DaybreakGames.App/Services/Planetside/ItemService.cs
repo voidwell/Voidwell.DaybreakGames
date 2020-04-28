@@ -36,9 +36,52 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return _itemRepository.FindItemsByIdsAsync(itemIds);
         }
 
-        public Task<IEnumerable<Item>> LookupItemsByName(string name, int limit = 12)
+        public async Task<IEnumerable<Item>> LookupWeaponsByName(string name, int limit = 12)
         {
-            return _itemRepository.FindItemsByNameAsync(name, limit);
+            var results = await _itemRepository.FindWeaponsByNameAsync(name, limit);
+
+            var orderedResults = new List<Item>();
+
+            //Exact match
+            foreach (var result in results.Except(orderedResults))
+            {
+                if (result.Name == name)
+                {
+                    orderedResults.Add(result);
+                }
+            }
+
+            //Starts with match
+            foreach (var result in results.Except(orderedResults))
+            {
+                if (result.Name.StartsWith(name))
+                {
+                    orderedResults.Add(result);
+                }
+            }
+
+            //Case insensitive exact match
+            foreach (var result in results.Except(orderedResults))
+            {
+                if (string.Equals(result.Name, name, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    orderedResults.Add(result);
+                }
+            }
+
+            //Case insensitive starts with
+            foreach (var result in results.Except(orderedResults))
+            {
+                if (result.Name.ToLower().StartsWith(name.ToLower()))
+                {
+                    orderedResults.Add(result);
+                }
+            }
+
+            //Everything else
+            orderedResults.AddRange(results.Except(orderedResults));
+
+            return orderedResults;
         }
 
         public async Task<IEnumerable<Item>> GetItemsByCategoryIds(IEnumerable<int> categoryIds)
