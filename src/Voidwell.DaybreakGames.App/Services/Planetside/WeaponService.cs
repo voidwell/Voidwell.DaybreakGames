@@ -81,8 +81,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 FireModes = hipModes?.Select(m => m.Description?.English),
                 IsVehicleWeapon = info.IsVehicleWeapon,
                 DamageRadius = info.FireMode?.Max(m => m.DamageRadius),
-                HipAcc = GetAccuracyStateFromFireMode(hipModes?.First()),
-                AimAcc = GetAccuracyStateFromFireMode(aimModes?.First())
+                HipAcc = GetAccuracyStateFromFireMode(hipModes?.FirstOrDefault()),
+                AimAcc = GetAccuracyStateFromFireMode(aimModes?.FirstOrDefault())
             };
 
             await _cache.SetAsync($"{_weaponInfoCacheKey}_{weaponItemId}", weaponInfo, _weaponInfoCacheExpiration);
