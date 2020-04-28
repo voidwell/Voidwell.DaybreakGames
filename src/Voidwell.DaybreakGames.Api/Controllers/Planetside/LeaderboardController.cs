@@ -7,17 +7,17 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
     [Route("ps2/leaderboard")]
     public class LeaderboardController : Controller
     {
-        private readonly IWeaponService _weaponService;
+        private readonly ICharacterService _characterService;
 
-        public LeaderboardController(IWeaponService weaponService)
+        public LeaderboardController(ICharacterService characterService)
         {
-            _weaponService = weaponService;
+            _characterService = characterService;
         }
 
         [HttpGet("weapon/{weaponItemId}")]
         public async Task<ActionResult> GetWeaponLeaderboard(int weaponItemId, [FromQuery]int page = 0)
         {
-            var result = await _weaponService.GetLeaderboard(weaponItemId, page);
+            var result = await _characterService.GetCharacterWeaponLeaderboardAsync(weaponItemId, page);
             return Ok(result);
         }
     }
