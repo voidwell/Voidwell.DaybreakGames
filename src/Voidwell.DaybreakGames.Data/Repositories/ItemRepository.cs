@@ -26,7 +26,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Item>> FindItemsByNameAsync(string name, int limit)
+        public async Task<IEnumerable<Item>> FindWeaponsByNameAsync(string name, int limit)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {

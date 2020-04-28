@@ -14,26 +14,28 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WeaponService : IWeaponService
     {
-        private readonly ICharacterRepository _characterRepository;
         private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly ISanctionedWeaponsRepository _sanctionedWeaponsRepository;
         private readonly IWorldEventsService _worldEventsService;
+        private readonly IItemService _itemService;
+        private readonly ICharacterService _characterService;
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
 
         private const string _weaponInfoCacheKey = "ps2.weaponinfo";
         private const string _sanctionedWeaponsCacheKey = "ps2.sanctionedWeapons";
         private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(8);
-        private readonly TimeSpan _weaponLeaderboardCacheExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
 
-        public WeaponService(ICharacterRepository characterRepository, IWeaponAggregateService weaponAggregateService,
-            ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService, CensusItem censusItem, ICache cache)
+        public WeaponService(IWeaponAggregateService weaponAggregateService, ISanctionedWeaponsRepository sanctionedWeaponRepository,
+            IWorldEventsService worldEventsService, IItemService itemService, ICharacterService characterService, CensusItem censusItem,
+            ICache cache)
         {
-            _characterRepository = characterRepository;
             _weaponAggregateService = weaponAggregateService;
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
             _worldEventsService = worldEventsService;
+            _itemService = itemService;
+            _characterService = characterService;
             _censusItem = censusItem;
             _cache = cache;
         }
@@ -94,6 +96,21 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return weaponInfo;
         }
 
+        public async Task<WeaponInfoResult> GetWeaponInfoByName(string weaponName)
+        {
+            if (!int.TryParse(weaponName, out int weaponId))
+            {
+                var items = await _itemService.LookupWeaponsByName(weaponName, 25);
+                if (items == null || !items.Any())
+                {
+                    return null;
+                }
+                weaponId = items.First().Id;
+            }
+
+            return await GetWeaponInfo(weaponId);
+        }
+
         private static AccuracyState GetAccuracyStateFromFireMode(CensusWeaponInfoModel.WeaponFireMode mode)
         {
             if (mode == null)
@@ -111,24 +128,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             };
         }
 
-        public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(int weaponItemId, string sortColumn = "Kills", SortDirection sortDirection = SortDirection.Descending, int rowStart = 0, int limit = 250)
+        public async Task<IEnumerable<WeaponLeaderboardRow>> GetLeaderboard(int weaponItemId, int page = 0, int limit = 50)
         {
-            var cacheKey = $"{_weaponInfoCacheKey}_leaderboard_{weaponItemId}";
-
-            var weaponRows = await _cache.GetAsync<IEnumerable<WeaponLeaderboardRow>>(cacheKey);
-            if (weaponRows != null)
-            {
-                return weaponRows;
-            }
-
-            var weaponStats = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, sortColumn, sortDirection, rowStart, limit);
+            var weaponStats = await _characterService.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
             var aggregate = await _weaponAggregateService.GetAggregateForItem(weaponItemId);
 
-            weaponRows = weaponStats.Select(s => ConvertToResult(s, aggregate));
-
-            await _cache.SetAsync(cacheKey, weaponRows, _weaponLeaderboardCacheExpiration);
-
-            return weaponRows;
+            return weaponStats.Select(s => ConvertToResult(s, aggregate));
         }
 
         public async Task<IEnumerable<int>> GetAllSanctionedWeaponIds()
