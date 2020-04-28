@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2002
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.App", "src\Voidwell.DaybreakGames.App\Voidwell.DaybreakGames.App.csproj", "{70DEC05A-24A9-474B-A954-6504AE2CD74C}"
 EndProject
@@ -12,12 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.dockerignore = .dockerignore
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		Directory.Build.props = Directory.Build.props
 		Dockerfile = Dockerfile
 		Dockerfile.debug = Dockerfile.debug
 		init-migrate.bat = init-migrate.bat
 		init-update.bat = init-update.bat
-		new-build.sh = new-build.sh
+		Jenkinsfile = Jenkinsfile
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}"
@@ -28,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Cache", "src\Voidw
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Test", "test\Voidwell.DaybreakGames.Test\Voidwell.DaybreakGames.Test.csproj", "{4A56391B-419B-4ECA-B1C4-794787F7E0D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Api", "src\Voidwell.DaybreakGames.Api\Voidwell.DaybreakGames.Api.csproj", "{7A123B6E-5756-4CB4-B140-FE724A977395}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Api", "src\Voidwell.DaybreakGames.Api\Voidwell.DaybreakGames.Api.csproj", "{7A123B6E-5756-4CB4-B140-FE724A977395}"
 	ProjectSection(ProjectDependencies) = postProject
 		{70DEC05A-24A9-474B-A954-6504AE2CD74C} = {70DEC05A-24A9-474B-A954-6504AE2CD74C}
 	EndProjectSection
