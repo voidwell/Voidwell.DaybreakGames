@@ -41,12 +41,19 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task AddToQueue(string characterId)
         {
-            var dataModel = new CharacterUpdateQueue
+            try
             {
-                CharacterId = characterId,
-                Timestamp = DateTime.UtcNow
-            };
-            await _characterUpdaterRepository.AddAsync(dataModel);
+                var dataModel = new CharacterUpdateQueue
+                {
+                    CharacterId = characterId,
+                    Timestamp = DateTime.UtcNow
+                };
+                await _characterUpdaterRepository.AddAsync(dataModel);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to add character '{characterId}' to updater", characterId);
+            }
         }
 
         public override Task StartInternalAsync(CancellationToken cancellationToken)
