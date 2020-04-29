@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,12 @@ namespace Voidwell.DaybreakGames.Data.Repositories
     public class CharacterUpdaterRepository : ICharacterUpdaterRepository
     {
         private readonly IDbContextHelper _dbContextHelper;
+        private readonly ILogger<ICharacterUpdaterRepository> _logger;
 
-        public CharacterUpdaterRepository(IDbContextHelper dbContextHelper)
+        public CharacterUpdaterRepository(IDbContextHelper dbContextHelper, ILogger<ICharacterUpdaterRepository> logger)
         {
             _dbContextHelper = dbContextHelper;
+            _logger = logger;
         }
 
         public async Task AddAsync(CharacterUpdateQueue entity)
@@ -25,11 +28,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 var storeEntity = await dbContext.CharacterUpdateQueue.FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
                 if (storeEntity == null)
                 {
+                    _logger.LogInformation($"Adding character ${entity.CharacterId}");
                     dbContext.CharacterUpdateQueue.Add(entity);
                 }
                 else
                 {
-                    storeEntity.Timestamp = entity.Timestamp;
+                    _logger.LogInformation($"Updating character ${storeEntity.CharacterId}");
+                    storeEntity.Timestamp = DateTime.UtcNow;
                     dbContext.CharacterUpdateQueue.Update(storeEntity);
                 }
 
