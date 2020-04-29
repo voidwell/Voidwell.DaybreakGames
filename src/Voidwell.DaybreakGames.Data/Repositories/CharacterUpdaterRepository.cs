@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                 }
                 else
                 {
-                    storeEntity = entity;
+                    storeEntity.Timestamp = entity.Timestamp;
                     dbContext.CharacterUpdateQueue.Update(storeEntity);
                 }
 
