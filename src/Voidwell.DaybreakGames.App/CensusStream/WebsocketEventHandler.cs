@@ -610,12 +610,13 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         private async Task<bool> ValidateEvent<T>(T ev, Func<T, string> keyExpr, Func<T, bool> cleanupExpr) where T: class
         {
-            var eventKey = $"{nameof(T)}:{keyExpr(ev)}";
+            var eventKey = $"{typeof(T).Name}:{keyExpr(ev)}";
             using (await _eventSemaphore.WaitAsync(eventKey))
             {
                 var isValid = !_eventBuffer.ContainsKey(eventKey);
 
-                var expiredKeys = _eventBuffer.Keys.ToList().Where(k => _eventBuffer[k] is T && cleanupExpr(_eventBuffer[k] as T)).ToList();
+                var expiredKeys = _eventBuffer.Keys.ToList()
+                    .Where(k => _eventBuffer.TryGetValue(k, out var value) && value is T  && cleanupExpr(value as T)).ToList();
                 expiredKeys.ForEach(k => _eventBuffer.TryRemove(k, out var value));
 
                 _eventBuffer.TryAdd(eventKey, ev);
