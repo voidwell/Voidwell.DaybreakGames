@@ -17,6 +17,7 @@ using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.CensusStream.Models;
 using Voidwell.DaybreakGames.Messages;
 using Voidwell.DaybreakGames.Messages.Models;
+using System.Collections.Concurrent;
 
 namespace Voidwell.DaybreakGames.CensusStream
 {
@@ -548,8 +549,13 @@ namespace Voidwell.DaybreakGames.CensusStream
         }
 
         [CensusEventHandler("PlayerLogin", typeof(PlayerLogin))]
-        private Task Process(PlayerLogin payload)
+        private async Task Process(PlayerLogin payload)
         {
+            if (!await ValidateEvent(payload, a => a.CharacterId, a => DateTime.UtcNow - a.Timestamp > TimeSpan.FromSeconds(1)))
+            {
+                return;
+            }
+
             var dataModel = new Data.Models.Planetside.Events.PlayerLogin
             {
                 CharacterId = payload.CharacterId,
@@ -557,12 +563,17 @@ namespace Voidwell.DaybreakGames.CensusStream
                 WorldId = payload.WorldId
             };
 
-            return Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp));
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOnlineAsync(payload.CharacterId, payload.Timestamp));
         }
 
         [CensusEventHandler("PlayerLogout", typeof(PlayerLogout))]
-        private Task Process(PlayerLogout payload)
+        private async Task Process(PlayerLogout payload)
         {
+            if (!await ValidateEvent(payload, a => a.CharacterId, a => DateTime.UtcNow - a.Timestamp > TimeSpan.FromSeconds(1)))
+            {
+                return;
+            }
+
             var dataModel = new Data.Models.Planetside.Events.PlayerLogout
             {
                 CharacterId = payload.CharacterId,
@@ -570,7 +581,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                 WorldId = payload.WorldId
             };
 
-            return Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp));
+            await Task.WhenAll(_eventRepository.AddAsync(dataModel), _playerMonitor.SetOfflineAsync(payload.CharacterId, payload.Timestamp));
         }
 
         [CensusEventHandler("VehicleDestroy", typeof(VehicleDestroy))]
@@ -592,6 +603,30 @@ namespace Voidwell.DaybreakGames.CensusStream
             };
 
             await _eventRepository.AddAsync(dataModel);
+        }
+
+        private readonly ConcurrentDictionary<string, object> _eventBuffer = new ConcurrentDictionary<string, object>();
+        private readonly KeyedSemaphoreSlim _eventSemaphore = new KeyedSemaphoreSlim();
+
+        private async Task<bool> ValidateEvent<T>(T ev, Func<T, string> keyExpr, Func<T, bool> cleanupExpr) where T: class
+        {
+            var eventKey = $"{nameof(T)}:{keyExpr}";
+            using (await _eventSemaphore.WaitAsync(eventKey))
+            {
+                var isValid = !_eventBuffer.ContainsKey(eventKey);
+
+                foreach (var key in _eventBuffer.Keys)
+                {
+                    if (_eventBuffer[key] is T && cleanupExpr(_eventBuffer[key] as T))
+                    {
+                        _eventBuffer.TryRemove(key, out var value);
+                    }
+                }
+
+                _eventBuffer.TryAdd(eventKey, ev);
+
+                return isValid;
+            }
         }
 
         private async Task SendPlayerDeathMessage(OnlineCharacter attackerCharacter, OnlineCharacter victimCharacter, Data.Models.Planetside.Events.Death model)
