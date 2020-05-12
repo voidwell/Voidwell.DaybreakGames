@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Api.Models;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Core.Services.Planetside;
+using Voidwell.DaybreakGames.GameState.Services;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
 {

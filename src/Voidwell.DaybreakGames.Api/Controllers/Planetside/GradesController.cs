@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Core.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
 {

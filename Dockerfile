@@ -3,10 +3,15 @@ WORKDIR /app
 
 # Copy and restore as distinct layers
 COPY *.sln ./
-COPY ./src/Voidwell.DaybreakGames.App/*.csproj ./src/Voidwell.DaybreakGames.App/
-COPY ./src/Voidwell.DaybreakGames.Api/*.csproj ./src/Voidwell.DaybreakGames.Api/
-COPY ./src/Voidwell.DaybreakGames.Data/*.csproj ./src/Voidwell.DaybreakGames.Data/
 COPY ./src/Voidwell.Cache/*.csproj ./src/Voidwell.Cache/
+COPY ./src/Voidwell.DaybreakGames.Api/*.csproj ./src/Voidwell.DaybreakGames.Api/
+COPY ./src/Voidwell.DaybreakGames.App/*.csproj ./src/Voidwell.DaybreakGames.App/
+COPY ./src/Voidwell.DaybreakGames.Census/*.csproj ./src/Voidwell.DaybreakGames.Census/
+COPY ./src/Voidwell.DaybreakGames.Core/*.csproj ./src/Voidwell.DaybreakGames.Core/
+COPY ./src/Voidwell.DaybreakGames.Data/*.csproj ./src/Voidwell.DaybreakGames.Data/
+COPY ./src/Voidwell.DaybreakGames.GameState/*.csproj ./src/Voidwell.DaybreakGames.GameState/
+COPY ./src/Voidwell.DaybreakGames.Messaging/*.csproj ./src/Voidwell.DaybreakGames.Messaging/
+COPY ./src/Voidwell.DaybreakGames.Utils/*.csproj ./src/Voidwell.DaybreakGames.Utils/
 COPY ./test/Voidwell.DaybreakGames.Test/*.csproj ./test/Voidwell.DaybreakGames.Test/
 
 RUN dotnet restore
@@ -26,4 +31,4 @@ ENV ASPNETCORE_URLS http://*:5000
 EXPOSE 5000
 
 # Start the app
-ENTRYPOINT dotnet Voidwell.DaybreakGames.Api.dll
+ENTRYPOINT dotnet Voidwell.DaybreakGames.App.dll

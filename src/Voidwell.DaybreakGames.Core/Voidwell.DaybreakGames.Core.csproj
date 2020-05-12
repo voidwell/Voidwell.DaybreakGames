@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Glicko-2RankingSystem" Version="2.0.0" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj" />
+  </ItemGroup>
+
+</Project>

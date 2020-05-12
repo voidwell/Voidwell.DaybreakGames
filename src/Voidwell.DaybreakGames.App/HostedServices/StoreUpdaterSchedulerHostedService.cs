@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Data.Models;
-using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Options;
+using Voidwell.DaybreakGames.UpdatableServices;
 
-namespace Voidwell.DaybreakGames.HostedServices
+namespace Voidwell.DaybreakGames.App.HostedServices
 {
     public class StoreUpdaterSchedulerHostedService : IHostedService
     {
@@ -41,10 +41,10 @@ namespace Voidwell.DaybreakGames.HostedServices
                 return Task.CompletedTask;
             }
 
-            var updatableTypes = typeof(IUpdateable).GetTypeInfo().Assembly.GetTypes()
-                .Where(a => typeof(IUpdateable).IsAssignableFrom(a));
+            var updatableTypes = typeof(IUpdatable).GetTypeInfo().Assembly.GetTypes()
+                .Where(a => typeof(IUpdatable).IsAssignableFrom(a));
 
-            var storeUpdaterInterfaces = updatableTypes.Where(a => a.GetTypeInfo().IsInterface && !typeof(IUpdateable).IsEquivalentTo(a));
+            var storeUpdaterInterfaces = updatableTypes.Where(a => a.GetTypeInfo().IsInterface && !typeof(IUpdatable).IsEquivalentTo(a));
             var storeUpdaterTypes = updatableTypes.Where(a => a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract);
 
             var storeUpdaterMatches = storeUpdaterTypes.Select(t => new[] { t, storeUpdaterInterfaces.SingleOrDefault(i => i.IsAssignableFrom(t)) })
@@ -71,7 +71,7 @@ namespace Voidwell.DaybreakGames.HostedServices
 
         private void RegisterUpdater(Type[] updaterPair)
         {
-            var updater = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdateable;
+            var updater = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdatable;
             var updaterHistory = _updaterSchedulerRepository.GetUpdaterHistoryByServiceName(updater.ServiceName);
 
             if (_updaterTimers.ContainsKey(updater.ServiceName))
@@ -103,13 +103,13 @@ namespace Voidwell.DaybreakGames.HostedServices
 
             var updaterPair = stateInfo as Type[];
 
-            var updaterService = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdateable;
+            var updaterService = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdatable;
 
             _logger.LogInformation($"Updating {updaterService.ServiceName}.");
 
             try
             {
-                await updaterService.RefreshStore();
+                await updaterService.UpdateAsync();
 
                 _logger.LogInformation($"Update complete for {updaterService.ServiceName}.");
 

@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Core\Voidwell.DaybreakGames.Core.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Messaging\Voidwell.DaybreakGames.Messaging.csproj" />
+  </ItemGroup>
+
+</Project>

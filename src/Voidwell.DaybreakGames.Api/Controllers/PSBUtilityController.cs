@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Services;
+using Voidwell.DaybreakGames.Core.Services;
 
 namespace Voidwell.DaybreakGames.Api.Controllers
 {

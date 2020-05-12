@@ -7,7 +7,6 @@ namespace Voidwell.DaybreakGames
         public bool DisableCensusMonitor { get; set; } = false;
         public bool DisableCharacterUpdater { get; set; } = false;
         public bool DisableUpdater { get; set; } = false;
-        public bool DisableMessages { get; set; } = false;
         public string CensusServiceKey { get; set; } = "example";
         public string CensusServiceNamespace { get; set; }
         public IEnumerable<string> CensusWebsocketWorlds { get; set; }

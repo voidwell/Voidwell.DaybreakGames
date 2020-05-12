@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Core.Services.Planetside;
+using Voidwell.DaybreakGames.GameState.Services;
 
 namespace Voidwell.DaybreakGames.Test
 {

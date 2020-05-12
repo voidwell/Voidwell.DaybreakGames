@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Core.Services.Planetside;
+using Voidwell.DaybreakGames.GameState.Services;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
 {

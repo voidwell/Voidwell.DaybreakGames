@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
-using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Core.Models;
 using Voidwell.DaybreakGames.Test.MapTests;
 using Xunit;
+using Voidwell.DaybreakGames.GameState.Models;
 
 namespace Voidwell.DaybreakGames.Test
 {

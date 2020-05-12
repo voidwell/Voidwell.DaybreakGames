@@ -6,9 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Core.Models;
+using Voidwell.DaybreakGames.GameState.Models;
 
 namespace Voidwell.DaybreakGames.Test.MapTests
 {

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
 using System.Linq;
 using System;
+using Voidwell.DaybreakGames.Utils.StatefulHostedService;
 
 namespace Voidwell.DaybreakGames.Api.Controllers
 {
@@ -15,15 +15,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers
 
         public ServicesController(IServiceProvider serviceProvider)
         {
-            var statefulHostedTypes = typeof(IStatefulHostedService).GetTypeInfo().Assembly.GetTypes()
-                .Where(a => typeof(IStatefulHostedService).IsAssignableFrom(a) && !typeof(IStatefulHostedService).IsEquivalentTo(a));
-
-            var statefulHostedServiceTypes = statefulHostedTypes.Where(a => a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract);
-
-            _services = statefulHostedTypes.Where(a => a.GetTypeInfo().IsInterface && statefulHostedServiceTypes.Any(a.IsAssignableFrom))
-                .Select(a => serviceProvider.GetService(a) as IStatefulHostedService)
-                .Where(a => a != null)
-                .OrderBy(a => a.ServiceName);
+            _services = serviceProvider.GetStatefulHostedServices();
         }
 
         [HttpGet("status")]

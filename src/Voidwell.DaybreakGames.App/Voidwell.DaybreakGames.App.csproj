@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>Voidwell.DaybreakGames.App</AssemblyName>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,21 +14,24 @@
   </ItemGroup>
     
   <ItemGroup>
-    <PackageReference Include="DaybreakGames.Census" Version="1.1.0" />
-    <PackageReference Include="Glicko-2RankingSystem" Version="2.0.0" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
-    <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.4" PrivateAssets="All" />
-    <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.7.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.4" />
+    <PackageReference Include="Voidwell.Logging" Version="1.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
-    <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Core\Voidwell.DaybreakGames.Core.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.GameState\Voidwell.DaybreakGames.GameState.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Api\Voidwell.DaybreakGames.Api.csproj" />
   </ItemGroup>
   
   <ItemGroup>
     <Content Update="devsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

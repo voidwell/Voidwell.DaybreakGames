@@ -27,7 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.App\Voidwell.DaybreakGames.App.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.GameState\Voidwell.DaybreakGames.GameState.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Messaging\Voidwell.DaybreakGames.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
