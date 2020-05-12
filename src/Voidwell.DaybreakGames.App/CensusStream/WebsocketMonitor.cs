@@ -1,6 +1,7 @@
 ﻿using DaybreakGames.Census.Stream;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -15,38 +16,57 @@ namespace Voidwell.DaybreakGames.CensusStream
 {
     public class WebsocketMonitor : StatefulHostedService, IWebsocketMonitor, IDisposable
     {
-        private readonly ICensusStreamClient _client;
+        private readonly ICensusStreamClient _deathClient;
+        private readonly ICensusStreamClient _loginLogoutClient;
+        private readonly ICensusStreamClient _otherClient;
+
         private readonly IWebsocketEventHandler _handler;
         private readonly DaybreakGamesOptions _options;
         private readonly IWorldMonitor _worldMonitor;
         private readonly ILogger<WebsocketMonitor> _logger;
 
-        private CensusHeartbeat _lastHeartbeat;
+        private Dictionary<string, CensusHeartbeat> _lastHeartbeat = new Dictionary<string, CensusHeartbeat>();
 
         public override string ServiceName => "CensusMonitor";
 
-        public WebsocketMonitor(ICensusStreamClient censusStreamClient, IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options,
+        private static readonly string[] _deathClientServices = { "Death" };
+        private static readonly string[] _loginLogoutClientServices = { "PlayerLogin", "PlayerLogout" };
+
+        public WebsocketMonitor(IServiceProvider provider, IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options,
             IWorldMonitor worldMonitor, ICache cache, ILogger<WebsocketMonitor> logger)
                 :base(cache)
         {
-            _client = censusStreamClient;
+            _deathClient = provider.GetService<ICensusStreamClient>();
+            _loginLogoutClient = provider.GetService<ICensusStreamClient>();
+            _otherClient = provider.GetService<ICensusStreamClient>();
+
             _handler = handler;
             _options = options.Value;
             _worldMonitor = worldMonitor;
             _logger = logger;
 
-            _client.Subscribe(CreateSubscription())
-                .OnMessage(OnMessage)
+            var censusServices = _options.CensusWebsocketServices;
+
+            _deathClient.Subscribe(CreateSubscription(censusServices.Where(a => _deathClientServices.Contains(a))))
+                .OnMessage(a => OnMessage("DeathClient", a))
+                .OnDisconnect(OnDisconnect);
+
+            _loginLogoutClient.Subscribe(CreateSubscription(censusServices.Where(a => _loginLogoutClientServices.Contains(a))))
+                .OnMessage(a => OnMessage("LoginLogoutClient", a))
+                .OnDisconnect(OnDisconnect);
+
+            _otherClient.Subscribe(CreateSubscription(censusServices.Where(a => !_deathClientServices.Contains(a) && !_loginLogoutClientServices.Contains(a))))
+                .OnMessage(a => OnMessage("OtherClient", a))
                 .OnDisconnect(OnDisconnect);
         }
 
-        private CensusStreamSubscription CreateSubscription()
+        private CensusStreamSubscription CreateSubscription(IEnumerable<string> services)
         {
             var eventNames = new List<string>();
 
-            if (_options.CensusWebsocketServices != null)
+            if (services != null)
             {
-                eventNames.AddRange(_options.CensusWebsocketServices);
+                eventNames.AddRange(services);
             }
 
             if (_options.CensusWebsocketExperienceIds != null && _options.CensusWebsocketExperienceIds.Any())
@@ -75,11 +95,13 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             try
             {
-                await _client.ConnectAsync();
+                await _otherClient.ConnectAsync();
+                await _loginLogoutClient.ConnectAsync();
+                await _deathClient.ConnectAsync();
             }
             catch(Exception ex)
             {
-                await _client?.DisconnectAsync();
+                await DisconnectAllClientsAsync();
                 await UpdateStateAsync(false);
 
                 _logger.LogError(91435, ex, "Failed to establish initial connection to Census. Will not attempt to reconnect.");
@@ -89,18 +111,13 @@ namespace Voidwell.DaybreakGames.CensusStream
         public override async Task StopInternalAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping census stream monitor");
-
-            if (_client == null)
-            {
-                return;
-            }
-
-            await _client.DisconnectAsync();
+            
+            await DisconnectAllClientsAsync();
         }
 
         public override async Task OnApplicationShutdown(CancellationToken cancellationToken)
         {
-            await _client?.DisconnectAsync();
+            await DisconnectAllClientsAsync();
         }
 
         protected override Task<object> GetStatusAsync(CancellationToken cancellationToken)
@@ -108,7 +125,14 @@ namespace Voidwell.DaybreakGames.CensusStream
             return Task.FromResult((object)_lastHeartbeat);
         }
 
-        private async Task OnMessage(string message)
+        private async Task DisconnectAllClientsAsync()
+        {
+            await _deathClient?.DisconnectAsync();
+            await _loginLogoutClient?.DisconnectAsync();
+            await _otherClient?.DisconnectAsync();
+        }
+
+        private async Task OnMessage(string subject, string message)
         {
             if (message == null)
             {
@@ -129,7 +153,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             if (msg.Value<string>("type") == "heartbeat")
             {
-                _lastHeartbeat = new CensusHeartbeat
+                _lastHeartbeat[subject] = new CensusHeartbeat
                 {
                     LastHeartbeat = DateTime.UtcNow,
                     Contents = msg.ToObject<object>()
@@ -153,7 +177,9 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         public void Dispose()
         {
-            _client?.Dispose();
+            _deathClient?.Dispose();
+            _loginLogoutClient?.Dispose();
+            _otherClient?.Dispose();
         }
     }
 }
