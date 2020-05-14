@@ -21,7 +21,7 @@ namespace Voidwell.DaybreakGames.CensusStream
         private readonly IWorldMonitor _worldMonitor;
         private readonly ILogger<WebsocketMonitor> _logger;
 
-        private CensusHeartbeat _lastHeartbeat;
+        private CensusState _lastStateChange;
 
         public override string ServiceName => "CensusMonitor";
 
@@ -81,6 +81,7 @@ namespace Voidwell.DaybreakGames.CensusStream
             {
                 await _client?.DisconnectAsync();
                 await UpdateStateAsync(false);
+                UpdateStateDetails(ex.Message);
 
                 _logger.LogError(91435, ex, "Failed to establish initial connection to Census. Will not attempt to reconnect.");
             }
@@ -95,7 +96,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                 return;
             }
 
-            await _client.DisconnectAsync();
+            await _client?.DisconnectAsync();
         }
 
         public override async Task OnApplicationShutdown(CancellationToken cancellationToken)
@@ -105,7 +106,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         protected override Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult((object)_lastHeartbeat);
+            return Task.FromResult((object)_lastStateChange);
         }
 
         private async Task OnMessage(string message)
@@ -129,12 +130,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             if (msg.Value<string>("type") == "heartbeat")
             {
-                _lastHeartbeat = new CensusHeartbeat
-                {
-                    LastHeartbeat = DateTime.UtcNow,
-                    Contents = msg.ToObject<object>()
-                };
-
+                UpdateStateDetails(msg.ToObject<object>());
                 return;
             }
 
@@ -148,7 +144,17 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         private async Task OnDisconnect(string error)
         {
+            UpdateStateDetails(error);
             await _worldMonitor.ClearAllWorldStates();
+        }
+
+        private void UpdateStateDetails(object contents)
+        {
+            _lastStateChange = new CensusState
+            {
+                LastStateChange = DateTime.UtcNow,
+                Contents = contents
+            };
         }
 
         public void Dispose()
