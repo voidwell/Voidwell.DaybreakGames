@@ -2,9 +2,9 @@
 
 namespace Voidwell.DaybreakGames.CensusStream.Models
 {
-    public class CensusHeartbeat
+    public class CensusState
     {
-        public DateTime LastHeartbeat { get; set; }
+        public DateTime LastStateChange { get; set; }
         public object Contents { get; set; }
     }
 }
