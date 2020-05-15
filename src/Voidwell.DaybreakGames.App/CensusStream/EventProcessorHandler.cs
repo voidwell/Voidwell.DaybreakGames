@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             var inputParam = payload.ToObject(processor.PayloadType, StreamConstants.PayloadDeserializer);
 
-            await (Task)processor.ProcessMethodReference.Invoke(processor.Instance, new[] { payload });
+            await (Task)processor.ProcessMethodReference.Invoke(processor.Instance, new[] { inputParam });
 
             return true;
         }
