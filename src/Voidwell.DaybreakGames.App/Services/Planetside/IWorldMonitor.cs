@@ -23,5 +23,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task SetupWorldZones(int worldId);
         Task<bool> SetupWorldZone(int worldId, int zoneId, bool retryAsync = false);
         Task<PopulationPeriod> GetZonePopulation(int worldId, int zoneId);
+        IEnumerable<int> GetOnlineWorldIds();
     }
 }

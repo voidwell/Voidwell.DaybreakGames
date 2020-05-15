@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Voidwell.DaybreakGames.CensusStream
 {
-    public interface IWebsocketEventHandler : IDisposable
+    public interface IWebsocketEventHandler
     {
         Task Process(JToken jPayload);
     }
