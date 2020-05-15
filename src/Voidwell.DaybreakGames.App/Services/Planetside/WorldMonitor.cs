@@ -231,6 +231,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return (await Task.WhenAll(_worldStates.Select(a => GetWorldState(a.Key)))).OrderBy(a => a.Name);
         }
 
+        public IEnumerable<int> GetOnlineWorldIds()
+        {
+            return _worldStates.Where(a => a.Value.IsOnline).Select(a => a.Key).ToList();
+        }
+
         public IEnumerable<ZoneRegionOwnership> GetZoneOwnership(int worldId, int zoneId)
         {
             if (!_worldStates.ContainsKey(worldId))

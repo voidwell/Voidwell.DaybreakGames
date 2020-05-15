@@ -17,22 +17,26 @@ namespace Voidwell.DaybreakGames.CensusStream
     {
         private readonly ICensusStreamClient _client;
         private readonly IWebsocketEventHandler _handler;
-        private readonly DaybreakGamesOptions _options;
         private readonly IWorldMonitor _worldMonitor;
+        private readonly IWebsocketHealthMonitor _healthMonitor;
+        private readonly DaybreakGamesOptions _options;
         private readonly ILogger<WebsocketMonitor> _logger;
 
         private CensusState _lastStateChange;
+        private Timer _timer;
 
         public override string ServiceName => "CensusMonitor";
 
-        public WebsocketMonitor(ICensusStreamClient censusStreamClient, IWebsocketEventHandler handler, IOptions<DaybreakGamesOptions> options,
-            IWorldMonitor worldMonitor, ICache cache, ILogger<WebsocketMonitor> logger)
+        public WebsocketMonitor(ICensusStreamClient censusStreamClient, IWebsocketEventHandler handler, 
+            IWorldMonitor worldMonitor, IWebsocketHealthMonitor healthMonitor, IOptions<DaybreakGamesOptions> options,
+            ILogger<WebsocketMonitor> logger, ICache cache)
                 :base(cache)
         {
             _client = censusStreamClient;
             _handler = handler;
-            _options = options.Value;
             _worldMonitor = worldMonitor;
+            _healthMonitor = healthMonitor;
+            _options = options.Value;
             _logger = logger;
 
             _client.Subscribe(CreateSubscription())
@@ -85,6 +89,8 @@ namespace Voidwell.DaybreakGames.CensusStream
 
                 _logger.LogError(91435, ex, "Failed to establish initial connection to Census. Will not attempt to reconnect.");
             }
+
+            _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
         }
 
         public override async Task StopInternalAsync(CancellationToken cancellationToken)
@@ -146,6 +152,8 @@ namespace Voidwell.DaybreakGames.CensusStream
         {
             UpdateStateDetails(error);
             await _worldMonitor.ClearAllWorldStates();
+            _healthMonitor.ClearAllWorlds();
+            _timer?.Dispose();
         }
 
         private void UpdateStateDetails(object contents)
@@ -157,9 +165,34 @@ namespace Voidwell.DaybreakGames.CensusStream
             };
         }
 
+        private async void CheckDataHealth(object state)
+        {
+            if (!_healthMonitor.IsHealthy())
+            {
+                _logger.LogError(45234, "Census stream has failed health checks. Attempting resetting connection.");
+
+                try
+                {
+                    await _client?.DisconnectAsync();
+
+                    await _client?.ConnectAsync();
+
+                    _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
+                }
+                catch (Exception ex)
+                {
+                    await _client?.DisconnectAsync();
+                    UpdateStateDetails(ex.Message);
+
+                    _logger.LogError(45235, ex, "Failed to reestablish connection to Census");
+                }
+            }
+        }
+
         public void Dispose()
         {
             _client?.Dispose();
+            _timer?.Dispose();
         }
     }
 }

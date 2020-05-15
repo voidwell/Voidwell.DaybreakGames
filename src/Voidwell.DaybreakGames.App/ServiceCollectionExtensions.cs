@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Voidwell.DaybreakGames.App.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusStream;
 using Voidwell.DaybreakGames.HostedServices;
@@ -48,7 +51,8 @@ namespace Voidwell.DaybreakGames.App
             });
 
             services.AddCensusHelpers();
-            services.AddUpdateableTasks();
+            services.AddUpdateableServices();
+            services.AddEventProcessors();
 
             services.AddTransient<IFeedService, FeedService>();
             services.AddTransient<IItemService, ItemService>();
@@ -81,12 +85,38 @@ namespace Voidwell.DaybreakGames.App
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
+            services.AddSingleton<IWebsocketHealthMonitor, WebsocketHealthMonitor>();
+            services.AddSingleton<IEventValidator, EventValidator>();
+            services.AddSingleton<IEventProcessorHandler, EventProcessorHandler>();
 
             services.AddHostedService<StoreUpdaterSchedulerHostedService>();
             services.AddHostedService<WebsocketMonitorHostedService>();
             services.AddHostedService<CharacterUpdaterHostedService>();
 
+
             return services;
+        }
+
+        private static void AddUpdateableServices(this IServiceCollection services)
+        {
+            typeof(IUpdateable).GetTypeInfo().Assembly.GetTypes()
+                .Where(a => typeof(IUpdateable).IsAssignableFrom(a) && a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract)
+                .ToList()
+                .ForEach(t => services.AddTransient(typeof(IUpdateable), t));
+        }
+
+        private static void AddEventProcessors(this IServiceCollection services)
+        {
+            typeof(IEventProcessor<>).GetTypeInfo().Assembly.GetTypes()
+                .Where(a => a.IsClass && !a.IsAbstract)
+                .ToList()
+                .ForEach(type =>
+                {
+                    type.GetInterfaces()
+                        .Where(a => a.IsGenericType && typeof(IEventProcessor<>).IsAssignableFrom(a.GetGenericTypeDefinition()))
+                        .ToList()
+                        .ForEach(a => services.AddSingleton(a, type));
+                });
         }
     }
 }
