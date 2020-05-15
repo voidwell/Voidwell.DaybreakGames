@@ -42,6 +42,11 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         private EventProcessorDefinition CreateEventProcessorDefinition(Type serviceType, object instance)
         {
+            if (instance == null)
+            {
+                return null;
+            }
+
             var attr = instance.GetType().GetCustomAttribute<CensusEventProcessorAttribute>();
 
             if (attr == null)

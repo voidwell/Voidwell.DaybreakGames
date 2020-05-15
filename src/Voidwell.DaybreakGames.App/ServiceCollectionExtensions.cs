@@ -108,15 +108,11 @@ namespace Voidwell.DaybreakGames.App
         private static void AddEventProcessors(this IServiceCollection services)
         {
             typeof(IEventProcessor<>).GetTypeInfo().Assembly.GetTypes()
-                .Where(a => a.IsClass && !a.IsAbstract)
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .SelectMany(t => t.GetInterfaces().Select(i => (t, i)))
+                .Where(a => a.i.IsGenericType && typeof(IEventProcessor<>).IsAssignableFrom(a.i.GetGenericTypeDefinition()))
                 .ToList()
-                .ForEach(type =>
-                {
-                    type.GetInterfaces()
-                        .Where(a => a.IsGenericType && typeof(IEventProcessor<>).IsAssignableFrom(a.GetGenericTypeDefinition()))
-                        .ToList()
-                        .ForEach(a => services.AddSingleton(a, type));
-                });
+                .ForEach(a => services.AddSingleton(a.i, a.t));
         }
     }
 }
