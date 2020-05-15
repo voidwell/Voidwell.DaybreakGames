@@ -90,7 +90,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                 _logger.LogError(91435, ex, "Failed to establish initial connection to Census. Will not attempt to reconnect.");
             }
 
-            _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
+            StartTimer();
         }
 
         public override async Task StopInternalAsync(CancellationToken cancellationToken)
@@ -103,6 +103,7 @@ namespace Voidwell.DaybreakGames.CensusStream
             }
 
             await _client?.DisconnectAsync();
+            _timer?.Dispose();
         }
 
         public override async Task OnApplicationShutdown(CancellationToken cancellationToken)
@@ -153,7 +154,6 @@ namespace Voidwell.DaybreakGames.CensusStream
             UpdateStateDetails(error);
             await _worldMonitor.ClearAllWorldStates();
             _healthMonitor.ClearAllWorlds();
-            _timer?.Dispose();
         }
 
         private void UpdateStateDetails(object contents)
@@ -165,8 +165,20 @@ namespace Voidwell.DaybreakGames.CensusStream
             };
         }
 
+        private void StartTimer()
+        {
+            _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
+        }
+
         private async void CheckDataHealth(object state)
         {
+            if (!_isRunning)
+            {
+                _healthMonitor.ClearAllWorlds();
+                _timer?.Dispose();
+                return;
+            }
+
             if (!_healthMonitor.IsHealthy())
             {
                 _logger.LogError(45234, "Census stream has failed health checks. Attempting resetting connection.");
@@ -176,12 +188,9 @@ namespace Voidwell.DaybreakGames.CensusStream
                     await _client?.DisconnectAsync();
 
                     await _client?.ConnectAsync();
-
-                    _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
                 }
                 catch (Exception ex)
                 {
-                    await _client?.DisconnectAsync();
                     UpdateStateDetails(ex.Message);
 
                     _logger.LogError(45235, ex, "Failed to reestablish connection to Census");
