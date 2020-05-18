@@ -185,8 +185,6 @@ namespace Voidwell.DaybreakGames.CensusStream
 
                 try
                 {
-                    await _client?.DisconnectAsync();
-
                     await _client?.ConnectAsync();
                 }
                 catch (Exception ex)
