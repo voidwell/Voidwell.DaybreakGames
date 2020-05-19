@@ -82,6 +82,7 @@ namespace Voidwell.DaybreakGames.App
             services.AddSingleton<IProfileService, ProfileService>();
             services.AddSingleton<IWorldEventsService, WorldEventsService>();
 
+            services.AddTransient<IStreamClient, StreamClient>();
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();

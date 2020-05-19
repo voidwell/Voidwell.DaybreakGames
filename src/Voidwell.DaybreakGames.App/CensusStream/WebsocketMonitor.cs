@@ -10,12 +10,13 @@ using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.CensusStream.Models;
+using Websocket.Client;
 
 namespace Voidwell.DaybreakGames.CensusStream
 {
     public class WebsocketMonitor : StatefulHostedService, IWebsocketMonitor, IDisposable
     {
-        private readonly ICensusStreamClient _client;
+        private readonly IStreamClient _client;
         private readonly IWebsocketEventHandler _handler;
         private readonly IWorldMonitor _worldMonitor;
         private readonly IWebsocketHealthMonitor _healthMonitor;
@@ -27,20 +28,19 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         public override string ServiceName => "CensusMonitor";
 
-        public WebsocketMonitor(ICensusStreamClient censusStreamClient, IWebsocketEventHandler handler, 
+        public WebsocketMonitor(IStreamClient streamClient, IWebsocketEventHandler handler, 
             IWorldMonitor worldMonitor, IWebsocketHealthMonitor healthMonitor, IOptions<DaybreakGamesOptions> options,
             ILogger<WebsocketMonitor> logger, ICache cache)
                 :base(cache)
         {
-            _client = censusStreamClient;
+            _client = streamClient;
             _handler = handler;
             _worldMonitor = worldMonitor;
             _healthMonitor = healthMonitor;
             _options = options.Value;
             _logger = logger;
 
-            _client.Subscribe(CreateSubscription())
-                .OnMessage(OnMessage)
+            _client.OnMessage(OnMessage)
                 .OnDisconnect(OnDisconnect);
         }
 
@@ -77,20 +77,9 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             _logger.LogInformation("Starting census stream monitor");
 
-            try
-            {
-                await _client.ConnectAsync();
-            }
-            catch(Exception ex)
-            {
-                await _client?.DisconnectAsync();
-                await UpdateStateAsync(false);
-                UpdateStateDetails(ex.Message);
+            await _client.ConnectAsync(CreateSubscription());
 
-                _logger.LogError(91435, ex, "Failed to establish initial connection to Census. Will not attempt to reconnect.");
-            }
-
-            StartTimer();
+            _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
         }
 
         public override async Task StopInternalAsync(CancellationToken cancellationToken)
@@ -149,9 +138,9 @@ namespace Voidwell.DaybreakGames.CensusStream
             #pragma warning restore CS4014
         }
 
-        private async Task OnDisconnect(string error)
+        private async Task OnDisconnect(DisconnectionInfo info)
         {
-            UpdateStateDetails(error);
+            UpdateStateDetails(info.Exception?.Message ?? info.Type.ToString());
             await _worldMonitor.ClearAllWorldStates();
             _healthMonitor.ClearAllWorlds();
         }
@@ -163,11 +152,6 @@ namespace Voidwell.DaybreakGames.CensusStream
                 LastStateChange = DateTime.UtcNow,
                 Contents = contents
             };
-        }
-
-        private void StartTimer()
-        {
-            _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
         }
 
         private async void CheckDataHealth(object state)
@@ -185,7 +169,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
                 try
                 {
-                    await _client?.ConnectAsync();
+                    await _client?.ReconnectAsync();
                 }
                 catch (Exception ex)
                 {
