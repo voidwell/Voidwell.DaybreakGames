@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
   </ItemGroup>
   
