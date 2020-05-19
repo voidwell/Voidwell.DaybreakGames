@@ -2,7 +2,6 @@
 using Moq;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Messages;
 using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Test
@@ -14,13 +13,12 @@ namespace Voidwell.DaybreakGames.Test
         public ICombatReportService CombatReportService { get; set; }
         public IMapService MapService { get; set; }
         public IWorldMonitor WorldMonitor { get; set; }
-        public IMessageService MessageService { get; set; }
         public ICache Cache { get; set; }
         private ILogger<AlertService> Logger { get; set; }
 
         public AlertService CreateSut()
         {
-            return new AlertService(AlertRepository, MetagameEventService, CombatReportService, MapService, WorldMonitor, MessageService, Cache, Logger);
+            return new AlertService(AlertRepository, MetagameEventService, CombatReportService, MapService, WorldMonitor, Cache, Logger);
         }
 
         public void ResetFixture()
@@ -30,7 +28,6 @@ namespace Voidwell.DaybreakGames.Test
             CombatReportService = Mock.Of<ICombatReportService>();
             MapService = Mock.Of<IMapService>();
             WorldMonitor = Mock.Of<IWorldMonitor>();
-            MessageService = Mock.Of<IMessageService>();
             Cache = Mock.Of<ICache>();
             Logger = Mock.Of<ILogger<AlertService>>();
         }

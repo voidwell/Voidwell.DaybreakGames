@@ -8,7 +8,6 @@ using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusStream;
 using Voidwell.DaybreakGames.HostedServices;
 using Voidwell.DaybreakGames.HttpAuthenticatedClient;
-using Voidwell.DaybreakGames.Messages;
 using Voidwell.DaybreakGames.Services;
 using Voidwell.DaybreakGames.Services.Planetside;
 
@@ -68,7 +67,6 @@ namespace Voidwell.DaybreakGames.App
             services.AddTransient<IGradeService, GradeService>();
             services.AddTransient<IExperienceService, ExperienceService>();
 
-            services.AddSingleton<IMessageService, MessageService>();
             services.AddSingleton<ICharacterService, CharacterService>();
             services.AddSingleton<ICharacterSessionService, CharacterSessionService>();
             services.AddSingleton<IOutfitService, OutfitService>();
