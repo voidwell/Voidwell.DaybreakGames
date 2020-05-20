@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>Voidwell.DaybreakGames.App</AssemblyName>
   </PropertyGroup>
 
@@ -14,9 +14,7 @@
     
   <ItemGroup>
     <PackageReference Include="DaybreakGames.Census" Version="1.1.0" />
-    <PackageReference Include="Glicko-2RankingSystem" Version="2.0.0" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
-    <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.4" PrivateAssets="All" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.7.0" />
     <PackageReference Include="Websocket.Client" Version="4.3.15" />
@@ -25,7 +23,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.CensusStream\Voidwell.DaybreakGames.CensusStream.csproj" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.GameState\Voidwell.DaybreakGames.GameState.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Models\Voidwell.DaybreakGames.Models.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Services\Voidwell.DaybreakGames.Services.csproj" />
   </ItemGroup>
   
   <ItemGroup>

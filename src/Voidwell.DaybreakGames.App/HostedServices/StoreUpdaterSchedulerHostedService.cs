@@ -11,8 +11,9 @@ using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Services;
 using Microsoft.Extensions.Options;
+using Voidwell.DaybreakGames.Models;
 
-namespace Voidwell.DaybreakGames.HostedServices
+namespace Voidwell.DaybreakGames.App.HostedServices
 {
     public class StoreUpdaterSchedulerHostedService : IHostedService
     {

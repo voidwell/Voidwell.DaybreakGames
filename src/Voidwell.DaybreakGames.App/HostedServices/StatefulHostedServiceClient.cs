@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using System.Threading;
+using Voidwell.DaybreakGames.Utils;
 
-namespace Voidwell.DaybreakGames.HostedServices
+namespace Voidwell.DaybreakGames.App.HostedServices
 {
     public abstract class StatefulHostedServiceClient : IHostedService
     {

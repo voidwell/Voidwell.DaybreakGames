@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Moq;
-using Voidwell.DaybreakGames.CensusStream.Models;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Services.Models;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Test

@@ -15,17 +15,17 @@ namespace Voidwell.DaybreakGames.CensusServices
             _queryFactory = queryFactory;
         }
 
-        public async Task<CensusMapModel> GetMapOwnership(int worldId, int zoneId)
+        public async Task<IEnumerable<CensusMapModel>> GetMapOwnership(int worldId, params int[] zoneId)
         {
             var query = _queryFactory.Create("map");
             query.SetLanguage("en");
 
             query.Where("world_id").Equals(worldId);
-            query.Where("zone_ids").Equals(zoneId);
+            query.Where("zone_ids").Equals(string.Join(",", zoneId));
 
             try
             {
-                return await query.GetAsync<CensusMapModel>();
+                return await query.GetListAsync<CensusMapModel>();
             }
             catch (Exception)
             {

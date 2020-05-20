@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
-using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Services.Models;
 using Voidwell.DaybreakGames.Test.MapTests;
 using Xunit;
+using ContinentLock = Voidwell.DaybreakGames.Data.Models.Planetside.Events.ContinentLock;
+using ContinentUnlock = Voidwell.DaybreakGames.Data.Models.Planetside.Events.ContinentUnlock;
 
 namespace Voidwell.DaybreakGames.Test
 {

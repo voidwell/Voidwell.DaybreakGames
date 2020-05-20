@@ -9,6 +9,7 @@ using System.Linq;
 using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Services.Models;
 
 namespace Voidwell.DaybreakGames.Test.MapTests
 {
@@ -66,7 +67,7 @@ namespace Voidwell.DaybreakGames.Test.MapTests
         public static IEnumerable<ZoneRegionOwnership> GetMapOwnership(int zoneId)
         {
             var mapList = LoadJson<IEnumerable<CensusMapModel>>($"{DataRoot}/MapOwnership.json", "map_list");
-            return mapList.First(a => a.ZoneId == zoneId).Regions.Row.Select(a => new ZoneRegionOwnership(a.RowData.RegionId, a.RowData.FactionId));
+            return mapList.First(a => a.ZoneId == zoneId).Regions.Row.Select(a => new ZoneRegionOwnership(zoneId, a.RowData.RegionId, a.RowData.FactionId));
         }
 
         public static IEnumerable<FacilityLink> GetFacilityLinks(int zoneId)

@@ -1,6 +1,6 @@
 ﻿using Voidwell.DaybreakGames.CensusStream;
 
-namespace Voidwell.DaybreakGames.HostedServices
+namespace Voidwell.DaybreakGames.App.HostedServices
 {
     public class WebsocketMonitorHostedService : StatefulHostedServiceClient
     {

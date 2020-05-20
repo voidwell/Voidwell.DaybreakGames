@@ -1,6 +1,6 @@
 ﻿using Voidwell.DaybreakGames.Services.Planetside;
 
-namespace Voidwell.DaybreakGames.HostedServices
+namespace Voidwell.DaybreakGames.App.HostedServices
 {
     public class CharacterUpdaterHostedService : StatefulHostedServiceClient
     {

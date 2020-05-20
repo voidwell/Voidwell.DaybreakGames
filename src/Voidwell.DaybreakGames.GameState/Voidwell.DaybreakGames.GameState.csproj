@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Voidwell.Cache\Voidwell.Cache.csproj" />
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Services\Voidwell.DaybreakGames.Services.csproj" />
+  </ItemGroup>
+
+</Project>
