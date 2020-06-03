@@ -6,5 +6,6 @@ namespace Voidwell.DaybreakGames.Models
     {
         public DateTime LastStateChange { get; set; }
         public object Contents { get; set; }
+        public object Health { get; set; }
     }
 }

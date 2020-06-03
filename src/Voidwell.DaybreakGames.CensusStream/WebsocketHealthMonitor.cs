@@ -23,13 +23,13 @@ namespace Voidwell.DaybreakGames.CensusStream
             _logger = logger;
         }
 
-        public void ReceivedEvent(int worldId, string eventName, DateTime? timestamp = null)
+        public void ReceivedEvent(int worldId, string eventName)
         {
-            if (timestamp == null)
-            {
-                timestamp = DateTime.UtcNow;
-            }
+            ReceivedEvent(worldId, eventName, DateTime.UtcNow);
+        }
 
+        public void ReceivedEvent(int worldId, string eventName, DateTime timestamp)
+        {
             try
             {
                 if (!_worldsLastSeenEvents.ContainsKey(worldId))
@@ -37,8 +37,8 @@ namespace Voidwell.DaybreakGames.CensusStream
                     _worldsLastSeenEvents.TryAdd(worldId, new ConcurrentDictionary<string, DateTime>());
                 }
 
-                _worldsLastSeenEvents[worldId].AddOrUpdate(eventName, timestamp.Value, (k, v) => timestamp.Value);
-            } catch(Exception ex)
+                _worldsLastSeenEvents[worldId].AddOrUpdate(eventName, timestamp, (k, v) => timestamp);
+            } catch(Exception)
             { }
         }
 
@@ -57,6 +57,11 @@ namespace Voidwell.DaybreakGames.CensusStream
             var worldIds = _worldsLastSeenEvents.Keys.Where(a => !_ignorableWorlds.Contains(a)).ToList();
 
             return !worldIds.Where(a => !TryEvaluateWorldHealth(a)).Any();
+        }
+
+        public Dictionary<int, Dictionary<string, DateTime>> GetHealthState()
+        {
+            return _worldsLastSeenEvents?.ToDictionary(a => a.Key, a => a.Value?.ToDictionary(b => b.Key, b => b.Value));
         }
 
         private bool TryEvaluateWorldHealth(int worldId)

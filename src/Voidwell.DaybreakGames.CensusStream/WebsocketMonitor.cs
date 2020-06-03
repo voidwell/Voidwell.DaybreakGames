@@ -103,14 +103,18 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         protected override Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
+            if (_lastStateChange != null)
+            {
+                _lastStateChange.Health = _healthMonitor.GetHealthState();
+            }
             return Task.FromResult((object)_lastStateChange);
         }
 
-        private async Task OnMessage(string message)
+        private Task OnMessage(string message)
         {
             if (message == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             JToken msg;
@@ -122,21 +126,21 @@ namespace Voidwell.DaybreakGames.CensusStream
             catch(Exception)
             {
                 _logger.LogError(91097, "Failed to parse message: {0}", message);
-                return;
+                return Task.CompletedTask;
             }
 
             if (msg.Value<string>("type") == "heartbeat")
             {
                 UpdateStateDetails(msg.ToObject<object>());
-                return;
+                return Task.CompletedTask;
             }
 
-            #pragma warning disable CS4014
             Task.Run(() =>
             {
                 _handler.Process(msg);
             }).ConfigureAwait(false);
-            #pragma warning restore CS4014
+
+            return Task.CompletedTask;
         }
 
         private async Task OnDisconnect(DisconnectionInfo info)
@@ -151,7 +155,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             _lastStateChange = new CensusState
             {
                 LastStateChange = DateTime.UtcNow,
-                Contents = contents
+                Contents = contents,
+                Health = _healthMonitor.GetHealthState()
             };
         }
 
