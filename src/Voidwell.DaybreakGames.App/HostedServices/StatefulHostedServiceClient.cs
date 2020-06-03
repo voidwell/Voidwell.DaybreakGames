@@ -7,21 +7,21 @@ namespace Voidwell.DaybreakGames.App.HostedServices
 {
     public abstract class StatefulHostedServiceClient : IHostedService
     {
-        private IStatefulHostedService _hostedService { get; set; }
+        public IStatefulHostedService Service { get; }
 
         protected StatefulHostedServiceClient(IStatefulHostedService hostedService)
         {
-            _hostedService = hostedService;
+            Service = hostedService;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            return _hostedService.OnApplicationStartup(cancellationToken);
+            return Service.OnApplicationStartup(cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            return _hostedService.OnApplicationShutdown(cancellationToken);
+            return Service.OnApplicationShutdown(cancellationToken);
         }
     }
 }

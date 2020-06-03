@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.dockerignore = .dockerignore
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
 		Dockerfile = Dockerfile
 		Dockerfile.debug = Dockerfile.debug
 		init-migrate.bat = init-migrate.bat
@@ -32,17 +33,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Api"
 		{70DEC05A-24A9-474B-A954-6504AE2CD74C} = {70DEC05A-24A9-474B-A954-6504AE2CD74C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.CensusServices", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusServices", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.GameState", "src\Voidwell.DaybreakGames.GameState\Voidwell.DaybreakGames.GameState.csproj", "{1BCBF354-4F5F-46F4-B406-E02A6BCC57D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.GameState", "src\Voidwell.DaybreakGames.GameState\Voidwell.DaybreakGames.GameState.csproj", "{1BCBF354-4F5F-46F4-B406-E02A6BCC57D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Services", "src\Voidwell.DaybreakGames.Services\Voidwell.DaybreakGames.Services.csproj", "{DEC920ED-99D7-4A56-B348-25CFBA5A89E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Services", "src\Voidwell.DaybreakGames.Services\Voidwell.DaybreakGames.Services.csproj", "{DEC920ED-99D7-4A56-B348-25CFBA5A89E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.CensusStream", "src\Voidwell.DaybreakGames.CensusStream\Voidwell.DaybreakGames.CensusStream.csproj", "{5EF002C5-0AD2-4D1D-8D9C-7B1DC7BF155E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusStream", "src\Voidwell.DaybreakGames.CensusStream\Voidwell.DaybreakGames.CensusStream.csproj", "{5EF002C5-0AD2-4D1D-8D9C-7B1DC7BF155E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Models", "src\Voidwell.DaybreakGames.Models\Voidwell.DaybreakGames.Models.csproj", "{996F91F8-3F80-425D-9820-DD8A13FFEC06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Models", "src\Voidwell.DaybreakGames.Models\Voidwell.DaybreakGames.Models.csproj", "{996F91F8-3F80-425D-9820-DD8A13FFEC06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Utils", "src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj", "{052A2BE1-FF8F-4E38-AC0C-F0266E657D75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Utils", "src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj", "{052A2BE1-FF8F-4E38-AC0C-F0266E657D75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

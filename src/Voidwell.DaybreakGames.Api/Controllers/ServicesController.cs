@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
 using System.Linq;
 using System;
 using Voidwell.DaybreakGames.Utils;
+using Newtonsoft.Json.Linq;
+using Voidwell.DaybreakGames.App.HostedServices;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Voidwell.DaybreakGames.Api.Controllers
 {
@@ -16,21 +19,16 @@ namespace Voidwell.DaybreakGames.Api.Controllers
 
         public ServicesController(IServiceProvider serviceProvider)
         {
-            var statefulHostedTypes = typeof(IStatefulHostedService).GetTypeInfo().Assembly.GetTypes()
-                .Where(a => typeof(IStatefulHostedService).IsAssignableFrom(a) && !typeof(IStatefulHostedService).IsEquivalentTo(a));
-
-            var statefulHostedServiceTypes = statefulHostedTypes.Where(a => a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract);
-
-            _services = statefulHostedTypes.Where(a => a.GetTypeInfo().IsInterface && statefulHostedServiceTypes.Any(a.IsAssignableFrom))
-                .Select(a => serviceProvider.GetService(a) as IStatefulHostedService)
-                .Where(a => a != null)
-                .OrderBy(a => a.ServiceName);
+            _services = serviceProvider.GetServices<IHostedService>()
+                .Where(a => a is StatefulHostedServiceClient)
+                .Cast<StatefulHostedServiceClient>()
+                .Select(a => a.Service);
         }
 
         [HttpGet("status")]
         public async Task<ActionResult> GetAllServiceStatus()
         {
-            var serviceStateTasks = _services.Select(a => a.GetStateAsync(CancellationToken.None));
+            var serviceStateTasks = _services?.Select(a => a.GetStateAsync(CancellationToken.None));
 
             var states = await Task.WhenAll(serviceStateTasks);
 
@@ -40,7 +38,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers
         [HttpGet("{serviceName}/status")]
         public async Task<ActionResult> GetServiceStatus(string serviceName)
         {
-            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
+            var service = _services?.FirstOrDefault(a => a.ServiceName == serviceName);
             if (service == null)
             {
                 return NotFound();
@@ -54,7 +52,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers
         [HttpPost("{serviceName}/enable")]
         public async Task<ActionResult> PostEnableService(string serviceName)
         {
-            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
+            var service = _services?.FirstOrDefault(a => a.ServiceName == serviceName);
             if (service == null)
             {
                 return NotFound();
@@ -70,7 +68,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers
         [HttpPost("{serviceName}/disable")]
         public async Task<ActionResult> PostDisableService(string serviceName)
         {
-            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
+            var service = _services?.FirstOrDefault(a => a.ServiceName == serviceName);
             if (service == null)
             {
                 return NotFound();
