@@ -47,8 +47,6 @@ namespace Voidwell.DaybreakGames.Services
                 return feed;
             }
 
-            _logger.LogInformation($"Fetching feed: {feedUri}");
-
             feed = await GetFeed(feedUri);
             if (feed != null)
             {
