@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Voidwell.DaybreakGames.CensusStream;
 using Voidwell.DaybreakGames.CensusStream.Models;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Services.Planetside;
 
@@ -27,49 +25,17 @@ namespace Voidwell.DaybreakGames.App.CensusStream.EventProcessors
 
         public async Task Process(Death payload)
         {
-            var taskList = new List<Task>();
-            Task<OutfitMember> attackerOutfitTask = null;
-            Task<OutfitMember> victimOutfitTask = null;
+            var attackerOutfitIdTask = GetCharacterOutfitIdAsync(payload.AttackerCharacterId);
+            var victimOutfitIdTask = GetCharacterOutfitIdAsync(payload.CharacterId);
 
-            taskList.Add(SetLastSeenAsync(payload));
+            await Task.WhenAll(
+                SetLastSeenAsync(payload),
+                CalculateCharacterRatingsAsync(payload),
+                attackerOutfitIdTask,
+                victimOutfitIdTask
+            );
 
-            if (payload.AttackerCharacterId != null && payload.AttackerCharacterId.Length > 18)
-            {
-                attackerOutfitTask = _characterService.GetCharactersOutfit(payload.AttackerCharacterId);
-                taskList.Add(attackerOutfitTask);
-            }
-
-            if (payload.CharacterId != null && payload.CharacterId.Length > 18)
-            {
-                victimOutfitTask = _characterService.GetCharactersOutfit(payload.CharacterId);
-                taskList.Add(victimOutfitTask);
-            }
-
-            if (payload.AttackerCharacterId != null && payload.CharacterId != null &&
-                payload.AttackerCharacterId != payload.CharacterId &&
-                payload.AttackerCharacterId.Length > 18 && payload.CharacterId.Length > 18)
-            {
-                taskList.Add(_characterRatingService.CalculateRatingAsync(payload.AttackerCharacterId, payload.CharacterId));
-            }
-
-            await Task.WhenAll(taskList);
-
-            var dataModel = new Data.Models.Planetside.Events.Death
-            {
-                AttackerCharacterId = payload.AttackerCharacterId,
-                AttackerFireModeId = payload.AttackerFireModeId,
-                AttackerLoadoutId = payload.AttackerLoadoutId,
-                AttackerVehicleId = payload.AttackerVehicleId,
-                AttackerWeaponId = payload.AttackerWeaponId,
-                AttackerOutfitId = attackerOutfitTask?.Result?.OutfitId,
-                CharacterId = payload.CharacterId,
-                CharacterLoadoutId = payload.CharacterLoadoutId,
-                CharacterOutfitId = victimOutfitTask?.Result?.OutfitId,
-                IsHeadshot = payload.IsHeadshot,
-                Timestamp = payload.Timestamp,
-                WorldId = payload.WorldId,
-                ZoneId = payload.ZoneId.Value
-            };
+            var dataModel = ToDataModel(payload, attackerOutfitIdTask?.Result, victimOutfitIdTask?.Result);
 
             await _eventRepository.AddAsync(dataModel);
         }
@@ -79,6 +45,54 @@ namespace Voidwell.DaybreakGames.App.CensusStream.EventProcessors
             return Task.WhenAll(
                 _playerMonitor.SetLastSeenAsync(payload.AttackerCharacterId, payload.ZoneId.Value, payload.Timestamp),
                 _playerMonitor.SetLastSeenAsync(payload.CharacterId, payload.ZoneId.Value, payload.Timestamp));
+        }
+
+        private bool IsValidCharacterId(string characterId)
+        {
+            return !string.IsNullOrWhiteSpace(characterId) && characterId.Length > 18;
+        }
+
+        private async Task<string> GetCharacterOutfitIdAsync(string characterId)
+        {
+            if (!IsValidCharacterId(characterId))
+            {
+                return null;
+            }
+
+            var outfit = await _characterService.GetCharactersOutfit(characterId);
+            return outfit?.OutfitId;
+        }
+
+        private Task CalculateCharacterRatingsAsync(Death payload)
+        {
+            if (!IsValidCharacterId(payload.AttackerCharacterId) ||
+                !IsValidCharacterId(payload.CharacterId) ||
+                payload.AttackerCharacterId == payload.CharacterId)
+            {
+                return Task.CompletedTask;
+            }
+
+            return _characterRatingService.CalculateRatingAsync(payload.AttackerCharacterId, payload.CharacterId);
+        }
+
+        private Data.Models.Planetside.Events.Death ToDataModel(Death payload, string attackerOutfitId, string victimOutfitId)
+        {
+            return new Data.Models.Planetside.Events.Death
+            {
+                AttackerCharacterId = payload.AttackerCharacterId,
+                AttackerFireModeId = payload.AttackerFireModeId,
+                AttackerLoadoutId = payload.AttackerLoadoutId,
+                AttackerVehicleId = payload.AttackerVehicleId,
+                AttackerWeaponId = payload.AttackerWeaponId,
+                AttackerOutfitId = attackerOutfitId,
+                CharacterId = payload.CharacterId,
+                CharacterLoadoutId = payload.CharacterLoadoutId,
+                CharacterOutfitId = victimOutfitId,
+                IsHeadshot = payload.IsHeadshot,
+                Timestamp = payload.Timestamp,
+                WorldId = payload.WorldId,
+                ZoneId = payload.ZoneId.Value
+            };
         }
     }
 }
