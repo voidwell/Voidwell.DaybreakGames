@@ -32,7 +32,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Api"
 		{70DEC05A-24A9-474B-A954-6504AE2CD74C} = {70DEC05A-24A9-474B-A954-6504AE2CD74C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.CensusServices", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusServices", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.CensusStore", "src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj", "{647810BA-3E71-44A7-838D-D4C40F6ECCDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Utils", "src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj", "{271436B4-89AF-4A98-9D64-6690D2C10CC0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +68,14 @@ Global
 		{F6E9813D-E90D-4903-82F3-EA8817E6C52C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6E9813D-E90D-4903-82F3-EA8817E6C52C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6E9813D-E90D-4903-82F3-EA8817E6C52C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{647810BA-3E71-44A7-838D-D4C40F6ECCDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{647810BA-3E71-44A7-838D-D4C40F6ECCDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{647810BA-3E71-44A7-838D-D4C40F6ECCDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{647810BA-3E71-44A7-838D-D4C40F6ECCDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,6 +87,8 @@ Global
 		{4A56391B-419B-4ECA-B1C4-794787F7E0D4} = {B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}
 		{7A123B6E-5756-4CB4-B140-FE724A977395} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{F6E9813D-E90D-4903-82F3-EA8817E6C52C} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
+		{647810BA-3E71-44A7-838D-D4C40F6ECCDC} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
+		{271436B4-89AF-4A98-9D64-6690D2C10CC0} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1011AD1D-2AC5-4BC2-A299-5778409158D2}

@@ -1,101 +1,58 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Models;
 using System;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.Data.Repositories;
-using DaybreakGames.Census.Exceptions;
 using Newtonsoft.Json.Linq;
 using System.Threading;
 using Voidwell.DaybreakGames.Data;
+using Voidwell.DaybreakGames.CensusStore.Services;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class CharacterService : ICharacterService
     {
-        private readonly ICharacterRepository _characterRepository;
-        private readonly CensusCharacter _censusCharacter;
+        private readonly ICharacterStore _characterStore;
         private readonly ICache _cache;
-        private readonly IOutfitService _outfitService;
         private readonly IWeaponAggregateService _weaponAggregateService;
         private readonly IGradeService _gradeService;
         private readonly IWeaponService _weaponService;
 
         private const string _cacheKey = "ps2.character";
-        private readonly Func<string, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
         private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
-        private readonly Func<string, string> _getCharacterIdCacheKey = characterName => $"{_cacheKey}_name_{characterName.ToLower()}";
         private readonly Func<int, int, string> _getCharacterLeaderboardCacheKey = (weaponId, page) => $"{_cacheKey}_leaderboard_{weaponId}_{page}";
 
-        private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
-        private readonly TimeSpan _cacheCharacterIdExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheCharacterLeaderboardExpiration = TimeSpan.FromMinutes(5);
 
-        private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
         private readonly SemaphoreSlim _characterStatsLock = new SemaphoreSlim(10);
 
-        public CharacterService(ICharacterRepository characterRepository, CensusCharacter censusCharacter, ICache cache,
-            IOutfitService outfitService, IWeaponAggregateService weaponAggregateService, IGradeService gradeService,
-            IWeaponService weaponService)
+        public CharacterService(ICharacterStore characterStore, ICache cache, IWeaponAggregateService weaponAggregateService,
+            IGradeService gradeService, IWeaponService weaponService)
         {
-            _characterRepository = characterRepository;
-            _censusCharacter = censusCharacter;
+            _characterStore = characterStore;
             _cache = cache;
-            _outfitService = outfitService;
             _weaponAggregateService = weaponAggregateService;
             _gradeService = gradeService;
             _weaponService = weaponService;
         }
 
+        public Task<Character> GetCharacter(string characterId)
+        {
+            return _characterStore.GetCharacter(characterId);
+        }
+
         public async Task<IEnumerable<CharacterSearchResult>> LookupCharactersByName(string query, int limit = 12)
         {
-            var characterList = await _censusCharacter.LookupCharactersByName(query, limit);
+            var characterList = await _characterStore.LookupCharactersByName(query, limit);
             return characterList.Select(CharacterSearchResult.LoadFromCensusCharacter);
         }
 
         public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)
         {
-            return _characterRepository.GetCharactersByIdsAsync(characterIds);
-        }
-
-        public async Task<Character> GetCharacter(string characterId)
-        {
-            Character character;
-
-            using (await _characterLock.WaitAsync(characterId))
-            {
-                var cacheKey = _getCharacterCacheKey(characterId);
-
-                character = await _cache.GetAsync<Character>(cacheKey);
-                if (character != null)
-                {
-                    return character;
-                }
-
-                character = await _characterRepository.GetCharacterAsync(characterId);
-                if (character == null)
-                {
-                    try
-                    {
-                        character = await UpdateCharacter(characterId);
-                    }
-                    catch (CensusConnectionException)
-                    {
-                        return null;
-                    }
-                }
-
-                if (character != null)
-                {
-                    await _cache.SetAsync(cacheKey, character, _cacheCharacterExpiration);
-                }
-            }
-
-            return character;
+            return _characterStore.FindCharacters(characterIds);
         }
 
         public async Task<CharacterDetails> GetCharacterDetails(string characterId)
@@ -107,7 +64,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return details;
             }
 
-            var characterTask = GetCharacterDetailsAsync(characterId);
+            var characterTask = _characterStore.GetCharacterDetailsAsync(characterId);
             var sanctionedWeaponsTask = _weaponService.GetAllSanctionedWeaponIds();
 
             await Task.WhenAll(characterTask, sanctionedWeaponsTask);
@@ -130,6 +87,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return details;
         }
 
+        public Task UpdateAllCharacterInfo(string characterId, DateTime? lastLoginDate = null)
+        {
+            return _characterStore.UpdateAllCharacterInfo(characterId, lastLoginDate);
+        }
+
         private async Task<IEnumerable<CharacterDetails>> GetCharacterDetails(IEnumerable<string> characterIds)
         {
             var cachedDetails = (await Task.WhenAll(characterIds.Select(GetCharacterDetailsFromCacheAsync))).Where(a => a != null);
@@ -143,7 +105,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var details = new List<CharacterDetails>();
             details.AddRange(cachedDetails);
 
-            var charactersTask = GetCharacterDetailsAsync(remainingCharacterIds);
+            var charactersTask = _characterStore.GetCharacterDetailsAsync(remainingCharacterIds);
             var sanctionedWeaponsTask = _weaponService.GetAllSanctionedWeaponIds();
 
             await Task.WhenAll(charactersTask, sanctionedWeaponsTask);
@@ -511,354 +473,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return infantryStats;
         }
 
-        public async Task UpdateAllCharacterInfo(string characterId, DateTime? lastLoginDate = null)
+        public Task<OutfitMember> GetCharactersOutfit(string characterId)
         {
-            var character = await UpdateCharacter(characterId);
-            if (character == null)
-            {
-                return;
-            }
-
-            await Task.WhenAll(UpdateCharacterTimes(characterId),
-                               UpdateCharacterStats(characterId, lastLoginDate),
-                               UpdateCharacterWeaponStats(characterId, lastLoginDate),
-                               UpdateCharacterStatsHistory(characterId, lastLoginDate));
-
-            var characterCacheKey = _getCharacterCacheKey(characterId);;
-            var detailsCacheKey = _getDetailsCacheKey(characterId);
-            await Task.WhenAll(_cache.RemoveAsync(characterCacheKey), _cache.RemoveAsync(detailsCacheKey));
-        }
-
-        public async Task<OutfitMember> GetCharactersOutfit(string characterId)
-        {
-            var character = await GetCharacter(characterId);
-            if (character == null)
-            {
-                return null;
-            }
-
-            return await _outfitService.UpdateCharacterOutfitMembership(character);
-        }
-
-        private async Task<Character> GetCharacterDetailsAsync(string characterId)
-        {
-            var characterDetailsTask = _characterRepository.GetCharacterWithDetailsAsync(characterId);
-            var censusCharacterTimesTask = _censusCharacter.GetCharacterTimes(characterId);
-
-            await Task.WhenAll(characterDetailsTask, censusCharacterTimesTask);
-
-            var character = characterDetailsTask.Result;
-            var censusTimes = censusCharacterTimesTask.Result;
-
-            if (character?.Time != null && (censusTimes == null || character?.Time?.LastSaveDate == censusTimes?.LastSaveDate))
-            {
-                return character;
-            }
-
-            await UpdateAllCharacterInfo(characterId);
-
-            return await _characterRepository.GetCharacterWithDetailsAsync(characterId);
-        }
-
-        private async Task<IEnumerable<Character>> GetCharacterDetailsAsync(IEnumerable<string> characterIds)
-        {
-            var characters = await _characterRepository.GetCharacterWithDetailsAsync(characterIds.ToArray());
-
-            var completeDetails = characters.Where(a => a.Time != null).ToList();
-
-            var missingCharacterIds = characterIds.Where(a => !characters.Any(b => b.Id == a)).ToList();
-
-            if (missingCharacterIds.Any())
-            {
-                var updateTasks = missingCharacterIds.Select(a => UpdateAllCharacterInfo(a));
-
-                await Task.WhenAll(updateTasks);
-
-                var updatedCharacters = await _characterRepository.GetCharacterWithDetailsAsync(missingCharacterIds.ToArray());
-
-                completeDetails.AddRange(updatedCharacters);
-            }
-
-            return completeDetails;
-        }
-
-        private async Task<Character> UpdateCharacter(string characterId)
-        {
-            var character = await _censusCharacter.GetCharacter(characterId);
-
-            if (character == null)
-            {
-                return null;
-            }
-
-            var model = new Character
-            {
-                Id = character.CharacterId,
-                Name = character.Name.First,
-                FactionId = character.FactionId,
-                WorldId = character.WorldId,
-                BattleRank = character.BattleRank.Value,
-                BattleRankPercentToNext = character.BattleRank.PercentToNext,
-                CertsEarned = character.Certs.EarnedPoints,
-                TitleId = character.TitleId,
-                PrestigeLevel = character.PrestigeLevel
-            };
-
-            await _characterRepository.UpsertAsync(model);
-
-            await _outfitService.UpdateCharacterOutfitMembership(model);
-
-            return model;
-        }
-
-        private async Task UpdateCharacterTimes(string characterId)
-        {
-            var times = await _censusCharacter.GetCharacterTimes(characterId);
-
-            if (times == null)
-            {
-                return;
-            }
-
-            var dataModel = new CharacterTime
-            {
-                CharacterId = characterId,
-                CreatedDate = times.CreationDate,
-                LastLoginDate = times.LastLoginDate,
-                LastSaveDate = times.LastSaveDate,
-                MinutesPlayed = times.MinutesPlayed
-            };
-
-            await _characterRepository.UpsertAsync(dataModel);
-        }
-
-        private async Task UpdateCharacterStats(string characterId, DateTime? LastLoginDate)
-        {
-            var statsTask = _censusCharacter.GetCharacterStats(characterId, LastLoginDate);
-            var statsByFactionTask = _censusCharacter.GetCharacterFactionStats(characterId, LastLoginDate);
-
-            await Task.WhenAll(statsTask, statsByFactionTask);
-
-            var stats = statsTask.Result;
-            var statsByFaction = statsByFactionTask.Result;
-
-            if (stats == null && statsByFaction == null)
-            {
-                return;
-            }
-
-            var statModels = new List<CharacterStat>();
-            var lifetimeStatModel = new CharacterLifetimeStat
-            {
-                CharacterId = characterId
-            };
-            var statByFactionModels = new List<CharacterStatByFaction>();
-            var lifetimeStatByFactionModel = new CharacterLifetimeStatByFaction
-            {
-                CharacterId = characterId
-            };
-
-            var statGroups = stats.GroupBy(a => a.ProfileId).ToList();
-            var statByFactionGroups = statsByFaction.GroupBy(a => a.ProfileId).ToList();
-
-            foreach (var group in statGroups)
-            {
-                if (group.Key == 0)
-                {
-                    foreach (var stat in group)
-                    {
-                        StatValueMapper.AssignStatValue(ref lifetimeStatModel, stat.StatName, stat.ValueForever);
-                    }
-                    continue;
-                }
-
-                var dbModel = new CharacterStat
-                {
-                    CharacterId = characterId,
-                    ProfileId = group.Key
-                };
-
-                foreach (var stat in group)
-                {
-                    StatValueMapper.AssignStatValue(ref dbModel, stat.StatName, stat.ValueForever);
-                }
-
-                statModels.Add(dbModel);
-            }
-
-            foreach (var group in statByFactionGroups)
-            {
-                if (group.Key == 0)
-                {
-                    foreach (var stat in group)
-                    {
-                        StatValueMapper.AssignStatValue(ref lifetimeStatByFactionModel, stat.StatName, stat.ValueForeverVs, stat.ValueForeverNc, stat.ValueForeverTr);
-                        StatValueMapper.AssignStatValue(ref lifetimeStatModel, stat.StatName, stat.ValueForeverVs + stat.ValueForeverNc + stat.ValueForeverTr);
-                    }
-                    continue;
-                }
-
-                var dbModel = new CharacterStatByFaction
-                {
-                    CharacterId = characterId,
-                    ProfileId = group.Key
-                };
-
-                var statModel = statModels.SingleOrDefault(a => a.ProfileId == group.Key);
-                if (statModel == null)
-                {
-                    statModel = new CharacterStat
-                    {
-                        CharacterId = characterId,
-                        ProfileId = group.Key
-                    };
-                    statModels.Add(statModel);
-                }
-
-                foreach (var stat in group)
-                {
-                    StatValueMapper.AssignStatValue(ref dbModel, stat.StatName, stat.ValueForeverVs, stat.ValueForeverNc, stat.ValueForeverTr);
-                    StatValueMapper.AssignStatValue(ref statModel, stat.StatName, stat.ValueForeverVs + stat.ValueForeverNc + stat.ValueForeverTr);
-                }
-
-                statByFactionModels.Add(dbModel);
-            }
-
-            await _characterRepository.UpsertAsync(lifetimeStatModel);
-            await _characterRepository.UpsertAsync(lifetimeStatByFactionModel);
-            await _characterRepository.UpsertRangeAsync(statModels);
-            await _characterRepository.UpsertRangeAsync(statByFactionModels);
-        }
-
-        private async Task UpdateCharacterWeaponStats(string characterId, DateTime? LastLoginDate)
-        {
-            var characterWepStatsTask = _censusCharacter.GetCharacterWeaponStats(characterId, LastLoginDate);
-            var characterWepStatsByFactionTask = _censusCharacter.GetCharacterWeaponStatsByFaction(characterId, LastLoginDate);
-
-            await Task.WhenAll(characterWepStatsTask, characterWepStatsByFactionTask);
-
-            var wepStats = characterWepStatsTask.Result;
-            var wepStatsByFaction = characterWepStatsByFactionTask.Result;
-
-            if (wepStats == null && wepStatsByFaction == null)
-            {
-                return;
-            }
-
-            var statModels = new List<CharacterWeaponStat>();
-            var statByFactionModels = new List<CharacterWeaponStatByFaction>();
-
-            var statGroups = wepStats.GroupBy(a => new { a.ItemId, a.VehicleId }).ToList();
-            var statByFactionGroups = wepStatsByFaction.GroupBy(a => new { a.ItemId, a.VehicleId }).ToList();
-
-            foreach (var group in statGroups)
-            {
-                var dbModel = new CharacterWeaponStat
-                {
-                    CharacterId = characterId,
-                    ItemId = group.Key.ItemId,
-                    VehicleId = group.Key.VehicleId
-                };
-
-                foreach (var stat in group)
-                {
-                    StatValueMapper.AssignStatValue(ref dbModel, stat.StatName, stat.Value);
-                }
-
-                statModels.Add(dbModel);
-            }
-
-            foreach (var group in statByFactionGroups)
-            {
-                var dbModel = new CharacterWeaponStatByFaction
-                {
-                    CharacterId = characterId,
-                    ItemId = group.Key.ItemId,
-                    VehicleId = group.Key.VehicleId
-                };
-
-                var statModel = statModels.SingleOrDefault(a => a.ItemId == group.Key.ItemId && a.VehicleId == group.Key.VehicleId);
-                if (statModel == null)
-                {
-                    statModel = new CharacterWeaponStat
-                    {
-                        CharacterId = characterId,
-                        ItemId = group.Key.ItemId,
-                        VehicleId = group.Key.VehicleId
-                    };
-                    statModels.Add(statModel);
-                }
-
-                foreach (var stat in group)
-                {
-                    StatValueMapper.AssignStatValue(ref dbModel, stat.StatName, stat.ValueVs, stat.ValueNc, stat.ValueTr);
-                    StatValueMapper.AssignStatValue(ref statModel, stat.StatName, stat.ValueVs + stat.ValueNc + stat.ValueTr);
-                }
-
-                statByFactionModels.Add(dbModel);
-            }
-
-            await _characterRepository.UpsertRangeAsync(statModels);
-            await _characterRepository.UpsertRangeAsync(statByFactionModels);
-        }
-
-        private async Task UpdateCharacterStatsHistory(string characterId, DateTime? lastLoginDate)
-        {
-            var statsHistory = await _censusCharacter.GetCharacterStatsHistory(characterId, lastLoginDate);
-            if (statsHistory == null)
-            {
-                return;
-            }
-
-            var dataModels = statsHistory.Select(a =>
-            {
-                var day = new List<int> {
-                    a.Day.d01, a.Day.d02, a.Day.d03, a.Day.d04, a.Day.d05, a.Day.d06, a.Day.d07, a.Day.d08, a.Day.d09, a.Day.d10, a.Day.d11, a.Day.d12,
-                    a.Day.d13, a.Day.d14, a.Day.d15, a.Day.d16, a.Day.d17, a.Day.d18, a.Day.d19, a.Day.d20, a.Day.d21, a.Day.d22, a.Day.d23, a.Day.d24,
-                    a.Day.d25, a.Day.d26, a.Day.d27, a.Day.d28, a.Day.d29, a.Day.d30, a.Day.d31
-                };
-
-                var month = new List<int> {
-                    a.Month.m01, a.Month.m02, a.Month.m03, a.Month.m04, a.Month.m05, a.Month.m06, a.Month.m07, a.Month.m08, a.Month.m09, a.Month.m10, a.Month.m11, a.Month.m12
-                };
-
-                var week = new List<int> {
-                    a.Week.w01, a.Week.w02, a.Week.w03, a.Week.w04, a.Week.w05, a.Week.w06, a.Week.w07, a.Week.w08, a.Week.w09, a.Week.w10, a.Week.w11, a.Week.w12, a.Week.w13
-                };
-
-                return new CharacterStatHistory
-                {
-                    CharacterId = a.CharacterId,
-                    StatName = a.StatName,
-                    AllTime = a.AllTime,
-                    OneLifeMax = a.OneLifeMax,
-                    Day = JToken.FromObject(day).ToString(),
-                    Week = JToken.FromObject(week).ToString(),
-                    Month = JToken.FromObject(month).ToString()
-                };
-            });
-
-            await _characterRepository.UpsertRangeAsync(dataModels);
-        }
-
-        private async Task<string> GetCharacterIdByName(string characterName)
-        {
-            var cacheKey = _getCharacterIdCacheKey(characterName);
-
-            var characterId = await _cache.GetAsync<string>(cacheKey);
-            if (characterId != null)
-            {
-                return characterId;
-            }
-
-            characterId = await _characterRepository.GetCharacterIdByName(characterName) ?? await _censusCharacter.GetCharacterIdByName(characterName);
-
-            if (characterId != null)
-            {
-                await _cache.SetAsync(cacheKey, characterId, _cacheCharacterIdExpiration);
-            }
-
-            return characterId;
+            return _characterStore.GetCharactersOutfitAsync(characterId);
         }
 
         public async Task<SimpleCharacterDetails> GetCharacterByName(string characterName)
@@ -985,7 +602,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return result;
             }
 
-            var stats = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
+            var stats = await _characterStore.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
             if (stats == null || !stats.Any())
             {
                 return Enumerable.Empty<WeaponLeaderboardRow>();
@@ -1053,7 +670,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<IEnumerable<CharacterDetails>> GetCharacterDetailsByNameAsync(IEnumerable<string> characterNames)
         {
-            var characterIdResults = await Task.WhenAll(characterNames.Select(GetCharacterIdByName));
+            var characterIdResults = await Task.WhenAll(characterNames.Select(_characterStore.GetCharacterIdByName));
             var characterIds = characterIdResults.Where(a => !string.IsNullOrWhiteSpace(a));
 
             if (!characterIds.Any())
@@ -1066,7 +683,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private async Task<CharacterDetails> GetCharacterDetailsByNameAsync(string characterName)
         {
-            var characterId = await GetCharacterIdByName(characterName);
+            var characterId = await _characterStore.GetCharacterIdByName(characterName);
             if (characterId == null)
             {
                 return null;

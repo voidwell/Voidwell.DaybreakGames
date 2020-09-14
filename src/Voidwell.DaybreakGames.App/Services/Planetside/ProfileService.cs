@@ -3,38 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Data.Repositories;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class ProfileService : IProfileService, IDisposable
     {
-        private readonly IProfileRepository _profileRepository;
-        private readonly ILoadoutRepository _loadoutRepository;
-        private readonly CensusProfile _censusProfile;
-        private readonly CensusLoadout _censusLoadout;
-
-        public string ServiceName => "ProfileService";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+        private readonly IProfileStore _profileStore;
 
         private Dictionary<int, Profile> _loadoutMapping = new Dictionary<int, Profile>();
 
         private readonly SemaphoreSlim _loadoutSemaphore = new SemaphoreSlim(1);
 
-        public ProfileService(IProfileRepository profileRepository, ILoadoutRepository loadoutRepository, CensusProfile censusProfile, CensusLoadout censusLoadout)
+        public ProfileService(IProfileStore profileStore)
         {
-            _profileRepository = profileRepository;
-            _loadoutRepository = loadoutRepository;
-            _censusProfile = censusProfile;
-            _censusLoadout = censusLoadout;
+            _profileStore = profileStore;
         }
 
         public Task<IEnumerable<Profile>> GetAllProfiles()
         {
-            return _profileRepository.GetAllProfilesAsync();
+            return _profileStore.GetAllProfilesAsync();
         }
 
         public async Task<Profile> GetProfileFromLoadoutIdAsync(int loadoutId)
@@ -58,8 +47,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return;
                 }
 
-                var loadoutsTask = _loadoutRepository.GetAllLoadoutsAsync();
-                var profilesTask = _profileRepository.GetAllProfilesAsync();
+                var loadoutsTask = _profileStore.GetAllLoadoutsAsync();
+                var profilesTask = _profileStore.GetAllProfilesAsync();
 
                 await Task.WhenAll(loadoutsTask, profilesTask);
 
@@ -72,46 +61,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 _loadoutSemaphore.Release();
             }
-        }
-
-        public async Task RefreshStore()
-        {
-            var profiles = await _censusProfile.GetAllProfiles();
-
-            if (profiles != null)
-            {
-                await _profileRepository.UpsertRangeAsync(profiles.Select(ConvertToDbModel));
-            }
-
-            var loadouts = await _censusLoadout.GetAllLoadouts();
-
-            if (loadouts != null)
-            {
-                await _loadoutRepository.UpsertRangeAsync(loadouts.Select(ConvertToDbModel));
-            }
-        }
-
-        private static Profile ConvertToDbModel(CensusProfileModel censusModel)
-        {
-            return new Profile
-            {
-                Id = censusModel.ProfileId,
-                Name = censusModel.Name.English,
-                ImageId = censusModel.ImageId,
-                ProfileTypeId = censusModel.ProfileTypeId,
-                FactionId = censusModel.FactionId
-            };
-        }
-
-        private static Loadout ConvertToDbModel(CensusLoadoutModel censusModel)
-        {
-            return new Loadout
-            {
-                Id = censusModel.LoadoutId,
-                ProfileId = censusModel.ProfileId,
-                FactionId = censusModel.FactionId,
-                CodeName = censusModel.CodeName
-            };
         }
 
         public void Dispose()

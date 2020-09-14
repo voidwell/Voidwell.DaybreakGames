@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Voidwell.DaybreakGames.App.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.CensusServices;
+using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.CensusStream;
 using Voidwell.DaybreakGames.HostedServices;
 using Voidwell.DaybreakGames.HttpAuthenticatedClient;
@@ -49,20 +50,16 @@ namespace Voidwell.DaybreakGames.App
                 options.CensusServiceNamespace = configuration.GetValue<string>("CensusServiceNamespace");
             });
 
-            services.AddCensusHelpers();
-            services.AddUpdateableServices();
+            services.AddCensusStores();
             services.AddEventProcessors();
 
             services.AddTransient<IFeedService, FeedService>();
             services.AddTransient<IItemService, ItemService>();
-            services.AddTransient<ITitleService, TitleService>();
             services.AddTransient<IVehicleService, VehicleService>();
-            services.AddTransient<IZoneService, ZoneService>();
             services.AddTransient<IWeaponService, WeaponService>();
             services.AddTransient<IAlertService, AlertService>();
             services.AddTransient<ICombatReportService, CombatReportService>();
             services.AddTransient<IMetagameEventService, MetagameEventService>();
-            services.AddTransient<IFactionService, FactionService>();
             services.AddTransient<ISearchService, SearchService>();
             services.AddTransient<IGradeService, GradeService>();
             services.AddTransient<IExperienceService, ExperienceService>();
@@ -94,14 +91,6 @@ namespace Voidwell.DaybreakGames.App
 
 
             return services;
-        }
-
-        private static void AddUpdateableServices(this IServiceCollection services)
-        {
-            typeof(IUpdateable).GetTypeInfo().Assembly.GetTypes()
-                .Where(a => typeof(IUpdateable).IsAssignableFrom(a) && a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract)
-                .ToList()
-                .ForEach(t => services.AddTransient(typeof(IUpdateable), t));
         }
 
         private static void AddEventProcessors(this IServiceCollection services)

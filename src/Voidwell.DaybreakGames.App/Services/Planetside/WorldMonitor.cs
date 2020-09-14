@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.CensusStream.Models;
+using Voidwell.DaybreakGames.CensusStore.Services;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WorldMonitor : IWorldMonitor
     {
-        private readonly IZoneService _zoneService;
+        private readonly IZoneStore _zoneStore;
         private readonly IWorldService _worldService;
         private readonly IWorldEventsService _worldEventService;
         private readonly IMapService _mapService;
@@ -22,10 +23,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private static readonly ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
         private static readonly ConcurrentDictionary<int, Dictionary<int, Zone>> _retryingWorlds = new ConcurrentDictionary<int, Dictionary<int, Zone>>();
 
-        public WorldMonitor(IWorldEventsService worldEventService, IZoneService zoneService, IWorldService worldService, IMapService mapService,
+        public WorldMonitor(IWorldEventsService worldEventService, IZoneStore zoneStore, IWorldService worldService, IMapService mapService,
             IPlayerMonitor playerMonitor, ILogger<WorldMonitor> logger)
         {
-            _zoneService = zoneService;
+            _zoneStore = zoneStore;
             _worldService = worldService;
             _worldEventService = worldEventService;
             _mapService = mapService;
@@ -38,7 +39,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private async Task InitializeWorlds()
         {
             var worldsTask = _worldService.GetAllWorlds();
-            var zonesTask = _zoneService.GetPlayableZones();
+            var zonesTask = _zoneStore.GetPlayableZones();
 
             await Task.WhenAll(worldsTask, zonesTask);
 
@@ -104,7 +105,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return;
             }
 
-            var zones = _retryingWorlds.GetValueOrDefault(worldId)?.Values ?? await _zoneService.GetPlayableZones();
+            var zones = _retryingWorlds.GetValueOrDefault(worldId)?.Values ?? await _zoneStore.GetPlayableZones();
 
             await Task.WhenAll(zones.Select(zone => SetupWorldZone(worldId, zone)));
 
@@ -120,7 +121,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<bool> SetupWorldZone(int worldId, int zoneId, bool retryAsync = false)
         {
-            var zone = await _zoneService.GetZone(zoneId);
+            var zone = await _zoneStore.GetZone(zoneId);
             if (zone == null)
             {
                 throw new InvalidOperationException($"Invalid zone id {zoneId} for world {worldId} provided.");

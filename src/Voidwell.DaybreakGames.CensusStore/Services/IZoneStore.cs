@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Services.Planetside
+namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface IZoneService : IUpdateable
+    public interface IZoneStore : IUpdateable
     {
         Task<IEnumerable<Zone>> GetAllZones();
         Task<Zone> GetZone(int zoneId);

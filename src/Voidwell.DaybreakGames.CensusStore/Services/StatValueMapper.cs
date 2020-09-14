@@ -1,6 +1,6 @@
 ﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Services.Planetside
+namespace Voidwell.DaybreakGames.CensusStore.Services
 {
     public static class StatValueMapper
     {

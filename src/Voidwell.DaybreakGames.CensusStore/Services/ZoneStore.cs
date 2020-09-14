@@ -8,24 +8,24 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
-namespace Voidwell.DaybreakGames.Services.Planetside
+namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public class ZoneService : IZoneService
+    public class ZoneStore : IZoneStore
     {
-        public string ServiceName => "ZoneService";
+        public string StoreName => "ZoneStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
         private readonly IZoneRepository _zoneRepository;
         private readonly CensusZone _censusZone;
         private readonly ICache _cache;
 
-        private const string _cacheKeyPrefix = "ps2.zoneService";
+        private const string _cacheKeyPrefix = "ps2.zoneStore";
         private readonly string _playableZonesCacheKey = $"{_cacheKeyPrefix}-playable-zones";
         private readonly TimeSpan _zoneCacheExpiration = TimeSpan.FromMinutes(30);
 
         private readonly int[] _playableZoneIds = { 2, 4, 6, 8 };
 
-        public ZoneService(IZoneRepository zoneRepository, CensusZone censusZone, ICache cache)
+        public ZoneStore(IZoneRepository zoneRepository, CensusZone censusZone, ICache cache)
         {
             _zoneRepository = zoneRepository;
             _censusZone = censusZone;

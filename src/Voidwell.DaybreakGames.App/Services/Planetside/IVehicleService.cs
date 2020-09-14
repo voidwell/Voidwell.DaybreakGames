@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public interface IVehicleService : IUpdateable
+    public interface IVehicleService
     {
         Task<IEnumerable<VehicleInfo>> GetAllVehicles();
     }

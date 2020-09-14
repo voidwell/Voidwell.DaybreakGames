@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Voidwell.DaybreakGames
+namespace Voidwell.DaybreakGames.Utils
 {
     public class KeyedSemaphoreSlim : IDisposable
     {

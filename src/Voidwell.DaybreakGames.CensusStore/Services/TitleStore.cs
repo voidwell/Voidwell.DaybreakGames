@@ -6,17 +6,17 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
-namespace Voidwell.DaybreakGames.Services.Planetside
+namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public class TitleService : ITitleService
+    public class TitleStore : ITitleStore
     {
         private readonly ITitleRepository _titleRepository;
         private readonly CensusTitle _censusTitle;
 
-        public string ServiceName => "TitleService";
+        public string StoreName => "TitleStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public TitleService(ITitleRepository titleRepository, CensusTitle censusTitle)
+        public TitleStore(ITitleRepository titleRepository, CensusTitle censusTitle)
         {
             _titleRepository = titleRepository;
             _censusTitle = censusTitle;

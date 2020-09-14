@@ -23,5 +23,15 @@ namespace Voidwell.DaybreakGames.CensusServices
 
             return await query.GetAsync<CensusOutfitModel>();
         }
+
+        public async Task<CensusOutfitMemberModel> GetCharacterOutfitMembership(string characterId)
+        {
+            var query = _queryFactory.Create("outfit_member");
+
+            query.ShowFields("character_id", "outfit_id", "member_since_date", "rank", "rank_ordinal");
+            query.Where("character_id").Equals(characterId);
+
+            return await query.GetAsync<CensusOutfitMemberModel>();
+        }
     }
 }

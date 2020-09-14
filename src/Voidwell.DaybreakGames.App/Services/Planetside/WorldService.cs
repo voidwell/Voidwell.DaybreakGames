@@ -4,26 +4,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.App.Models;
-using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
-using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class WorldService : IWorldService
     {
-        private readonly IWorldRepository _worldRepository;
+        private readonly IWorldStore _worldStore;
         private readonly ICombatReportService _combatReportService;
         private readonly IWorldEventsService _worldEventsService;
         private readonly ICharacterService _characterService;
-        private readonly CensusWorld _censusWorld;
         private readonly ICache _cache;
-
-        public string ServiceName => "WorldService";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
         private const string _cacheKeyPrefix = "ps2.worldService";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
@@ -35,31 +31,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly KeyedSemaphoreSlim _worldPopulationLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _activityPopulationLock = new KeyedSemaphoreSlim();
 
-        public WorldService(IWorldRepository worldRepository, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, CensusWorld censusWorld, ICache cache)
+        public WorldService(IWorldStore worldStore, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, ICache cache)
         {
-            _worldRepository = worldRepository;
+            _worldStore = worldStore;
             _combatReportService = combatReportService;
             _worldEventsService = worldEventsService;
             _characterService = characterService;
-            _censusWorld = censusWorld;
             _cache = cache;
         }
 
-        public async Task<IEnumerable<World>> GetAllWorlds()
+        public Task<IEnumerable<World>> GetAllWorlds()
         {
-            var worlds = await _cache.GetAsync<IEnumerable<World>>(_cacheKeyPrefix);
-            if (worlds != null)
-            {
-                return worlds;
-            }
-
-            worlds = await _worldRepository.GetAllWorldsAsync();
-            if (worlds != null)
-            {
-                await _cache.SetAsync(_cacheKeyPrefix, worlds, _cacheExpiration);
-            }
-
-            return worlds;
+            return _worldStore.GetAllWorlds();
         }
 
         public async Task<World> GetWorld(int worldId)
@@ -70,7 +53,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<Dictionary<int, IEnumerable<DailyPopulation>>> GetWorldPopulationHistory(IEnumerable<int> worldIds, DateTime start, DateTime end)
         {
-            var popTasks = worldIds.Select(id => GetWorldPopulationHistory(id, start, end)).ToArray();
+            var popTasks = worldIds.Select(id => _worldStore.GetWorldPopulationHistory(id, start, end)).ToArray();
             await Task.WhenAll(popTasks);
 
             var popDict = new Dictionary<int, IEnumerable<DailyPopulation>>();
@@ -288,49 +271,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return result;
-        }
-
-        private async Task<IEnumerable<DailyPopulation>> GetWorldPopulationHistory(int worldId, DateTime start, DateTime end)
-        {
-            var cacheKey = $"{_cacheKeyPrefix}_{worldId}_{start.Year}-{start.Month}-{start.Day}_{end.Year}-{end.Month}-{end.Day}";
-
-            using (await _worldPopulationLock.WaitAsync(cacheKey))
-            {
-
-                var populations = await _cache.GetAsync<IEnumerable<DailyPopulation>>(cacheKey);
-                if (populations != null)
-                {
-                    return populations;
-                }
-
-                populations = await _worldRepository.GetDailyPopulationsByWorldIdAsync(worldId);
-                if (populations != null)
-                {
-                    await _cache.SetAsync(cacheKey, populations, _cacheExpiration);
-                }
-
-                return populations;
-            }
-        }
-
-        public async Task RefreshStore()
-        {
-            var worlds = await _censusWorld.GetAllWorlds();
-
-            if (worlds != null)
-            {
-                await _worldRepository.UpsertRangeAsync(worlds.Select(ConvertToDbModel));
-                await _cache.RemoveAsync(_cacheKeyPrefix);
-            }
-        }
-
-        private static World ConvertToDbModel(CensusWorldModel censusModel)
-        {
-            return new World
-            {
-                Id = censusModel.WorldId,
-                Name = censusModel.Name.English
-            };
         }
 
         private async Task<IEnumerable<PlayerActivitySession>> GetPlayerSessions(int worldId, DateTime startDate, DateTime endDate)

@@ -6,7 +6,7 @@ using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public interface IWorldService : IUpdateable
+    public interface IWorldService
     {
         Task<IEnumerable<World>> GetAllWorlds();
         Task<World> GetWorld(int worldId);
