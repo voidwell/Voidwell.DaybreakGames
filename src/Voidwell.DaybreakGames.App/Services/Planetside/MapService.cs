@@ -1,44 +1,37 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.CensusServices.Models;
 using System.Collections.Generic;
 using Voidwell.DaybreakGames.Models;
-using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.Cache;
 using System.Threading;
 using Voidwell.DaybreakGames.Utils;
+using Voidwell.DaybreakGames.CensusStore.Services;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public class MapService : IMapService
     {
-        private readonly IMapRepository _mapRepository;
+        private readonly IMapStore _mapStore;
         private readonly IWorldEventsService _worldEventsService;
-        private readonly CensusMap _censusMap;
-        private readonly CensusWorldEvent _censusWorldEvent;
         private readonly ICache _cache;
-
-        public string ServiceName => "MapService";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
         private readonly KeyedSemaphoreSlim _zoneMapLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _zoneHistoryLock = new KeyedSemaphoreSlim();
         private readonly SemaphoreSlim _zoneStateLock = new SemaphoreSlim(1);
 
-        private const string _cacheKeyPrefix = "ps2.map_service";
+        private const string _cacheKey = "ps2.map_service";
+        private readonly Func<int, string> _getZoneMapCacheKey = zoneId => $"{_cacheKey}-zoneMap-{zoneId}";
+        private readonly string _getZoneStateHistoricalCacheKey = $"{_cacheKey}__zonestatehistorical";
+
         private readonly TimeSpan _zoneMapCacheExpiration = TimeSpan.FromHours(24);
-        private readonly TimeSpan _facilityWorldEventCacheExpiration = TimeSpan.FromSeconds(10);
         private readonly TimeSpan _zoneStateCacheExpiration = TimeSpan.FromSeconds(30);
 
-        public MapService(IMapRepository mapRepository, IWorldEventsService worldEventsService, CensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
+        public MapService(IMapStore mapStore, IWorldEventsService worldEventsService, ICache cache)
         {
-            _mapRepository = mapRepository;
+            _mapStore = mapStore;
             _worldEventsService = worldEventsService;
-            _censusMap = censusMap;
-            _censusWorldEvent = censusWorldEvent;
             _cache = cache;
         }
 
@@ -46,17 +39,15 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             using (await _zoneMapLock.WaitAsync(zoneId.ToString()))
             {
-                var cacheKey = GetCacheKey($"zoneMap-{zoneId}");
-
-                var zoneMap = await _cache.GetAsync<ZoneMap>(cacheKey);
+                var zoneMap = await _cache.GetAsync<ZoneMap>(_getZoneMapCacheKey(zoneId));
                 if (zoneMap != null)
                 {
                     return zoneMap;
                 }
 
-                var linksTask = _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
-                var hexsTask = _mapRepository.GetMapHexsByZoneIdAsync(zoneId);
-                var regionsTask = _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
+                var linksTask = _mapStore.GetFacilityLinksByZoneIdAsync(zoneId);
+                var hexsTask = _mapStore.GetMapHexsByZoneIdAsync(zoneId);
+                var regionsTask = _mapStore.GetMapRegionsByZoneIdAsync(zoneId);
 
                 await Task.WhenAll(linksTask, hexsTask, regionsTask);
 
@@ -94,7 +85,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     Links = links
                 };
 
-                await _cache.SetAsync(cacheKey, zoneMap, _zoneMapCacheExpiration);
+                await _cache.SetAsync(_getZoneMapCacheKey(zoneId), zoneMap, _zoneMapCacheExpiration);
 
                 return zoneMap;
             }
@@ -102,17 +93,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnership(int worldId, int zoneId)
         {
-            var ownership = await _censusMap.GetMapOwnership(worldId, zoneId);
+            var mapOwnership = await _mapStore.GetMapOwnershipAsync(worldId, zoneId);
 
-            return ownership?.Regions.Row.Select(o => new ZoneRegionOwnership(o.RowData.RegionId, o.RowData.FactionId));
+            return mapOwnership?.Select(o => new ZoneRegionOwnership(o.Key, o.Value));
         }
 
         public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnershipFromHistory(int worldId, int zoneId)
         {
             using (await _zoneHistoryLock.WaitAsync(worldId.ToString()))
             {
-                var regionsTask = _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
-                var eventsTask = GetCensusFacilityWorldEventsByZoneId(worldId, zoneId);
+                var regionsTask = _mapStore.GetMapRegionsByZoneIdAsync(zoneId);
+                var eventsTask = _mapStore.GetCensusFacilityWorldEventsByZoneIdAsync(worldId, zoneId);
 
                 await Task.WhenAll(regionsTask, eventsTask);
 
@@ -146,42 +137,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public Task<IEnumerable<MapRegion>> FindRegions(params int[] facilityIds)
         {
-            return _mapRepository.GetMapRegionsByFacilityIdsAsync(facilityIds);
+            return _mapStore.GetMapRegionsByFacilityIdsAsync(facilityIds);
         }
 
-        public async Task CreateZoneSnapshot(int worldId, int zoneId, DateTime? timestamp = null, int? metagameInstanceId = null, IEnumerable<ZoneRegionOwnership> zoneOwnership = null)
+        public  Task CreateZoneSnapshot(int worldId, int zoneId, DateTime? timestamp = null, int? metagameInstanceId = null, IEnumerable<ZoneRegionOwnership> zoneOwnership = null)
         {
-            if (timestamp == null)
-            {
-                timestamp = DateTime.UtcNow;
-            }
-
-            if (zoneOwnership == null || !zoneOwnership.Any())
-            {
-                zoneOwnership = await GetMapOwnership(worldId, zoneId);
-            }
-
-            if (zoneOwnership == null)
-            {
-                return;
-            }
-
-            var snapshotRegions = zoneOwnership.Select(a => new ZoneOwnershipSnapshot
-            {
-                Timestamp = timestamp.Value,
-                WorldId = worldId,
-                ZoneId = zoneId,
-                MetagameInstanceId = metagameInstanceId,
-                RegionId = a.RegionId,
-                FactionId = a.FactionId
-            });
-
-            await _mapRepository.InsertRangeAsync(snapshotRegions);
+            return _mapStore.CreateZoneSnapshotAsync(worldId, zoneId, timestamp, metagameInstanceId, zoneOwnership?.ToDictionary(a => a.RegionId, a => a.FactionId));
         }
 
         public async Task<ZoneSnapshot> GetZoneSnapshotByMetagameEvent(int worldId, int metagameInstanceId)
         {
-            var snapshotRegions = await _mapRepository.GetZoneSnapshotByMetagameEvent(worldId, metagameInstanceId);
+            var snapshotRegions = await _mapStore.GetZoneSnapshotByMetagameEventAsync(worldId, metagameInstanceId);
             if (snapshotRegions == null || !snapshotRegions.Any())
             {
                 return null;
@@ -199,7 +165,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<ZoneSnapshot> GetZoneSnapshotByDateTime(int worldId, int zoneId, DateTime timestamp)
         {
-            var snapshotRegions = await _mapRepository.GetZoneSnapshotByDateTime(worldId, zoneId, timestamp);
+            var snapshotRegions = await _mapStore.GetZoneSnapshotByDateTimeAsync(worldId, zoneId, timestamp);
             if (snapshotRegions == null || !snapshotRegions.Any())
             {
                 return null;
@@ -216,13 +182,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<ZoneStateHistorical> GetZoneStateHistoricals()
         {
-            var cacheKey = $"{_cacheKeyPrefix}_zonestatehistorical";
-
             await _zoneStateLock.WaitAsync();
 
             try
             {
-                var results = await _cache.GetAsync<ZoneStateHistorical>(cacheKey);
+                var results = await _cache.GetAsync<ZoneStateHistorical>(_getZoneStateHistoricalCacheKey);
                 if (results != null)
                 {
                     return results;
@@ -234,7 +198,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 await Task.WhenAll(zoneLocks, zoneUnlocks);
 
                 results = new ZoneStateHistorical(zoneLocks.Result, zoneUnlocks.Result);
-                await _cache.SetAsync(cacheKey, results, _zoneStateCacheExpiration);
+                await _cache.SetAsync(_getZoneStateHistoricalCacheKey, results, _zoneStateCacheExpiration);
 
                 return results;
             }
@@ -242,109 +206,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             {
                 _zoneStateLock.Release();
             }
-        }
-
-        public async Task RefreshStore()
-        {
-            var mapHexs = await _censusMap.GetAllMapHexs();
-
-            if (mapHexs != null)
-            {
-                await _mapRepository.UpsertRangeAsync(mapHexs.Select(ConvertToDbModel));
-            }
-
-            var mapRegions = await _censusMap.GetAllMapRegions();
-
-            if (mapRegions != null)
-            {
-                await _mapRepository.UpsertRangeAsync(mapRegions.Select(ConvertToDbModel));
-            }
-
-            var facilityLinks = await _censusMap.GetAllFacilityLinks();
-
-            if (facilityLinks != null)
-            {
-                await _mapRepository.UpsertRangeAsync(facilityLinks.Select(ConvertToDbModel));
-            }
-        }
-
-        private async Task<IEnumerable<CensusFacilityWorldEventModel>> GetCensusFacilityWorldEventsByZoneId(int worldId, int zoneId)
-        {
-            var cacheKey = $"{_cacheKeyPrefix}_facility_world_events_{worldId}";
-
-            var events = await _cache.GetAsync<IEnumerable<CensusFacilityWorldEventModel>>(cacheKey);
-            if (events == null)
-            {
-                events = await GetAllCensusFacilityWorldEvents(worldId);
-                if (events != null)
-                {
-                    await _cache.SetAsync(cacheKey, events, _facilityWorldEventCacheExpiration);
-                }
-            }
-
-            return events?.Where(a => a.ZoneId == zoneId) ?? Enumerable.Empty<CensusFacilityWorldEventModel>();
-        }
-
-        private async Task<IEnumerable<CensusFacilityWorldEventModel>> GetAllCensusFacilityWorldEvents(int worldId)
-        {
-            var events = (await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId))?.ToList();
-
-            if (events != null && events.Any())
-            {
-                for(var i = 0; i < 12; i++)
-                {
-                    var lastEvent = events.OrderBy(a => a.Timestamp).First();
-                    var additionalEvents = await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId, lastEvent.Timestamp);
-                    events.AddRange(additionalEvents);
-                }
-            }
-
-            return events;
-        }
-
-        private static MapHex ConvertToDbModel(CensusMapHexModel censusModel)
-        {
-            return new MapHex
-            {
-                MapRegionId = censusModel.MapRegionId,
-                HexType = censusModel.HexType,
-                TypeName = censusModel.TypeName,
-                ZoneId = censusModel.ZoneId,
-                XPos = censusModel.X,
-                YPos = censusModel.Y
-            };
-        }
-
-        private static MapRegion ConvertToDbModel(CensusMapRegionModel censusModel)
-        {
-            return new MapRegion
-            {
-                Id = censusModel.MapRegionId,
-                ZoneId = censusModel.ZoneId,
-                FacilityId = censusModel.FacilityId,
-                FacilityName = censusModel.FacilityName,
-                FacilityTypeId = censusModel.FacilityTypeId,
-                FacilityType = censusModel.FacilityType,
-                XPos = censusModel.LocationX,
-                YPos = censusModel.LocationY,
-                ZPos = censusModel.LocationZ
-            };
-        }
-
-        private static FacilityLink ConvertToDbModel(CensusFacilityLinkModel censusModel)
-        {
-            return new FacilityLink
-            {
-                ZoneId = censusModel.ZoneId,
-                FacilityIdA = censusModel.FacilityIdA,
-                FacilityIdB = censusModel.FacilityIdB,
-                Description = censusModel.Description
-            };
-        }
-
-        private static string GetCacheKey(string id)
-        {
-            return $"{_cacheKeyPrefix}-{id}";
         }
     }
 }

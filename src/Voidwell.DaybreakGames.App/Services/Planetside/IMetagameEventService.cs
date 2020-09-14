@@ -3,7 +3,7 @@ using Voidwell.DaybreakGames.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public interface IMetagameEventService : IUpdateable
+    public interface IMetagameEventService
     {
         Task<ZoneMetagameEvent> GetMetagameEvent(int metagameEventId);
     }

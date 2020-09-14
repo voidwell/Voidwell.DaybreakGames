@@ -16,7 +16,7 @@ namespace Voidwell.DaybreakGames.Test
         }
 
         [Fact]
-        public async Task IsHealthy_NoEvents_True()
+        public void IsHealthy_NoEvents_True()
         {
             var sut = _fixture.CreateSut();
 
@@ -26,7 +26,7 @@ namespace Voidwell.DaybreakGames.Test
         }
 
         [Fact]
-        public async Task IsHealthy_RecentEvents_True()
+        public void IsHealthy_RecentEvents_True()
         {
             var sut = _fixture.CreateSut();
 
@@ -38,7 +38,7 @@ namespace Voidwell.DaybreakGames.Test
         }
 
         [Fact]
-        public async Task IsHealthy_StagnantEvents_False()
+        public void IsHealthy_StagnantEvents_False()
         {
             var sut = _fixture.CreateSut();
 
@@ -50,7 +50,7 @@ namespace Voidwell.DaybreakGames.Test
         }
 
         [Fact]
-        public async Task IsHealthy_ClearedWorld_True()
+        public void IsHealthy_ClearedWorld_True()
         {
             var sut = _fixture.CreateSut();
 

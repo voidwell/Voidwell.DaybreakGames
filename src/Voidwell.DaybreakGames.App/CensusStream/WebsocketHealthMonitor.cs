@@ -38,7 +38,7 @@ namespace Voidwell.DaybreakGames.CensusStream
                 }
 
                 _worldsLastSeenEvents[worldId].AddOrUpdate(eventName, timestamp.Value, (k, v) => timestamp.Value);
-            } catch(Exception ex)
+            } catch(Exception)
             { }
         }
 

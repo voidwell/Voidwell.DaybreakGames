@@ -1,23 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.CensusStore.Services;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
 {
     [Route("ps2/zone")]
     public class ZoneController : Controller
     {
-        private readonly IZoneService _zoneService;
+        private readonly IZoneStore _zoneStore;
 
-        public ZoneController(IZoneService zoneService)
+        public ZoneController(IZoneStore zoneStore)
         {
-            _zoneService = zoneService;
+            _zoneStore = zoneStore;
         }
 
         [HttpGet]
         public async Task<ActionResult> GetAllZones()
         {
-            var result = await _zoneService.GetAllZones();
+            var result = await _zoneStore.GetAllZones();
             return Ok(result);
         }
     }

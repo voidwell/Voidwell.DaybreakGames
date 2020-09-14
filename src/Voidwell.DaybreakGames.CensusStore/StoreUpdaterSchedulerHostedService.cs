@@ -1,24 +1,23 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Data.Models;
-using Voidwell.DaybreakGames.Services;
-using Microsoft.Extensions.Options;
+using Voidwell.DaybreakGames.Data.Repositories;
 
-namespace Voidwell.DaybreakGames.HostedServices
+namespace Voidwell.DaybreakGames.CensusStore
 {
     public class StoreUpdaterSchedulerHostedService : IHostedService
     {
         private readonly IUpdaterSchedulerRepository _updaterSchedulerRepository;
         private readonly IServiceProvider _serviceProvider;
-        private readonly DaybreakGamesOptions _options;
+        private readonly StoreOptions _options;
         private readonly ILogger<StoreUpdaterSchedulerHostedService> _logger;
         private readonly Dictionary<string, Timer> _updaterTimers = new Dictionary<string, Timer>();
 
@@ -26,7 +25,7 @@ namespace Voidwell.DaybreakGames.HostedServices
         private bool _isWorking = false;
 
         public StoreUpdaterSchedulerHostedService(IUpdaterSchedulerRepository updaterSchedulerRepository, IServiceProvider serviceProvider,
-            IOptions<DaybreakGamesOptions> options, ILogger<StoreUpdaterSchedulerHostedService> logger)
+            IOptions<StoreOptions> options, ILogger<StoreUpdaterSchedulerHostedService> logger)
         {
             _updaterSchedulerRepository = updaterSchedulerRepository;
             _serviceProvider = serviceProvider;
@@ -48,7 +47,7 @@ namespace Voidwell.DaybreakGames.HostedServices
             var storeUpdaterTypes = updatableTypes.Where(a => a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract);
 
             var storeUpdaterMatches = storeUpdaterTypes.Select(t => new[] { t, storeUpdaterInterfaces.SingleOrDefault(i => i.IsAssignableFrom(t)) })
-                .Where(m => m[1] != null) ;
+                .Where(m => m[1] != null);
 
             foreach (var updaterPair in storeUpdaterMatches)
             {
@@ -72,9 +71,9 @@ namespace Voidwell.DaybreakGames.HostedServices
         private void RegisterUpdater(Type[] updaterPair)
         {
             var updater = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdateable;
-            var updaterHistory = _updaterSchedulerRepository.GetUpdaterHistoryByServiceName(updater.ServiceName);
+            var updaterHistory = _updaterSchedulerRepository.GetUpdaterHistoryByServiceName(updater.StoreName);
 
-            if (_updaterTimers.ContainsKey(updater.ServiceName))
+            if (_updaterTimers.ContainsKey(updater.StoreName))
                 return;
 
             var remainingInterval = TimeSpan.Zero;
@@ -88,7 +87,7 @@ namespace Voidwell.DaybreakGames.HostedServices
             }
 
             var timer = new Timer(HandleTimer, updaterPair, remainingInterval, updater.UpdateInterval);
-            _updaterTimers.Add(updater.ServiceName, timer);
+            _updaterTimers.Add(updater.StoreName, timer);
         }
 
         private async void HandleTimer(object stateInfo)
@@ -105,20 +104,20 @@ namespace Voidwell.DaybreakGames.HostedServices
 
             var updaterService = _serviceProvider.GetRequiredService(updaterPair[1]) as IUpdateable;
 
-            _logger.LogInformation($"Updating {updaterService.ServiceName}.");
+            _logger.LogInformation($"Updating {updaterService.StoreName}.");
 
             try
             {
                 await updaterService.RefreshStore();
 
-                _logger.LogInformation($"Update complete for {updaterService.ServiceName}.");
+                _logger.LogInformation($"Update complete for {updaterService.StoreName}.");
 
-                var dataModel = new UpdaterScheduler { Id = updaterService.ServiceName, LastUpdateDate = DateTime.UtcNow };
+                var dataModel = new UpdaterScheduler { Id = updaterService.StoreName, LastUpdateDate = DateTime.UtcNow };
                 await _updaterSchedulerRepository.UpsertAsync(dataModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Update failed for {updaterService.ServiceName}: {ex}");
+                _logger.LogError($"Update failed for {updaterService.StoreName}: {ex}");
             }
             finally
             {

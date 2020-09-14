@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -37,7 +36,7 @@ namespace Voidwell.DaybreakGames.Test
             var mapOwnership = MapHelper.GetMapOwnership(zoneId);
             var zoneMap = MapHelper.GetZoneMap(zoneId);
 
-            _fixture.ZoneService.AsMock()
+            _fixture.ZoneStore.AsMock()
                 .Setup(a => a.GetPlayableZones())
                 .ReturnsAsync(new[] { testZone });
 
@@ -83,7 +82,7 @@ namespace Voidwell.DaybreakGames.Test
             var testZoneMetagameEvent = new ZoneMetagameEvent {Id = 1, Description = "my alert", Duration = TimeSpan.FromHours(3)};
             var testZoneAlertState = new ZoneAlertState(DateTime.UtcNow, 1234, testZoneMetagameEvent);
             
-            _fixture.ZoneService.AsMock()
+            _fixture.ZoneStore.AsMock()
                 .Setup(a => a.GetPlayableZones())
                 .ReturnsAsync(new[] { testZone });
 

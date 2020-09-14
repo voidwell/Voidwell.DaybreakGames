@@ -50,7 +50,7 @@ namespace Voidwell.DaybreakGames.App
                 options.CensusServiceNamespace = configuration.GetValue<string>("CensusServiceNamespace");
             });
 
-            services.AddCensusStores();
+            services.AddCensusStores(configuration);
             services.AddEventProcessors();
 
             services.AddTransient<IFeedService, FeedService>();
@@ -62,7 +62,6 @@ namespace Voidwell.DaybreakGames.App
             services.AddTransient<IMetagameEventService, MetagameEventService>();
             services.AddTransient<ISearchService, SearchService>();
             services.AddTransient<IGradeService, GradeService>();
-            services.AddTransient<IExperienceService, ExperienceService>();
 
             services.AddSingleton<ICharacterService, CharacterService>();
             services.AddSingleton<ICharacterSessionService, CharacterSessionService>();
@@ -85,10 +84,8 @@ namespace Voidwell.DaybreakGames.App
             services.AddSingleton<IEventValidator, EventValidator>();
             services.AddSingleton<IEventProcessorHandler, EventProcessorHandler>();
 
-            services.AddHostedService<StoreUpdaterSchedulerHostedService>();
             services.AddHostedService<WebsocketMonitorHostedService>();
             services.AddHostedService<CharacterUpdaterHostedService>();
-
 
             return services;
         }

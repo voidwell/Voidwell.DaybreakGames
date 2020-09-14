@@ -6,17 +6,17 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
-namespace Voidwell.DaybreakGames.Services.Planetside
+namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public class ExperienceService : IExperienceService
+    public class ExperienceStore : IExperienceStore
     {
         private readonly IExperienceRepository _experienceRepository;
         private readonly CensusExperience _censusExperience;
 
-        public string ServiceName => "ExperienceService";
+        public string StoreName => "ExperienceStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(45);
 
-        public ExperienceService(IExperienceRepository experienceRepository, CensusExperience censusExperience)
+        public ExperienceStore(IExperienceRepository experienceRepository, CensusExperience censusExperience)
         {
             _experienceRepository = experienceRepository;
             _censusExperience = censusExperience;
