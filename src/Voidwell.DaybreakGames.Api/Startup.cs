@@ -15,13 +15,13 @@ namespace Voidwell.DaybreakGames.Api
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", false, true);
 
-            if (env.IsDevelopment())
+            if (env.EnvironmentName == "Development")
             {
                 builder.AddJsonFile("devsettings.json", true, true);
             }
@@ -35,14 +35,13 @@ namespace Voidwell.DaybreakGames.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvcCore()
-                .AddDataAnnotations()
-                .AddJsonFormatters(options =>
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
                 {
-                    options.NullValueHandling = NullValueHandling.Ignore;
-                    options.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    options.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
 
             services.AddEntityFrameworkContext(Configuration);
@@ -64,15 +63,20 @@ namespace Voidwell.DaybreakGames.Api
             services.ConfigureApplicationServices(Configuration);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.InitializeDatabases();
 
             app.UseLoggingMiddleware();
 
+            app.UseRouting();
+
             app.UseAuthentication();
 
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

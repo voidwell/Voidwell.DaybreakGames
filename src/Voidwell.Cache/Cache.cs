@@ -142,6 +142,11 @@ namespace Voidwell.Cache
 
         private async Task<IDatabaseAsync> ConnectAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (string.IsNullOrWhiteSpace(_options.RedisConfiguration))
+            {
+                return null;
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
 
             if (_redis != null)

@@ -30,7 +30,7 @@ namespace Voidwell.DaybreakGames.Api
                     builder.AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.None);
                     builder.AddFilter("Microsoft.EntityframeworkCore.Database.Command", LogLevel.None);
 
-                    if (useGelf && !context.HostingEnvironment.IsDevelopment())
+                    if (useGelf && !(context.HostingEnvironment.EnvironmentName == "Development"))
                     {
                         builder.AddGelf(options =>
                         {

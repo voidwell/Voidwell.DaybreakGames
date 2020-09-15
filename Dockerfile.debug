@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.2-sdk
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1
 
 #setup remote debugger
 WORKDIR /
@@ -12,8 +12,8 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
-#install CLRDBG, Microsoft's new cross-platform command line debugger used for debugging code running on .NET Core
-RUN curl -sSL https://aka.ms/getclrdbgsh | bash /dev/stdin vs2015u2 ~/clrdbg
+# Install Visual Studio Remote Debugger
+RUN curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 ENV ASPNETCORE_ENVIRONMENT Development
@@ -26,6 +26,6 @@ RUN dotnet restore
 
 WORKDIR /app/Voidwell.DaybreakGames.Api
 
-EXPOSE 5000 22
+EXPOSE 5000 22 2222
 
 ENTRYPOINT dotnet watch run --no-launch-profile
