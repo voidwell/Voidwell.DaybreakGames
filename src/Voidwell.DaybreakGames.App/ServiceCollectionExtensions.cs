@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Voidwell.DaybreakGames.App.CensusStream.EventProcessors;
-using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.CensusStream;
 using Voidwell.DaybreakGames.HostedServices;
@@ -48,6 +47,7 @@ namespace Voidwell.DaybreakGames.App
             {
                 options.CensusServiceId = configuration.GetValue<string>("CensusServiceKey");
                 options.CensusServiceNamespace = configuration.GetValue<string>("CensusServiceNamespace");
+                options.LogCensusErrors = configuration.GetValue<bool>("LogCensusErrors", false);
             });
 
             services.AddCensusStores(configuration);
@@ -76,7 +76,6 @@ namespace Voidwell.DaybreakGames.App
             services.AddSingleton<IProfileService, ProfileService>();
             services.AddSingleton<IWorldEventsService, WorldEventsService>();
 
-            services.AddTransient<IStreamClient, StreamClient>();
             services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
             services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();

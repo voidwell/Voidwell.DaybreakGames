@@ -16,7 +16,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 {
     public class WebsocketMonitor : StatefulHostedService, IWebsocketMonitor, IDisposable
     {
-        private readonly IStreamClient _client;
+        private readonly ICensusStreamClient _client;
         private readonly IWebsocketEventHandler _handler;
         private readonly IWorldMonitor _worldMonitor;
         private readonly IWebsocketHealthMonitor _healthMonitor;
@@ -28,7 +28,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
         public override string ServiceName => "CensusMonitor";
 
-        public WebsocketMonitor(IStreamClient streamClient, IWebsocketEventHandler handler, 
+        public WebsocketMonitor(ICensusStreamClient streamClient, IWebsocketEventHandler handler, 
             IWorldMonitor worldMonitor, IWebsocketHealthMonitor healthMonitor, IOptions<DaybreakGamesOptions> options,
             ILogger<WebsocketMonitor> logger, ICache cache)
                 :base(cache)
@@ -40,7 +40,8 @@ namespace Voidwell.DaybreakGames.CensusStream
             _options = options.Value;
             _logger = logger;
 
-            _client.OnMessage(OnMessage)
+            _client.OnConnect(OnConnect)
+                .OnMessage(OnMessage)
                 .OnDisconnect(OnDisconnect);
         }
 
@@ -77,7 +78,7 @@ namespace Voidwell.DaybreakGames.CensusStream
 
             _logger.LogInformation("Starting census stream monitor");
 
-            await _client.ConnectAsync(CreateSubscription());
+            await _client.ConnectAsync();
 
             _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
         }
@@ -103,6 +104,12 @@ namespace Voidwell.DaybreakGames.CensusStream
         protected override Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult((object)_lastStateChange);
+        }
+
+        private Task OnConnect(ReconnectionType type)
+        {
+            _client.Subscribe(CreateSubscription());
+            return Task.CompletedTask;
         }
 
         private Task OnMessage(string message)
