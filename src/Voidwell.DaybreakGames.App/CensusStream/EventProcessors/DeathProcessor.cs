@@ -30,7 +30,7 @@ namespace Voidwell.DaybreakGames.App.CensusStream.EventProcessors
 
             await Task.WhenAll(
                 SetLastSeenAsync(payload),
-                CalculateCharacterRatingsAsync(payload),
+                //CalculateCharacterRatingsAsync(payload),
                 attackerOutfitIdTask,
                 victimOutfitIdTask
             );
