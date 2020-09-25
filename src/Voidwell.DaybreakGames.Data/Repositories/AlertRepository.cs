@@ -9,6 +9,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public class AlertRepository : IAlertRepository
     {
+        private const int KOLTYR_ZONE_ID = 14;
+        private const int ZONE_PENDING_CATEGORY_ID = 5;
+
         private readonly IDbContextHelper _dbContextHelper;
 
         public AlertRepository(IDbContextHelper dbContextHelper)
@@ -27,7 +30,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
                     from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != 5
+                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != ZONE_PENDING_CATEGORY_ID
                     select new { alert, metagameEvent };
 
                 var result = await query.FirstOrDefaultAsync();
@@ -51,7 +54,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
                     from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && metagameEvent.Type != 5
+                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && metagameEvent.Type != ZONE_PENDING_CATEGORY_ID && alert.ZoneId != KOLTYR_ZONE_ID
                     select new { alert, metagameEvent };
 
                 var results = await query.ToListAsync();
@@ -75,7 +78,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                     join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
                     from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
 
-                    where metagameEvent.Type != 5
+                    where metagameEvent.Type != ZONE_PENDING_CATEGORY_ID && alert.ZoneId != KOLTYR_ZONE_ID
                     orderby alert.StartDate descending
                     select new { alert, metagameEvent, metagameEventZone };
 
