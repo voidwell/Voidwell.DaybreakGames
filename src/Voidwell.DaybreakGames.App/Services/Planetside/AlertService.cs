@@ -8,6 +8,7 @@ using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.CensusStream.Models;
 using Microsoft.Extensions.Logging;
+using Voidwell.DaybreakGames.App;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -181,7 +182,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 LastFactionTr = metagameEvent.FactionTr
             };
 
-            await Task.WhenAll(_alertRepository.AddAsync(dataModel), CreateAlertZoneSnapshot(metagameEvent));
+            var tasks = new List<Task>
+            {
+                _alertRepository.AddAsync(dataModel)
+            };
+
+            if (dataModel.ZoneId != Constants.KoltyrZoneId)
+            {
+                tasks.Add(CreateAlertZoneSnapshot(metagameEvent));
+            }
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task EndAlert(MetagameEvent metagameEvent)
