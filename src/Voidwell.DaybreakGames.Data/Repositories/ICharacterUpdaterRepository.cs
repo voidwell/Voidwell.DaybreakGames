@@ -10,6 +10,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task AddAsync(CharacterUpdateQueue entity);
         Task RemoveAsync(CharacterUpdateQueue entity);
         Task<IEnumerable<CharacterUpdateQueue>> GetAllAsync(TimeSpan? delay = null);
-        Task<int> GetQueueLengthAsync();
+        Task<int> GetQueueLengthAsync(TimeSpan? delay = null);
     }
 }

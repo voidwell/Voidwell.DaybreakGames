@@ -22,6 +22,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         private Timer _timer;
         private readonly TimeSpan _executionInterval = TimeSpan.FromSeconds(10);
+        private readonly TimeSpan _updateDelay = TimeSpan.FromHours(1);
         private const int _maxParallelUpdates = 1;
         private bool _isWorking;
         private bool _waitError;
@@ -84,8 +85,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         protected override async Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
-            var count = await _characterUpdaterRepository.GetQueueLengthAsync();
-            return new { QueueLength = count };
+            var totalCountTask = _characterUpdaterRepository.GetQueueLengthAsync();
+            var activeCountTask = _characterUpdaterRepository.GetQueueLengthAsync(_updateDelay);
+
+            await Task.WhenAll(totalCountTask, activeCountTask);
+
+            return new { ActiveQueue = activeCountTask.Result, QueueLength = totalCountTask.Result };
         }
 
         private async void ExecuteAsync(object stateInfo)
@@ -97,7 +102,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _waitError = false;
             _parallelSemaphore = new SemaphoreSlim(_maxParallelUpdates);
 
-            var characterQueue = await _characterUpdaterRepository.GetAllAsync(TimeSpan.FromHours(1));
+            var characterQueue = await _characterUpdaterRepository.GetAllAsync(_updateDelay);
             await Task.WhenAll(characterQueue.Select(UpdateCharacter));
             _isWorking = false;
         }

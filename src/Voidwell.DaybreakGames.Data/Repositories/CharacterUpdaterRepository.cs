@@ -62,11 +62,18 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<int> GetQueueLengthAsync()
+        public async Task<int> GetQueueLengthAsync(TimeSpan? delay = null)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
+
+                if (delay != null)
+                {
+                    return await dbContext.CharacterUpdateQueue
+                        .Where(a => DateTime.UtcNow - a.Timestamp >= delay)
+                        .CountAsync();
+                }
 
                 return await dbContext.CharacterUpdateQueue
                     .CountAsync();
