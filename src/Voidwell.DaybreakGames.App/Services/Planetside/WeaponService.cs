@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.CensusServices.Models.Extensions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Models;
 using Voidwell.DaybreakGames.Utils;
+using static Voidwell.DaybreakGames.CensusServices.Models.Extensions.CensusWeaponInfoModelExtensions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -45,45 +47,39 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var info = await _censusItem.GetWeaponInfo(weaponItemId);
 
-            var hipModes = info.FireMode.Where(m => m.Type == "primary").ToList();
-            var aimModes = info.FireMode.Where(m => m.Type == "secondary").ToList();
-
-            var minDamage = info.FireMode.Min(m => m.DamageMin) ?? info.Datasheet.DamageMin;
-            var maxDamage = info.FireMode.Max(m => m.DamageMax) ?? info.Datasheet.DamageMax;
-
-            var minReloadSpeed = info.FireMode.Any(a => a.ReloadTimeMs.HasValue && a.ReloadChamberTimeMs.HasValue) ? info.FireMode.Min(m => m.ReloadTimeMs.Value + m.ReloadChamberTimeMs.Value) : info.Datasheet.ReloadMsMin;
-            var maxReloadSpeed = info.FireMode.Max(m => m.ReloadTimeMs) ?? info.Datasheet.ReloadMsMax;
+            var hipModes = info.GetFireModesOfType(FireModeType.Primary)?.ToList();
+            var aimModes = info.GetFireModesOfType(FireModeType.Secondary)?.ToList();
 
             var weaponInfo = new WeaponInfoResult
             {
-                Name = info.Name?.English,
+                Name = info.GetName(),
                 ItemId = weaponItemId,
-                Category = info.Category?.Name?.English,
+                Category = info.GetCategory(),
                 FactionId = info.FactionId,
                 ImageId = info.ImageId,
-                Description = info.Description?.English,
+                Description = info.GetDescription(),
                 MaxStackSize = info.MaxStackSize,
-                Range = info.Datasheet?.Range?.English,
+                Range = info.GetRange(),
                 FireRateMs = info.Datasheet?.FireRateMs,
                 ClipSize = info.Datasheet?.ClipSize,
                 Capacity = info.Datasheet?.Capacity,
-                MuzzleVelocity = info.FireMode?.FirstOrDefault()?.Speed,
-                MinDamage = minDamage,
-                MaxDamage = maxDamage,
-                MinDamageRange = info.FireMode?.Min(m => m.DamageMinRange).GetValueOrDefault(),
-                MaxDamageRange = info.FireMode?.Min(m => m.DamageMaxRange).GetValueOrDefault(),
-                IndirectMinDamage = info.FireMode?.Min(m => m.IndirectDamageMin),
-                IndirectMaxDamage = info.FireMode?.Max(m => m.IndirectDamageMax),
-                IndirectMinDamageRange = info.FireMode?.Min(m => m.IndirectDamageMinRange),
-                IndirectMaxDamageRange = info.FireMode?.Max(m => m.IndirectDamageMaxRange),
-                MinReloadSpeed = minReloadSpeed,
-                MaxReloadSpeed = maxReloadSpeed,
-                IronSightZoom = aimModes?.FirstOrDefault()?.DefaultZoom,
-                FireModes = hipModes?.Select(m => m.Description?.English),
+                MuzzleVelocity = info.GetWeaponSpeed(),
+                MinDamage = info.GetMinDamage(),
+                MaxDamage = info.GetMaxDamage(),
+                MinDamageRange = info.GetMinDamageRange(),
+                MaxDamageRange = info.GetMaxDamageRange(),
+                IndirectMinDamage = info.GetIndirectMinDamage(),
+                IndirectMaxDamage = info.GetIndirectMaxDamage(),
+                IndirectMinDamageRange = info.GetIndirectMinDamageRange(),
+                IndirectMaxDamageRange = info.GetIndirectMaxDamageRange(),
+                MinReloadSpeed = info.GetMinReloadSpeed(),
+                MaxReloadSpeed = info.GetMaxReloadSpeed(),
+                IronSightZoom = aimModes?.GetDefaultZoom(),
+                FireModes = hipModes?.GetFireModeNames(),
                 IsVehicleWeapon = info.IsVehicleWeapon,
-                DamageRadius = info.FireMode?.Max(m => m.DamageRadius),
-                HipAcc = GetAccuracyStateFromFireMode(hipModes?.FirstOrDefault()),
-                AimAcc = GetAccuracyStateFromFireMode(aimModes?.FirstOrDefault())
+                DamageRadius = info.GetDamageRadius(),
+                HipAcc = GetAccuracyStateFromFireMode(hipModes),
+                AimAcc = GetAccuracyStateFromFireMode(aimModes)
             };
 
             await _cache.SetAsync($"{_weaponInfoCacheKey}_{weaponItemId}", weaponInfo, _weaponInfoCacheExpiration);
@@ -106,19 +102,21 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return await GetWeaponInfo(weaponId);
         }
 
-        private static AccuracyState GetAccuracyStateFromFireMode(CensusWeaponInfoModel.WeaponFireMode mode)
+        private static AccuracyState GetAccuracyStateFromFireMode(IEnumerable<CensusWeaponInfoModel.WeaponFireMode> modes)
         {
-            if (mode == null)
+            if (modes?.Any() != true)
             {
                 return null;
             }
 
+            var mode = modes.FirstOrDefault();
+
             return new AccuracyState
             {
-                Crouching = mode.States.FirstOrDefault(s => s.PlayerState == "Crouching")?.MinConeOfFire,
-                CrouchWalking = mode.States.FirstOrDefault(s => s.PlayerState == "CrouchWalking")?.MinConeOfFire,
-                Standing = mode.States.FirstOrDefault(s => s.PlayerState == "Standing")?.MinConeOfFire,
-                Running = mode.States.FirstOrDefault(s => s.PlayerState == "Running")?.MinConeOfFire,
+                Crouching = mode.GetFireModeStateCoF(FireModeState.Crouching),
+                CrouchWalking = mode.GetFireModeStateCoF(FireModeState.CrouchWalking),
+                Standing = mode.GetFireModeStateCoF(FireModeState.Standing),
+                Running = mode.GetFireModeStateCoF(FireModeState.Running),
                 Cof = mode.CofRecoil
             };
         }
