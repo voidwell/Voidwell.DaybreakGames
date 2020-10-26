@@ -22,10 +22,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly SemaphoreSlim _zoneStateLock = new SemaphoreSlim(1);
 
         private const string _cacheKey = "ps2.map_service";
-        private readonly Func<int, string> _getZoneMapCacheKey = zoneId => $"{_cacheKey}-zoneMap-{zoneId}";
+        private readonly Func<int, string> _getZoneMapCacheKey = zoneId => $"{_cacheKey}-zonemap-{zoneId}";
         private readonly string _getZoneStateHistoricalCacheKey = $"{_cacheKey}__zonestatehistorical";
 
-        private readonly TimeSpan _zoneMapCacheExpiration = TimeSpan.FromHours(24);
+        private readonly TimeSpan _zoneMapCacheExpiration = TimeSpan.FromMinutes(10);
         private readonly TimeSpan _zoneStateCacheExpiration = TimeSpan.FromSeconds(30);
 
         public MapService(IMapStore mapStore, IWorldEventsService worldEventsService, ICache cache)
