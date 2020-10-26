@@ -28,7 +28,7 @@ namespace Voidwell.DaybreakGames.Models
 
     public class CaptureLogRowMapRegion
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string FacilityName { get; set; }
         public string FacilityType { get; set; }
     }

@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.dockerignore = .dockerignore
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
 		Dockerfile = Dockerfile
 		Dockerfile.debug = Dockerfile.debug
 		init-migrate.bat = init-migrate.bat
@@ -34,9 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Api"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusServices", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.CensusStore", "src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj", "{647810BA-3E71-44A7-838D-D4C40F6ECCDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusStore", "src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj", "{647810BA-3E71-44A7-838D-D4C40F6ECCDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.Utils", "src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj", "{271436B4-89AF-4A98-9D64-6690D2C10CC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Utils", "src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj", "{271436B4-89AF-4A98-9D64-6690D2C10CC0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

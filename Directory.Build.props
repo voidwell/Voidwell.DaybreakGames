@@ -1,0 +1,9 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="OutDir;Configuration">
+  <PropertyGroup>
+      <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
+      <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+      <OutputPath>$(RepositoryRootDirectory)\build\$(MSBuildProjectName)\$(Configuration)\bin\</OutputPath>
+      <BaseIntermediateOutputPath>$(RepositoryRootDirectory)\build\$(MSBuildProjectName)\$(Configuration)\obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

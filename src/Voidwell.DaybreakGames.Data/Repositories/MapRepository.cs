@@ -44,7 +44,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.MapRegions.Where(a => facilityIds.Contains(a.FacilityId))
+                return await dbContext.MapRegions.Where(a => a.FacilityId != null && facilityIds.Contains(a.FacilityId.Value))
                     .ToListAsync();
             }
         }
