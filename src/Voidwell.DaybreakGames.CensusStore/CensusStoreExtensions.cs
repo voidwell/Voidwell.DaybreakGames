@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Voidwell.DaybreakGames.CensusServices;
 using Voidwell.DaybreakGames.CensusStore.Services;
+using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 
 namespace Voidwell.DaybreakGames.CensusStore
 {
@@ -27,6 +28,7 @@ namespace Voidwell.DaybreakGames.CensusStore
             services.AddSingleton<IExperienceStore, ExperienceStore>();
             services.AddSingleton<IMetagameEventStore, MetagameEventStore>();
 
+            services.AddSingleton<IStoreUpdaterService, StoreUpdaterService>();
             services.AddHostedService<StoreUpdaterSchedulerHostedService>();
 
             return services;
