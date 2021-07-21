@@ -51,7 +51,10 @@ namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater
 
         private void RegisterUpdaterTimer(LastStoreUpdate lastStoreUpdate)
         {
-            _updaterTimers[lastStoreUpdate.StoreName]?.Dispose();
+            if (_updaterTimers.ContainsKey(lastStoreUpdate.StoreName))
+            {
+                _updaterTimers[lastStoreUpdate.StoreName].Dispose();
+            }
 
             var remainingInterval = TimeSpan.Zero;
             if (lastStoreUpdate.LastUpdated != null)
