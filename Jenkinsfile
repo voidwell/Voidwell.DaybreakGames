@@ -21,32 +21,32 @@ REGISTRY=$REGISTRY_ENDPOINT
 REPOSITORY=$REPOSITORY
 REGISTRY_USER=$REGISTRY_USER
 REGISTRY_PASSWORD=$REGISTRY_PASSWORD
+BUILDTAG=$BUILD_NUMBER
 
 REGISTRY_CRED="${REGISTRY_USER}:${REGISTRY_PASSWORD}"
 REPO_LABEL=${REGISTRY}/${REPOSITORY}
-
-TAGS="`curl -s --user ${REGISTRY_CRED} https://${REGISTRY}/v2/${REPOSITORY}/tags/list | jq -r \'.tags\' | sed \'s/[^0-9]*//g\'`"
-LATEST=`echo "${TAGS[*]}" | sort -nr | head -n1`
-BUILDTAG=$((LATEST + 1))
 
 docker tag ${REPO_LABEL}:latest ${REPO_LABEL}:${BUILDTAG}
 
 docker push ${REPO_LABEL}:${BUILDTAG}
 docker push ${REPO_LABEL}:latest
 
-echo export "${REPO_LABEL}:${BUILDTAG}" > buildlabel
 echo -e "\\nPushed ${REPO_LABEL}:${BUILDTAG}"'''
       }
     }
     stage('Deploy') {
       steps {
+        git branch: 'master', credentialsId: 'Github', url: 'https://github.com/voidwell/server.git'
         sh '''#!/bin/bash
-#COMPOSE_PATH=$COMPOSE_PATH
+BUILDTAG=$BUILD_NUMBER
+ENV_VAR_KEY="IMAGE_${SERVICE_NAME^^}_VERS"
 
-#BUILD_LABEL=readFile(\'buildlabel\').trim()
+sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILDTAG}/};\${x;/^$/{s//${ENV_VAR_KEY}=${BUILDTAG}/;H};x}" voidwell.env
 
-#echo ${COMPOSE_PATH}
-#echo ${BUILD_LABEL}'''
+git add voidwell.env
+git commit -m "Updated ${ENV_VAR_KEY} with ${BUILDTAG}"
+git push
+'''
       }
     }
   }
@@ -55,7 +55,7 @@ echo -e "\\nPushed ${REPO_LABEL}:${BUILDTAG}"'''
     REGISTRY_PASSWORD = credentials('docker-registry-password')
     REGISTRY_ENDPOINT = 'docker.voidwell.com'
     REPOSITORY = 'voidwell/daybreakgames'
+    SERVICE_NAME = 'daybreakgames'
     DOCKERFILE_PATH = './Dockerfile'
-    COMPOSE_PATH = '/docker-configs/voidwell/docker-compose.yml'
   }
 }
