@@ -36,19 +36,31 @@ echo -e "\\nPushed ${REPO_LABEL}:${BUILDTAG}"'''
     }
     stage('Update Release') {
       steps {
-        git credentialsId: 'Github', url: 'https://github.com/voidwell/server.git'
-        sh '''#!/bin/bash
+        dir ('release-tmp') {
+          git branch: 'master', credentialsId: 'Github', url: 'https://github.com/voidwell/server.git'
+          sh '''#!/bin/bash
 BUILDTAG=$BUILD_NUMBER
 ENV_VAR_KEY="IMAGE_${SERVICE_NAME^^}_VERS"
 
-ls
-
-sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILDTAG}/};\${x;/^$/{s//${ENV_VAR_KEY}=${BUILDTAG}/;H};x}" voidwell.env
+sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILDTAG}/};\\${x;/^$/{s//${ENV_VAR_KEY}=${BUILDTAG}/;H};x}" voidwell.env
 
 git add voidwell.env
 git commit -m "Updated ${ENV_VAR_KEY} with ${BUILDTAG}"
-git push
 '''
+          withCredentials([usernamePassword(credentialsId: 'Github',
+                 usernameVariable: 'username',
+                 passwordVariable: 'password')]){
+              script {
+                env.URL_ENCODED_GIT_USERNAME=URLEncoder.encode(username, "UTF-8")
+                env.URL_ENCODED_GIT_PASSWORD=URLEncoder.encode(password, "UTF-8")
+              }
+              sh '''
+                set +x
+                git push https://${URL_ENCODED_GIT_USERNAME}:${URL_ENCODED_GIT_PASSWORD}@github.com/voidwell/server.git
+                set -x
+                '''
+          }
+        }
       }
     }
   }
