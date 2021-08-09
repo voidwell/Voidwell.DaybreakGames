@@ -34,12 +34,14 @@ docker push ${REPO_LABEL}:latest
 echo -e "\\nPushed ${REPO_LABEL}:${BUILDTAG}"'''
       }
     }
-    stage('Deploy') {
+    stage('Update Release') {
       steps {
-        git branch: 'master', credentialsId: 'Github', url: 'https://github.com/voidwell/server.git'
+        git credentialsId: 'Github', url: 'https://github.com/voidwell/server.git'
         sh '''#!/bin/bash
 BUILDTAG=$BUILD_NUMBER
 ENV_VAR_KEY="IMAGE_${SERVICE_NAME^^}_VERS"
+
+ls
 
 sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILDTAG}/};\${x;/^$/{s//${ENV_VAR_KEY}=${BUILDTAG}/;H};x}" voidwell.env
 
