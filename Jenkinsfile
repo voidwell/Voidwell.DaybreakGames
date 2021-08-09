@@ -47,17 +47,9 @@ sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILDTAG}/};\\${x;/^$/{s//${ENV_VAR_KEY}=$
 git add voidwell.env
 git commit -m "Updated ${ENV_VAR_KEY} with ${BUILDTAG}"
 '''
-          withCredentials([usernamePassword(credentialsId: 'Github',
-                 usernameVariable: 'username',
-                 passwordVariable: 'password')]){
-              script {
-                env.URL_ENCODED_GIT_USERNAME=URLEncoder.encode(username, "UTF-8")
-                env.URL_ENCODED_GIT_PASSWORD=URLEncoder.encode(password, "UTF-8")
-              }
+          sshagent(credentials: ['GithubSSH']) {
               sh '''
-                set +x
-                git push https://${URL_ENCODED_GIT_USERNAME}:${URL_ENCODED_GIT_PASSWORD}@github.com/voidwell/server.git
-                set -x
+                git push origin master
                 '''
           }
         }
