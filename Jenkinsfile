@@ -48,9 +48,9 @@ git add voidwell.env
 git commit -m "Updated ${ENV_VAR_KEY} with ${BUILDTAG}"
 '''
           sshagent(credentials: ['GithubSSH']) {
-              sh '''
-                git push origin master
-                '''
+            sh 'ssh -T git@github.com'
+            sh 'git remote set-url origin git@github.com/voidwell/server.git'
+            sh 'git push origin master'
           }
         }
       }
