@@ -29,7 +29,7 @@ ENV_VAR_KEY="IMAGE_${SERVICE_NAME^^}_VERS"
 sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILD_NUMBER}/};\\${x;/^$/{s//${ENV_VAR_KEY}=${BUILD_NUMBER}/;H};x}" $RELEASE_FILE
 
 git add $RELEASE_FILE
-git commit -m "Updated ${ENV_VAR_KEY} with ${BUILDTAG}"
+git commit -m "Updated ${ENV_VAR_KEY} in ${RELEASE_FILE} with ${BUILD_NUMBER}"
 '''
           sshagent(credentials: ['GithubSSH']) {
             sh 'git push origin master'
