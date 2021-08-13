@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.CensusServices;
@@ -21,20 +25,26 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IItemService _itemService;
         private readonly CensusItem _censusItem;
         private readonly ICache _cache;
+        private readonly ILogger _logger;
 
         private const string _weaponInfoCacheKey = "ps2.weaponinfo";
         private const string _sanctionedWeaponsCacheKey = "ps2.sanctionedWeapons";
+        private const string _masterSanctionedWeaponsEndpoint = "https://raw.githubusercontent.com/cooltrain7/Planetside-2-API-Tracker/master/Weapons/sanction-list-machine.json";
         private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(8);
         private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
 
+        private readonly KeyedSemaphoreSlim _oracleStatLock = new KeyedSemaphoreSlim();
+        private readonly SemaphoreSlim _sanctionedStoreLock = new SemaphoreSlim(1);
+
         public WeaponService(ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService,
-            IItemService itemService, CensusItem censusItem, ICache cache)
+            IItemService itemService, CensusItem censusItem, ICache cache, ILogger<WeaponService> logger)
         {
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
             _worldEventsService = worldEventsService;
             _itemService = itemService;
             _censusItem = censusItem;
             _cache = cache;
+            _logger = logger;
         }
 
         public async Task<WeaponInfoResult> GetWeaponInfo(int weaponItemId)
@@ -123,21 +133,34 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<int>> GetAllSanctionedWeaponIds()
         {
-            var weapons = await _cache.GetAsync<IEnumerable<int>>(_sanctionedWeaponsCacheKey);
-            if (weapons != null)
+            await _sanctionedStoreLock.WaitAsync();
+
+            try
             {
+                var weapons = await _cache.GetAsync<IEnumerable<int>>(_sanctionedWeaponsCacheKey);
+                if (weapons != null)
+                {
+                    return weapons;
+                }
+
+                weapons = await GetSanctionedWeaponsFromMasterListAsync();
+                if (weapons == null)
+                {
+                    var repoWeapons = await _sanctionedWeaponsRepository.GetAllSanctionedWeapons();
+                    weapons = repoWeapons.Select(a => a.Id);
+                }
+
+                if (weapons.Any())
+                {
+                    await _cache.SetAsync(_sanctionedWeaponsCacheKey, weapons, _sanctionedWeaponsCacheExpiration);
+                }
+
                 return weapons;
             }
-
-            var repoWeapons = await _sanctionedWeaponsRepository.GetAllSanctionedWeapons();
-            weapons = repoWeapons.Select(a => a.Id);
-            
-            if (weapons.Any())
+            finally
             {
-                await _cache.SetAsync(_sanctionedWeaponsCacheKey, weapons, _sanctionedWeaponsCacheExpiration);
+                _sanctionedStoreLock.Release();
             }
-
-            return weapons;
         }
 
         public async Task<Dictionary<int, IEnumerable<DailyWeaponStats>>> GetOracleStatsFromWeaponByDateAsync(IEnumerable<int> weaponIds, DateTime start, DateTime end)
@@ -153,8 +176,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             return oracleDict;
         }
-
-        private readonly KeyedSemaphoreSlim _oracleStatLock = new KeyedSemaphoreSlim();
 
         private async Task<IEnumerable<DailyWeaponStats>> GetOracleStats(int weaponId, DateTime start, DateTime end)
         {
@@ -177,6 +198,31 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                 return stats;
             }
+        }
+
+        private async Task<IEnumerable<int>> GetSanctionedWeaponsFromMasterListAsync()
+        {
+            try
+            {
+                var httpClient = new HttpClient();
+                var result = await httpClient.GetAsync(_masterSanctionedWeaponsEndpoint);
+                if (!result.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"Failed to retrieve master sanctioned list from remote resource. Returned '{result.StatusCode}'.");
+                    return null;
+                }
+
+                var serializedResult = await result.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<Dictionary<int, string>>(serializedResult)
+                    .Where(a => a.Value == "infantry")
+                    .Select(a => a.Key);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to retrieve master sanctioned list: {ex.Message}");
+            }
+
+            return null;
         }
     }
 }
