@@ -42,9 +42,9 @@ echo -e "\\nPushed ${REPO_LABEL}:${BUILDTAG}"'''
 BUILDTAG=$BUILD_NUMBER
 ENV_VAR_KEY="IMAGE_${SERVICE_NAME^^}_VERS"
 
-sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILDTAG}/};\\${x;/^$/{s//${ENV_VAR_KEY}=${BUILDTAG}/;H};x}" voidwell.env
+sed -i "/^${ENV_VAR_KEY}=/{h;s/=.*/=${BUILDTAG}/};\\${x;/^$/{s//${ENV_VAR_KEY}=${BUILDTAG}/;H};x}" $RELEASE_FILE
 
-git add voidwell.env
+git add $RELEASE_FILE
 git commit -m "Updated ${ENV_VAR_KEY} with ${BUILDTAG}"
 '''
           sshagent(credentials: ['GithubSSH']) {
@@ -62,5 +62,6 @@ git commit -m "Updated ${ENV_VAR_KEY} with ${BUILDTAG}"
     REPOSITORY = 'voidwell/daybreakgames'
     SERVICE_NAME = 'daybreakgames'
     DOCKERFILE_PATH = './Dockerfile'
+    RELEASE_FILE = '.env.prod'
   }
 }
