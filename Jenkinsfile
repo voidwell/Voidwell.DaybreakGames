@@ -16,7 +16,7 @@ echo -e "\\nBuild Completed"'''
 docker push ${REGISTRY_ENDPOINT}/${REPOSITORY}:${BUILD_NUMBER}
 docker push ${REGISTRY_ENDPOINT}/${REPOSITORY}:latest
 
-echo -e "\\nPushed ${REPO_LABEL}:${BUILD_NUMBER}"'''
+echo -e "\\nPushed ${REGISTRY_ENDPOINT}/${REPOSITORY}:${BUILD_NUMBER}"'''
       }
     }
     stage('Update Release') {
