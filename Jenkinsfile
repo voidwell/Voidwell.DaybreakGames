@@ -2,21 +2,20 @@ pipeline {
   agent any
   stages {
     stage('Build') {
-      agent any
       steps {
-        sh '''#!/bin/bash
-docker build -t ${REGISTRY_ENDPOINT}/${REPOSITORY}:latest -t ${REGISTRY_ENDPOINT}/${REPOSITORY}:${BUILD_NUMBER} -f ${DOCKERFILE_PATH} .
-
-echo -e "\\nBuild Completed"'''
+        script {
+          dockerImage = docker.build("${REPOSITORY}", "-f ${DOCKERFILE_PATH} .")
+        }
       }
     }
     stage('Docker Push') {
       steps {
-        sh '''#!/bin/bash
-docker push ${REGISTRY_ENDPOINT}/${REPOSITORY}:${BUILD_NUMBER}
-docker push ${REGISTRY_ENDPOINT}/${REPOSITORY}:latest
-
-echo -e "\\nPushed ${REGISTRY_ENDPOINT}/${REPOSITORY}:${BUILD_NUMBER}"'''
+        script {
+          docker.withRegistry("${REGISTRY_ENDPOINT}", 'docker.voidwell.com') {
+            dockerImage.push("${BUILD_NUMBER}")
+            dockerImage.push("latest")
+          }
+        }
       }
     }
     stage('Update Release') {
@@ -39,12 +38,11 @@ git commit -m "Updated ${ENV_VAR_KEY} in ${RELEASE_FILE} with ${BUILD_NUMBER}"
     }
   }
   environment {
-    REGISTRY_USER = credentials('docker-registry-user')
-    REGISTRY_PASSWORD = credentials('docker-registry-password')
-    REGISTRY_ENDPOINT = 'docker.voidwell.com'
+    REGISTRY_ENDPOINT = 'https://docker.voidwell.com'
     REPOSITORY = 'voidwell/daybreakgames'
     SERVICE_NAME = 'daybreakgames'
     DOCKERFILE_PATH = './Dockerfile'
     RELEASE_FILE = '.env.prod'
+    dockerImage = ''
   }
 }
