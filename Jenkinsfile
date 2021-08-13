@@ -13,10 +13,10 @@ echo -e "\\nBuild Completed"'''
     stage('Docker Push') {
       steps {
         sh '''#!/bin/bash
-docker push ${REGISTRY_ENDPOINT}/${REPOSITORY}:${$BUILD_NUMBER}
+docker push ${REGISTRY_ENDPOINT}/${REPOSITORY}:${BUILD_NUMBER}
 docker push ${REGISTRY_ENDPOINT}/${REPOSITORY}:latest
 
-echo -e "\\nPushed ${REPO_LABEL}:${BUILDTAG}"'''
+echo -e "\\nPushed ${REPO_LABEL}:${BUILD_NUMBER}"'''
       }
     }
     stage('Update Release') {
