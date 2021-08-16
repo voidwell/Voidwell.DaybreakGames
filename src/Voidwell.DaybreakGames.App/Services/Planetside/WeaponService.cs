@@ -56,6 +56,10 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             var info = await _censusItem.GetWeaponInfo(weaponItemId);
+            if (info == null)
+            {
+                return null;
+            }
 
             var hipModes = info.GetFireModesOfType(FireModeType.Primary)?.ToList();
             var aimModes = info.GetFireModesOfType(FireModeType.Secondary)?.ToList();

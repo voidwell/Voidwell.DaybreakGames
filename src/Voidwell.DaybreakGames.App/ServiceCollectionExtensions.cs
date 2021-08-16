@@ -64,6 +64,7 @@ namespace Voidwell.DaybreakGames.App
             services.AddTransient<IGradeService, GradeService>();
 
             services.AddSingleton<ICharacterService, CharacterService>();
+            services.AddSingleton<ILeaderboardService, LeaderboardService>();
             services.AddSingleton<ICharacterSessionService, CharacterSessionService>();
             services.AddSingleton<IOutfitService, OutfitService>();
             services.AddSingleton<IWorldMonitor, WorldMonitor>();

@@ -18,6 +18,11 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         public async Task<ActionResult> GetWeaponInfo(int weaponItemId)
         {
             var result = await _weaponService.GetWeaponInfo(weaponItemId);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
             return Ok(result);
         }
 
