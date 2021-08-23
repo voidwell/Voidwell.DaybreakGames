@@ -164,13 +164,13 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
                 {
                     return sort switch
                     {
-                        "kills" => d.Kills,
-                        "vehicleKills" => d.VehicleKills,
-                        "deaths" => d.Deaths,
-                        "kdr" => d.Deaths > 0 ? d.Kills / d.Deaths : null,
-                        "accuracy" => d.FireCount > 0 ? d.HitCount / d.FireCount : null,
-                        "hsr" => d.Kills > 0 ? d.Headshots / d.Kills : null,
-                        "kph" => d.PlayTime > 0 ? d.Kills / (d.PlayTime / 3600) : null,
+                        "kills" => (float?)d.Kills,
+                        "vehiclekills" => (float?)d.VehicleKills,
+                        "deaths" => (float?)d.Deaths,
+                        "kdr" => d.Deaths > 0 ? (float?)d.Kills / (float?)d.Deaths : null,
+                        "accuracy" => d.FireCount > 0 ? (float?)d.HitCount / (float?)d.FireCount : null,
+                        "hsr" => d.Kills > 0 ? (float?)d.Headshots / (float?)d.Kills : null,
+                        "kph" => d.PlayTime > 0 ? (float?)d.Kills / ((float?)d.PlayTime / 3600.0) : null,
                         _ => null,
                     };
                 })?.ToList();
