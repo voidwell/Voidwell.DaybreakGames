@@ -16,8 +16,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ICache _cache;
 
         private const string _cacheKey = "ps2.leaderboard";
-        private readonly Func<int, int, string> _getCharacterLeaderboardCacheKey = (weaponId, page) => $"{_cacheKey}_leaderboard_{weaponId}_{page}";
-        private readonly TimeSpan _cacheCharacterLeaderboardExpiration = TimeSpan.FromMinutes(5);
+        private readonly Func<int, int, string, string, string> _getCharacterLeaderboardCacheKey = (weaponId, page, sort, sortDir) => $"{_cacheKey}_leaderboard_{weaponId}_{page}_{sort}_{sortDir}";
+        private readonly TimeSpan _cacheCharacterLeaderboardExpiration = TimeSpan.FromMinutes(1);
 
         public LeaderboardService(ICharacterStore characterStore, IWeaponAggregateService weaponAggregateService, ICache cache)
         {
@@ -26,15 +26,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             _cache = cache;
         }
 
-        public async Task<IEnumerable<WeaponLeaderboardRow>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50)
+        public async Task<IEnumerable<WeaponLeaderboardRow>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50, string sort = "kills", string sortDir = "desc")
         {
-            var result = await _cache.GetAsync<IEnumerable<WeaponLeaderboardRow>>(_getCharacterLeaderboardCacheKey(weaponItemId, page));
+            var cacheKey = _getCharacterLeaderboardCacheKey(weaponItemId, page, sort, sortDir);
+
+            var result = await _cache.GetAsync<IEnumerable<WeaponLeaderboardRow>>(cacheKey);
             if (result != null)
             {
                 return result;
             }
 
-            var stats = await _characterStore.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
+            var stats = await _characterStore.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit, sort, sortDir);
             if (stats == null || !stats.Any())
             {
                 return Enumerable.Empty<WeaponLeaderboardRow>();
@@ -43,7 +45,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var aggregate = await _weaponAggregateService.GetAggregateForItem(weaponItemId);
             result = stats.Select(s => ConvertToLeaderboardRow(s, aggregate));
 
-            await _cache.SetAsync(_getCharacterLeaderboardCacheKey(weaponItemId, page), result, _cacheCharacterLeaderboardExpiration);
+            await _cache.SetAsync(cacheKey, result, _cacheCharacterLeaderboardExpiration);
 
             return result;
         }

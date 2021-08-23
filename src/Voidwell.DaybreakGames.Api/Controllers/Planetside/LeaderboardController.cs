@@ -15,9 +15,9 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         }
 
         [HttpGet("weapon/{weaponItemId}")]
-        public async Task<ActionResult> GetWeaponLeaderboard(int weaponItemId, [FromQuery]int page = 0)
+        public async Task<ActionResult> GetWeaponLeaderboard(int weaponItemId, [FromQuery] int page = 0, [FromQuery] string sort = "kills", [FromQuery] string sortDir = "desc")
         {
-            var result = await _leaderboardService.GetCharacterWeaponLeaderboardAsync(weaponItemId, page);
+            var result = await _leaderboardService.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, 50, sort?.ToLower(), sortDir?.ToLower());
             return Ok(result);
         }
     }

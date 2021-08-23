@@ -24,9 +24,11 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly Func<string, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
         private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
         private readonly Func<string, string> _getCharacterIdCacheKey = characterName => $"{_cacheKey}_name_{characterName.ToLower()}";
+        private readonly Func<int, string> _getLeaderboardDataCacheKey = weaponId => $"{_cacheKey}_leaderboard_{weaponId}";
 
         private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
         private readonly TimeSpan _cacheCharacterIdExpiration = TimeSpan.FromMinutes(30);
+        private readonly TimeSpan _cacheWeaponLeaderboardDataExpiration = TimeSpan.FromMinutes(5);
 
         private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
 
@@ -145,9 +147,41 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             return completeDetails;
         }
 
-        public Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50)
+        public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50, string sort = null, string sortDir = null)
         {
-            return _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit);
+            var cacheKey = _getLeaderboardDataCacheKey(weaponItemId);
+
+            var data = await _cache.GetAsync<IEnumerable<CharacterWeaponStat>>(cacheKey);
+            if (data == null)
+            {
+                data = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, 0, 1000);
+                await _cache.SetAsync(cacheKey, data, _cacheWeaponLeaderboardDataExpiration);
+            }
+
+            if (sort != null)
+            {
+                data = data?.OrderBy(d =>
+                {
+                    return sort switch
+                    {
+                        "kills" => d.Kills,
+                        "vehicleKills" => d.VehicleKills,
+                        "deaths" => d.Deaths,
+                        "kdr" => d.Deaths > 0 ? d.Kills / d.Deaths : null,
+                        "accuracy" => d.FireCount > 0 ? d.HitCount / d.FireCount : null,
+                        "hsr" => d.Kills > 0 ? d.Headshots / d.Kills : null,
+                        "kph" => d.PlayTime > 0 ? d.Kills / (d.PlayTime / 3600) : null,
+                        _ => null,
+                    };
+                })?.ToList();
+
+                if (sortDir == "desc")
+                {
+                    data = data?.Reverse();
+                }
+            }
+
+            return data?.Skip(page * limit).Take(limit);
         }
 
         public async Task<string> GetCharacterIdByName(string characterName)

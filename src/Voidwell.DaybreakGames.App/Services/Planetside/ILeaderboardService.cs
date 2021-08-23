@@ -6,6 +6,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public interface ILeaderboardService
     {
-        Task<IEnumerable<WeaponLeaderboardRow>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50);
+        Task<IEnumerable<WeaponLeaderboardRow>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50, string sort = "kills", string sortDir = "desc");
     }
 }
