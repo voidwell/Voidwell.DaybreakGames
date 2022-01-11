@@ -109,12 +109,9 @@ namespace Voidwell.DaybreakGames.Models
 
         public ZoneAlertState GetAlertState()
         {
-            if (_alertState != null) {
-                if (LockState?.State == ZoneLockStateEnum.LOCKED ||
-                    _alertState.MetagameEvent.Duration.HasValue && DateTime.UtcNow - _alertState.Timestamp > _alertState.MetagameEvent.Duration.Value)
-                {
-                    UpdateAlertState();
-                }
+            if (_alertState != null && (LockState?.State == ZoneLockStateEnum.LOCKED || _alertState.IsEventEnded()))
+            {
+                UpdateAlertState();
             } 
 
             return _alertState;
