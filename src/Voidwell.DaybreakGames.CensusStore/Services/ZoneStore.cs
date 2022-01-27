@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly string _playableZonesCacheKey = $"{_cacheKeyPrefix}-playable-zones";
         private readonly TimeSpan _zoneCacheExpiration = TimeSpan.FromMinutes(30);
 
-        private readonly int[] _playableZoneIds = { 2, 4, 6, 8 };
+        private readonly int[] _playableZoneIds = { 2, 4, 6, 8, 344 };
 
         public ZoneStore(IZoneRepository zoneRepository, CensusZone censusZone, ICache cache)
         {
