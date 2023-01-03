@@ -14,7 +14,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class WorldStore : IWorldStore
     {
         private readonly IWorldRepository _worldRepository;
-        private readonly CensusWorld _censusWorld;
+        private readonly ICensusWorld _censusWorld;
         private readonly ICache _cache;
 
         private const string _cacheKeyPrefix = "ps2.worldstore";
@@ -25,7 +25,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         public string StoreName => "WorldStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public WorldStore(IWorldRepository worldRepository, CensusWorld censusWorld, ICache cache)
+        public WorldStore(IWorldRepository worldRepository, ICensusWorld censusWorld, ICache cache)
         {
             _worldRepository = worldRepository;
             _censusWorld = censusWorld;

@@ -5,18 +5,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public class CensusItemCategory
+    public class CensusItemCategory : ICensusItemCategory
     {
-        private readonly ICensusQueryFactory _queryFactory;
+        private readonly ICensusClient _client;
 
-        public CensusItemCategory(ICensusQueryFactory queryFactory)
+        public CensusItemCategory(ICensusClient client)
         {
-            _queryFactory = queryFactory;
+            _client = client;
         }
 
         public async Task<IEnumerable<CensusItemCategoryModel>> GetAllItemCategories()
         {
-            var query = _queryFactory.Create("item_category");
+            var query = _client.CreateQuery("item_category");
             query.SetLanguage("en");
 
             query.ShowFields("item_category_id", "name");

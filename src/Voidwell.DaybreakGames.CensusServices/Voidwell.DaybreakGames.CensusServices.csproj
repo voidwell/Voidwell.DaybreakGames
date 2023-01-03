@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DaybreakGames.Census" Version="1.1.0" />
+    <PackageReference Include="DaybreakGames.Census" Version="3.2.4" />
   </ItemGroup>
 
 </Project>

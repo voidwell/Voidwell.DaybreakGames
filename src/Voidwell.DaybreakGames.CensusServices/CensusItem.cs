@@ -5,18 +5,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public class CensusItem
+    public class CensusItem : ICensusItem
     {
-        private readonly ICensusQueryFactory _queryFactory;
+        private readonly ICensusClient _client;
 
-        public CensusItem(ICensusQueryFactory queryFactory)
+        public CensusItem(ICensusClient client)
         {
-            _queryFactory = queryFactory;
+            _client = client;
         }
 
         public async Task<IEnumerable<CensusItemModel>> GetAllItems()
         {
-            var query = _queryFactory.Create("item");
+            var query = _client.CreateQuery("item");
             query.SetLanguage("en");
 
             query.ShowFields("item_id", "item_type_id", "item_category_id", "is_vehicle_weapon", "name", "description", "faction_id", "max_stack_size", "image_id");
@@ -26,7 +26,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
         public async Task<CensusWeaponInfoModel> GetWeaponInfo(int weaponItemId)
         {
-            var query = _queryFactory.Create("item");
+            var query = _client.CreateQuery("item");
             query.SetLanguage("en");
 
             query.HideFields("image_set_id", "image_path", "skill_set_id", "is_default_attachment", "passive_ability_id", "activatable_ability_id", "item_type_id");

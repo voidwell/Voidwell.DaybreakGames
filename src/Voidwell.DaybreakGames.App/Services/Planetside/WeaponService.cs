@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ISanctionedWeaponsRepository _sanctionedWeaponsRepository;
         private readonly IWorldEventsService _worldEventsService;
         private readonly IItemService _itemService;
-        private readonly CensusItem _censusItem;
+        private readonly ICensusItem _censusItem;
         private readonly ICache _cache;
         private readonly ILogger _logger;
 
@@ -37,7 +37,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly SemaphoreSlim _sanctionedStoreLock = new SemaphoreSlim(1);
 
         public WeaponService(ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService,
-            IItemService itemService, CensusItem censusItem, ICache cache, ILogger<WeaponService> logger)
+            IItemService itemService, ICensusItem censusItem, ICache cache, ILogger<WeaponService> logger)
         {
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
             _worldEventsService = worldEventsService;

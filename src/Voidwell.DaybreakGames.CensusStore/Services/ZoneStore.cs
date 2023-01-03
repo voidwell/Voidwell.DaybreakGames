@@ -16,7 +16,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
         private readonly IZoneRepository _zoneRepository;
-        private readonly CensusZone _censusZone;
+        private readonly ICensusZone _censusZone;
         private readonly ICache _cache;
 
         private const string _cacheKeyPrefix = "ps2.zoneStore";
@@ -25,7 +25,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private readonly int[] _playableZoneIds = { 2, 4, 6, 8, 344 };
 
-        public ZoneStore(IZoneRepository zoneRepository, CensusZone censusZone, ICache cache)
+        public ZoneStore(IZoneRepository zoneRepository, ICensusZone censusZone, ICache cache)
         {
             _zoneRepository = zoneRepository;
             _censusZone = censusZone;

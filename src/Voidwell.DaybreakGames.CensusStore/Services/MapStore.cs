@@ -13,7 +13,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class MapStore : IMapStore
     {
         private readonly IMapRepository _mapRepository;
-        private readonly CensusMap _censusMap;
+        private readonly ICensusMap _censusMap;
         private readonly CensusWorldEvent _censusWorldEvent;
         private readonly ICache _cache;
 
@@ -25,7 +25,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         public string StoreName => "MapStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
 
-        public MapStore(IMapRepository mapRepository, CensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
+        public MapStore(IMapRepository mapRepository, ICensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
         {
             _mapRepository = mapRepository;
             _censusMap = censusMap;

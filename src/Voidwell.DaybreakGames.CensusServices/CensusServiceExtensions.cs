@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Voidwell.DaybreakGames.CensusServices.Patcher;
+using Voidwell.DaybreakGames.CensusServices.Patcher.Services;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
@@ -21,6 +23,14 @@ namespace Voidwell.DaybreakGames.CensusServices
             services.AddSingleton<CensusExperience>();
             services.AddSingleton<CensusWorldEvent>();
             services.AddSingleton<CensusLoadout>();
+
+            services.AddSingleton<ICensusItem, PatchItem>();
+            services.AddSingleton<ICensusItemCategory, PatchItemCategory>();
+            services.AddSingleton<ICensusMap, PatchMap>();
+            services.AddSingleton<ICensusWorld, PatchWorld>();
+            services.AddSingleton<ICensusZone, PatchZone>();
+
+            services.AddSingleton<IPatchClient, SanctuaryCensusClient>();
 
             return services;
         }

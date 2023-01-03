@@ -13,8 +13,8 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class ItemStore : IItemStore
     {
         private readonly IItemRepository _itemRepository;
-        private readonly CensusItem _censusItem;
-        private readonly CensusItemCategory _censusItemCategory;
+        private readonly ICensusItem _censusItem;
+        private readonly ICensusItemCategory _censusItemCategory;
         private readonly ICache _cache;
 
         private const string _categoryItemsCacheKey = "ps2.categoryItems";
@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         public string StoreName => "ItemStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(45);
 
-        public ItemStore(IItemRepository itemRepository, CensusItem censusItem, CensusItemCategory censusItemCategory, ICache cache)
+        public ItemStore(IItemRepository itemRepository, ICensusItem censusItem, ICensusItemCategory censusItemCategory, ICache cache)
         {
             _itemRepository = itemRepository;
             _censusItem = censusItem;

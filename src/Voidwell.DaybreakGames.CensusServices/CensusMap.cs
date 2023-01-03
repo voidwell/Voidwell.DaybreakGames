@@ -6,18 +6,18 @@ using Voidwell.DaybreakGames.CensusServices.Models;
 
 namespace Voidwell.DaybreakGames.CensusServices
 {
-    public class CensusMap
+    public class CensusMap : ICensusMap
     {
-        private readonly ICensusQueryFactory _queryFactory;
+        private readonly ICensusClient _client;
 
-        public CensusMap(ICensusQueryFactory queryFactory)
+        public CensusMap(ICensusClient client)
         {
-            _queryFactory = queryFactory;
+            _client = client;
         }
 
         public async Task<CensusMapModel> GetMapOwnership(int worldId, int zoneId)
         {
-            var query = _queryFactory.Create("map");
+            var query = _client.CreateQuery("map");
             query.SetLanguage("en");
 
             query.Where("world_id").Equals(worldId);
@@ -35,7 +35,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
         public async Task<IEnumerable<CensusMapHexModel>> GetAllMapHexs()
         {
-            var query = _queryFactory.Create("map_hex");
+            var query = _client.CreateQuery("map_hex");
 
             query.ShowFields("zone_id", "map_region_id", "x", "y", "hex_type", "type_name");
 
@@ -44,7 +44,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
         public async Task<IEnumerable<CensusMapRegionModel>> GetAllMapRegions()
         {
-            var query = _queryFactory.Create("map_region");
+            var query = _client.CreateQuery("map_region");
 
             query.ShowFields("map_region_id", "zone_id", "facility_id", "facility_name", "facility_type_id", "facility_type", "location_x", "location_y", "location_z");
 
@@ -53,7 +53,7 @@ namespace Voidwell.DaybreakGames.CensusServices
 
         public async Task<IEnumerable<CensusFacilityLinkModel>> GetAllFacilityLinks()
         {
-            var query = _queryFactory.Create("facility_link");
+            var query = _client.CreateQuery("facility_link");
 
             query.ShowFields("zone_id", "facility_id_a", "facility_id_b", "description");
 
