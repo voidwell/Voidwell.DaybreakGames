@@ -114,7 +114,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.MapRegions.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id && a.FacilityId == e.FacilityId);
+                await dbContext.MapRegions.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
 
                 await dbContext.SaveChangesAsync();
             }
