@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29728.190
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.App", "src\Voidwell.DaybreakGames.App\Voidwell.DaybreakGames.App.csproj", "{70DEC05A-24A9-474B-A954-6504AE2CD74C}"
 EndProject
@@ -38,6 +38,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusStore", "src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj", "{647810BA-3E71-44A7-838D-D4C40F6ECCDC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Utils", "src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj", "{271436B4-89AF-4A98-9D64-6690D2C10CC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.IntegrationTest", "test\Voidwell.DaybreakGames.IntegrationTest\Voidwell.DaybreakGames.IntegrationTest.csproj", "{4D63C9D4-042C-4943-B72A-78433EB341ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +96,7 @@ Global
 		{F6E9813D-E90D-4903-82F3-EA8817E6C52C} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{647810BA-3E71-44A7-838D-D4C40F6ECCDC} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
+		{4D63C9D4-042C-4943-B72A-78433EB341ED} = {B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1011AD1D-2AC5-4BC2-A299-5778409158D2}

@@ -89,8 +89,8 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             return new Zone
             {
                 Id = censusModel.ZoneId,
-                Name = censusModel.Name.English,
-                Description = censusModel.Description.English,
+                Name = censusModel.Name?.English,
+                Description = censusModel.Description?.English,
                 Code = censusModel.Code,
                 HexSize = censusModel.HexSize
             };
