@@ -11,6 +11,7 @@ COPY ./src/Voidwell.DaybreakGames.CensusServices/*.csproj ./src/Voidwell.Daybrea
 COPY ./src/Voidwell.DaybreakGames.Utils/*.csproj ./src/Voidwell.DaybreakGames.Utils/
 COPY ./src/Voidwell.Cache/*.csproj ./src/Voidwell.Cache/
 COPY ./test/Voidwell.DaybreakGames.Test/*.csproj ./test/Voidwell.DaybreakGames.Test/
+COPY ./test/Voidwell.DaybreakGames.IntegrationTest/*.csproj ./test/Voidwell.DaybreakGames.IntegrationTest/
 
 RUN dotnet restore
 
