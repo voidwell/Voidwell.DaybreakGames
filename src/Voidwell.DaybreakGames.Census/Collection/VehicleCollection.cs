@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class VehicleCollection : CensusCollection, ICensusStaticCollection<CensusVehicleModel>
     {
         public override string CollectionName => "vehicle";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public VehicleCollection(ICensusClient censusClient) : base(censusClient)
         {

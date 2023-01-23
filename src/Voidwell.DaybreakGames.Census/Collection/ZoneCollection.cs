@@ -11,7 +11,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class ZoneCollection : CensusPatchCollection, ICensusStaticCollection<CensusZoneModel>
     {
         public override string CollectionName => "zone";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public ZoneCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient) : base(censusPatchClient, censusClient)
         {

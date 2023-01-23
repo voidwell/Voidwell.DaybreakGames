@@ -11,7 +11,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class ItemCategoryCollection : CensusPatchCollection, ICensusStaticCollection<CensusItemCategoryModel>
     {
         public override string CollectionName => "item_category";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public ItemCategoryCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
             : base(censusPatchClient, censusClient)

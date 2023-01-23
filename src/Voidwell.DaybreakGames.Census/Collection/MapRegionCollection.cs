@@ -11,7 +11,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class MapRegionCollection : CensusPatchCollection, ICensusStaticCollection<CensusMapRegionModel>
     {
         public override string CollectionName => "map_region";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public MapRegionCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
             : base(censusPatchClient, censusClient)

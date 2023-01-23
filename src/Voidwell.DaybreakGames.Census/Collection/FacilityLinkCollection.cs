@@ -11,7 +11,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class FacilityLinkCollection : CensusPatchCollection, ICensusStaticCollection<CensusFacilityLinkModel>
     {
         public override string CollectionName => "facility_link";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public FacilityLinkCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
             : base(censusPatchClient, censusClient)

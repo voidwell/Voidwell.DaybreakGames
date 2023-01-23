@@ -11,7 +11,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class MapHexCollection : CensusPatchCollection, ICensusStaticCollection<CensusMapHexModel>
     {
         public override string CollectionName => "map_hex";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public MapHexCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
             : base(censusPatchClient, censusClient)

@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class WorldCollection : CensusCollection, ICensusStaticCollection<CensusWorldModel>
     {
         public override string CollectionName => "world";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public WorldCollection(ICensusClient censusClient) : base(censusClient)
         {

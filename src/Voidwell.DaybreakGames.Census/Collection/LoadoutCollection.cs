@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class LoadoutCollection : CensusCollection, ICensusStaticCollection<CensusLoadoutModel>
     {
         public override string CollectionName => "loadout";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public LoadoutCollection(ICensusClient censusClient) : base(censusClient)
         {

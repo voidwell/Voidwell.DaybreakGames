@@ -11,7 +11,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class ItemCollection : CensusPatchCollection, ICensusStaticCollection<CensusItemModel>
     {
         public override string CollectionName => "item";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public ItemCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
             : base(censusPatchClient, censusClient)

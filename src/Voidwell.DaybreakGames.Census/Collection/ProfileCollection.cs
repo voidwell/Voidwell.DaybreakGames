@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class ProfileCollection : CensusCollection, ICensusStaticCollection<CensusProfileModel>
     {
         public override string CollectionName => "profile";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public ProfileCollection(ICensusClient censusClient) : base(censusClient)
         {

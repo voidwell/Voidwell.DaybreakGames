@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class MetagameEventStateCollection : CensusCollection, ICensusStaticCollection<CensusMetagameEventStateModel>
     {
         public override string CollectionName => "metagame_event_state";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public MetagameEventStateCollection(ICensusClient censusClient) : base(censusClient)
         {

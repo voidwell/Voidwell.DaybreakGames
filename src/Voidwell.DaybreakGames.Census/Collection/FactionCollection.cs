@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Census.Collection
     public class FactionCollection : CensusCollection, ICensusStaticCollection<CensusFactionModel>
     {
         public override string CollectionName => "faction";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
         public FactionCollection(ICensusClient censusClient) : base(censusClient)
         {
