@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Voidwell.DaybreakGames.CensusServices.Models.Extensions
+namespace Voidwell.DaybreakGames.Census.Models.Extensions
 {
     public static class CensusWeaponInfoModelExtensions
     {

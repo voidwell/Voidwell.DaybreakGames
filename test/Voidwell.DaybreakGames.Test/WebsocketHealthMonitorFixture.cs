@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using Voidwell.DaybreakGames.CensusStream;
+using Voidwell.DaybreakGames.Live.CensusStream;
 
 namespace Voidwell.DaybreakGames.Test
 {

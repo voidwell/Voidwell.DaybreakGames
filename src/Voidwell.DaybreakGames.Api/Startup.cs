@@ -9,7 +9,9 @@ using Voidwell.DaybreakGames.Data;
 using IdentityServer4.AccessTokenValidation;
 using System;
 using Voidwell.Logging;
-using Voidwell.DaybreakGames.App;
+using Voidwell.DaybreakGames.CensusStore;
+using Voidwell.DaybreakGames.Services;
+using Voidwell.DaybreakGames.Live;
 
 namespace Voidwell.DaybreakGames.Api
 {
@@ -60,7 +62,16 @@ namespace Voidwell.DaybreakGames.Api
                     options.CacheDuration = TimeSpan.FromMinutes(10);
                 });
 
-            services.ConfigureApplicationServices(Configuration);
+            services.AddCensusServices(options =>
+            {
+                options.CensusServiceId = Configuration.GetValue<string>("CensusServiceKey");
+                options.CensusServiceNamespace = Configuration.GetValue<string>("CensusServiceNamespace");
+                options.LogCensusErrors = Configuration.GetValue<bool>("LogCensusErrors", false);
+            });
+
+            services.AddCensusStores(Configuration);
+            services.AddApplicationServices();
+            services.AddLiveServices(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

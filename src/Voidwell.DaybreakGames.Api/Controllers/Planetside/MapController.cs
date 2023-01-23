@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Api.Models;
+using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Services.Planetside;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
@@ -20,7 +21,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         [HttpGet("{zoneId}")]
         public async Task<ActionResult> GetZoneMap(int zoneId)
         {
-            var result = await _mapService.GetZoneMap(zoneId);
+            var result = await _mapService.GetZoneMapAsync(zoneId);
             return Ok(result);
         }
 

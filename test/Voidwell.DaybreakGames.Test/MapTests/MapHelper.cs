@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Domain.Models;
 
 namespace Voidwell.DaybreakGames.Test.MapTests
 {
@@ -39,7 +39,7 @@ namespace Voidwell.DaybreakGames.Test.MapTests
 
             var zone = new Zone { Id = zoneId };
 
-            return new WorldZoneState(1, zone, zoneMap, ownership);
+            return new WorldZoneState(1, zone.Id, zone.Name, zoneMap, ownership);
         }
 
         public static ZoneMap GetZoneMap(int zoneId)

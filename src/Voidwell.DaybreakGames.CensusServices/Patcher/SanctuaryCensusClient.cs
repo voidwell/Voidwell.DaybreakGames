@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Voidwell.DaybreakGames.CensusServices.Patcher
+namespace Voidwell.DaybreakGames.Census.Patcher
 {
-    public class SanctuaryCensusClient : CensusClient, IPatchClient
+    public class SanctuaryCensusClient : CensusClient, ICensusPatchClient
     {
         private const string SanctuaryEndpoint = "census.lithafalcon.cc";
         private const string SanctuaryNamespace = "ps2";

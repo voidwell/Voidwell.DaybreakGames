@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Voidwell.DaybreakGames.CensusServices.Models
+namespace Voidwell.DaybreakGames.Census.Models
 {
     public class MultiLanguageString
     {

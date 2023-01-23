@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
+using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Utils;
@@ -16,7 +16,13 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class CharacterStore : ICharacterStore
     {
         private readonly ICharacterRepository _characterRepository;
-        private readonly CensusCharacter _censusCharacter;
+        private readonly CharacterCollection _characterCollection;
+        private readonly CharacterNameCollection _characterNameCollection;
+        private readonly CharactersStatCollection _charactersStatCollection;
+        private readonly CharactersStatByFactionCollection _charactersStatByFactionCollection;
+        private readonly CharactersWeaponStatCollection _charactersWeaponStatCollection;
+        private readonly CharactersWeaponStatByFactionCollection _charactersWeaponStatByFactionCollection;
+        private readonly CharactersStatHistoryCollection _charactersStatHistoryCollection;
         private readonly IOutfitStore _outfitStore;
         private readonly ICache _cache;
 
@@ -32,18 +38,33 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
 
-        public CharacterStore(ICharacterRepository characterRepository, CensusCharacter censusCharacter, IOutfitStore outfitStore,
+        public CharacterStore(
+            ICharacterRepository characterRepository,
+            CharacterCollection characterCollection,
+            CharacterNameCollection characterNameCollection,
+            CharactersStatCollection charactersStatCollection,
+            CharactersStatByFactionCollection characterStatByFactionCollection,
+            CharactersWeaponStatCollection charactersWeaponStatCollection,
+            CharactersWeaponStatByFactionCollection charactersWeaponStatByFactionCollection,
+            CharactersStatHistoryCollection charactersStatHistoryCollection,
+            IOutfitStore outfitStore,
             ICache cache)
         {
             _characterRepository = characterRepository;
-            _censusCharacter = censusCharacter;
+            _characterCollection = characterCollection;
+            _characterNameCollection = characterNameCollection;
+            _charactersStatCollection = charactersStatCollection;
+            _charactersStatByFactionCollection = characterStatByFactionCollection;
+            _charactersWeaponStatCollection = charactersWeaponStatCollection;
+            _charactersWeaponStatByFactionCollection = charactersWeaponStatByFactionCollection;
+            _charactersStatHistoryCollection = charactersStatHistoryCollection;
             _outfitStore = outfitStore;
             _cache = cache;
         }
 
         public Task<IEnumerable<CensusCharacterModel>> LookupCharactersByName(string query, int limit = 12)
         {
-            return _censusCharacter.LookupCharactersByName(query, limit);
+            return _characterCollection.LookupCharactersByNameAsync(query, limit);
         }
 
         public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)
@@ -108,7 +129,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         public async Task<Character> GetCharacterDetailsAsync(string characterId)
         {
             var characterDetailsTask = _characterRepository.GetCharacterWithDetailsAsync(characterId);
-            var censusCharacterTimesTask = _censusCharacter.GetCharacterTimes(characterId);
+            var censusCharacterTimesTask = _characterCollection.GetCharacterTimesAsync(characterId);
 
             await Task.WhenAll(characterDetailsTask, censusCharacterTimesTask);
 
@@ -194,7 +215,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
                 return characterId;
             }
 
-            characterId = await _characterRepository.GetCharacterIdByName(characterName) ?? await _censusCharacter.GetCharacterIdByName(characterName);
+            characterId = await _characterRepository.GetCharacterIdByName(characterName) ?? await _characterNameCollection.GetCharacterIdByNameAsync(characterName);
 
             if (characterId != null)
             {
@@ -217,7 +238,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private async Task<Character> UpdateCharacter(string characterId)
         {
-            var character = await _censusCharacter.GetCharacter(characterId);
+            var character = await _characterCollection.GetCharacterAsync(characterId);
 
             if (character == null)
             {
@@ -246,7 +267,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private async Task UpdateCharacterTimes(string characterId)
         {
-            var times = await _censusCharacter.GetCharacterTimes(characterId);
+            var times = await _characterCollection.GetCharacterTimesAsync(characterId);
 
             if (times == null)
             {
@@ -267,8 +288,8 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private async Task UpdateCharacterStats(string characterId, DateTime? LastLoginDate)
         {
-            var statsTask = _censusCharacter.GetCharacterStats(characterId, LastLoginDate);
-            var statsByFactionTask = _censusCharacter.GetCharacterFactionStats(characterId, LastLoginDate);
+            var statsTask = _charactersStatCollection.GetCharacterStatsAsync(characterId, LastLoginDate);
+            var statsByFactionTask = _charactersStatByFactionCollection.GetCharacterFactionStatsAsync(characterId, LastLoginDate);
 
             await Task.WhenAll(statsTask, statsByFactionTask);
 
@@ -365,8 +386,8 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private async Task UpdateCharacterWeaponStats(string characterId, DateTime? LastLoginDate)
         {
-            var characterWepStatsTask = _censusCharacter.GetCharacterWeaponStats(characterId, LastLoginDate);
-            var characterWepStatsByFactionTask = _censusCharacter.GetCharacterWeaponStatsByFaction(characterId, LastLoginDate);
+            var characterWepStatsTask = _charactersWeaponStatCollection.GetCharacterWeaponStatsAsync(characterId, LastLoginDate);
+            var characterWepStatsByFactionTask = _charactersWeaponStatByFactionCollection.GetCharacterWeaponStatsByFactionAsync(characterId, LastLoginDate);
 
             await Task.WhenAll(characterWepStatsTask, characterWepStatsByFactionTask);
 
@@ -437,7 +458,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private async Task UpdateCharacterStatsHistory(string characterId, DateTime? lastLoginDate)
         {
-            var statsHistory = await _censusCharacter.GetCharacterStatsHistory(characterId, lastLoginDate);
+            var statsHistory = await _charactersStatHistoryCollection.GetCharacterStatsHistoryAsync(characterId, lastLoginDate);
             if (statsHistory == null)
             {
                 return;

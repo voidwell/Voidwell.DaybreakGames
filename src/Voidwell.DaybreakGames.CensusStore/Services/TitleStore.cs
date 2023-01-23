@@ -1,8 +1,8 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -11,34 +11,27 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class TitleStore : ITitleStore
     {
         private readonly ITitleRepository _titleRepository;
-        private readonly CensusTitle _censusTitle;
+        private readonly TitleCollection _titleCollection;
+        private readonly IMapper _mapper;
 
         public string StoreName => "TitleStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
-        public TitleStore(ITitleRepository titleRepository, CensusTitle censusTitle)
+        public TitleStore(ITitleRepository titleRepository, TitleCollection titleCollection, IMapper mapper)
         {
             _titleRepository = titleRepository;
-            _censusTitle = censusTitle;
+            _titleCollection = titleCollection;
+            _mapper = mapper;
         }
 
         public async Task RefreshStore()
         {
-            var profiles = await _censusTitle.GetAllTitles();
+            var titles = await _titleCollection.GetCollectionAsync();
 
-            if (profiles != null)
+            if (titles != null)
             {
-                await _titleRepository.UpdateRangeAsync(profiles.Select(ConvertToDbModel));
+                await _titleRepository.UpdateRangeAsync(titles.Select(_mapper.Map<Title>));
             }
-        }
-
-        private static Title ConvertToDbModel(CensusTitleModel censusModel)
-        {
-            return new Title
-            {
-                Id = censusModel.TitleId,
-                Name = censusModel.Name.English
-            };
         }
     }
 }

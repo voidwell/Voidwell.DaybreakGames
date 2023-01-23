@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
+using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -13,22 +14,22 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class ItemStore : IItemStore
     {
         private readonly IItemRepository _itemRepository;
-        private readonly ICensusItem _censusItem;
-        private readonly ICensusItemCategory _censusItemCategory;
+        private readonly ItemCollection _itemCollection;
         private readonly ICache _cache;
+        private readonly IMapper _mapper;
 
         private const string _categoryItemsCacheKey = "ps2.categoryItems";
         private readonly TimeSpan _categoryItemsCacheExpiration = TimeSpan.FromHours(1);
 
         public string StoreName => "ItemStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(45);
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
-        public ItemStore(IItemRepository itemRepository, ICensusItem censusItem, ICensusItemCategory censusItemCategory, ICache cache)
+        public ItemStore(IItemRepository itemRepository, ItemCollection itemCollection, ICache cache, IMapper mapper)
         {
             _itemRepository = itemRepository;
-            _censusItem = censusItem;
-            _censusItemCategory = censusItemCategory;
+            _itemCollection = itemCollection;
             _cache = cache;
+            _mapper = mapper;
         }
 
         public Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<int> itemIds)
@@ -60,46 +61,19 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             return _itemRepository.FindWeaponsByNameAsync(name, limit);
         }
 
+        public Task<CensusWeaponInfoModel> GetWeaponInfoAsync(int weaponItemId)
+        {
+            return _itemCollection.GetWeaponInfoAsync(weaponItemId);
+        }
+
         public async Task RefreshStore()
         {
-            var itemCategories = await _censusItemCategory.GetAllItemCategories();
-
-            if (itemCategories != null)
-            {
-                await _itemRepository.UpsertRangeAsync(itemCategories.Select(ConvertToDbModel));
-            }
-
-            var items = await _censusItem.GetAllItems();
+            var items = await _itemCollection.GetCollectionAsync();
 
             if (items != null)
             {
-                await _itemRepository.UpsertRangeAsync(items.Select(ConvertToDbModel));
+                await _itemRepository.UpsertRangeAsync(items.Select(_mapper.Map<Item>));
             }
-        }
-
-        private static Item ConvertToDbModel(CensusItemModel item)
-        {
-            return new Item
-            {
-                Id = item.ItemId,
-                ItemTypeId = item.ItemTypeId,
-                ItemCategoryId = item.ItemCategoryId,
-                IsVehicleWeapon = item.IsVehicleWeapon,
-                Name = item.Name?.English,
-                Description = item.Description?.English,
-                FactionId = item.FactionId,
-                MaxStackSize = item.MaxStackSize,
-                ImageId = item.ImageId
-            };
-        }
-
-        private static ItemCategory ConvertToDbModel(CensusItemCategoryModel itemCat)
-        {
-            return new ItemCategory
-            {
-                Id = itemCat.ItemCategoryId,
-                Name = itemCat.Name?.English
-            };
         }
     }
 }

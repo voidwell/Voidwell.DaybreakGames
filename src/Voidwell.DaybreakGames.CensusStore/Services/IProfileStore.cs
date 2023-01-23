@@ -7,6 +7,5 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public interface IProfileStore : IUpdateable
     {
         Task<IEnumerable<Profile>> GetAllProfilesAsync();
-        Task<IEnumerable<Loadout>> GetAllLoadoutsAsync();
     }
 }

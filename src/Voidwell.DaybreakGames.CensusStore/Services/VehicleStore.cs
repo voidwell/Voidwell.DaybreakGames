@@ -1,9 +1,9 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -12,15 +12,17 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class VehicleStore : IVehicleStore
     {
         private readonly IVehicleRepository _vehicleRepository;
-        private readonly CensusVehicle _censusVehicle;
+        private readonly VehicleCollection _vehicleCollection;
+        private readonly IMapper _mapper;
 
         public string StoreName => "VehicleStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
-        public VehicleStore(IVehicleRepository vehicleRepository, CensusVehicle censusVehicle)
+        public VehicleStore(IVehicleRepository vehicleRepository, VehicleCollection vehicleCollection, IMapper mapper)
         {
             _vehicleRepository = vehicleRepository;
-            _censusVehicle = censusVehicle;
+            _vehicleCollection = vehicleCollection;
+            _mapper = mapper;
         }
 
         public Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
@@ -30,40 +32,12 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         public async Task RefreshStore()
         {
-            var vehicles = await _censusVehicle.GetAllVehicles();
-            var vehicleFactions = await _censusVehicle.GetAllVehicleFactions();
+            var vehicles = await _vehicleCollection.GetCollectionAsync();
 
             if (vehicles != null)
             {
-                await _vehicleRepository.UpsertRangeAsync(vehicles.Select(ConvertToDbModel));
+                await _vehicleRepository.UpsertRangeAsync(vehicles.Select(_mapper.Map<Vehicle>));
             }
-
-            if (vehicleFactions != null)
-            {
-                await _vehicleRepository.UpsertRangeAsync(vehicleFactions.Select(ConvertToDbModel));
-            }
-        }
-
-        private static Vehicle ConvertToDbModel(CensusVehicleModel censusModel)
-        {
-            return new Vehicle
-            {
-                Id = censusModel.VehicleId,
-                Name = censusModel.Name?.English,
-                ImageId = censusModel.ImageId,
-                Cost = censusModel.Cost,
-                CostResourceId = censusModel.CostResourceId,
-                Description = censusModel.Description?.English
-            };
-        }
-
-        private static VehicleFaction ConvertToDbModel(CensusVehicleFactionModel censusModel)
-        {
-            return new VehicleFaction
-            {
-                VehicleId = censusModel.VehicleId,
-                FactionId = censusModel.FactionId
-            };
         }
     }
 }

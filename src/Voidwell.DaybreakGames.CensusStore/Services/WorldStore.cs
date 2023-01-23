@@ -1,10 +1,10 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Utils;
@@ -14,8 +14,9 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class WorldStore : IWorldStore
     {
         private readonly IWorldRepository _worldRepository;
-        private readonly ICensusWorld _censusWorld;
+        private readonly WorldCollection _worldCollection;
         private readonly ICache _cache;
+        private readonly IMapper _mapper;
 
         private const string _cacheKeyPrefix = "ps2.worldstore";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
@@ -23,13 +24,14 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly KeyedSemaphoreSlim _worldPopulationLock = new KeyedSemaphoreSlim();
 
         public string StoreName => "WorldStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
-        public WorldStore(IWorldRepository worldRepository, ICensusWorld censusWorld, ICache cache)
+        public WorldStore(IWorldRepository worldRepository, WorldCollection worldCollection, ICache cache, IMapper mapper)
         {
             _worldRepository = worldRepository;
-            _censusWorld = censusWorld;
+            _worldCollection = worldCollection;
             _cache = cache;
+            _mapper = mapper; ;
         }
 
         public async Task<IEnumerable<World>> GetAllWorlds()
@@ -74,22 +76,13 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         public async Task RefreshStore()
         {
-            var worlds = await _censusWorld.GetAllWorlds();
+            var worlds = await _worldCollection.GetCollectionAsync();
 
             if (worlds != null)
             {
-                await _worldRepository.UpsertRangeAsync(worlds.Select(ConvertToDbModel));
+                await _worldRepository.UpsertRangeAsync(worlds.Select(_mapper.Map<World>));
                 await _cache.RemoveAsync(_cacheKeyPrefix);
             }
-        }
-
-        private static World ConvertToDbModel(CensusWorldModel censusModel)
-        {
-            return new World
-            {
-                Id = censusModel.WorldId,
-                Name = censusModel.Name.English
-            };
         }
     }
 }

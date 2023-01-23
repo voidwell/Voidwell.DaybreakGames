@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Voidwell.DaybreakGames.CensusServices.Models
+namespace Voidwell.DaybreakGames.Census.Models
 {
     public class CensusMapModel
     {

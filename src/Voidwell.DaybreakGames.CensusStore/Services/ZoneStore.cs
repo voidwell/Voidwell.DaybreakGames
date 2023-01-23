@@ -1,10 +1,10 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -12,12 +12,10 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 {
     public class ZoneStore : IZoneStore
     {
-        public string StoreName => "ZoneStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
-
         private readonly IZoneRepository _zoneRepository;
-        private readonly ICensusZone _censusZone;
+        private readonly ZoneCollection _zoneCollection;
         private readonly ICache _cache;
+        private readonly IMapper _mapper;
 
         private const string _cacheKeyPrefix = "ps2.zoneStore";
         private readonly string _playableZonesCacheKey = $"{_cacheKeyPrefix}-playable-zones";
@@ -25,11 +23,15 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private readonly int[] _playableZoneIds = { 2, 4, 6, 8, 344 };
 
-        public ZoneStore(IZoneRepository zoneRepository, ICensusZone censusZone, ICache cache)
+        public string StoreName => "ZoneStore";
+        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
+
+        public ZoneStore(IZoneRepository zoneRepository, ZoneCollection zoneCollection, ICache cache, IMapper mapper)
         {
             _zoneRepository = zoneRepository;
-            _censusZone = censusZone;
+            _zoneCollection = zoneCollection;
             _cache = cache;
+            _mapper = mapper;
         }
 
         public Task<IEnumerable<Zone>> GetAllZones()
@@ -75,25 +77,13 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         public async Task RefreshStore()
         {
-            var zones = await _censusZone.GetAllZones();
+            var zones = await _zoneCollection.GetCollectionAsync();
 
             if (zones != null)
             {
-                await _zoneRepository.UpsertRangeAsync(zones.Select(ConvertToDbModel));
+                await _zoneRepository.UpsertRangeAsync(zones.Select(_mapper.Map<Zone>));
                 await _cache.RemoveAsync(_playableZonesCacheKey);
             }
-        }
-
-        private static Zone ConvertToDbModel(CensusZoneModel censusModel)
-        {
-            return new Zone
-            {
-                Id = censusModel.ZoneId,
-                Name = censusModel.Name?.English,
-                Description = censusModel.Description?.English,
-                Code = censusModel.Code,
-                HexSize = censusModel.HexSize
-            };
         }
     }
 }

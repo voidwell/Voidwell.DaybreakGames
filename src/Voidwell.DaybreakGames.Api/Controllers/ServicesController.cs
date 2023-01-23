@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Linq;
 using System;
+using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Api.Controllers
 {

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
+using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -13,8 +13,8 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class MapStore : IMapStore
     {
         private readonly IMapRepository _mapRepository;
-        private readonly ICensusMap _censusMap;
-        private readonly CensusWorldEvent _censusWorldEvent;
+        private readonly MapCollection _mapCollection;
+        private readonly WorldEventCollection _worldEventCollection;
         private readonly ICache _cache;
 
         private const string _cacheKey = "ps2.mapstore";
@@ -22,41 +22,18 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private readonly TimeSpan _facilityWorldEventCacheExpiration = TimeSpan.FromSeconds(10);
 
-        public string StoreName => "MapStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(31);
-
-        public MapStore(IMapRepository mapRepository, ICensusMap censusMap, CensusWorldEvent censusWorldEvent, ICache cache)
+        public MapStore(IMapRepository mapRepository, MapCollection mapCollection, WorldEventCollection worldEventCollection, ICache cache)
         {
             _mapRepository = mapRepository;
-            _censusMap = censusMap;
-            _censusWorldEvent = censusWorldEvent;
+            _mapCollection = mapCollection;
+            _worldEventCollection = worldEventCollection;
             _cache = cache;
         }
 
         public async Task<Dictionary<int, int>> GetMapOwnershipAsync(int worldId, int zoneId)
         {
-            var map = await _censusMap.GetMapOwnership(worldId, zoneId);
+            var map = await _mapCollection.GetMapOwnershipAsync(worldId, zoneId);
             return map?.Regions.Row.ToDictionary(a => a.RowData.RegionId, a => a.RowData.FactionId);
-        }
-
-        public Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId)
-        {
-            return _mapRepository.GetMapRegionsByZoneIdAsync(zoneId);
-        }
-
-        public Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId)
-        {
-            return _mapRepository.GetFacilityLinksByZoneIdAsync(zoneId);
-        }
-
-        public Task<IEnumerable<MapHex>> GetMapHexsByZoneIdAsync(int zoneId)
-        {
-            return _mapRepository.GetMapHexsByZoneIdAsync(zoneId);
-        }
-
-        public Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(params int[] facilityIds)
-        {
-            return _mapRepository.GetMapRegionsByFacilityIdsAsync(facilityIds);
         }
 
         public async Task CreateZoneSnapshotAsync(int worldId, int zoneId, DateTime? timestamp = null, int? metagameInstanceId = null, Dictionary<int, int> zoneOwnership = null)
@@ -111,83 +88,19 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private async Task<IEnumerable<CensusFacilityWorldEventModel>> GetAllCensusFacilityWorldEvents(int worldId)
         {
-            var events = (await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId))?.ToList();
+            var events = (await _worldEventCollection.GetFacilityWorldEventsByWorldIdAsync(worldId))?.ToList();
 
             if (events != null && events.Any())
             {
                 for (var i = 0; i < 12; i++)
                 {
                     var lastEvent = events.OrderBy(a => a.Timestamp).First();
-                    var additionalEvents = await _censusWorldEvent.GetFacilityWorldEventsByWorldId(worldId, lastEvent.Timestamp);
+                    var additionalEvents = await _worldEventCollection.GetFacilityWorldEventsByWorldIdAsync(worldId, lastEvent.Timestamp);
                     events.AddRange(additionalEvents);
                 }
             }
 
             return events;
-        }
-
-        public async Task RefreshStore()
-        {
-            var mapHexs = await _censusMap.GetAllMapHexs();
-
-            if (mapHexs != null)
-            {
-                await _mapRepository.UpsertRangeAsync(mapHexs.Select(ConvertToDbModel));
-            }
-
-            var mapRegions = await _censusMap.GetAllMapRegions();
-
-            if (mapRegions != null)
-            {
-                await _mapRepository.UpsertRangeAsync(mapRegions.Select(ConvertToDbModel));
-            }
-
-            var facilityLinks = await _censusMap.GetAllFacilityLinks();
-
-            if (facilityLinks != null)
-            {
-                await _mapRepository.UpsertRangeAsync(facilityLinks.Select(ConvertToDbModel));
-            }
-        }
-
-        private static MapHex ConvertToDbModel(CensusMapHexModel censusModel)
-        {
-            return new MapHex
-            {
-                MapRegionId = censusModel.MapRegionId,
-                HexType = censusModel.HexType,
-                TypeName = censusModel.TypeName,
-                ZoneId = censusModel.ZoneId,
-                XPos = censusModel.X,
-                YPos = censusModel.Y
-            };
-        }
-
-        private static MapRegion ConvertToDbModel(CensusMapRegionModel censusModel)
-        {
-            return new MapRegion
-            {
-                Id = censusModel.MapRegionId,
-                ZoneId = censusModel.ZoneId,
-                FacilityId = censusModel.FacilityId,
-                FacilityName = censusModel.FacilityName,
-                FacilityTypeId = censusModel.FacilityTypeId,
-                FacilityType = censusModel.FacilityType,
-                XPos = censusModel.LocationX,
-                YPos = censusModel.LocationY,
-                ZPos = censusModel.LocationZ
-            };
-        }
-
-        private static FacilityLink ConvertToDbModel(CensusFacilityLinkModel censusModel)
-        {
-            return new FacilityLink
-            {
-                ZoneId = censusModel.ZoneId,
-                FacilityIdA = censusModel.FacilityIdA,
-                FacilityIdB = censusModel.FacilityIdB,
-                Description = censusModel.Description
-            };
         }
     }
 }

@@ -5,7 +5,7 @@ using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
-using Voidwell.DaybreakGames.Models;
+using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Test.MapTests;
 using Xunit;
 
@@ -45,7 +45,7 @@ namespace Voidwell.DaybreakGames.Test
                 .ReturnsAsync(mapOwnership);
 
             _fixture.MapService.AsMock()
-                .Setup(a => a.GetZoneMap(zoneId))
+                .Setup(a => a.GetZoneMapAsync(zoneId))
                 .ReturnsAsync(zoneMap);
 
             _fixture.MapService.AsMock()
@@ -91,7 +91,7 @@ namespace Voidwell.DaybreakGames.Test
                 .ReturnsAsync(mapOwnership);
 
             _fixture.MapService.AsMock()
-                .Setup(a => a.GetZoneMap(zoneId))
+                .Setup(a => a.GetZoneMapAsync(zoneId))
                 .ReturnsAsync(zoneMap);
 
             _fixture.MapService.AsMock()

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.App", "src\Voidwell.DaybreakGames.App\Voidwell.DaybreakGames.App.csproj", "{70DEC05A-24A9-474B-A954-6504AE2CD74C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E07D5578-2777-4F00-B6F9-C2DEC74C1138}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E1267F52-358F-4DE7-9098-0C44BB71CBA6}"
@@ -29,17 +27,18 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Test", "test\Voidwell.DaybreakGames.Test\Voidwell.DaybreakGames.Test.csproj", "{4A56391B-419B-4ECA-B1C4-794787F7E0D4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Api", "src\Voidwell.DaybreakGames.Api\Voidwell.DaybreakGames.Api.csproj", "{7A123B6E-5756-4CB4-B140-FE724A977395}"
-	ProjectSection(ProjectDependencies) = postProject
-		{70DEC05A-24A9-474B-A954-6504AE2CD74C} = {70DEC05A-24A9-474B-A954-6504AE2CD74C}
-	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusServices", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.CensusServices.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Census", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.Census.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusStore", "src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj", "{647810BA-3E71-44A7-838D-D4C40F6ECCDC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Utils", "src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj", "{271436B4-89AF-4A98-9D64-6690D2C10CC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.DaybreakGames.IntegrationTest", "test\Voidwell.DaybreakGames.IntegrationTest\Voidwell.DaybreakGames.IntegrationTest.csproj", "{4D63C9D4-042C-4943-B72A-78433EB341ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Services", "src\Voidwell.DaybreakGames.Services\Voidwell.DaybreakGames.Services.csproj", "{D1639160-DD7E-4913-9CF4-6406515DFFB6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Domain", "src\Voidwell.DaybreakGames.Domain\Voidwell.DaybreakGames.Domain.csproj", "{54E1D509-6842-4793-AA74-480532E10A16}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Live", "src\Voidwell.DaybreakGames.Live\Voidwell.DaybreakGames.Live.csproj", "{F3C3BA8B-AEB6-4027-A779-D78041E0B92F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +46,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{70DEC05A-24A9-474B-A954-6504AE2CD74C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{70DEC05A-24A9-474B-A954-6504AE2CD74C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{70DEC05A-24A9-474B-A954-6504AE2CD74C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{70DEC05A-24A9-474B-A954-6504AE2CD74C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D982D254-B957-4EA4-A076-A27DFAFB4781}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D982D254-B957-4EA4-A076-A27DFAFB4781}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D982D254-B957-4EA4-A076-A27DFAFB4781}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -79,16 +74,23 @@ Global
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D63C9D4-042C-4943-B72A-78433EB341ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1639160-DD7E-4913-9CF4-6406515DFFB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1639160-DD7E-4913-9CF4-6406515DFFB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1639160-DD7E-4913-9CF4-6406515DFFB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1639160-DD7E-4913-9CF4-6406515DFFB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54E1D509-6842-4793-AA74-480532E10A16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54E1D509-6842-4793-AA74-480532E10A16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54E1D509-6842-4793-AA74-480532E10A16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54E1D509-6842-4793-AA74-480532E10A16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3C3BA8B-AEB6-4027-A779-D78041E0B92F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3C3BA8B-AEB6-4027-A779-D78041E0B92F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3C3BA8B-AEB6-4027-A779-D78041E0B92F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3C3BA8B-AEB6-4027-A779-D78041E0B92F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{70DEC05A-24A9-474B-A954-6504AE2CD74C} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{D982D254-B957-4EA4-A076-A27DFAFB4781} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{20214CD9-BDBB-49B5-B38D-DDA29D9729B3} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{4A56391B-419B-4ECA-B1C4-794787F7E0D4} = {B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}
@@ -96,7 +98,9 @@ Global
 		{F6E9813D-E90D-4903-82F3-EA8817E6C52C} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{647810BA-3E71-44A7-838D-D4C40F6ECCDC} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 		{271436B4-89AF-4A98-9D64-6690D2C10CC0} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
-		{4D63C9D4-042C-4943-B72A-78433EB341ED} = {B237F769-5DAF-4CC0-A3D9-EBFAD7A0D1FB}
+		{D1639160-DD7E-4913-9CF4-6406515DFFB6} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
+		{54E1D509-6842-4793-AA74-480532E10A16} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
+		{F3C3BA8B-AEB6-4027-A779-D78041E0B92F} = {E07D5578-2777-4F00-B6F9-C2DEC74C1138}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1011AD1D-2AC5-4BC2-A299-5778409158D2}

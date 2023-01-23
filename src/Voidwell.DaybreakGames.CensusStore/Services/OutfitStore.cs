@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.Cache;
-using Voidwell.DaybreakGames.CensusServices;
-using Voidwell.DaybreakGames.CensusServices.Models;
+using Voidwell.DaybreakGames.Census.Collection;
+using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Utils;
@@ -15,8 +15,9 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class OutfitStore : IOutfitStore
     {
         private readonly IOutfitRepository _outfitRepository;
-        private readonly CensusOutfit _censusOutfit;
-        private readonly CensusCharacter _censusCharacter;
+        private readonly OutfitCollection _outfitCollection;
+        private readonly OutfitMembershipCollection _outfitMembershipCollection;
+        private readonly CharacterCollection _characterCollection;
         private readonly ICache _cache;
         private readonly ILogger<OutfitStore> _logger;
 
@@ -33,12 +34,14 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly KeyedSemaphoreSlim _outfitLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _outfitMembershipLock = new KeyedSemaphoreSlim();
 
-        public OutfitStore(IOutfitRepository outfitRepository, CensusOutfit censusOutfit, CensusCharacter censusCharacter, ICache cache,
+        public OutfitStore(IOutfitRepository outfitRepository, OutfitCollection outfitCollection,
+            OutfitMembershipCollection outfitMembershipCollection, CharacterCollection characterCollection, ICache cache,
             ILogger<OutfitStore> logger)
         {
             _outfitRepository = outfitRepository;
-            _censusOutfit = censusOutfit;
-            _censusCharacter = censusCharacter;
+            _outfitCollection = outfitCollection;
+            _outfitMembershipCollection = outfitMembershipCollection;
+            _characterCollection = characterCollection;
             _cache = cache;
             _logger = logger;
         }
@@ -122,7 +125,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
                 try
                 {
-                    membership = await _censusOutfit.GetCharacterOutfitMembership(character.Id);
+                    membership = await _outfitMembershipCollection.GetCharacterOutfitMembershipAsync(character.Id);
                 }
                 catch (CensusConnectionException)
                 {
@@ -211,7 +214,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private async Task<Outfit> GetCensusOutfit(string outfitId)
         {
-            var censusOutfit = await _censusOutfit.GetOutfit(outfitId);
+            var censusOutfit = await _outfitCollection.GetOutfitAsync(outfitId);
             if (censusOutfit == null)
             {
                 return null;
@@ -264,7 +267,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             }
             else
             {
-                var leader = await _censusCharacter.GetCharacter(member.Id);
+                var leader = await _characterCollection.GetCharacterAsync(member.Id);
                 outfit.WorldId = leader.WorldId;
                 outfit.FactionId = leader.FactionId;
             }
