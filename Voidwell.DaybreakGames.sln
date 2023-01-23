@@ -28,7 +28,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Api", "src\Voidwell.DaybreakGames.Api\Voidwell.DaybreakGames.Api.csproj", "{7A123B6E-5756-4CB4-B140-FE724A977395}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Census", "src\Voidwell.DaybreakGames.CensusServices\Voidwell.DaybreakGames.Census.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.Census", "src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj", "{F6E9813D-E90D-4903-82F3-EA8817E6C52C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.DaybreakGames.CensusStore", "src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj", "{647810BA-3E71-44A7-838D-D4C40F6ECCDC}"
 EndProject
