@@ -1,15 +1,13 @@
-﻿using System.Threading;
+﻿using Microsoft.Extensions.Hosting;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService
 {
-    public interface IStatefulHostedService
+    public interface IStatefulHostedService : IHostedService
     {
         Task OnApplicationStartup(CancellationToken cancellationToken);
         Task OnApplicationShutdown(CancellationToken cancellationToken);
-        Task StartAsync(CancellationToken cancellationToken);
-        Task StopAsync(CancellationToken cancellationToken);
-        Task<ServiceState> GetStateAsync(CancellationToken cancellationToken);
-        string ServiceName { get; }
+        Task<object> GetStatusAsync(CancellationToken cancellationToken);
     }
 }

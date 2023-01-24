@@ -4,24 +4,21 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.Cache;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Utils.HostedService;
-using Voidwell.DaybreakGames.Domain;
 
 namespace Voidwell.DaybreakGames.Live
 {
-    public class CharacterUpdaterService : StatefulHostedService, ICharacterUpdaterService
+    public class CharacterUpdaterService : ICharacterUpdaterService, IStatefulHostedService
     {
         private readonly ICharacterUpdaterRepository _characterUpdaterRepository;
         private readonly ICharacterService _characterService;
+        private readonly HostedServiceState<CharacterUpdaterService> _state;
         private readonly LiveOptions _options;
         private readonly ILogger _logger;
-
-        public override string ServiceName => "CharacterUpdater";
 
         private Timer _timer;
         private readonly TimeSpan _executionInterval = TimeSpan.FromSeconds(10);
@@ -32,11 +29,12 @@ namespace Voidwell.DaybreakGames.Live
         private SemaphoreSlim _parallelSemaphore;
 
         public CharacterUpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService,
-            IOptions<LiveOptions> options, ICache cache, ILogger<CharacterUpdaterService> logger)
-            : base(cache)
+            HostedServiceState<CharacterUpdaterService> state, IOptions<LiveOptions> options,
+            ILogger<CharacterUpdaterService> logger)
         {
             _characterUpdaterRepository = characterUpdaterRepository;
             _characterService = characterService;
+            _state = state;
             _options = options.Value;
             _logger = logger;
 
@@ -60,7 +58,7 @@ namespace Voidwell.DaybreakGames.Live
             }
         }
 
-        public override Task StartInternalAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             _timer?.Dispose();
 
@@ -77,7 +75,7 @@ namespace Voidwell.DaybreakGames.Live
             return Task.CompletedTask;
         }
 
-        public override Task StopInternalAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
             _timer?.Dispose();
 
@@ -86,7 +84,7 @@ namespace Voidwell.DaybreakGames.Live
             return Task.CompletedTask;
         }
 
-        protected override async Task<object> GetStatusAsync(CancellationToken cancellationToken)
+        public async Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
             var totalCountTask = _characterUpdaterRepository.GetQueueLengthAsync();
             var activeCountTask = _characterUpdaterRepository.GetQueueLengthAsync(_updateDelay);
@@ -116,7 +114,7 @@ namespace Voidwell.DaybreakGames.Live
 
             try
             {
-                if (!_isRunning || _waitError)
+                if (!_state.IsRunning || _waitError)
                     return;
 
                 var character = await _characterService.GetCharacter(characterItem.CharacterId);
@@ -141,6 +139,16 @@ namespace Voidwell.DaybreakGames.Live
             {
                 _parallelSemaphore.Release();
             }
+        }
+
+        public Task OnApplicationStartup(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task OnApplicationShutdown(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }

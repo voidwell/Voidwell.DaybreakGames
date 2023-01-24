@@ -8,6 +8,7 @@ using Voidwell.DaybreakGames.Live.CensusStream;
 using Voidwell.DaybreakGames.Live.GameState;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Voidwell.DaybreakGames.Live.Mappers;
+using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Live
 {
@@ -38,15 +39,13 @@ namespace Voidwell.DaybreakGames.Live
             services.TryAddSingleton<IPlayerMonitor, PlayerMonitor>();
             services.TryAddSingleton<IWorldMonitor, WorldMonitor>();
 
-            services.AddSingleton<ICharacterUpdaterService, CharacterUpdaterService>();
             services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
-            services.AddSingleton<IWebsocketMonitor, WebsocketMonitor>();
             services.AddSingleton<IWebsocketHealthMonitor, WebsocketHealthMonitor>();
             services.AddSingleton<IEventValidator, EventValidator>();
             services.AddSingleton<IEventProcessorHandler, EventProcessorHandler>();
 
-            services.AddHostedService<WebsocketMonitorHostedService>();
-            services.AddHostedService<CharacterUpdaterHostedService>();
+            services.AddStatefulHostedService<WebsocketMonitor>();
+            services.AddStatefulHostedService<ICharacterUpdaterService, CharacterUpdaterService>();
 
             return services;
         }

@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
-using System.Linq;
-using System;
 using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Api.Controllers
@@ -12,27 +8,17 @@ namespace Voidwell.DaybreakGames.Api.Controllers
     [Route("services")]
     public class ServicesController : Controller
     {
-        private readonly IEnumerable<IStatefulHostedService> _services;
+        private readonly IStatefulHostedServiceManager _serviceManager;
 
-        public ServicesController(IServiceProvider serviceProvider)
+        public ServicesController(IStatefulHostedServiceManager serviceManager)
         {
-            var statefulHostedTypes = typeof(IStatefulHostedService).GetTypeInfo().Assembly.GetTypes()
-                .Where(a => typeof(IStatefulHostedService).IsAssignableFrom(a) && !typeof(IStatefulHostedService).IsEquivalentTo(a));
-
-            var statefulHostedServiceTypes = statefulHostedTypes.Where(a => a.GetTypeInfo().IsClass && !a.GetTypeInfo().IsAbstract);
-
-            _services = statefulHostedTypes.Where(a => a.GetTypeInfo().IsInterface && statefulHostedServiceTypes.Any(a.IsAssignableFrom))
-                .Select(a => serviceProvider.GetService(a) as IStatefulHostedService)
-                .Where(a => a != null)
-                .OrderBy(a => a.ServiceName);
+            _serviceManager = serviceManager;
         }
 
         [HttpGet("status")]
         public async Task<ActionResult> GetAllServiceStatus()
         {
-            var serviceStateTasks = _services.Select(a => a.GetStateAsync(CancellationToken.None));
-
-            var states = await Task.WhenAll(serviceStateTasks);
+            var states = await _serviceManager.GetServiceStatusAsync(CancellationToken.None);
 
             return Ok(states);
         }
@@ -40,29 +26,26 @@ namespace Voidwell.DaybreakGames.Api.Controllers
         [HttpGet("{serviceName}/status")]
         public async Task<ActionResult> GetServiceStatus(string serviceName)
         {
-            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
-            if (service == null)
+            var state = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
+            if (state == null)
             {
                 return NotFound();
             }
 
-            var status = await service.GetStateAsync(CancellationToken.None);
-
-            return Ok(status);
+            return Ok(state);
         }
 
         [HttpPost("{serviceName}/enable")]
         public async Task<ActionResult> PostEnableService(string serviceName)
         {
-            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
-            if (service == null)
+            if (!_serviceManager.VerifyServiceExists(serviceName))
             {
                 return NotFound();
             }
 
-            await service.StartAsync(CancellationToken.None);
+            await _serviceManager.StartServiceAsync(serviceName, CancellationToken.None);
 
-            var status = await service.GetStateAsync(CancellationToken.None);
+            var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
 
             return Ok(status);
         }
@@ -70,15 +53,14 @@ namespace Voidwell.DaybreakGames.Api.Controllers
         [HttpPost("{serviceName}/disable")]
         public async Task<ActionResult> PostDisableService(string serviceName)
         {
-            var service = _services.FirstOrDefault(a => a.ServiceName == serviceName);
-            if (service == null)
+            if (!_serviceManager.VerifyServiceExists(serviceName))
             {
                 return NotFound();
             }
 
-            await service.StopAsync(CancellationToken.None);
+            await _serviceManager.StopServiceAsync(serviceName, CancellationToken.None);
 
-            var status = await service.GetStateAsync(CancellationToken.None);
+            var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
 
             return Ok(status);
         }

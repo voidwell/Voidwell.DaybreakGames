@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.Cache;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Utils.HostedService;
@@ -15,30 +14,29 @@ using Websocket.Client;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream
 {
-    public class WebsocketMonitor : StatefulHostedService, IWebsocketMonitor, IDisposable
+    public class WebsocketMonitor : IStatefulHostedService, IDisposable
     {
         private readonly ICensusStreamClient _client;
         private readonly IWebsocketEventHandler _handler;
         private readonly IWorldMonitor _worldMonitor;
         private readonly IWebsocketHealthMonitor _healthMonitor;
         private readonly LiveOptions _options;
+        private readonly HostedServiceState<WebsocketMonitor> _state;
         private readonly ILogger<WebsocketMonitor> _logger;
 
         private CensusState _lastStateChange;
         private Timer _timer;
 
-        public override string ServiceName => "CensusMonitor";
-
         public WebsocketMonitor(ICensusStreamClient streamClient, IWebsocketEventHandler handler, 
             IWorldMonitor worldMonitor, IWebsocketHealthMonitor healthMonitor, IOptions<LiveOptions> options,
-            ILogger<WebsocketMonitor> logger, ICache cache)
-                :base(cache)
+            HostedServiceState<WebsocketMonitor> state, ILogger<WebsocketMonitor> logger)
         {
             _client = streamClient;
             _handler = handler;
             _worldMonitor = worldMonitor;
             _healthMonitor = healthMonitor;
             _options = options.Value;
+            _state = state;
             _logger = logger;
 
             _client.OnConnect(OnConnect)
@@ -69,7 +67,7 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
             };
         }
 
-        public override async Task StartInternalAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             if (_options.DisableCensusMonitor)
             {
@@ -84,7 +82,7 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
             _timer = new Timer(CheckDataHealth, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
         }
 
-        public override async Task StopInternalAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping census stream monitor");
 
@@ -93,16 +91,22 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
                 return;
             }
 
-            await _client?.DisconnectAsync();
             _timer?.Dispose();
+            await _client?.DisconnectAsync();
+            _healthMonitor.ClearAllWorlds();
         }
 
-        public override async Task OnApplicationShutdown(CancellationToken cancellationToken)
+        public Task OnApplicationStartup(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public async Task OnApplicationShutdown(CancellationToken cancellationToken)
         {
             await _client?.DisconnectAsync();
         }
 
-        protected override Task<object> GetStatusAsync(CancellationToken cancellationToken)
+        public Task<object> GetStatusAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult((object)_lastStateChange);
         }
@@ -166,7 +170,7 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
 
         private async void CheckDataHealth(object state)
         {
-            if (!_isRunning)
+            if (!_state.IsRunning)
             {
                 _healthMonitor.ClearAllWorlds();
                 _timer?.Dispose();
