@@ -28,6 +28,10 @@ namespace Voidwell.DaybreakGames.Utils.HostedService
             {
                 return new HostedServiceState<TImplementation> { Service = sp.GetRequiredService<TImplementation>() };
             });
+            services.AddSingleton(sp =>
+            {
+                return (HostedServiceState)sp.GetRequiredService<HostedServiceState<TImplementation>>();
+            });
 
             services.AddHostedService<StatefulHostedServiceWrapper<TImplementation>>();
 
@@ -45,6 +49,10 @@ namespace Voidwell.DaybreakGames.Utils.HostedService
             services.AddSingleton(sp =>
             {
                 return new HostedServiceState<TImplementation> { Service = (TImplementation)sp.GetRequiredService<TService>() };
+            });
+            services.AddSingleton(sp =>
+            {
+                return (HostedServiceState)sp.GetRequiredService<HostedServiceState<TImplementation>>();
             });
 
             services.AddHostedService(sp =>

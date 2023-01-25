@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +19,7 @@ namespace Voidwell.DaybreakGames.Utils.HostedService
         {
             _cache = cache;
 
-            _services = serviceProvider.GetServices(typeof(HostedServiceState<>))
-                .Cast<HostedServiceState>();
+            _services = serviceProvider.GetServices<HostedServiceState>();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
