@@ -1,11 +1,11 @@
-﻿using System;
+﻿using AsyncKeyedLock;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Domain.Models;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -25,11 +25,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _cacheCharacterSessionExpiration = TimeSpan.FromMinutes(10);
         private readonly TimeSpan _cacheCharacterLiveSessionExpiration = TimeSpan.FromSeconds(10);
 
-        private readonly KeyedSemaphoreSlim _characterSessionLock = new KeyedSemaphoreSlim();
-        private readonly KeyedSemaphoreSlim _characterLiveSessionLock = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
-        public CharacterSessionService(IPlayerSessionRepository playerSessionRepository, IWorldEventsService worldEventService, ICache cache)
+        public CharacterSessionService(AsyncKeyedLocker<string> asyncKeyedLocker, IPlayerSessionRepository playerSessionRepository, IWorldEventsService worldEventService, ICache cache)
         {
+            _asyncKeyedLocker = asyncKeyedLocker;
             _playerSessionRepository = playerSessionRepository;
             _worldEventService = worldEventService;
             _cache = cache;
@@ -54,7 +54,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<PlayerSession> GetSession(string characterId, int sessionId)
         {
-            using (await _characterSessionLock.WaitAsync($"{characterId}_{sessionId}"))
+            using (await _asyncKeyedLocker.LockAsync($"{characterId}_{sessionId}").ConfigureAwait(false))
             {
                 var cacheKey = _getSessionCacheKey(characterId, sessionId);
 
@@ -96,7 +96,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<PlayerSession> GetSession(string characterId)
         {
-            using (await _characterLiveSessionLock.WaitAsync(characterId))
+            using (await _asyncKeyedLocker.LockAsync(characterId).ConfigureAwait(false))
             {
                 var cacheKey = _getLiveSessionCacheKey(characterId);
 

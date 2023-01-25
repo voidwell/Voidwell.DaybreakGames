@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AsyncKeyedLock;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,6 @@ using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Domain.Models;
-using Voidwell.DaybreakGames.Utils;
 using static Voidwell.DaybreakGames.Census.Models.Extensions.CensusWeaponInfoModelExtensions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
@@ -30,12 +30,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(8);
         private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
 
-        private readonly KeyedSemaphoreSlim _oracleStatLock = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly SemaphoreSlim _sanctionedStoreLock = new SemaphoreSlim(1);
 
-        public WeaponService(ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService,
+        public WeaponService(AsyncKeyedLocker<string> asyncKeyedLocker, ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService,
             IItemService itemService, ICache cache, ILogger<WeaponService> logger)
         {
+            _asyncKeyedLocker = asyncKeyedLocker;
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
             _worldEventsService = worldEventsService;
             _itemService = itemService;
@@ -181,7 +182,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         {
             var cacheKey = $"ps2.oracle_{weaponId}_{start.Year}-{start.Month}-{start.Day}_{end.Year}-{end.Month}-{end.Day}";
 
-            using (await _oracleStatLock.WaitAsync(cacheKey))
+            using (await _asyncKeyedLocker.LockAsync(cacheKey).ConfigureAwait(false))
             {
 
                 var stats = await _cache.GetAsync<IEnumerable<DailyWeaponStats>>(cacheKey);

@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AsyncKeyedLock;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService
 {
@@ -8,6 +10,11 @@ namespace Voidwell.DaybreakGames.Utils.HostedService
         public static IServiceCollection AddStatefulServiceDependencies(this IServiceCollection services)
         {
             services.TryAddSingleton<IStatefulHostedServiceManager, StatefulHostedServiceManager>();
+            services.AddSingleton(new AsyncKeyedLocker<string>(o =>
+            {
+                o.PoolSize = 20;
+                o.PoolInitialFill = 1;
+            }));
 
             services.AddHostedService(sp =>
             {

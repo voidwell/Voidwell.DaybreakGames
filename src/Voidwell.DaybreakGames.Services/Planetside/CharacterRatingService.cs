@@ -1,4 +1,5 @@
-﻿using Glicko2;
+﻿using AsyncKeyedLock;
+using Glicko2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,6 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Domain.Models;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -25,17 +25,18 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
         private readonly TimeSpan _leaderboardCacheExpiration = TimeSpan.FromMinutes(5);
 
-        private readonly KeyedSemaphoreSlim _calculatingLock = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
-        public CharacterRatingService(ICharacterRepository characterRepository, ICache cache)
+        public CharacterRatingService(AsyncKeyedLocker<string> asyncKeyedLocker, ICharacterRepository characterRepository, ICache cache)
         {
+            _asyncKeyedLocker = asyncKeyedLocker;
             _characterRepository = characterRepository;
             _cache = cache;
         }
 
         public async Task CalculateRatingAsync(string winnerCharacterId, string loserCharacterId)
         {
-            var locks = await Task.WhenAll(_calculatingLock.WaitAsync(winnerCharacterId), _calculatingLock.WaitAsync(loserCharacterId));
+            var locks = await Task.WhenAll(_asyncKeyedLocker.LockAsync(winnerCharacterId).AsTask(), _asyncKeyedLocker.LockAsync(loserCharacterId).AsTask());
 
             try
             {
@@ -76,7 +77,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task SaveCachedRatingAsync(string characterId)
         {
-            using (await _calculatingLock.WaitAsync(characterId))
+            using (await _asyncKeyedLocker.LockAsync(characterId).ConfigureAwait(false))
             {
                 var cacheKey = GetCacheKey(characterId);
 
