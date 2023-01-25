@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService
 {
@@ -12,7 +11,7 @@ namespace Voidwell.DaybreakGames.Utils.HostedService
 
             services.AddHostedService(sp =>
             {
-                return (IHostedService)sp.GetRequiredService<IStatefulHostedServiceManager>();
+                return sp.GetRequiredService<IStatefulHostedServiceManager>();
             });
             
             return services;

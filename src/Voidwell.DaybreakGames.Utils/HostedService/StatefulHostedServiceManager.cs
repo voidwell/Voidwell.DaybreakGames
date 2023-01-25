@@ -9,7 +9,7 @@ using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService
 {
-    public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHostedService
+    public class StatefulHostedServiceManager : IStatefulHostedServiceManager
     {
         private readonly ICache _cache;
         private readonly IEnumerable<HostedServiceState> _services;
