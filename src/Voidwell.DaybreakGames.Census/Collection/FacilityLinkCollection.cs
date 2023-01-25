@@ -21,6 +21,8 @@ namespace Voidwell.DaybreakGames.Census.Collection
         {
             return await QueryAsync(query =>
             {
+                query.Where("zone_id").IsLessThan(300);
+
                 query.ShowFields("zone_id", "facility_id_a", "facility_id_b", "description");
 
                 return query.GetBatchAsync<CensusFacilityLinkModel>();

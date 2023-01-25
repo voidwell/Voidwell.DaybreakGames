@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using Voidwell.Cache;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService
 {
-    public class StatefulHostedServiceManager : IStatefulHostedServiceManager
+    public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHostedService
     {
         private readonly ICache _cache;
         private readonly IEnumerable<HostedServiceState> _services;
