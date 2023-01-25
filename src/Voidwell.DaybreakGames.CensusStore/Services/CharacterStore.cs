@@ -10,7 +10,6 @@ using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
