@@ -74,7 +74,6 @@ namespace Voidwell.DaybreakGames.Test.MapTests
             var model = LoadJson<IEnumerable<CensusFacilityLinkModel>>($"{DataRoot}FacilityLinks.json", "facility_link_list");
             return model.Select(a => new FacilityLink
             {
-                Id = Guid.NewGuid().ToString(),
                 ZoneId = a.ZoneId,
                 FacilityIdA = a.FacilityIdA,
                 FacilityIdB = a.FacilityIdB

@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
         {
             builder.ToTable("FacilityLink");
 
-            builder.HasKey(a => a.Id);
+            builder.HasKey(a => new { a.FacilityIdA, a.FacilityIdB } );
         }
     }
 }
