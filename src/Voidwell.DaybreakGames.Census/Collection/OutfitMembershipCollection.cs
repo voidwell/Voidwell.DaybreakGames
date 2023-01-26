@@ -7,7 +7,7 @@ namespace Voidwell.DaybreakGames.Census.Collection
 {
     public class OutfitMembershipCollection : CensusCollection
     {
-        public override string CollectionName => "outfit_membership";
+        public override string CollectionName => "outfit_member";
 
         public OutfitMembershipCollection(ICensusClient censusClient) : base(censusClient)
         {
