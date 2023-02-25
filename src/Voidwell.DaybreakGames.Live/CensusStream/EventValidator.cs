@@ -1,20 +1,25 @@
-﻿using System;
+﻿using AsyncKeyedLock;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream
 {
-    public class EventValidator : IEventValidator, IDisposable
+    public class EventValidator : IEventValidator
     {
         private readonly ConcurrentDictionary<string, object> _eventBuffer = new ConcurrentDictionary<string, object>();
-        private readonly KeyedSemaphoreSlim _eventSemaphore = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
+
+        public EventValidator(AsyncKeyedLocker<string> asyncKeyedLocker)
+        {
+            _asyncKeyedLocker = asyncKeyedLocker;
+        }
 
         public async Task<bool> Validiate<T>(T ev, Func<T, string> keyExpr, Func<T, bool> cleanupExpr) where T : class
         {
             var eventKey = $"{typeof(T).Name}:{keyExpr(ev)}";
-            using (await _eventSemaphore.WaitAsync(eventKey))
+            using (await _asyncKeyedLocker.LockAsync(eventKey).ConfigureAwait(false))
             {
                 var isValid = !_eventBuffer.ContainsKey(eventKey);
 
@@ -26,11 +31,6 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
 
                 return isValid;
             }
-        }
-
-        public void Dispose()
-        {
-            _eventSemaphore.Dispose();
         }
     }
 }

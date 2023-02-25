@@ -1,4 +1,5 @@
-﻿using DaybreakGames.Census.Exceptions;
+﻿using AsyncKeyedLock;
+using DaybreakGames.Census.Exceptions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,6 @@ using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
@@ -36,7 +36,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly TimeSpan _cacheCharacterIdExpiration = TimeSpan.FromMinutes(30);
         private readonly TimeSpan _cacheWeaponLeaderboardDataExpiration = TimeSpan.FromMinutes(5);
 
-        private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
         public CharacterStore(
             ICharacterRepository characterRepository,
@@ -47,6 +47,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             CharactersWeaponStatCollection charactersWeaponStatCollection,
             CharactersWeaponStatByFactionCollection charactersWeaponStatByFactionCollection,
             CharactersStatHistoryCollection charactersStatHistoryCollection,
+            AsyncKeyedLocker<string> asyncKeyedLocker,
             IOutfitStore outfitStore,
             ICache cache)
         {
@@ -58,6 +59,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             _charactersWeaponStatCollection = charactersWeaponStatCollection;
             _charactersWeaponStatByFactionCollection = charactersWeaponStatByFactionCollection;
             _charactersStatHistoryCollection = charactersStatHistoryCollection;
+            _asyncKeyedLocker = asyncKeyedLocker;
             _outfitStore = outfitStore;
             _cache = cache;
         }
@@ -76,7 +78,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         {
             Character character;
 
-            using (await _characterLock.WaitAsync(characterId))
+            using (await _asyncKeyedLocker.LockAsync(characterId).ConfigureAwait(false))
             {
                 var cacheKey = _getCharacterCacheKey(characterId);
 

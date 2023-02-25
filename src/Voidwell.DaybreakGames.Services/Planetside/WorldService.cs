@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AsyncKeyedLock;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +9,6 @@ using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -26,10 +26,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _activityPopulationOffset = TimeSpan.FromHours(12);
         private readonly TimeSpan _activityPopulationPeriodInterval = TimeSpan.FromSeconds(16);
 
-        private readonly KeyedSemaphoreSlim _activityPopulationLock = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
-        public WorldService(IWorldStore worldStore, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, ICache cache)
+        public WorldService(AsyncKeyedLocker<string> asyncKeyedLocker, IWorldStore worldStore, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, ICache cache)
         {
+            _asyncKeyedLocker = asyncKeyedLocker;
             _worldStore = worldStore;
             _combatReportService = combatReportService;
             _worldEventsService = worldEventsService;
@@ -69,7 +70,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
             var cacheKey = $"{_cacheKeyPrefix}_{worldId}-hours:{periodHours}";
 
-            using (await _activityPopulationLock.WaitAsync(cacheKey))
+            using (await _asyncKeyedLocker.LockAsync(cacheKey).ConfigureAwait(false))
             {
                 var cachedActivity = await _cache.GetAsync<WorldActivity>(cacheKey);
                 if (cachedActivity != null)

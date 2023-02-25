@@ -1,4 +1,5 @@
-﻿using DaybreakGames.Census.Exceptions;
+﻿using AsyncKeyedLock;
+using DaybreakGames.Census.Exceptions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,6 @@ using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
@@ -31,17 +31,17 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly TimeSpan _cacheOutfitMemberExpiration = TimeSpan.FromMinutes(10);
         private readonly TimeSpan _cacheOutfitMemberDetailsExpiration = TimeSpan.FromMinutes(30);
 
-        private readonly KeyedSemaphoreSlim _outfitLock = new KeyedSemaphoreSlim();
-        private readonly KeyedSemaphoreSlim _outfitMembershipLock = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
         public OutfitStore(IOutfitRepository outfitRepository, OutfitCollection outfitCollection,
-            OutfitMembershipCollection outfitMembershipCollection, CharacterCollection characterCollection, ICache cache,
-            ILogger<OutfitStore> logger)
+            OutfitMembershipCollection outfitMembershipCollection, CharacterCollection characterCollection, AsyncKeyedLocker<string> asyncKeyedLocker,
+            ICache cache, ILogger<OutfitStore> logger)
         {
             _outfitRepository = outfitRepository;
             _outfitCollection = outfitCollection;
             _outfitMembershipCollection = outfitMembershipCollection;
             _characterCollection = characterCollection;
+            _asyncKeyedLocker = asyncKeyedLocker;
             _cache = cache;
             _logger = logger;
         }
@@ -111,7 +111,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         {
             OutfitMember outfitMember;
 
-            using (await _outfitMembershipLock.WaitAsync(character.Id))
+            using (await _asyncKeyedLocker.LockAsync(character.Id).ConfigureAwait(false))
             {
                 var cacheKey = $"{_cacheKey}_member_{character.Id}";
 
@@ -167,7 +167,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         {
             Outfit outfit;
 
-            using (await _outfitLock.WaitAsync(outfitId))
+            using (await _asyncKeyedLocker.LockAsync(outfitId).ConfigureAwait(false))
             {
                 outfit = await GetKnownOutfitAsync(outfitId);
                 if (outfit == null)
@@ -235,7 +235,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         {
             Outfit outfit;
 
-            using (await _outfitLock.WaitAsync(outfitId))
+            using (await _asyncKeyedLocker.LockAsync(outfitId).ConfigureAwait(false))
             {
                 outfit = await _cache.GetAsync<Outfit>(_getOutfitCacheKey(outfitId));
                 if (outfit != null)

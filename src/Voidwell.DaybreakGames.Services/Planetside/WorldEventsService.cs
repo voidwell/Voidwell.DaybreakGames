@@ -1,21 +1,22 @@
-﻿using System;
+﻿using AsyncKeyedLock;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
-    public class WorldEventsService : IWorldEventsService, IDisposable
+    public class WorldEventsService : IWorldEventsService
     {
         private readonly IEventRepository _eventRepository;
 
-        private readonly KeyedSemaphoreSlim _facilityControlsByDateSemaphore = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
-        public WorldEventsService(IEventRepository eventRepository)
+        public WorldEventsService(AsyncKeyedLocker<string> asyncKeyedLocker, IEventRepository eventRepository)
         {
+            _asyncKeyedLocker = asyncKeyedLocker;
             _eventRepository = eventRepository;
         }
 
@@ -56,7 +57,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
         public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
         {
-            using (await _facilityControlsByDateSemaphore.WaitAsync($"{worldId}_{startDate}_{endDate}_{zoneId}"))
+            using (await _asyncKeyedLocker.LockAsync($"{worldId}_{startDate}_{endDate}_{zoneId}").ConfigureAwait(false))
             {
                 return await _eventRepository.GetFacilityControlsByDateAsync(worldId, startDate, endDate, zoneId);
             }
@@ -120,11 +121,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public Task<IEnumerable<GainExperience>> GetSquadBeaconKillExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
         {
             return _eventRepository.GetExperienceByDateAsync(Experience.SquadBeaconKill, worldId, startDate, endDate, zoneId);
-        }
-
-        public void Dispose()
-        {
-            _facilityControlsByDateSemaphore.Dispose();
         }
 
         private static class Experience

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AsyncKeyedLock;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,6 @@ using Voidwell.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
@@ -21,17 +21,18 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private const string _cacheKeyPrefix = "ps2.worldstore";
         private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
 
-        private readonly KeyedSemaphoreSlim _worldPopulationLock = new KeyedSemaphoreSlim();
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
         public string StoreName => "WorldStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
-        public WorldStore(IWorldRepository worldRepository, WorldCollection worldCollection, ICache cache, IMapper mapper)
+        public WorldStore(IWorldRepository worldRepository, WorldCollection worldCollection, AsyncKeyedLocker<string> asyncKeyedLocker, ICache cache, IMapper mapper)
         {
             _worldRepository = worldRepository;
             _worldCollection = worldCollection;
+            _asyncKeyedLocker = asyncKeyedLocker;
             _cache = cache;
-            _mapper = mapper; ;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<World>> GetAllWorlds()
@@ -55,7 +56,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         {
             var cacheKey = $"{_cacheKeyPrefix}_{worldId}_{start.Year}-{start.Month}-{start.Day}_{end.Year}-{end.Month}-{end.Day}";
 
-            using (await _worldPopulationLock.WaitAsync(cacheKey))
+            using (await _asyncKeyedLocker.LockAsync(cacheKey).ConfigureAwait(false))
             {
 
                 var populations = await _cache.GetAsync<IEnumerable<DailyPopulation>>(cacheKey);
