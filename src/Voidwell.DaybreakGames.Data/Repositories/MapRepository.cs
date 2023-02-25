@@ -100,8 +100,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                //dbContext.MapHexs
-
                 await dbContext.MapHexs.UpsertRangeAsync(entities, (a, e) => a.MapRegionId == e.MapRegionId && a.ZoneId == e.ZoneId && a.XPos == e.XPos && a.YPos == e.YPos, true);
 
                 await dbContext.SaveChangesAsync();
@@ -126,25 +124,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                var dbSet = dbContext.FacilityLinks;
-
-                var storeEntities = await dbSet.ToListAsync();
-
-                foreach (var entity in entities)
-                {
-                    var storeEntity = storeEntities.SingleOrDefault(a => a.ZoneId == entity.ZoneId && a.FacilityIdA == entity.FacilityIdA && a.FacilityIdB == entity.FacilityIdB);
-                    if (storeEntity == null)
-                    {
-                        entity.Id = Guid.NewGuid().ToString();
-                        dbSet.Add(entity);
-                    }
-                    else
-                    {
-                        entity.Id = storeEntity.Id;
-                        storeEntity = entity;
-                        dbSet.Update(storeEntity);
-                    }
-                }
+                await dbContext.FacilityLinks.UpsertRangeAsync(entities, (a, e) => a.FacilityIdA == e.FacilityIdA && a.FacilityIdB == e.FacilityIdB);
 
                 await dbContext.SaveChangesAsync();
             }

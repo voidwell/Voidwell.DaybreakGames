@@ -12,11 +12,11 @@ using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Live
 {
-    public class CharacterUpdaterService : ICharacterUpdaterService, IStatefulHostedService
+    public class CharacterUpdaterService : ICharacterUpdaterService
     {
         private readonly ICharacterUpdaterRepository _characterUpdaterRepository;
         private readonly ICharacterService _characterService;
-        private readonly HostedServiceState<CharacterUpdaterService> _state;
+        private readonly HostedServiceState<ICharacterUpdaterService> _state;
         private readonly LiveOptions _options;
         private readonly ILogger _logger;
 
@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.Live
         private SemaphoreSlim _parallelSemaphore;
 
         public CharacterUpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService,
-            HostedServiceState<CharacterUpdaterService> state, IOptions<LiveOptions> options,
+            HostedServiceState<ICharacterUpdaterService> state, IOptions<LiveOptions> options,
             ILogger<CharacterUpdaterService> logger)
         {
             _characterUpdaterRepository = characterUpdaterRepository;

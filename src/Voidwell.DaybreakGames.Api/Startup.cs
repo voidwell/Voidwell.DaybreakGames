@@ -12,6 +12,7 @@ using Voidwell.Logging;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Services;
 using Voidwell.DaybreakGames.Live;
+using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Api
 {
@@ -69,6 +70,7 @@ namespace Voidwell.DaybreakGames.Api
                 options.LogCensusErrors = Configuration.GetValue<bool>("LogCensusErrors", false);
             });
 
+            services.AddStatefulServiceDependencies();
             services.AddCensusStores(Configuration);
             services.AddApplicationServices();
             services.AddLiveServices(Configuration);

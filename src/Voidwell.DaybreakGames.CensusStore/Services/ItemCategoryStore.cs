@@ -29,7 +29,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             var itemCategories = await _itemCategoryCollection.GetCollectionAsync();
             if (itemCategories != null)
             {
-                await _itemRepository.UpsertRangeAsync(itemCategories.Select(_mapper.Map<Item>));
+                await _itemRepository.UpsertRangeAsync(itemCategories.Select(_mapper.Map<ItemCategory>));
             }
         }
     }
