@@ -2,7 +2,7 @@
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using System.Collections.Generic;
 using Voidwell.DaybreakGames.Domain.Models;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using System;
 using System.Linq;
 using Voidwell.DaybreakGames.CensusStore.Services;

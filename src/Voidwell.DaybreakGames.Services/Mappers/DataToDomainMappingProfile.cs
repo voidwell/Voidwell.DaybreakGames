@@ -77,6 +77,60 @@ namespace Voidwell.DaybreakGames.Services.Mappers
                 .ForMember(d => d.Stats, opt => opt.MapFrom(s => s));
 
             CreateMap<Data.Models.Planetside.CharacterWeaponStat, Domain.Models.CharacterDetailsWeaponStatValue>();
+
+            CreateMap<IEnumerable<Data.Models.Planetside.DirectiveTreeCategory>, Domain.Models.DirectivesOutline>()
+                .ForMember(d => d.Categories, opt => opt.MapFrom(s => s));
+
+            CreateMap<Data.Models.Planetside.DirectiveTreeCategory, Domain.Models.DirectivesOutlineTreeCategory>()
+                .ForMember(d => d.Trees, opt => opt.MapFrom(s => s.Trees));
+
+            CreateMap<Data.Models.Planetside.DirectiveTree, Domain.Models.DirectivesOutlineTree>()
+                .ForMember(d => d.Tiers, opt => opt.MapFrom(s => s.Tiers));
+
+            CreateMap<Data.Models.Planetside.DirectiveTier, Domain.Models.DirectivesOutlineTier>()
+                .ForMember(d => d.TierId, opt => opt.MapFrom(s => s.DirectiveTierId))
+                .ForMember(d => d.TreeId, opt => opt.MapFrom(s => s.DirectiveTreeId))
+                .ForMember(d => d.Rewards, opt => opt.MapFrom(s => s.RewardGroupSets.SelectMany(a => a.RewardGroups)))
+                .ForMember(d => d.Directives, opt => opt.MapFrom(s => s.Directives));
+
+            CreateMap<Data.Models.Planetside.RewardGroupToReward, Domain.Models.DirectivesOutlineReward>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.RewardId))
+                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Reward.Item.Name))
+                .ForMember(d => d.ImageId, opt => opt.MapFrom(s => s.Reward.Item.ImageId))
+                .ForMember(d => d.FactionId, opt => opt.MapFrom(s => s.Reward.Item.FactionId));
+
+            CreateMap<Data.Models.Planetside.Directive, Domain.Models.DirectivesOutlineDirective>()
+                .ForMember(d => d.TierId, opt => opt.MapFrom(s => s.DirectiveTierId))
+                .ForMember(d => d.TreeId, opt => opt.MapFrom(s => s.DirectiveTreeId))
+                .ForMember(d => d.Objectives, opt => opt.MapFrom(s => s.ObjectiveSet.Objectives));
+
+            CreateMap<Data.Models.Planetside.Objective, Domain.Models.DirectivesOutlineObjective>()
+                .ForMember(d => d.TypeId, opt => opt.MapFrom(s => s.ObjectiveTypeId))
+                .ForMember(d => d.FactionId, opt => opt.MapFrom(s => s.Achievement.Objective.Item.FactionId))
+                .ForMember(d => d.AchievementId, opt => opt.MapFrom(s => s.Achievement.Id));
+
+            CreateMap<IEnumerable<Data.Models.Planetside.CharacterDirectiveTree>, Domain.Models.CharacterDirectivesOutline>()
+                .ForMember(d => d.Trees, opt => opt.MapFrom(s => s));
+
+            CreateMap<Data.Models.Planetside.CharacterDirectiveTree, Domain.Models.CharacterDirectivesOutlineTree>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.DirectiveTreeId))
+                .ForMember(d => d.CompletionDate, opt => opt.MapFrom(s => s.CompletionTimeDate))
+                .ForMember(d => d.Tiers, opt => opt.MapFrom(s => s.CharacterDirectiveTiers))
+                .ForMember(d => d.Directives, opt => opt.MapFrom(s => s.CharacterDirectives));
+
+            CreateMap<Data.Models.Planetside.CharacterDirectiveTier, Domain.Models.CharacterDirectivesOutlineTier>()
+                .ForMember(d => d.TreeId, opt => opt.MapFrom(s => s.DirectiveTreeId))
+                .ForMember(d => d.TierId, opt => opt.MapFrom(s => s.DirectiveTierId))
+                .ForMember(d => d.CompletionDate, opt => opt.MapFrom(s => s.CompletionTimeDate));
+
+            CreateMap<Data.Models.Planetside.CharacterDirective, Domain.Models.CharacterDirectivesOutlineDirective>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.DirectiveId))
+                .ForMember(d => d.CompletionDate, opt => opt.MapFrom(s => s.CompletionTimeDate))
+                .ForMember(d => d.Objectives, opt => opt.MapFrom(s => s.CharacterDirectiveObjectives));
+
+            CreateMap<Data.Models.Planetside.CharacterDirectiveObjective, Domain.Models.CharacterDirectivesOutlineObjective>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ObjectiveId))
+                .ForMember(d => d.Progress, opt => opt.MapFrom(s => s.StateData));
         }
 
         private class CharacterVehicleStatsResolver : IValueResolver<Data.Models.Planetside.Character, Domain.Models.CharacterDetails, IEnumerable<Domain.Models.CharacterDetailsVehicleStat>>

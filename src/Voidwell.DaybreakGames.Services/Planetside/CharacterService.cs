@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Domain.Models;
 using System;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using System.Threading;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using AutoMapper;
+using System.Collections;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -90,6 +91,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public Task UpdateAllCharacterInfo(string characterId, DateTime? lastLoginDate = null)
         {
             return _characterStore.UpdateAllCharacterInfo(characterId, lastLoginDate);
+        }
+
+        public Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
+        {
+            return _characterStore.GetCharacterAchievementsAsync(characterId);
         }
 
         private async Task<IEnumerable<CharacterDetails>> GetCharacterDetails(IEnumerable<string> characterIds)

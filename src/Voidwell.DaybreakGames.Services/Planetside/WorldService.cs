@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.App.Models;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
-using Voidwell.DaybreakGames.Utils;
+using Voidwell.Microservice.Utility;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {

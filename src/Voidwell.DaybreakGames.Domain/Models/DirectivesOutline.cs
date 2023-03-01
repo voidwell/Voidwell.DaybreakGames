@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Voidwell.DaybreakGames.Domain.Models
 {
@@ -54,7 +53,6 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int? ImageId { get; set; }
-        public DateTime? CompletionDate { get; set; }
 
         public IEnumerable<DirectivesOutlineObjective> Objectives { get; set; }
     }
@@ -64,5 +62,7 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public int Id { get; set; }
         public int TypeId { get; set; }
         public int? GoalValue { get; set; }
+        public int? FactionId { get; set; }
+        public int? AchievementId { get; set; }
     }
 }
