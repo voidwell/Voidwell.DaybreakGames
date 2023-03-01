@@ -3,7 +3,7 @@
 namespace Voidwell.DaybreakGames.Utils.HostedService
 {
     public class HostedServiceState<TService> : HostedServiceState
-        where TService : class, IStatefulHostedService
+        where TService : class
     {
         public HostedServiceState(IServiceProvider sp)
         {

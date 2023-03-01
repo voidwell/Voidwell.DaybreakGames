@@ -34,8 +34,8 @@ namespace Voidwell.DaybreakGames.Utils.HostedService
         }
 
         public static IServiceCollection AddStatefulHostedService<TService, TImplementation>(this IServiceCollection services)
-            where TService : class, IStatefulHostedService
-            where TImplementation : class, TService
+            where TService : class
+            where TImplementation : class, TService, IStatefulHostedService
         {
             services.AddSingleton<TService, TImplementation>();
 
