@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService
 {
