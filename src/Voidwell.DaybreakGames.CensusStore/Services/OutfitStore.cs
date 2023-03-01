@@ -3,12 +3,12 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Utils;
+using Voidwell.Microservice.Utility;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {

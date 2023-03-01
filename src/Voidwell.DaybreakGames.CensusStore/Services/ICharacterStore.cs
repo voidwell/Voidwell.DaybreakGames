@@ -17,5 +17,6 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50, string sort = null, string sortDir = null);
         Task<string> GetCharacterIdByName(string characterName);
         Task<OutfitMember> GetCharactersOutfitAsync(string characterId);
+        Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId);
     }
 }

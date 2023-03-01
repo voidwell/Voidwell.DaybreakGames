@@ -4,12 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Utils;
+using Voidwell.Microservice.Utility;
+using AutoMapper;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
@@ -23,8 +24,10 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly CharactersWeaponStatCollection _charactersWeaponStatCollection;
         private readonly CharactersWeaponStatByFactionCollection _charactersWeaponStatByFactionCollection;
         private readonly CharactersStatHistoryCollection _charactersStatHistoryCollection;
+        private readonly CharactersAchievementCollection _charactersAchievementCollection;
         private readonly IOutfitStore _outfitStore;
         private readonly ICache _cache;
+        private readonly IMapper _mapper;
 
         private const string _cacheKey = "ps2.characterstore";
         private readonly Func<string, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
@@ -47,8 +50,10 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             CharactersWeaponStatCollection charactersWeaponStatCollection,
             CharactersWeaponStatByFactionCollection charactersWeaponStatByFactionCollection,
             CharactersStatHistoryCollection charactersStatHistoryCollection,
+            CharactersAchievementCollection charactersAchievementCollection,
             IOutfitStore outfitStore,
-            ICache cache)
+            ICache cache,
+            IMapper mapper)
         {
             _characterRepository = characterRepository;
             _characterCollection = characterCollection;
@@ -58,8 +63,10 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             _charactersWeaponStatCollection = charactersWeaponStatCollection;
             _charactersWeaponStatByFactionCollection = charactersWeaponStatByFactionCollection;
             _charactersStatHistoryCollection = charactersStatHistoryCollection;
+            _charactersAchievementCollection = charactersAchievementCollection;
             _outfitStore = outfitStore;
             _cache = cache;
+            _mapper = mapper;
         }
 
         public Task<IEnumerable<CensusCharacterModel>> LookupCharactersByName(string query, int limit = 12)
@@ -119,7 +126,8 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             await Task.WhenAll(UpdateCharacterTimes(characterId),
                                UpdateCharacterStats(characterId, lastLoginDate),
                                UpdateCharacterWeaponStats(characterId, lastLoginDate),
-                               UpdateCharacterStatsHistory(characterId, lastLoginDate));
+                               UpdateCharacterStatsHistory(characterId, lastLoginDate),
+                               UpdateCharacterAchievementsAsync(characterId, lastLoginDate));
 
             var characterCacheKey = _getCharacterCacheKey(characterId); ;
             var detailsCacheKey = _getDetailsCacheKey(characterId);
@@ -234,6 +242,11 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             }
 
             return await _outfitStore.UpdateCharacterOutfitMembershipAsync(character);
+        }
+
+        public Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
+        {
+            return _characterRepository.GetCharacterAchievementsAsync(characterId);
         }
 
         private async Task<Character> UpdateCharacter(string characterId)
@@ -491,6 +504,19 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
                     Month = JToken.FromObject(month).ToString()
                 };
             });
+
+            await _characterRepository.UpsertRangeAsync(dataModels);
+        }
+
+        private async Task UpdateCharacterAchievementsAsync(string characterId, DateTime? lastLoginDate)
+        {
+            var achievements = await _charactersAchievementCollection.GetCharacterAchievementsAsync(characterId, lastLoginDate);
+            if (achievements == null)
+            {
+                return;
+            }
+
+            var dataModels = _mapper.Map<IEnumerable<CharacterAchievement>>(achievements);
 
             await _characterRepository.UpsertRangeAsync(dataModels);
         }

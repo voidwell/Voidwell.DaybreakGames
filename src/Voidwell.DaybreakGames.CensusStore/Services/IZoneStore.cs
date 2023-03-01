@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface IZoneStore : IUpdateable
+    public interface IZoneStore
     {
         Task<IEnumerable<Zone>> GetAllZones();
         Task<Zone> GetZone(int zoneId);

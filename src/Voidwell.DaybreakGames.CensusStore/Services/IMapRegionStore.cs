@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface IMapRegionStore : IUpdateable
+    public interface IMapRegionStore
     {
         Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId);
         Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityIdsAsync(params int[] facilityIds);

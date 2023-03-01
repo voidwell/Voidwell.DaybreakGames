@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface ILoadoutStore : IUpdateable
+    public interface ILoadoutStore
     {
         Task<IEnumerable<Loadout>> GetAllLoadoutsAsync();
     }

@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Cache;
-using Voidwell.DaybreakGames.Census.Collection;
+using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 
@@ -13,9 +11,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
     public class ZoneStore : IZoneStore
     {
         private readonly IZoneRepository _zoneRepository;
-        private readonly ZoneCollection _zoneCollection;
         private readonly ICache _cache;
-        private readonly IMapper _mapper;
 
         private const string _cacheKeyPrefix = "ps2.zoneStore";
         private readonly string _playableZonesCacheKey = $"{_cacheKeyPrefix}-playable-zones";
@@ -23,15 +19,12 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         private readonly int[] _playableZoneIds = { 2, 4, 6, 8, 344 };
 
-        public string StoreName => "ZoneStore";
         public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
 
-        public ZoneStore(IZoneRepository zoneRepository, ZoneCollection zoneCollection, ICache cache, IMapper mapper)
+        public ZoneStore(IZoneRepository zoneRepository, ICache cache)
         {
             _zoneRepository = zoneRepository;
-            _zoneCollection = zoneCollection;
             _cache = cache;
-            _mapper = mapper;
         }
 
         public Task<IEnumerable<Zone>> GetAllZones()
@@ -73,17 +66,6 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             }
 
             return zones;
-        }
-
-        public async Task RefreshStore()
-        {
-            var zones = await _zoneCollection.GetCollectionAsync();
-
-            if (zones != null)
-            {
-                await _zoneRepository.UpsertRangeAsync(zones.Select(_mapper.Map<Zone>));
-                await _cache.RemoveAsync(_playableZonesCacheKey);
-            }
         }
     }
 }

@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface IMapHexStore : IUpdateable
+    public interface IMapHexStore
     {
         Task<IEnumerable<MapHex>> GetMapHexsByZoneIdAsync(int zoneId);
     }
