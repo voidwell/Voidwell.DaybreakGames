@@ -33,7 +33,6 @@ namespace Voidwell.DaybreakGames.Live
                 }
             });
 
-            services.AddCensusStores(configuration);
             services.AddEventProcessors();
 
             services.TryAddSingleton<IPlayerMonitor, PlayerMonitor>();

@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Utils;
+using Voidwell.Microservice.Utility;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream
 {
