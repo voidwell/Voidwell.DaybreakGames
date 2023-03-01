@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.Domain.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside

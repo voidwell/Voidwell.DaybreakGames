@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Data.Repositories.Models;
 

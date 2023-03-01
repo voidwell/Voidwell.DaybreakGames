@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using System.Collections.Generic;
 using Voidwell.DaybreakGames.Domain.Models;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using System.Threading;
-using Voidwell.DaybreakGames.Utils;
+using Voidwell.Microservice.Utility;
 using Voidwell.DaybreakGames.CensusStore.Services;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
