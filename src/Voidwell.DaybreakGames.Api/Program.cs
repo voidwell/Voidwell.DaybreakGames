@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Voidwell.Logging;
+using Serilog.Events;
+using Serilog.Filters;
+using System;
+using System.Collections.Generic;
+using Voidwell.Microservice.Logging;
 
 namespace Voidwell.DaybreakGames.Api
 {
@@ -17,30 +19,18 @@ namespace Voidwell.DaybreakGames.Api
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls("http://0.0.0.0:5000")
-                .ConfigureLogging((context, builder) =>
+                .UseMicroserviceLogging(new LoggingOptions
                 {
-                    builder.ClearProviders();
-
-                    var useGelf = context.Configuration.GetValue("UseGelfLogging", false);
-
-                    builder.SetMinimumLevel(LogLevel.Information);
-
-                    builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
-                    builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
-                    builder.AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.None);
-                    builder.AddFilter("Microsoft.EntityframeworkCore.Database.Command", LogLevel.None);
-
-                    if (useGelf && !(context.HostingEnvironment.EnvironmentName == "Development"))
+                    MinLogLevel = LogEventLevel.Information,
+                    IncludeMicrosoftInformation = true,
+                    LoggingOutput = "flat",
+                    IgnoreRules = new List<Func<LogEvent, bool>>
                     {
-                        builder.AddGelf(options =>
-                        {
-                            options.LogSource = context.Configuration.GetValue("ApplicationName", "Voidwell.DaybreakGames");
-                        });
-                    }
-                    else
-                    {
-                        builder.AddConsole();
-                        builder.AddDebug();
+                        e => Matching.FromSource("Microsoft.AspNetCore.Routing")(e),
+                        e => Matching.FromSource("Microsoft.AspNetCore.Mvc")(e),
+                        e => Matching.FromSource("Microsoft.EntityFrameworkCore")(e) && e.Level < LogEventLevel.Error,
+                        e => Matching.FromSource("Microsoft.EntityFrameworkCore.Update")(e),
+                        e => Matching.FromSource("Microsoft.EntityFrameworkCore.Database.Command")(e)
                     }
                 })
                 .Build();

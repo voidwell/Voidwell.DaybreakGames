@@ -14,7 +14,8 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         private readonly ICharacterSessionService _characterSessionService;
         private readonly IPlayerMonitor _playerMonitor;
 
-        public CharacterController(ICharacterService characterService, ICharacterSessionService characterSessionService, IPlayerMonitor playerMonitor)
+        public CharacterController(ICharacterService characterService, ICharacterSessionService characterSessionService,
+            IPlayerMonitor playerMonitor)
         {
             _characterService = characterService;
             _characterSessionService = characterSessionService;
