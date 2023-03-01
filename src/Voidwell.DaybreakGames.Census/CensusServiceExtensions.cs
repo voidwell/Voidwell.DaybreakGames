@@ -11,13 +11,23 @@ namespace Voidwell.DaybreakGames.Census
         {
             services.TryAddSingleton<ICensusPatchClient, SanctuaryCensusClient>();
 
+            services.TryAddTransient<AchievementCollection>();
+            services.TryAddTransient<CharactersAchievementCollection>();
             services.TryAddTransient<CharacterCollection>();
             services.TryAddTransient<CharacterNameCollection>();
+            services.TryAddTransient<CharactersDirectiveCollection>();
+            services.TryAddTransient<CharactersDirectiveObjectiveCollection>();
+            services.TryAddTransient<CharactersDirectiveTierCollection>();
+            services.TryAddTransient<CharactersDirectiveTreeCollection>();
             services.TryAddTransient<CharactersStatCollection>();
             services.TryAddTransient<CharactersStatByFactionCollection>();
             services.TryAddTransient<CharactersStatHistoryCollection>();
             services.TryAddTransient<CharactersWeaponStatCollection>();
             services.TryAddTransient<CharactersWeaponStatByFactionCollection>();
+            services.TryAddTransient<DirectiveCollection>();
+            services.TryAddTransient<DirectiveTierCollection>();
+            services.TryAddTransient<DirectiveTreeCategoryCollection>();
+            services.TryAddTransient<DirectiveTreeCollection>();
             services.TryAddTransient<ExperienceCollection>();
             services.TryAddTransient<FacilityLinkCollection>();
             services.TryAddTransient<FactionCollection>();
@@ -29,9 +39,14 @@ namespace Voidwell.DaybreakGames.Census
             services.TryAddTransient<MapRegionCollection>();
             services.TryAddTransient<MetagameEventCollection>();
             services.TryAddTransient<MetagameEventStateCollection>();
+            services.TryAddTransient<ObjectiveCollection>();
+            services.TryAddTransient<ObjectiveSetToObjectiveCollection>();
             services.TryAddTransient<OutfitCollection>();
             services.TryAddTransient<OutfitMembershipCollection>();
             services.TryAddTransient<ProfileCollection>();
+            services.TryAddTransient<RewardCollection>();
+            services.TryAddTransient<RewardGroupToRewardCollection>();
+            services.TryAddTransient<RewardSetToRewardGroupCollection>();
             services.TryAddTransient<TitleCollection>();
             services.TryAddTransient<VehicleCollection>();
             services.TryAddTransient<VehicleFactionCollection>();

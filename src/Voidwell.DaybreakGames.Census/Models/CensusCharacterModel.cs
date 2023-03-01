@@ -5,7 +5,7 @@ namespace Voidwell.DaybreakGames.Census.Models
     public class CensusCharacterModel
     {
         public string CharacterId { get; set; }
-        public CharacterName Name { get; set; }
+        public CensusCharacterName Name { get; set; }
         public int FactionId { get; set; }
         public int TitleId { get; set; }
         public CharacterTimes Times { get; set; }
@@ -14,12 +14,6 @@ namespace Voidwell.DaybreakGames.Census.Models
         public int WorldId { get; set; }
         public bool OnlineStatus { get; set; }
         public int PrestigeLevel { get; set; }
-
-        public class CharacterName
-        {
-            public string First { get; set; }
-            public string FirstLower { get; set; }
-        }
 
         public class CharacterTimes
         {
