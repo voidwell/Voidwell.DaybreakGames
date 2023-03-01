@@ -2,17 +2,18 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Voidwell.Cache;
 using Voidwell.DaybreakGames.Data;
 using IdentityServer4.AccessTokenValidation;
 using System;
-using Voidwell.Logging;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Services;
 using Voidwell.DaybreakGames.Live;
 using Voidwell.DaybreakGames.Utils.HostedService;
+using Voidwell.Microservice.Hosting;
+using Voidwell.Microservice.Configuration;
+using Voidwell.Microservice.Cache;
+using Voidwell.Microservice.Authentication;
+using Voidwell.Microservice.Tracing;
 
 namespace Voidwell.DaybreakGames.Api
 {
@@ -39,26 +40,25 @@ namespace Voidwell.DaybreakGames.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                .AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                });
+                .AddMicroserviceJsonOptions();
 
             services.AddEntityFrameworkContext(Configuration);
 
-            var applicationName = Configuration.GetValue("ApplicationName", "Voidwell.DaybreakGames");
-            services.AddCache(Configuration, applicationName);
+            services.ConfigureServiceProperties("Voidwell.DaybreakGames");
+
+            services.AddCache(options =>
+            {
+                options.RedisConfiguration = Configuration.GetValue<string>("RedisConfiguration");
+            });
+
+            //services.AddTracing();
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddIdentityServerAuthentication(options =>
+                .AddServiceAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme, options =>
                 {
                     options.Authority = "http://voidwellauth:5000";
-                    options.SupportedTokens = SupportedTokens.Jwt;
+                    options.SupportedTokens = Microservice.Authentication.SupportedTokens.Jwt;
                     options.RequireHttpsMetadata = false;
-
                     options.EnableCaching = true;
                     options.CacheDuration = TimeSpan.FromMinutes(10);
                 });
@@ -76,14 +76,13 @@ namespace Voidwell.DaybreakGames.Api
             services.AddLiveServices(Configuration);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.InitializeDatabases();
 
-            app.UseLoggingMiddleware();
-
             app.UseRouting();
 
+            //app.UseTracing();
             app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>

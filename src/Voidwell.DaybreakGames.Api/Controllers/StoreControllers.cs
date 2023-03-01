@@ -26,6 +26,10 @@ namespace Voidwell.DaybreakGames.Api.Controllers
         public async Task<ActionResult> PostForceUpdateStore(string storeName)
         {
             var result = await _storeUpdaterService.UpdateStoreAsync(storeName);
+            if (result == null)
+            {
+                return NotFound();
+            }
 
             return Ok(result);
         }
