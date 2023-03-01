@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
   
     <ItemGroup>
@@ -13,22 +13,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="obj\**" />
-        <EmbeddedResource Remove="obj\**" />
-        <None Remove="obj\**" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.4">
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.13" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.13">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.13" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.13">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.8" />
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.8" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.2.4" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.8" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
+        <PackageReference Include="Voidwell.Microservice" Version="6.0.20" />
     </ItemGroup>
 
     <ItemGroup>

@@ -20,6 +20,11 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
                 .Ignore(a => a.Title)
                 .Ignore(a => a.World)
                 .Ignore(a => a.Faction);
+
+            builder.HasMany(e => e.DirectiveTrees)
+                .WithOne()
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(t => t.CharacterId);
         }
     }
 }

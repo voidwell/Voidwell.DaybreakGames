@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -100,9 +101,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.MapHexs.UpsertRangeAsync(entities, (a, e) => a.MapRegionId == e.MapRegionId && a.ZoneId == e.ZoneId && a.XPos == e.XPos && a.YPos == e.YPos, true);
-
-                await dbContext.SaveChangesAsync();
+                await dbContext.UpsertAsync(entities);
             }
         }
 
@@ -112,9 +111,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.MapRegions.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
-
-                await dbContext.SaveChangesAsync();
+                await dbContext.UpsertAsync(entities);
             }
         }
 
@@ -124,9 +121,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.FacilityLinks.UpsertRangeAsync(entities, (a, e) => a.FacilityIdA == e.FacilityIdA && a.FacilityIdB == e.FacilityIdB);
-
-                await dbContext.SaveChangesAsync();
+                await dbContext.UpsertAsync(entities);
             }
         }
     }

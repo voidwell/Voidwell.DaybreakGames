@@ -4,15 +4,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations
 {
-    public class SanctionedWeaponConfiguration : IEntityTypeConfiguration<SanctionedWeapon>
+    public class RewardConfiguration : IEntityTypeConfiguration<Reward>
     {
-        public void Configure(EntityTypeBuilder<SanctionedWeapon> builder)
+        public void Configure(EntityTypeBuilder<Reward> builder)
         {
-            builder.ToTable("SanctionedWeapon");
+            builder.ToTable("Reward");
 
             builder.HasKey(a => a.Id);
 
             builder.Property(a => a.Id).ValueGeneratedNever();
+
+            builder.Ignore(a => a.Item);
         }
     }
 }
