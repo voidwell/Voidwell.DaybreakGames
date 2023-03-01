@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Text.Json.Serialization;
 using System;
 
 namespace Voidwell.DaybreakGames.Domain.Models
@@ -20,7 +19,7 @@ namespace Voidwell.DaybreakGames.Domain.Models
             Timestamp = timestamp;
         }
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public ZoneLockStateEnum State { get; }
         public DateTime Timestamp { get; }
         public int? MetagameEventId { get; }

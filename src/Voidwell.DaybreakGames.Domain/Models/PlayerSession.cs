@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Domain.Models
 {
@@ -12,7 +12,7 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public PlayerSessionInfo Session { get; set; }
     }
 
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum PlayerSessionEventType
     {
         Death = 0,
@@ -124,31 +124,23 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public string TypeName { get; set; }
     }
 
-    public class PlayerSessionEventCreationConverter : JsonConverter
+    public class PlayerSessionEventCreationConverter : JsonConverter<PlayerSessionEvent>
     {
-        protected PlayerSessionEvent Create(Type objectType, JObject jsonObject)
+        protected static Type GetConvertType(JsonNode node)
         {
-            var typeName = jsonObject["eventType"].ToString();
+            var typeName = node["eventType"].ToString();
             var eventType = Enum.Parse(typeof(PlayerSessionEventType), typeName);
-            switch (eventType)
+            return eventType switch
             {
-                case PlayerSessionEventType.Death:
-                    return new PlayerSessionDeathEvent();
-                case PlayerSessionEventType.BattleRankUp:
-                    return new PlayerSessionBattleRankUpEvent();
-                case PlayerSessionEventType.FacilityCapture:
-                    return new PlayerSessionFacilityCaptureEvent();
-                case PlayerSessionEventType.FacilityDefend:
-                    return new PlayerSessionFacilityDefendEvent();
-                case PlayerSessionEventType.VehicleDestroy:
-                    return new PlayerSessionVehicleDestroyEvent();
-                case PlayerSessionEventType.Login:
-                    return new PlayerSessionLoginEvent();
-                case PlayerSessionEventType.Logout:
-                    return new PlayerSessionLogoutEvent();
-                default:
-                    return null;
-            }
+                PlayerSessionEventType.Death => typeof(PlayerSessionDeathEvent),
+                PlayerSessionEventType.BattleRankUp => typeof(PlayerSessionBattleRankUpEvent),
+                PlayerSessionEventType.FacilityCapture => typeof(PlayerSessionFacilityCaptureEvent),
+                PlayerSessionEventType.FacilityDefend => typeof(PlayerSessionFacilityDefendEvent),
+                PlayerSessionEventType.VehicleDestroy => typeof(PlayerSessionVehicleDestroyEvent),
+                PlayerSessionEventType.Login => typeof(PlayerSessionLoginEvent),
+                PlayerSessionEventType.Logout => typeof(PlayerSessionLogoutEvent),
+                _ => null,
+            };
         }
 
         public override bool CanConvert(Type objectType)
@@ -156,19 +148,18 @@ namespace Voidwell.DaybreakGames.Domain.Models
             return typeof(PlayerSessionEvent).IsAssignableFrom(objectType);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override PlayerSessionEvent Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var jsonObject = JObject.Load(reader);
-            var target = Create(objectType, jsonObject);
-            serializer.Populate(jsonObject.CreateReader(), target);
-            return target;
+            var jsonNode = JsonNode.Parse(ref reader, new JsonNodeOptions { PropertyNameCaseInsensitive = true });
+
+            var eventType = GetConvertType(jsonNode);
+
+            return jsonNode.Deserialize(eventType, options) as PlayerSessionEvent;
         }
-
-        public override bool CanWrite => false;
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        
+        public override void Write(Utf8JsonWriter writer, PlayerSessionEvent value, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            JsonSerializer.Serialize(writer, value, value.GetType(), options);
         }
     }
 }
