@@ -15,14 +15,14 @@ namespace Voidwell.DaybreakGames.Census.Collection
 
         public async Task<string> GetCharacterIdByNameAsync(string characterName)
         {
-            var character = await QueryAsync(query =>
+            var nameModel = await QueryAsync(query =>
             {
                 query.Where("name.first_lower").Equals(characterName.ToLower());
 
-                return query.GetAsync<CensusCharacterModel>();
+                return query.GetAsync<CensusCharacterNameModel>();
             });
 
-            return character?.CharacterId;
+            return nameModel?.CharacterId;
         }
     }
 }

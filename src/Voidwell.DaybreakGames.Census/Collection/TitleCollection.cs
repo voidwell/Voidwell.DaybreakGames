@@ -1,5 +1,4 @@
 ﻿using DaybreakGames.Census;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
