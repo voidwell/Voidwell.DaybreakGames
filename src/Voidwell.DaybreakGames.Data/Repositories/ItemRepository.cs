@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -56,9 +57,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.Items.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
-
-                await dbContext.SaveChangesAsync();
+                await dbContext.UpsertAsync(entities);
             }
         }
 
@@ -68,9 +67,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.ItemCategories.UpsertRangeAsync(entities, (a, e) => a.Id == e.Id);
-
-                await dbContext.SaveChangesAsync();
+                await dbContext.UpsertAsync(entities);
             }
         }
     }

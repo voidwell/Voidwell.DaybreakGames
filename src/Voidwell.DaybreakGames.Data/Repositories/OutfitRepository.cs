@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using System.Collections.Generic;
 using System.Linq;
+using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -147,27 +148,18 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.OutfitMembers.UpsertAsync(entity, a => a.CharacterId == entity.CharacterId);
-
-                await dbContext.SaveChangesAsync();
-                return entity;
+                return await dbContext.UpsertAsync(entity);
             }
         }
 
         public async Task<Outfit> UpsertAsync(Outfit entity)
         {
-            Outfit result;
-
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
 
-                result = await dbContext.Outfits.UpsertAsync(entity, a => a.Id == entity.Id);
-
-                await dbContext.SaveChangesAsync();
+                return await dbContext.UpsertAsync(entity);
             }
-
-            return result;
         }
     }
 }

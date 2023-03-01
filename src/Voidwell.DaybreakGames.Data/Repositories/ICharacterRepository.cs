@@ -12,6 +12,11 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<Character> GetCharacterWithDetailsAsync(string characterId);
         Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params string[] characterIds);
         Task<CharacterRating> GetCharacterRatingAsync(string characterId);
+        Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page, int limit);
+        Task<IEnumerable<CharacterRating>> GetCharacterRatingLeaderboardAsync(int limit);
+        Task<IEnumerable<CharacterDirectiveTree>> GetCharacterDirectivesAsync(string characterId);
+        Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId);
+
         Task<Character> UpsertAsync(Character entity);
         Task<CharacterTime> UpsertAsync(CharacterTime entity);
         Task<CharacterLifetimeStat> UpsertAsync(CharacterLifetimeStat entity);
@@ -22,7 +27,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
         Task<IEnumerable<CharacterWeaponStat>> UpsertRangeAsync(IEnumerable<CharacterWeaponStat> entities);
         Task<IEnumerable<CharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterWeaponStatByFaction> entities);
         Task<IEnumerable<CharacterStatHistory>> UpsertRangeAsync(IEnumerable<CharacterStatHistory> entities);
-        Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page, int limit);
-        Task<IEnumerable<CharacterRating>> GetCharacterRatingLeaderboardAsync(int limit);
+        Task<IEnumerable<CharacterAchievement>> UpsertRangeAsync(IEnumerable<CharacterAchievement> entities);
     }
 }

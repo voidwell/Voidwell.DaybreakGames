@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models;
+using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -13,13 +14,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public UpdaterScheduler GetUpdaterHistoryByServiceName(string serviceName)
+        public async Task<UpdaterScheduler> GetUpdaterHistoryByServiceNameAsync(string serviceName)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
 
-                return dbContext.UpdaterScheduler.SingleOrDefault(u => u.Id == serviceName);
+                return await dbContext.UpdaterScheduler.SingleOrDefaultAsync(u => u.Id == serviceName);
             }
         }
 
@@ -29,9 +30,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.UpdaterScheduler.UpsertAsync(entity, a => a.Id == entity.Id);
-
-                await dbContext.SaveChangesAsync();
+                await dbContext.UpsertAsync(entity);
             }
         }
     }

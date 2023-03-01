@@ -2,10 +2,10 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
+using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data
 {
@@ -14,6 +14,7 @@ namespace Voidwell.DaybreakGames.Data
         public PS2DbContext(DbContextOptions<PS2DbContext> options)
             : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
 
         public DbSet<Alert> Alerts { get; set; }
@@ -53,6 +54,21 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<Experience> Experience { get; set; }
         public DbSet<WeaponAggregate> WeaponAggregates { get; set; }
         public DbSet<DailyPopulation> DailyPopulations { get; set; }
+        public DbSet<Directive> Directives { get; set; }
+        public DbSet<DirectiveTier> DirectiveTiers { get; set; }
+        public DbSet<DirectiveTree> DirectiveTrees { get; set; }
+        public DbSet<DirectiveTreeCategory> DirectiveTreeCategories { get; set; }
+        public DbSet<CharacterDirective> CharacterDirectives { get; set; }
+        public DbSet<CharacterDirectiveObjective> CharacterDirectiveObjectives { get; set; }
+        public DbSet<CharacterDirectiveTier> CharacterDirectiveTiers { get; set; }
+        public DbSet<CharacterDirectiveTree> CharacterDirectiveTrees { get; set; }
+        public DbSet<Objective> Objectives { get; set; }
+        public DbSet<ObjectiveSetToObjective> ObjectiveSetsToObjective { get; set; }
+        public DbSet<Reward> Rewards { get; set; }
+        public DbSet<RewardGroupToReward> RewardGroupsToReward { get; set; }
+        public DbSet<RewardSetToRewardGroup> RewardSetsToRewardGroup { get; set; }
+        public DbSet<Achievement> Achievements { get; set; }
+        public DbSet<CharacterAchievement> CharacterAchievements { get; set; }
 
         public DbSet<AchievementEarned> AchievementEarnedEvents { get; set; }
         public DbSet<BattlerankUp> BattleRankUpEvents { get; set; }
@@ -75,7 +91,7 @@ namespace Voidwell.DaybreakGames.Data
             base.OnModelCreating(builder);
 
             ApplyConfigurations(builder);
-            ConvertToConvention(builder);
+            builder.ConvertToSnakeCaseConvention();
         }
 
         private static void ApplyConfigurations(ModelBuilder builder)
@@ -96,44 +112,6 @@ namespace Voidwell.DaybreakGames.Data
                     }
                 }
             }
-        }
-
-        private static void ConvertToConvention(ModelBuilder builder)
-        {
-            foreach (var entity in builder.Model.GetEntityTypes())
-            {
-                // Replace table names
-                entity.Relational().TableName = ToSnakeCase(entity.Relational().TableName);
-
-                // Replace column names
-                foreach (var property in entity.GetProperties())
-                {
-                    property.Relational().ColumnName = ToSnakeCase(property.Name);
-                }
-
-                foreach (var key in entity.GetKeys())
-                {
-                    key.Relational().Name = $"p_k_{ToSnakeCase(key.Relational().Name)}";
-                }
-
-                foreach (var key in entity.GetForeignKeys())
-                {
-                    key.Relational().Name = $"f_k_{ToSnakeCase(key.Relational().Name)}";
-                }
-
-                foreach (var index in entity.GetIndexes())
-                {
-                    index.Relational().Name = $"i_x_{ToSnakeCase(index.Relational().Name)}";
-                }
-            }
-        }
-
-        private static string ToSnakeCase(string input)
-        {
-            var matches = Regex.Matches(input, "([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)");
-            var result = string.Join("_", matches.Select(a => a.Value));
-
-            return result.ToLower();
         }
     }
 }

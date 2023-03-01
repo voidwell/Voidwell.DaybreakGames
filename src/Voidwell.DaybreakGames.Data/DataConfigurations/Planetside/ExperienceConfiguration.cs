@@ -11,6 +11,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.ToTable("Experience");
 
             builder.HasKey(a => a.Id );
+
+            builder.Property(a => a.Id).ValueGeneratedNever();
         }
     }
 }

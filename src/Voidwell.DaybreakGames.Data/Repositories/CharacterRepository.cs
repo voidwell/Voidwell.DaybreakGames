@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
-    public class CharacterRepository: Repository, ICharacterRepository
+    public class CharacterRepository : ICharacterRepository
     {
         public static T ClientMethod<T>(T element) => element;
         private readonly IDbContextHelper _dbContextHelper;
 
-        public CharacterRepository(IDbContextHelper dbContextHelper) : base(dbContextHelper)
+        public CharacterRepository(IDbContextHelper dbContextHelper)
         {
             _dbContextHelper = dbContextHelper;
         }
@@ -274,59 +275,144 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public Task<Character> UpsertAsync(Character entity)
+        public async Task<IEnumerable<CharacterDirectiveTree>> GetCharacterDirectivesAsync(string characterId)
         {
-            return UpsertAsync(entity, a => a.Id == entity.Id);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.CharacterDirectiveTrees
+                    .Where(a => a.CharacterId == characterId)
+                    .Include(a => a.CharacterDirectiveTiers)
+                    .Include(a => a.CharacterDirectives)
+                        .ThenInclude(a => a.CharacterDirectiveObjectives)
+                            .ThenInclude(a => a.Objective)
+                    .ToListAsync();
+            }
         }
 
-        public Task<CharacterTime> UpsertAsync(CharacterTime entity)
+        public async Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
         {
-            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.CharacterAchievements
+                    .Where(a => a.CharacterId == characterId)
+                    .Include(a => a.Achievement)
+                        .ThenInclude(a => a.Objective)
+                    .ToListAsync();
+            }
         }
 
-        public Task<CharacterLifetimeStat> UpsertAsync(CharacterLifetimeStat entity)
+        public async Task<Character> UpsertAsync(Character entity)
         {
-            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId, true);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertAsync(entity);
+            }
         }
 
-        public Task<CharacterLifetimeStatByFaction> UpsertAsync(CharacterLifetimeStatByFaction entity)
+        public async Task<CharacterTime> UpsertAsync(CharacterTime entity)
         {
-            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId, true);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertAsync(entity);
+            }
         }
 
-        public Task<CharacterRating> UpsertAsync(CharacterRating entity)
+        public async Task<CharacterLifetimeStat> UpsertAsync(CharacterLifetimeStat entity)
         {
-            return UpsertAsync(entity, a => a.CharacterId == entity.CharacterId);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertWithoutNullPropertiesAsync(entity);
+            }
         }
 
-        public Task<IEnumerable<CharacterStat>> UpsertRangeAsync(IEnumerable<CharacterStat> entities)
+        public async Task<CharacterLifetimeStatByFaction> UpsertAsync(CharacterLifetimeStatByFaction entity)
         {
-            var id = entities.FirstOrDefault()?.CharacterId;
-            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ProfileId == b.ProfileId, true);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertWithoutNullPropertiesAsync(entity);
+            }
         }
 
-        public Task<IEnumerable<CharacterStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterStatByFaction> entities)
+        public async Task<CharacterRating> UpsertAsync(CharacterRating entity)
         {
-            var id = entities.FirstOrDefault()?.CharacterId;
-            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ProfileId == b.ProfileId, true);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertAsync(entity);
+            }
         }
 
-        public Task<IEnumerable<CharacterWeaponStat>> UpsertRangeAsync(IEnumerable<CharacterWeaponStat> entities)
+        public async Task<IEnumerable<CharacterStat>> UpsertRangeAsync(IEnumerable<CharacterStat> entities)
         {
-            var id = entities.FirstOrDefault()?.CharacterId;
-            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+            }
         }
 
-        public Task<IEnumerable<CharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterWeaponStatByFaction> entities)
+        public async Task<IEnumerable<CharacterStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterStatByFaction> entities)
         {
-            var id = entities.FirstOrDefault()?.CharacterId;
-            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.ItemId == b.ItemId && a.VehicleId == b.VehicleId, true);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+            }
         }
 
-        public Task<IEnumerable<CharacterStatHistory>> UpsertRangeAsync(IEnumerable<CharacterStatHistory> entities)
+        public async Task<IEnumerable<CharacterWeaponStat>> UpsertRangeAsync(IEnumerable<CharacterWeaponStat> entities)
         {
-            var id = entities.FirstOrDefault()?.CharacterId;
-            return UpsertRangeAsync(entities, s => s.CharacterId == id, (a, b) => a.StatName == b.StatName);
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+            }
+        }
+
+        public async Task<IEnumerable<CharacterWeaponStatByFaction>> UpsertRangeAsync(IEnumerable<CharacterWeaponStatByFaction> entities)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+            }
+        }
+
+        public async Task<IEnumerable<CharacterStatHistory>> UpsertRangeAsync(IEnumerable<CharacterStatHistory> entities)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertAsync(entities);
+            }
+        }
+
+        public async Task<IEnumerable<CharacterAchievement>> UpsertRangeAsync(IEnumerable<CharacterAchievement> entities)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.UpsertAsync(entities);
+            }
         }
     }
 }
