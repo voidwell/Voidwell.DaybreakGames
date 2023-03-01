@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface IVehicleStore : IUpdateable
+    public interface IVehicleStore
     {
         Task<IEnumerable<Vehicle>> GetAllVehiclesAsync();
     }

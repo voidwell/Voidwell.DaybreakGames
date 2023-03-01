@@ -4,7 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface IFacilityLinkStore : IUpdateable
+    public interface IFacilityLinkStore
     {
         Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId);
     }

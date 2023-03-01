@@ -5,7 +5,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
-    public interface IItemStore : IUpdateable
+    public interface IItemStore
     {
         Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<int> itemIds);
         Task<IEnumerable<Item>> GetItemsByCategoryIdsAsync(IEnumerable<int> categoryIds);

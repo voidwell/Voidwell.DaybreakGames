@@ -7,6 +7,41 @@ namespace Voidwell.DaybreakGames.CensusStore
     {
         public CensusToEntityMappingProfile()
         {
+            CreateMap<CensusAchievementModel, Achievement>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.AchievementId))
+                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English))
+                .ForMember(d => d.Description, opt => opt.MapFrom(s => s.Description.English));
+
+            CreateMap<CensusCharacterAchievementModel, CharacterAchievement>();
+
+            CreateMap<CensusCharacterDirectiveModel, CharacterDirective>()
+                .ForMember(d => d.CompletionTimeDate, opt => opt.Condition(s => s.CompletionTimeDate.Year != 1970));
+
+            CreateMap<CensusCharacterDirectiveObjectiveModel, CharacterDirectiveObjective>();
+
+            CreateMap<CensusCharacterDirectiveTierModel, CharacterDirectiveTier>()
+                .ForMember(d => d.CompletionTimeDate, opt => opt.Condition(s => s.CompletionTimeDate.Year != 1970));
+
+            CreateMap<CensusCharacterDirectiveTreeModel, CharacterDirectiveTree>()
+                .ForMember(d => d.CompletionTimeDate, opt => opt.Condition(s => s.CompletionTimeDate.Year != 1970));
+
+            CreateMap<CensusDirectiveModel, Directive>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.DirectiveId))
+                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English))
+                .ForMember(d => d.Description, opt => opt.MapFrom(s => s.Description.English));
+
+            CreateMap<CensusDirectiveTierModel, DirectiveTier>()
+                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English));
+
+            CreateMap<CensusDirectiveTreeModel, DirectiveTree>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.DirectiveTreeId))
+                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English))
+                .ForMember(d => d.Description, opt => opt.MapFrom(s => s.Description.English));
+
+            CreateMap<CensusDirectiveTreeCategoryModel, DirectiveTreeCategory>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.DirectiveTreeCategoryId))
+                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English));
+
             CreateMap<CensusExperienceModel, Experience>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ExperienceId));
 
@@ -43,9 +78,21 @@ namespace Voidwell.DaybreakGames.CensusStore
             CreateMap<CensusMetagameEventStateModel, MetagameEventState>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.MetagameEventStateId));
 
+            CreateMap<CensusObjectiveModel, Objective>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ObjectiveId));
+
+            CreateMap<CensusObjectiveSetToObjectiveModel, ObjectiveSetToObjective>();
+
             CreateMap<CensusProfileModel, Profile>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ProfileId))
                 .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English));
+
+            CreateMap<CensusRewardModel, Reward>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.RewardId));
+
+            CreateMap<CensusRewardSetToRewardGroupModel, RewardSetToRewardGroup>();
+
+            CreateMap<CensusRewardGroupToRewardModel, RewardGroupToReward>();
 
             CreateMap<CensusLoadoutModel, Loadout>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.LoadoutId));

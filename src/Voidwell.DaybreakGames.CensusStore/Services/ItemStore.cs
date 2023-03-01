@@ -1,9 +1,7 @@
-﻿using AutoMapper;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Cache;
+using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -16,20 +14,15 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly IItemRepository _itemRepository;
         private readonly ItemCollection _itemCollection;
         private readonly ICache _cache;
-        private readonly IMapper _mapper;
 
         private const string _categoryItemsCacheKey = "ps2.categoryItems";
         private readonly TimeSpan _categoryItemsCacheExpiration = TimeSpan.FromHours(1);
 
-        public string StoreName => "ItemStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
-
-        public ItemStore(IItemRepository itemRepository, ItemCollection itemCollection, ICache cache, IMapper mapper)
+        public ItemStore(IItemRepository itemRepository, ItemCollection itemCollection, ICache cache)
         {
             _itemRepository = itemRepository;
             _itemCollection = itemCollection;
             _cache = cache;
-            _mapper = mapper;
         }
 
         public Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<int> itemIds)
@@ -64,16 +57,6 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         public Task<CensusWeaponInfoModel> GetWeaponInfoAsync(int weaponItemId)
         {
             return _itemCollection.GetWeaponInfoAsync(weaponItemId);
-        }
-
-        public async Task RefreshStore()
-        {
-            var items = await _itemCollection.GetCollectionAsync();
-
-            if (items != null)
-            {
-                await _itemRepository.UpsertRangeAsync(items.Select(_mapper.Map<Item>));
-            }
         }
     }
 }
