@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
@@ -24,7 +24,7 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
                 .ToList();
         }
 
-        public async Task<bool> TryProcessAsync(string eventName, JToken payload)
+        public async Task<bool> TryProcessAsync(string eventName, JsonElement payload)
         {
             var processor = _processors.FirstOrDefault(a => a.EventName == eventName);
 
@@ -33,7 +33,7 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
                 return false;
             }
 
-            var inputParam = payload.ToObject(processor.PayloadType, StreamConstants.PayloadDeserializer);
+            var inputParam = payload.Deserialize(processor.PayloadType, StreamConstants.SerializerOptions);
 
             await (Task)processor.ProcessMethodReference.Invoke(processor.Instance, new[] { inputParam });
 

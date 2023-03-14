@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -7,6 +6,9 @@ using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
+using System.Text.Json;
+using DaybreakGames.Census;
+using IdentityModel.Client;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream
 {
@@ -33,9 +35,9 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
             _logger = logger;
         }
 
-        public async Task Process(JToken message)
+        public async Task Process(JsonElement message)
         {
-            if (message.Value<string>("type") == "serviceStateChanged")
+            if (message.TryGetString("type") == "serviceStateChanged")
             {
                 try
                 {
@@ -52,9 +54,9 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
             await ProcessServiceEvent(message);
         }
 
-        private async Task ProcessServiceStateChanged(JToken message)
+        private async Task ProcessServiceStateChanged(JsonElement message)
         {
-            var detail = message.Value<string>("detail");
+            var detail = message.TryGetString("detail");
 
             var r = new Regex(RegServer);
             var m = r.Match(detail);
@@ -63,7 +65,7 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
 
             if (int.TryParse(m.Groups[2].Value, out var worldId))
             {
-                var isWorldOnline = message.Value<bool>("online");
+                var isWorldOnline = message.TryGetBoolean("online").GetValueOrDefault();
 
                 await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
 
@@ -87,11 +89,12 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
             }
         }
 
-        private async Task ProcessServiceEvent(JToken message)
+        private async Task ProcessServiceEvent(JsonElement message)
         {
-            var jPayload = message.SelectToken("payload");
+            var jPayload = message.GetProperty("payload");
 
-            var payload = jPayload?.ToObject<PayloadBase>(StreamConstants.PayloadDeserializer);
+            var payload = jPayload.Deserialize<PayloadBase>(StreamConstants.SerializerOptions);
+
             var eventName = payload?.EventName;
 
             _healthMonitor.ReceivedEvent(payload.WorldId, eventName);

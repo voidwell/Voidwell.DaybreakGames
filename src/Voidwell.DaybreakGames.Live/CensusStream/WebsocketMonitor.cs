@@ -1,10 +1,11 @@
 ﻿using DaybreakGames.Census.Stream;
+using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
@@ -124,11 +125,11 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
                 return Task.CompletedTask;
             }
 
-            JToken msg;
+            JsonElement msg;
 
             try
             {
-                msg = JToken.Parse(message);
+                msg = JsonSerializer.Deserialize<JsonElement>(message);
             }
             catch(Exception)
             {
@@ -136,9 +137,9 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
                 return Task.CompletedTask;
             }
 
-            if (msg.Value<string>("type") == "heartbeat")
+            if (msg.TryGetString("type") == "heartbeat")
             {
-                UpdateStateDetails(msg.ToObject<object>());
+                UpdateStateDetails(msg.Deserialize<object>());
                 return Task.CompletedTask;
             }
 
