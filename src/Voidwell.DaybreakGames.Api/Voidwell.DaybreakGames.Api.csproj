@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     <PackageReference Include="Voidwell.Logging" Version="3.1.0" />
-    <PackageReference Include="Voidwell.Microservice" Version="6.0.20" />
+    <PackageReference Include="Voidwell.Microservice" Version="6.0.29" />
   </ItemGroup>
 
   <ItemGroup>

@@ -25,6 +25,21 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
                 .WithOne()
                 .HasPrincipalKey(e => e.Id)
                 .HasForeignKey(t => t.CharacterId);
+
+            builder.HasMany(e => e.DirectiveTiers)
+                .WithOne()
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(t => t.CharacterId);
+
+            builder.HasMany(e => e.Directives)
+                .WithOne()
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(t => t.CharacterId);
+
+            builder.HasMany(e => e.DirectiveObjectives)
+                .WithOne()
+                .HasPrincipalKey(e => e.Id)
+                .HasForeignKey(t => t.CharacterId);
         }
     }
 }

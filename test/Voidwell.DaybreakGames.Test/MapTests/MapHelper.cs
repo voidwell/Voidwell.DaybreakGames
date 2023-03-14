@@ -1,35 +1,30 @@
-﻿using DaybreakGames.Census;
-using DaybreakGames.Census.JsonConverters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
+using Voidwell.DaybreakGames.Live.CensusStream.JsonConverters;
 
 namespace Voidwell.DaybreakGames.Test.MapTests
 {
     public static class MapHelper
     {
         private const string DataRoot = "MapTests/TestData/";
-        private static readonly JsonSerializer jsonSerializer;
+        private static readonly JsonSerializerOptions jsonSerializerOptions;
 
         static MapHelper()
         {
-            var settings = new JsonSerializerSettings
+            jsonSerializerOptions = new JsonSerializerOptions
             {
-                ContractResolver = new UnderscorePropertyNamesContractResolver(),
-                Converters = new JsonConverter[]
+                PropertyNamingPolicy = new UnderscorePropertyJsonNamingPolicy(),
+                Converters =
                 {
                     new BooleanJsonConverter(),
                     new DateTimeJsonConverter()
                 }
             };
-
-            jsonSerializer = JsonSerializer.Create(settings);
         }
 
         public static WorldZoneState GetWorldZoneState(int zoneId)
@@ -101,9 +96,9 @@ namespace Voidwell.DaybreakGames.Test.MapTests
         {
             using (var r = new StreamReader(filename))
             {
-                return JToken.Parse(r.ReadToEnd())
-                    .SelectToken(rootProperty)
-                    .ToObject<T>(jsonSerializer);
+                return JsonSerializer.Deserialize<JsonElement>(r.ReadToEnd())
+                    .GetProperty(rootProperty)
+                    .Deserialize<T>(jsonSerializerOptions);
             }
         }
     }

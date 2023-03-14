@@ -13,5 +13,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         [Required]
         public int DirectiveTierId { get; set; }
         public DateTime? CompletionTimeDate { get; set; }
+        
+        public IEnumerable<CharacterDirective> CharacterDirectives { get; set; }
     }
 }

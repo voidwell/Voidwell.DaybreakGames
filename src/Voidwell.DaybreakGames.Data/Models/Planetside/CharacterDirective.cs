@@ -14,5 +14,6 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public DateTime? CompletionTimeDate { get; set; }
 
         public IEnumerable<CharacterDirectiveObjective> CharacterDirectiveObjectives { get; set; }
+        public Directive Directive { get; set; }
     }
 }

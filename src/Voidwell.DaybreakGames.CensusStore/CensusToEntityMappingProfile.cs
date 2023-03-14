@@ -12,7 +12,8 @@ namespace Voidwell.DaybreakGames.CensusStore
                 .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English))
                 .ForMember(d => d.Description, opt => opt.MapFrom(s => s.Description.English));
 
-            CreateMap<CensusCharacterAchievementModel, CharacterAchievement>();
+            CreateMap<CensusCharacterAchievementModel, CharacterAchievement>()
+                .ForMember(d => d.FinishDate, opt => opt.Condition(s => s.FinishDate?.Year != 1970));
 
             CreateMap<CensusCharacterDirectiveModel, CharacterDirective>()
                 .ForMember(d => d.CompletionTimeDate, opt => opt.Condition(s => s.CompletionTimeDate.Year != 1970));

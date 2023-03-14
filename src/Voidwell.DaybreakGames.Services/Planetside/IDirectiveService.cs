@@ -1,11 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
     public interface IDirectiveService
     {
-        Task<DirectivesOutline> GetDirectivesOutlineAsync(int factionId);
-        Task<CharacterDirectivesOutline> GetCharacterDirectivesAsync(string characterId);
+        Task<IEnumerable<DirectiveTreeCategory>> GetDirectiveDataAsync();
     }
 }

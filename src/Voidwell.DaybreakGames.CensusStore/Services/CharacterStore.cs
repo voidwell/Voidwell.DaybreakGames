@@ -249,6 +249,11 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             return _characterRepository.GetCharacterAchievementsAsync(characterId);
         }
 
+        public Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(string characterId)
+        {
+            return _characterRepository.GetWeaponStatsAsync(characterId);
+        }
+
         private async Task<Character> UpdateCharacter(string characterId)
         {
             var character = await _characterCollection.GetCharacterAsync(characterId);

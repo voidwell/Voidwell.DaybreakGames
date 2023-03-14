@@ -11,6 +11,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
             builder.ToTable("CharacterDirectiveTier");
 
             builder.HasKey(a => new { a.CharacterId, a.DirectiveTreeId, a.DirectiveTierId });
+
+            builder.Ignore(a => a.CharacterDirectives);
         }
     }
 }
