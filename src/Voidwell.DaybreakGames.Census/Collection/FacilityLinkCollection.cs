@@ -1,5 +1,4 @@
 ﻿using DaybreakGames.Census;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
@@ -10,7 +9,7 @@ namespace Voidwell.DaybreakGames.Census.Collection
 {
     public class FacilityLinkCollection : CensusPatchCollection, ICensusStaticCollection<CensusFacilityLinkModel>
     {
-        public override string CollectionName => "facility_link";
+        public string CollectionName => "facility_link";
 
         public FacilityLinkCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
             : base(censusPatchClient, censusClient)
@@ -19,14 +18,10 @@ namespace Voidwell.DaybreakGames.Census.Collection
 
         public async Task<IEnumerable<CensusFacilityLinkModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.Where("zone_id").IsLessThan(300);
-
-                query.ShowFields("zone_id", "facility_id_a", "facility_id_b", "description");
-
-                return query.GetBatchAsync<CensusFacilityLinkModel>();
-            });
+            return await QueryAsync(CollectionName, query =>
+                query.Where("zone_id", a => a.IsLessThan(300))
+                    .ShowFields("zone_id", "facility_id_a", "facility_id_b", "description")
+                    .GetBatchAsync<CensusFacilityLinkModel>());
         }
     }
 }

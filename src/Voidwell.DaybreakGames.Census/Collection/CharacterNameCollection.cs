@@ -5,22 +5,22 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class CharacterNameCollection : CensusCollection
+    public class CharacterNameCollection : ICensusCollection<CensusCharacterNameModel>
     {
-        public override string CollectionName => "character_name";
+        private readonly ICensusClient _client;
 
-        public CharacterNameCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "character_name";
+
+        public CharacterNameCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<string> GetCharacterIdByNameAsync(string characterName)
         {
-            var nameModel = await QueryAsync(query =>
-            {
-                query.Where("name.first_lower").Equals(characterName.ToLower());
-
-                return query.GetAsync<CensusCharacterNameModel>();
-            });
+            var nameModel = await _client.CreateQuery(CollectionName)
+                .Where("name.first_lower", a => a.Equals(characterName.ToLower()))
+                .GetAsync<CensusCharacterNameModel>();
 
             return nameModel?.CharacterId;
         }

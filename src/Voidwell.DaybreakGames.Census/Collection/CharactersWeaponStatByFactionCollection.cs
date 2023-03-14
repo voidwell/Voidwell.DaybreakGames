@@ -7,29 +7,30 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class CharactersWeaponStatByFactionCollection : CensusCollection
+    public class CharactersWeaponStatByFactionCollection : ICensusCollection<CensusCharacterWeaponFactionStatModel>
     {
-        public override string CollectionName => "characters_weapon_stat_by_faction";
+        private readonly ICensusClient _client;
 
-        public CharactersWeaponStatByFactionCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "characters_weapon_stat_by_faction";
+
+        public CharactersWeaponStatByFactionCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusCharacterWeaponFactionStatModel>> GetCharacterWeaponStatsByFactionAsync(string characterId, DateTime? lastLogin = null)
         {
-            return await QueryAsync(query =>
+            var query = _client.CreateQuery(CollectionName)
+                .SetLimit(5000)
+                .ShowFields("character_id", "stat_name", "item_id", "vehicle_id", "value_vs", "value_nc", "value_tr")
+                .Where("character_id", a => a.Equals(characterId));
+
+            if (lastLogin != null)
             {
-                query.SetLimit(5000);
-                query.ShowFields("character_id", "stat_name", "item_id", "vehicle_id", "value_vs", "value_nc", "value_tr");
-                query.Where("character_id").Equals(characterId);
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
+            }
 
-                if (lastLogin != null)
-                {
-                    query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
-                }
-
-                return query.GetBatchAsync<CensusCharacterWeaponFactionStatModel>();
-            });
+            return await query.GetBatchAsync<CensusCharacterWeaponFactionStatModel>();
         }
     }
 }

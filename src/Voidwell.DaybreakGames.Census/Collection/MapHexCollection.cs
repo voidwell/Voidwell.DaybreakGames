@@ -1,5 +1,4 @@
 ﻿using DaybreakGames.Census;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
@@ -10,7 +9,7 @@ namespace Voidwell.DaybreakGames.Census.Collection
 {
     public class MapHexCollection : CensusPatchCollection, ICensusStaticCollection<CensusMapHexModel>
     {
-        public override string CollectionName => "map_hex";
+        public string CollectionName => "map_hex";
 
         public MapHexCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
             : base(censusPatchClient, censusClient)
@@ -19,12 +18,9 @@ namespace Voidwell.DaybreakGames.Census.Collection
 
         public async Task<IEnumerable<CensusMapHexModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.ShowFields("zone_id", "map_region_id", "x", "y", "hex_type", "type_name");
-
-                return query.GetBatchAsync<CensusMapHexModel>();
-            });
+            return await QueryAsync(CollectionName, query =>
+                query.ShowFields("zone_id", "map_region_id", "x", "y", "hex_type", "type_name")
+                    .GetBatchAsync<CensusMapHexModel>());
         }
     }
 }

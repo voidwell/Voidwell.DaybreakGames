@@ -6,22 +6,22 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class DirectiveTreeCollection : CensusCollection, ICensusStaticCollection<CensusDirectiveTreeModel>
+    public class DirectiveTreeCollection : ICensusStaticCollection<CensusDirectiveTreeModel>
     {
-        public override string CollectionName => "directive_tree";
+        private readonly ICensusClient _client;
 
-        public DirectiveTreeCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "directive_tree";
+
+        public DirectiveTreeCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusDirectiveTreeModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.SetLanguage("en");
-
-                return query.GetBatchAsync<CensusDirectiveTreeModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .SetLanguage("en")
+                .GetBatchAsync<CensusDirectiveTreeModel>();
         }
     }
 }

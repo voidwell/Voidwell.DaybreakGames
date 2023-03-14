@@ -6,25 +6,26 @@ using Voidwell.DaybreakGames.Census.Patcher;
 
 namespace Voidwell.DaybreakGames.Census.Collection.Abstract
 {
-    public abstract class CensusPatchCollection : CensusCollection
+    public abstract class CensusPatchCollection
     {
         protected readonly ICensusPatchClient _patchClient;
+        protected readonly ICensusClient _censusClient;
 
         protected CensusPatchCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient)
-            : base(censusClient)
         {
             _patchClient = censusPatchClient;
+            _censusClient = censusClient;
         }
 
-        protected override async Task<T> QueryAsync<T>(Func<CensusQuery, Task<T>> queryFunc)
+        protected async Task<T> QueryAsync<T>(string collectionName, Func<CensusQuery, Task<T>> queryFunc)
         {
             try
             {
-                return await queryFunc(_patchClient.CreateQuery(CollectionName));
+                return await queryFunc(_patchClient.CreateQuery(collectionName));
             }
             catch (Exception)
             {
-                return await base.QueryAsync(queryFunc);
+                return await queryFunc(_censusClient.CreateQuery(collectionName));
             }
         }
     }

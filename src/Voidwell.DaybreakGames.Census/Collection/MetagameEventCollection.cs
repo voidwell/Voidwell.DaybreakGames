@@ -1,5 +1,4 @@
 ﻿using DaybreakGames.Census;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
@@ -7,24 +6,23 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class MetagameEventCollection : CensusCollection, ICensusStaticCollection<CensusMetagameEventCategoryModel>
+    public class MetagameEventCollection : ICensusStaticCollection<CensusMetagameEventCategoryModel>
     {
-        public override string CollectionName => "metagame_event";
+        private readonly ICensusClient _client;
 
-        public MetagameEventCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "metagame_event";
+
+        public MetagameEventCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusMetagameEventCategoryModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.SetLanguage("en");
-
-                query.ShowFields("metagame_event_id", "name", "description", "type", "experience_bonus");
-
-                return query.GetBatchAsync<CensusMetagameEventCategoryModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .SetLanguage("en")
+                .ShowFields("metagame_event_id", "name", "description", "type", "experience_bonus")
+                .GetBatchAsync<CensusMetagameEventCategoryModel>();
         }
     }
 }

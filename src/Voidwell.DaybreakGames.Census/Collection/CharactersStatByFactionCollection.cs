@@ -7,29 +7,30 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class CharactersStatByFactionCollection : CensusCollection
+    public class CharactersStatByFactionCollection : ICensusCollection<CensusCharacterFactionStatModel>
     {
-        public override string CollectionName => "characters_stat_by_faction";
+        private readonly ICensusClient _client;
 
-        public CharactersStatByFactionCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "characters_stat_by_faction";
+
+        public CharactersStatByFactionCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusCharacterFactionStatModel>> GetCharacterFactionStatsAsync(string characterId, DateTime? lastLogin = null)
         {
-            return await QueryAsync(query =>
+            var query =_client.CreateQuery(CollectionName)
+                .SetLimit(500)
+                .ShowFields("character_id", "stat_name", "profile_id", "value_forever_vs", "value_forever_nc", "value_forever_tr")
+                .Where("character_id", a => a.Equals(characterId));
+
+            if (lastLogin != null)
             {
-                query.SetLimit(500);
-                query.ShowFields("character_id", "stat_name", "profile_id", "value_forever_vs", "value_forever_nc", "value_forever_tr");
-                query.Where("character_id").Equals(characterId);
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
+            }
 
-                if (lastLogin != null)
-                {
-                    query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
-                }
-
-                return query.GetBatchAsync<CensusCharacterFactionStatModel>();
-            });
+            return await query.GetBatchAsync<CensusCharacterFactionStatModel>();
         }
     }
 }

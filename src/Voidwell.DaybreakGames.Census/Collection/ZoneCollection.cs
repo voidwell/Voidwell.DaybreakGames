@@ -1,5 +1,4 @@
 ﻿using DaybreakGames.Census;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
@@ -10,7 +9,7 @@ namespace Voidwell.DaybreakGames.Census.Collection
 {
     public class ZoneCollection : CensusPatchCollection, ICensusStaticCollection<CensusZoneModel>
     {
-        public override string CollectionName => "zone";
+        public string CollectionName => "zone";
 
         public ZoneCollection(ICensusPatchClient censusPatchClient, ICensusClient censusClient) : base(censusPatchClient, censusClient)
         {
@@ -18,14 +17,10 @@ namespace Voidwell.DaybreakGames.Census.Collection
 
         public async Task<IEnumerable<CensusZoneModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.SetLanguage("en");
-
-                query.ShowFields("zone_id", "code", "name", "description", "hex_size");
-
-                return query.GetBatchAsync<CensusZoneModel>();
-            });
+            return await QueryAsync(CollectionName, query =>
+                query.SetLanguage("en")
+                    .ShowFields("zone_id", "code", "name", "description", "hex_size")
+                    .GetBatchAsync<CensusZoneModel>());
         }
     }
 }
