@@ -38,15 +38,14 @@ namespace Voidwell.DaybreakGames.Census.Collection
 
         public async Task<IEnumerable<CensusCharacterModel>> LookupCharactersByNameAsync(string name, int limit)
         {
-            var query = _client.CreateQuery(CollectionName)
+            return await _client.CreateQuery(CollectionName)
                 .SetLimit(limit)
+                .UseExactMatchFirst()
                 .AddResolve("online_status", "world")
                 .ShowFields("character_id", "name.first", "battle_rank.value", "faction_id", "times.last_login")
                 .Where("name.first_lower", a => a.StartsWith(name.ToLower()))
-                .Where("battle_rank.value", a => a.IsGreaterThan(0));
-            query.ExactMatchFirst = true;
-
-            return await query.GetListAsync<CensusCharacterModel>();
+                .Where("battle_rank.value", a => a.IsGreaterThan(0))
+                .GetListAsync<CensusCharacterModel>();
         }
     }
 }
