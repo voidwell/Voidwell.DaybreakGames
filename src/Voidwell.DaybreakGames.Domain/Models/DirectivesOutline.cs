@@ -42,7 +42,6 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public int? ImageId { get; set; }
-        public int? FactionId { get; set; }
     }
 
     public class DirectivesOutlineDirective
@@ -62,7 +61,6 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public int Id { get; set; }
         public int TypeId { get; set; }
         public int? GoalValue { get; set; }
-        public int? FactionId { get; set; }
         public int? AchievementId { get; set; }
     }
 }

@@ -19,19 +19,19 @@ namespace Voidwell.DaybreakGames.Api
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls("http://0.0.0.0:5000")
-                .UseMicroserviceLogging(new LoggingOptions
+                .UseMicroserviceLogging(options =>
                 {
-                    MinLogLevel = LogEventLevel.Information,
-                    IncludeMicrosoftInformation = true,
-                    LoggingOutput = "flat",
-                    IgnoreRules = new List<Func<LogEvent, bool>>
+                    options.MinLogLevel = LogEventLevel.Information;
+                    options.IncludeMicrosoftInformation = true;
+                    options.LoggingOutput = "flat";
+                    options.IgnoreRules = new List<Func<LogEvent, bool>>
                     {
                         e => Matching.FromSource("Microsoft.AspNetCore.Routing")(e),
                         e => Matching.FromSource("Microsoft.AspNetCore.Mvc")(e),
                         e => Matching.FromSource("Microsoft.EntityFrameworkCore")(e) && e.Level < LogEventLevel.Error,
                         e => Matching.FromSource("Microsoft.EntityFrameworkCore.Update")(e),
                         e => Matching.FromSource("Microsoft.EntityFrameworkCore.Database.Command")(e)
-                    }
+                    };
                 })
                 .Build();
     }

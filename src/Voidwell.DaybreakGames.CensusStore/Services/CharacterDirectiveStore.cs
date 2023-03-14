@@ -9,12 +9,13 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.Microservice.Utility;
 using Voidwell.DaybreakGames.Census.Models;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
     public class CharacterDirectiveStore : ICharacterDirectiveStore
     {
-        private readonly ICharacterRepository _repository;
+        private readonly ICharacterDirectiveRepository _repository;
         private readonly CharactersDirectiveCollection _charactersDirectiveCollection;
         private readonly CharactersDirectiveObjectiveCollection _charactersDirectiveObjectiveCollection;
         private readonly CharactersDirectiveTierCollection _charactersDirectiveTierCollection;
@@ -28,7 +29,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
 
         public CharacterDirectiveStore(
-            ICharacterRepository repository,
+            ICharacterDirectiveRepository repository,
             CharactersDirectiveCollection charactersDirectiveCollection,
             CharactersDirectiveObjectiveCollection charactersDirectiveObjectiveCollection,
             CharactersDirectiveTierCollection charactersDirectiveTierCollection,
@@ -49,13 +50,13 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         {
             using (await _characterLock.WaitAsync(characterId))
             {
-                var data = await _repository.GetCharacterDirectivesAsync(characterId);
+                var data = await GetCharacterDirectiveStoreDataAsync(characterId);
                 if (data == null || !data.Any())
                 {
                     try
                     {
                         await UpdateCharacterDirectiveDataAsync(characterId);
-                        data = await _repository.GetCharacterDirectivesAsync(characterId);
+                        data = await GetCharacterDirectiveStoreDataAsync(characterId);
                     }
                     catch (CensusConnectionException)
                     {
@@ -65,6 +66,32 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
                 return data;
             }
+        }
+
+        private async Task<IEnumerable<CharacterDirectiveTree>> GetCharacterDirectiveStoreDataAsync (string characterId)
+        {
+            var directiveTreesTask = _repository.GetDirectiveTreesAsync(characterId);
+            var directiveTiersTask = _repository.GetDirectiveTiersAsync(characterId);
+            var directivesTask = _repository.GetDirectivesAsync(characterId);
+            var directiveObjectivesTask = _repository.GetDirectiveObjectivesAsync(characterId);
+
+            await Task.WhenAll(directiveTreesTask, directiveTiersTask, directivesTask, directiveObjectivesTask);
+
+            var directiveTrees = directiveTreesTask.Result;
+            var directiveTiers = directiveTiersTask.Result;
+            var directives = directivesTask.Result;
+            var directiveObjectives = directiveObjectivesTask.Result;
+
+            if (directiveTrees == null)
+            {
+                return null;
+            }
+
+            directives?.SetGroupJoin(directiveObjectives, a => a.DirectiveId, a => a.DirectiveId, a => a.CharacterDirectiveObjectives);
+            directiveTiers.SetGroupJoin(directives, a => new { a.DirectiveTreeId, a.DirectiveTierId }, a => new { a.Directive.DirectiveTreeId, a.Directive.DirectiveTierId }, a => a.CharacterDirectives);
+            directiveTrees.SetGroupJoin(directiveTiers, a => a.DirectiveTreeId, a => a.DirectiveTreeId, a => a.CharacterDirectiveTiers);
+
+            return directiveTrees;
         }
 
         public async Task UpdateCharacterDirectiveDataAsync(string characterId)

@@ -1,4 +1,4 @@
-﻿using Glicko2;
+﻿//using Glicko2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,11 +47,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 var winnerRating = winnerRatingTask.Result;
                 var loserRating = loserRatingTask.Result;
 
-                var winnerResult = Calculate1v1(winnerRating, loserRating, true);
-                var loserResult = Calculate1v1(loserRating, winnerRating, false);
+                //var winnerResult = Calculate1v1(winnerRating, loserRating, true);
+                //var loserResult = Calculate1v1(loserRating, winnerRating, false);
 
-                await Task.WhenAll(_cache.SetAsync(GetCacheKey(winnerCharacterId), winnerResult, _cacheExpiration),
-                    _cache.SetAsync(GetCacheKey(loserCharacterId), loserResult, _cacheExpiration));
+                //await Task.WhenAll(_cache.SetAsync(GetCacheKey(winnerCharacterId), winnerResult, _cacheExpiration),
+                //    _cache.SetAsync(GetCacheKey(loserCharacterId), loserResult, _cacheExpiration));
             }
             finally
             {
@@ -120,6 +120,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             return leaderboard;
         }
 
+        /*
         private static CharacterRating Calculate1v1(CharacterRating focus, CharacterRating opponent, bool isWin)
         {
             var focusPlayer = ToGlickoPlayer(focus);
@@ -147,5 +148,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 Volatility = rating.Volatility
             };
         }
+        */
     }
 }

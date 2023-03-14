@@ -10,7 +10,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories
 {
     public class CharacterRepository : ICharacterRepository
     {
-        public static T ClientMethod<T>(T element) => element;
         private readonly IDbContextHelper _dbContextHelper;
 
         public CharacterRepository(IDbContextHelper dbContextHelper)
@@ -104,6 +103,12 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                             join lifetimeStatsByFaction in dbContext.CharacterLifetimeStatsByFaction on c.Id equals lifetimeStatsByFaction.CharacterId into lifetimeStatsByFactionQ
                             from lifetimeStatsByFaction in lifetimeStatsByFactionQ.DefaultIfEmpty()
 
+                            join outfitMembership in dbContext.OutfitMembers on c.Id equals outfitMembership.CharacterId into outfitMemberships
+                            from outfitMembership in outfitMemberships.DefaultIfEmpty()
+
+                            join outfit in dbContext.Outfits on outfitMembership.OutfitId equals outfit.Id into outfits
+                            from outfit in outfits.DefaultIfEmpty()
+
                             where characterIds.Contains(c.Id)
                             select new Character
                             {
@@ -122,132 +127,133 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                 Faction = faction,
                                 LifetimeStats = lifetimeStats,
                                 LifetimeStatsByFaction = lifetimeStatsByFaction,
-                                OutfitMembership = (from om in dbContext.OutfitMembers
-                                                    join outfit in dbContext.Outfits on om.OutfitId equals outfit.Id
-                                                    where om.CharacterId == c.Id
-                                                    select new OutfitMember
+                                OutfitMembership = outfitMembership == null ? null : new OutfitMember
+                                {
+                                    CharacterId = outfitMembership.CharacterId,
+                                    MemberSinceDate = outfitMembership.MemberSinceDate,
+                                    OutfitId = outfitMembership.OutfitId,
+                                    Rank = outfitMembership.Rank,
+                                    RankOrdinal = outfitMembership.RankOrdinal,
+                                    Outfit = outfit
+                                }
+                            };
+                var details = await query.ToListAsync();
+
+                foreach(var c in details)
+                {
+                    c.Stats = await (from s in dbContext.CharacterStats
+                                     join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = c.FactionId } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
+                                     from profile in profileQ.DefaultIfEmpty()
+
+                                     where s.CharacterId == c.Id
+                                     select new CharacterStat
+                                     {
+                                         CharacterId = s.CharacterId,
+                                         ProfileId = s.ProfileId,
+                                         Deaths = s.Deaths,
+                                         FireCount = s.FireCount,
+                                         HitCount = s.HitCount,
+                                         KilledBy = s.KilledBy,
+                                         Kills = s.Kills,
+                                         PlayTime = s.PlayTime,
+                                         Score = s.Score,
+                                         Profile = profile
+                                     }).ToListAsync();
+
+                    c.StatsHistory = await (from s in dbContext.CharacterStatHistory
+                                            where s.CharacterId == c.Id
+                                            select s).ToListAsync();
+
+                    c.WeaponStats = await (from s in dbContext.CharacterWeaponStats
+                                           join item in dbContext.Items on s.ItemId equals item.Id into items
+                                           from item in items.DefaultIfEmpty()
+
+                                           join itemCategory in dbContext.ItemCategories on item.ItemCategoryId equals itemCategory.Id into itemCategories
+                                           from itemCategory in itemCategories.DefaultIfEmpty()
+
+                                           join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
+                                           from vehicle in vehicleQ.DefaultIfEmpty()
+
+                                           where s.CharacterId == c.Id
+                                           select new CharacterWeaponStat
+                                           {
+                                               CharacterId = s.CharacterId,
+                                               ItemId = s.ItemId,
+                                               VehicleId = s.VehicleId,
+                                               DamageGiven = s.DamageGiven,
+                                               DamageTakenBy = s.DamageTakenBy,
+                                               Headshots = s.Headshots,
+                                               Deaths = s.Deaths,
+                                               VehicleKills = s.VehicleKills,
+                                               FireCount = s.FireCount,
+                                               HitCount = s.HitCount,
+                                               KilledBy = s.KilledBy,
+                                               Kills = s.Kills,
+                                               PlayTime = s.PlayTime,
+                                               Score = s.Score,
+                                               Item = item == null ? null : new Item
+                                               {
+                                                   Id = item.Id,
+                                                   Name = item.Name,
+                                                   Description = item.Description,
+                                                   FactionId = item.FactionId,
+                                                   ImageId = item.ImageId,
+                                                   IsVehicleWeapon = item.IsVehicleWeapon,
+                                                   ItemTypeId = item.ItemTypeId,
+                                                   MaxStackSize = item.MaxStackSize,
+                                                   ItemCategoryId = item.ItemCategoryId,
+                                                   ItemCategory = itemCategory,
+                                               },
+                                               Vehicle = vehicle
+                                           }).ToListAsync();
+
+                    c.WeaponStatsByFaction = await (from s in dbContext.CharacterWeaponStatByFactions
+                                                    join item in dbContext.Items on s.ItemId equals item.Id into itemQ
+                                                    from item in itemQ.DefaultIfEmpty()
+
+                                                    join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
+                                                    from vehicle in vehicleQ.DefaultIfEmpty()
+
+                                                    where s.CharacterId == c.Id
+                                                    select new CharacterWeaponStatByFaction
                                                     {
-                                                        CharacterId = om.CharacterId,
-                                                        MemberSinceDate = om.MemberSinceDate,
-                                                        OutfitId = om.OutfitId,
-                                                        Rank = om.Rank,
-                                                        RankOrdinal = om.RankOrdinal,
-                                                        Outfit = outfit
-                                                    }).FirstOrDefault(),
-                                Stats = (from s in dbContext.CharacterStats
-                                         join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
-                                         from profile in profileQ.DefaultIfEmpty()
-                                         where s.CharacterId == c.Id
-                                         select new CharacterStat
-                                         {
-                                             CharacterId = s.CharacterId,
-                                             ProfileId = s.ProfileId,
-                                             Deaths = s.Deaths,
-                                             FireCount = s.FireCount,
-                                             HitCount = s.HitCount,
-                                             KilledBy = s.KilledBy,
-                                             Kills = s.Kills,
-                                             PlayTime = s.PlayTime,
-                                             Score = s.Score,
-                                             Profile = profile
-                                         }).ToList(),
-                                StatsHistory = (from s in dbContext.CharacterStatHistory
-                                                where s.CharacterId == c.Id
-                                                select s).ToList(),
-                                StatsByFaction = (from s in dbContext.CharacterStatByFactions
-                                                  join profile in dbContext.Profiles on new { pid = s.ProfileId, fid = ClientMethod(c.FactionId) } equals new { pid = profile.ProfileTypeId, fid = profile.FactionId } into profileQ
-                                                  from profile in profileQ.DefaultIfEmpty()
-                                                  where s.CharacterId == c.Id
-                                                  select new CharacterStatByFaction
-                                                  {
-                                                      CharacterId = s.CharacterId,
-                                                      ProfileId = s.ProfileId,
-                                                      KilledByVS = s.KilledByVS,
-                                                      KilledByNC = s.KilledByNC,
-                                                      KilledByTR = s.KilledByTR,
-                                                      KillsVS = s.KillsVS,
-                                                      KillsNC = s.KillsNC,
-                                                      KillsTR = s.KillsTR,
-                                                      Profile = profile
-                                                  }).ToList(),
-                                WeaponStats = (from s in dbContext.CharacterWeaponStats
-                                                join item in (from i in dbContext.Items
-                                                              join category in dbContext.ItemCategories on i.ItemCategoryId equals category.Id into categoryQ
-                                                              from category in categoryQ.DefaultIfEmpty()
-                                                              select new Item
-                                                              {
-                                                                  Id = i.Id,
-                                                                  Name = i.Name,
-                                                                  Description = i.Description,
-                                                                  FactionId = i.FactionId,
-                                                                  ImageId = i.ImageId,
-                                                                  IsVehicleWeapon = i.IsVehicleWeapon,
-                                                                  ItemTypeId = i.ItemTypeId,
-                                                                  MaxStackSize = i.MaxStackSize,
-                                                                  ItemCategoryId = i.ItemCategoryId,
-                                                                  ItemCategory = category
-                                                              }).ToList()
-                                                on s.ItemId equals item.Id into itemQ
-                                                from item in itemQ.DefaultIfEmpty()
-                                                join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
-                                                from vehicle in vehicleQ.DefaultIfEmpty()
-                                                where s.CharacterId == c.Id
-                                                select new CharacterWeaponStat
-                                                {
-                                                    CharacterId = s.CharacterId,
-                                                    ItemId = s.ItemId,
-                                                    VehicleId = s.VehicleId,
-                                                    DamageGiven = s.DamageGiven,
-                                                    DamageTakenBy = s.DamageTakenBy,
-                                                    Headshots = s.Headshots,
-                                                    Deaths = s.Deaths,
-                                                    VehicleKills = s.VehicleKills,
-                                                    FireCount = s.FireCount,
-                                                    HitCount = s.HitCount,
-                                                    KilledBy = s.KilledBy,
-                                                    Kills = s.Kills,
-                                                    PlayTime = s.PlayTime,
-                                                    Score = s.Score,
-                                                    Item = item,
-                                                    Vehicle = vehicle
-                                                }).ToList(),
-                                 WeaponStatsByFaction = (from s in dbContext.CharacterWeaponStatByFactions
-                                                         join item in dbContext.Items on s.ItemId equals item.Id into itemQ
-                                                         from item in itemQ.DefaultIfEmpty()
-                                                         join vehicle in dbContext.Vehicles on s.VehicleId equals vehicle.Id into vehicleQ
-                                                         from vehicle in vehicleQ.DefaultIfEmpty()
-                                                         where s.CharacterId == c.Id
-                                                         select new CharacterWeaponStatByFaction
-                                                         {
-                                                             CharacterId = s.CharacterId,
-                                                             ItemId = s.ItemId,
-                                                             VehicleId = s.VehicleId,
-                                                             DamageGivenVS = s.DamageGivenVS,
-                                                             DamageGivenNC = s.DamageGivenNC,
-                                                             DamageGivenTR = s.DamageGivenTR,
-                                                             DamageTakenByVS = s.DamageTakenByVS,
-                                                             DamageTakenByNC = s.DamageTakenByNC,
-                                                             DamageTakenByTR = s.DamageTakenByTR,
-                                                             HeadshotsVS = s.HeadshotsVS,
-                                                             HeadshotsNC = s.HeadshotsNC,
-                                                             HeadshotsTR = s.HeadshotsTR,
-                                                             KilledByVS = s.KilledByVS,
-                                                             KilledByNC = s.KilledByNC,
-                                                             KilledByTR = s.KilledByTR,
-                                                             KillsVS = s.KillsVS,
-                                                             KillsNC = s.KillsNC,
-                                                             KillsTR = s.KillsTR,
-                                                             VehicleKillsVS = s.VehicleKillsVS,
-                                                             VehicleKillsNC = s.VehicleKillsNC,
-                                                             VehicleKillsTR = s.VehicleKillsTR,
-                                                             Item = item,
-                                                             Vehicle = vehicle
-                                                         }).ToList()
-                             };
+                                                        CharacterId = s.CharacterId,
+                                                        ItemId = s.ItemId,
+                                                        VehicleId = s.VehicleId,
+                                                        DamageGivenVS = s.DamageGivenVS,
+                                                        DamageGivenNC = s.DamageGivenNC,
+                                                        DamageGivenTR = s.DamageGivenTR,
+                                                        DamageTakenByVS = s.DamageTakenByVS,
+                                                        DamageTakenByNC = s.DamageTakenByNC,
+                                                        DamageTakenByTR = s.DamageTakenByTR,
+                                                        HeadshotsVS = s.HeadshotsVS,
+                                                        HeadshotsNC = s.HeadshotsNC,
+                                                        HeadshotsTR = s.HeadshotsTR,
+                                                        KilledByVS = s.KilledByVS,
+                                                        KilledByNC = s.KilledByNC,
+                                                        KilledByTR = s.KilledByTR,
+                                                        KillsVS = s.KillsVS,
+                                                        KillsNC = s.KillsNC,
+                                                        KillsTR = s.KillsTR,
+                                                        VehicleKillsVS = s.VehicleKillsVS,
+                                                        VehicleKillsNC = s.VehicleKillsNC,
+                                                        VehicleKillsTR = s.VehicleKillsTR,
+                                                        Item = item,
+                                                        Vehicle = vehicle
+                                                    }).ToListAsync();
+                }
 
-                var result = query.ToList();
+                return details;
+            }
+        }
 
-                return await Task.FromResult(result);
+        public async Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(string characterId)
+        {
+            using (var factory = _dbContextHelper.GetFactory())
+            {
+                var dbContext = factory.GetDbContext();
+
+                return await dbContext.CharacterWeaponStats.Where(a => a.CharacterId == characterId).ToListAsync();
             }
         }
 
@@ -275,33 +281,26 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<CharacterDirectiveTree>> GetCharacterDirectivesAsync(string characterId)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                return await dbContext.CharacterDirectiveTrees
-                    .Where(a => a.CharacterId == characterId)
-                    .Include(a => a.CharacterDirectiveTiers)
-                    .Include(a => a.CharacterDirectives)
-                        .ThenInclude(a => a.CharacterDirectiveObjectives)
-                            .ThenInclude(a => a.Objective)
-                    .ToListAsync();
-            }
-        }
-
         public async Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.CharacterAchievements
-                    .Where(a => a.CharacterId == characterId)
-                    .Include(a => a.Achievement)
-                        .ThenInclude(a => a.Objective)
-                    .ToListAsync();
+                var query = from characterAch in dbContext.CharacterAchievements
+                            join achievement in dbContext.Achievements on characterAch.AchievementId equals achievement.Id into achievements
+                            from achievement in achievements.DefaultIfEmpty()
+                            where characterAch.CharacterId == characterId
+                            select new CharacterAchievement
+                            {
+                                CharacterId = characterAch.CharacterId,
+                                AchievementId = characterAch.AchievementId,
+                                EarnedCount = characterAch.EarnedCount,
+                                StartDate = characterAch.StartDate,
+                                FinishDate = characterAch.FinishDate,
+                                Achievement = achievement
+                            };
+                return await query.ToListAsync();
             }
         }
 
@@ -361,7 +360,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+                return await dbContext.UpsertRangeWithoutNullPropertiesAsync(entities);
             }
         }
 
@@ -371,7 +370,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+                return await dbContext.UpsertRangeWithoutNullPropertiesAsync(entities);
             }
         }
 
@@ -381,7 +380,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+                return await dbContext.UpsertRangeWithoutNullPropertiesAsync(entities);
             }
         }
 
@@ -391,7 +390,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             {
                 var dbContext = factory.GetDbContext();
 
-                return await dbContext.UpsertWithoutNullPropertiesAsync(entities);
+                return await dbContext.UpsertRangeWithoutNullPropertiesAsync(entities);
             }
         }
 

@@ -13,13 +13,15 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
         private readonly ICharacterService _characterService;
         private readonly ICharacterSessionService _characterSessionService;
         private readonly IPlayerMonitor _playerMonitor;
+        private readonly ICharacterDirectiveService _characterDirectiveService;
 
         public CharacterController(ICharacterService characterService, ICharacterSessionService characterSessionService,
-            IPlayerMonitor playerMonitor)
+            IPlayerMonitor playerMonitor, ICharacterDirectiveService characterDirectiveService)
         {
             _characterService = characterService;
             _characterSessionService = characterSessionService;
             _playerMonitor = playerMonitor;
+            _characterDirectiveService = characterDirectiveService;
         }
 
         [HttpGet("{characterId}")]
@@ -92,6 +94,18 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             var result = await _characterService.GetCharactersByName(characterNames.Take(25).ToArray());
 
             return Ok(result);
+        }
+
+        [HttpGet("{characterId}/directives")]
+        public async Task<ActionResult> GetDirectivesByCharacterId(string characterId)
+        {
+            var data = await _characterDirectiveService.GetCharacterDirectivesAsync(characterId);
+            if (data == null)
+            {
+                return NotFound($"Unable to find directives for character : '{characterId}'");
+            }
+
+            return Ok(data);
         }
     }
 }

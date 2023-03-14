@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Voidwell.DaybreakGames.Data;
@@ -11,9 +12,10 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    partial class PS2DbContextModelSnapshot : ModelSnapshot
+    [Migration("20230307201808_ps2dbcontext.2023_03_07_15_18_02")]
+    partial class ps2dbcontext2023_03_07_15_18_02
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -7,6 +7,7 @@ using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
+using System.Diagnostics;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {
@@ -32,8 +33,15 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
         public async Task<Dictionary<int, int>> GetMapOwnershipAsync(int worldId, int zoneId)
         {
-            var map = await _mapCollection.GetMapOwnershipAsync(worldId, zoneId);
-            return map?.Regions.Row.ToDictionary(a => a.RowData.RegionId, a => a.RowData.FactionId);
+            try
+            {
+                var map = await _mapCollection.GetMapOwnershipAsync(worldId, zoneId);
+                return map?.Regions.Row.ToDictionary(a => a.RowData.RegionId, a => a.RowData.FactionId);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public async Task CreateZoneSnapshotAsync(int worldId, int zoneId, DateTime? timestamp = null, int? metagameInstanceId = null, Dictionary<int, int> zoneOwnership = null)

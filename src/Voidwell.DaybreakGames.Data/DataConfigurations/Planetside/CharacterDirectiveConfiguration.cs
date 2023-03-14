@@ -12,10 +12,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations
 
             builder.HasKey(a => new { a.CharacterId, a.DirectiveId });
 
-            builder.HasMany(a => a.CharacterDirectiveObjectives)
-                .WithOne()
-                .HasPrincipalKey(e => new { e.CharacterId, e.DirectiveId })
-                .HasForeignKey(t => new { t.CharacterId, t.DirectiveId });
+            builder.Ignore(a => a.CharacterDirectiveObjectives)
+                .Ignore(a => a.Directive);
         }
     }
 }

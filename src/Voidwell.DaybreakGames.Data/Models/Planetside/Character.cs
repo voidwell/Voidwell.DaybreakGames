@@ -33,5 +33,8 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public IEnumerable<CharacterStatHistory> StatsHistory { get; set; }
         public CharacterRating Rating { get; set; }
         public IEnumerable<CharacterDirectiveTree> DirectiveTrees { get; set; }
+        public IEnumerable<CharacterDirectiveTier> DirectiveTiers { get; set; }
+        public IEnumerable<CharacterDirective> Directives { get; set; }
+        public IEnumerable<CharacterDirectiveObjective> DirectiveObjectives { get; set; }
     }
 }

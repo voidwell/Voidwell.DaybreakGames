@@ -18,5 +18,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         Task<SimpleCharacterDetails> GetCharacterByName(string characterName);
         Task<CharacterWeaponDetails> GetCharacterWeaponByName(string characterName, string weaponName);
         Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId);
+        Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(string characterId);
     }
 }

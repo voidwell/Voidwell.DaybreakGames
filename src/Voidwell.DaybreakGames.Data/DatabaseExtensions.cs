@@ -49,6 +49,8 @@ namespace Voidwell.DaybreakGames.Data
             services.AddSingleton<IWeaponAggregateRepository, WeaponAggregateRepository>();
             services.AddSingleton<IDirectiveRepository, DirectiveRepository>();
             services.AddSingleton<IObjectiveRepository, ObjectiveRepository>();
+            services.AddSingleton<IRewardRepository, RewardRepository>();
+            services.AddSingleton<ICharacterDirectiveRepository, CharacterDirectiveRepository>();
 
             return services;
         }

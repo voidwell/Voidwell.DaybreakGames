@@ -6,10 +6,8 @@ using System;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.Microservice.Cache;
 using System.Threading;
-using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using AutoMapper;
-using System.Collections;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -96,6 +94,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         public Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
         {
             return _characterStore.GetCharacterAchievementsAsync(characterId);
+        }
+
+        public Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(string characterId)
+        {
+            return _characterStore.GetWeaponStatsAsync(characterId);
         }
 
         private async Task<IEnumerable<CharacterDetails>> GetCharacterDetails(IEnumerable<string> characterIds)
