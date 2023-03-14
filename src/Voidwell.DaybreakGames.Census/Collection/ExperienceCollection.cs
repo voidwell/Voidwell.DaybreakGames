@@ -6,22 +6,22 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class ExperienceCollection : CensusCollection, ICensusStaticCollection<CensusExperienceModel>
+    public class ExperienceCollection : ICensusStaticCollection<CensusExperienceModel>
     {
-        public override string CollectionName => "experience";
+        private readonly ICensusClient _client;
 
-        public ExperienceCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "experience";
+
+        public ExperienceCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusExperienceModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.ShowFields("experience_id", "description", "xp");
-
-                return query.GetBatchAsync<CensusExperienceModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .ShowFields("experience_id", "description", "xp")
+                .GetBatchAsync<CensusExperienceModel>();
         }
     }
 }

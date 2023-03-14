@@ -6,20 +6,21 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class ObjectiveCollection : CensusCollection, ICensusStaticCollection<CensusObjectiveModel>
+    public class ObjectiveCollection : ICensusStaticCollection<CensusObjectiveModel>
     {
-        public override string CollectionName => "objective";
+        private readonly ICensusClient _client;
 
-        public ObjectiveCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "objective";
+
+        public ObjectiveCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusObjectiveModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                return query.GetBatchAsync<CensusObjectiveModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .GetBatchAsync<CensusObjectiveModel>();
         }
     }
 }

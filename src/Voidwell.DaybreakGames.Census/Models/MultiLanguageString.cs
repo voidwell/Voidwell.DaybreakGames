@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Census.Models
 {
     public class MultiLanguageString
     {
-        [JsonProperty("en")]
+        [JsonPropertyName("en")]
         public string English { get;set; }
     }
 }

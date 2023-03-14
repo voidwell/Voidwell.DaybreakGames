@@ -1,5 +1,4 @@
 ﻿using DaybreakGames.Census;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
@@ -7,24 +6,23 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class VehicleFactionCollection : CensusCollection, ICensusStaticCollection<CensusVehicleFactionModel>
+    public class VehicleFactionCollection : ICensusStaticCollection<CensusVehicleFactionModel>
     {
-        public override string CollectionName => "vehicle_faction";
+        private readonly ICensusClient _client;
 
-        public VehicleFactionCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "vehicle_faction";
+
+        public VehicleFactionCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusVehicleFactionModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.SetLanguage("en");
-
-                query.ShowFields("vehicle_id", "faction_id");
-
-                return query.GetBatchAsync<CensusVehicleFactionModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .SetLanguage("en")
+                .ShowFields("vehicle_id", "faction_id")
+                .GetBatchAsync<CensusVehicleFactionModel>();
         }
     }
 }

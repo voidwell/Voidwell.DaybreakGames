@@ -6,22 +6,23 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class AchievementCollection : CensusCollection, ICensusStaticCollection<CensusAchievementModel>
+    public class AchievementCollection : ICensusStaticCollection<CensusAchievementModel>
     {
-        public override string CollectionName => "achievement";
+        private readonly ICensusClient _client;
 
-        public AchievementCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "achievement";
+
+        public AchievementCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusAchievementModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.SetLanguage("en");
-
-                return query.GetBatchAsync<CensusAchievementModel>();
-            });
+            return await _client
+                .CreateQuery(CollectionName)
+                .SetLanguage("en")
+                .GetBatchAsync<CensusAchievementModel>();
         }
     }
 }

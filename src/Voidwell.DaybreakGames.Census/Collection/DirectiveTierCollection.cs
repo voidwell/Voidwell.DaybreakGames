@@ -6,22 +6,22 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class DirectiveTierCollection : CensusCollection, ICensusStaticCollection<CensusDirectiveTierModel>
+    public class DirectiveTierCollection : ICensusStaticCollection<CensusDirectiveTierModel>
     {
-        public override string CollectionName => "directive_tier";
+        private readonly ICensusClient _client;
 
-        public DirectiveTierCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "directive_tier";
+
+        public DirectiveTierCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusDirectiveTierModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.SetLanguage("en");
-
-                return query.GetBatchAsync<CensusDirectiveTierModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .SetLanguage("en")
+                .GetBatchAsync<CensusDirectiveTierModel>();
         }
     }
 }

@@ -5,23 +5,23 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class OutfitMembershipCollection : CensusCollection
+    public class OutfitMembershipCollection : ICensusCollection<CensusOutfitMemberModel>
     {
-        public override string CollectionName => "outfit_member";
+        private readonly ICensusClient _client;
 
-        public OutfitMembershipCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "outfit_member";
+
+        public OutfitMembershipCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<CensusOutfitMemberModel> GetCharacterOutfitMembershipAsync(string characterId)
         {
-            return await QueryAsync(query =>
-            {
-                query.ShowFields("character_id", "outfit_id", "member_since_date", "rank", "rank_ordinal");
-                query.Where("character_id").Equals(characterId);
-
-                return query.GetAsync<CensusOutfitMemberModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .ShowFields("character_id", "outfit_id", "member_since_date", "rank", "rank_ordinal")
+                .Where("character_id", a => a.Equals(characterId))
+                .GetAsync<CensusOutfitMemberModel>();
         }
     }
 }

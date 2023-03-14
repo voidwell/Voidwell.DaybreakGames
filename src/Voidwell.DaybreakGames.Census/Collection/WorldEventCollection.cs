@@ -6,40 +6,37 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class WorldEventCollection : CensusCollection
+    public class WorldEventCollection : ICensusCollection
     {
-        public override string CollectionName => "world_event";
+        private readonly ICensusClient _client;
 
-        public WorldEventCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "world_event";
+
+        public WorldEventCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusMetagameWorldEventModel>> GetMetagameWorldEventsAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.Where("type").Equals("METAGAME");
-
-                return query.GetListAsync<CensusMetagameWorldEventModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .Where("type", a => a.Equals("METAGAME"))
+                .GetListAsync<CensusMetagameWorldEventModel>();
         }
 
         public async Task<IEnumerable<CensusFacilityWorldEventModel>> GetFacilityWorldEventsByWorldIdAsync(int worldId, int? beforeTimestamp = null)
         {
-            return await QueryAsync(query =>
+            var query = _client.CreateQuery(CollectionName)
+                .SetLimit(500)
+                .Where("type", a => a.Equals("FACILITY"))
+                .Where("world_id", a => a.Equals(worldId));
+
+            if (beforeTimestamp.HasValue)
             {
-                query.Where("type").Equals("FACILITY");
-                query.Where("world_id").Equals(worldId);
+                query.Where("before").Equals(beforeTimestamp.Value);
+            }
 
-                if (beforeTimestamp.HasValue)
-                {
-                    query.Where("before").Equals(beforeTimestamp.Value);
-                }
-
-                query.SetLimit(500);
-
-                return query.GetListAsync<CensusFacilityWorldEventModel>();
-            });
+            return await query.GetListAsync<CensusFacilityWorldEventModel>();
         }
     }
 }

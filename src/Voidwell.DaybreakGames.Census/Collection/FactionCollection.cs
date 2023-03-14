@@ -7,24 +7,23 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class FactionCollection : CensusCollection, ICensusStaticCollection<CensusFactionModel>
+    public class FactionCollection : ICensusStaticCollection<CensusFactionModel>
     {
-        public override string CollectionName => "faction";
+        private readonly ICensusClient _client;
 
-        public FactionCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "faction";
+
+        public FactionCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusFactionModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                query.SetLanguage("en");
-
-                query.ShowFields("faction_id", "name", "image_id", "code_tag", "user_selectable");
-
-                return query.GetBatchAsync<CensusFactionModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .SetLanguage("en")
+                .ShowFields("faction_id", "name", "image_id", "code_tag", "user_selectable")
+                .GetBatchAsync<CensusFactionModel>();
         }
     }
 }

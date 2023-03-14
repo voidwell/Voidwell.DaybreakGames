@@ -7,29 +7,30 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class CharactersStatCollection : CensusCollection
+    public class CharactersStatCollection : ICensusCollection
     {
-        public override string CollectionName => "characters_stat";
+        private readonly ICensusClient _client;
 
-        public CharactersStatCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "characters_stat";
+
+        public CharactersStatCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusCharacterStatModel>> GetCharacterStatsAsync(string characterId, DateTime? lastLogin = null)
         {
-            return await QueryAsync(query =>
+            var query = _client.CreateQuery(CollectionName)
+                .SetLimit(500)
+                .ShowFields("character_id", "stat_name", "profile_id", "value_forever")
+                .Where("character_id", a => a.Equals(characterId));
+
+            if (lastLogin != null)
             {
-                query.SetLimit(500);
-                query.ShowFields("character_id", "stat_name", "profile_id", "value_forever");
-                query.Where("character_id").Equals(characterId);
+                query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
+            }
 
-                if (lastLogin != null)
-                {
-                    query.Where("last_save_date").IsGreaterThanOrEquals(lastLogin.Value);
-                }
-
-                return query.GetBatchAsync<CensusCharacterStatModel>();
-            });
+            return await query.GetBatchAsync<CensusCharacterStatModel>();
         }
     }
 }

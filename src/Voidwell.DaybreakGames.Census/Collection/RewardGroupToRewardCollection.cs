@@ -6,20 +6,21 @@ using Voidwell.DaybreakGames.Census.Models;
 
 namespace Voidwell.DaybreakGames.Census.Collection
 {
-    public class RewardGroupToRewardCollection : CensusCollection, ICensusStaticCollection<CensusRewardGroupToRewardModel>
+    public class RewardGroupToRewardCollection : ICensusStaticCollection<CensusRewardGroupToRewardModel>
     {
-        public override string CollectionName => "reward_group_to_reward";
+        private readonly ICensusClient _client;
 
-        public RewardGroupToRewardCollection(ICensusClient censusClient) : base(censusClient)
+        public string CollectionName => "reward_group_to_reward";
+
+        public RewardGroupToRewardCollection(ICensusClient censusClient)
         {
+            _client = censusClient;
         }
 
         public async Task<IEnumerable<CensusRewardGroupToRewardModel>> GetCollectionAsync()
         {
-            return await QueryAsync(query =>
-            {
-                return query.GetBatchAsync<CensusRewardGroupToRewardModel>();
-            });
+            return await _client.CreateQuery(CollectionName)
+                .GetBatchAsync<CensusRewardGroupToRewardModel>();
         }
     }
 }

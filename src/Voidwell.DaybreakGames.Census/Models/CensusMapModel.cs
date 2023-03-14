@@ -1,34 +1,34 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Census.Models
 {
     public class CensusMapModel
     {
-        [JsonProperty("ZoneId")]
+        [JsonPropertyName("ZoneId")]
         public int ZoneId { get; set; }
-        [JsonProperty("Regions")]
+        [JsonPropertyName("Regions")]
         public CensusMapRegionSet Regions { get; set; }
 
         public class CensusMapRegionSet
         {
-            [JsonProperty("IsList")]
+            [JsonPropertyName("IsList")]
             public bool IsList { get; set; }
-            [JsonProperty("Row")]
+            [JsonPropertyName("Row")]
             public IEnumerable<CensusMapRegionSetRow> Row { get; set; }
         }
 
         public class CensusMapRegionSetRow
         {
-            [JsonProperty("RowData")]
+            [JsonPropertyName("RowData")]
             public CensusMapRegionSetRowData RowData { get; set; }
         }
 
         public class CensusMapRegionSetRowData
         {
-            [JsonProperty("RegionId")]
+            [JsonPropertyName("RegionId")]
             public int RegionId { get; set; }
-            [JsonProperty("FactionId")]
+            [JsonPropertyName("FactionId")]
             public int FactionId { get; set; }
         }
     }
