@@ -8,7 +8,6 @@ using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
 using System.Text.Json;
 using DaybreakGames.Census;
-using IdentityModel.Client;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream
 {
@@ -65,7 +64,7 @@ namespace Voidwell.DaybreakGames.Live.CensusStream
 
             if (int.TryParse(m.Groups[2].Value, out var worldId))
             {
-                var isWorldOnline = message.TryGetBoolean("online").GetValueOrDefault();
+                var isWorldOnline = bool.TryParse(message.TryGetString("online"), out bool result) ? result : false;
 
                 await _worldMonitor.SetWorldState(worldId, worldName, isWorldOnline);
 
