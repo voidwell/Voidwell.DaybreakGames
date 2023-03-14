@@ -1,19 +1,18 @@
-﻿using DaybreakGames.Census;
-using DaybreakGames.Census.JsonConverters;
-using Newtonsoft.Json;
+﻿using System.Text.Json;
+using Voidwell.DaybreakGames.Live.CensusStream.JsonConverters;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream
 {
     public static class StreamConstants
     {
-        public static readonly JsonSerializer PayloadDeserializer = JsonSerializer.Create(new JsonSerializerSettings
+        public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
         {
-            ContractResolver = new UnderscorePropertyNamesContractResolver(),
-            Converters = new JsonConverter[]
-                {
-                    new BooleanJsonConverter(),
-                    new DateTimeJsonConverter()
-                }
-        });
+            PropertyNamingPolicy = new UnderscorePropertyJsonNamingPolicy(),
+            Converters =
+            {
+                new BooleanJsonConverter(),
+                new DateTimeJsonConverter()
+            }
+        };
     }
 }
