@@ -50,6 +50,9 @@ namespace Voidwell.DaybreakGames.CensusStore
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.FactionId))
                 .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English));
 
+            CreateMap<CensusImageSetModel, ImageSet>()
+                .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ImageSetId));
+
             CreateMap<CensusItemCategoryModel, ItemCategory>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ItemCategoryId))
                 .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name.English));

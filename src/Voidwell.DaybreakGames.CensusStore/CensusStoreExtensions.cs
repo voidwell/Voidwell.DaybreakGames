@@ -52,6 +52,7 @@ namespace Voidwell.DaybreakGames.CensusStore
             services.AddUpdaterStaticStore<ExperienceCollection, Experience>();
             services.AddUpdaterStaticStore<FacilityLinkCollection, FacilityLink>();
             services.AddUpdaterStaticStore<FactionCollection, Faction>();
+            services.AddUpdaterStaticStore<ImageSetCollection, ImageSet>();
             services.AddUpdaterStaticStore<ItemCategoryCollection, ItemCategory>();
             services.AddUpdaterStaticStore<ItemCollection, Item>();
             services.AddUpdaterStaticStore<LoadoutCollection, Loadout>();
