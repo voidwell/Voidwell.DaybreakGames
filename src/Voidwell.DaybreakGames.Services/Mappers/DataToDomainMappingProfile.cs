@@ -98,11 +98,11 @@ namespace Voidwell.DaybreakGames.Services.Mappers
             CreateMap<Data.Models.Planetside.Directive, Domain.Models.CharacterDirectivesOutlineDirective>()
                 .ForMember(d => d.TierId, opt => opt.MapFrom(s => s.DirectiveTierId))
                 .ForMember(d => d.TreeId, opt => opt.MapFrom(s => s.DirectiveTreeId))
+                .ForMember(d => d.ImageId, opt => opt.MapFrom(s => s.ImageSet != null ? s.ImageSet.ImageId : s.ImageId))
                 .ForMember(d => d.Objective, opt => opt.MapFrom(s => s.ObjectiveSet.Objectives.FirstOrDefault()));
 
             CreateMap<Data.Models.Planetside.Objective, Domain.Models.DirectivesOutlineObjective>()
-                .ForMember(d => d.TypeId, opt => opt.MapFrom(s => s.ObjectiveTypeId))
-                .ForMember(d => d.AchievementId, opt => opt.MapFrom(s => s.Achievement.Id));
+                .ForMember(d => d.TypeId, opt => opt.MapFrom(s => s.ObjectiveTypeId));
 
             CreateMap<Data.Models.Planetside.CharacterDirectiveTree, Domain.Models.CharacterDirectivesOutlineTree>()
                 .ForMember(d => d.CompletionDate, opt => opt.MapFrom(s => s.CompletionTimeDate));

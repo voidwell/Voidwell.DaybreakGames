@@ -55,6 +55,9 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                             join objectiveSet in dbContext.ObjectiveSetsToObjective on directive.ObjectiveSetId equals objectiveSet.ObjectiveSetId into objectiveSets
                             from objectiveSet in objectiveSets.DefaultIfEmpty()
 
+                            join imageSet in dbContext.ImageSets on new { imageSetId = directive.ImageSetId.Value, typeId = 6 } equals  new { imageSetId = imageSet.Id, typeId = imageSet.TypeId } into imageSets
+                            from imageSet in imageSets.DefaultIfEmpty()
+
                             select new Directive
                             {
                                 Id = directive.Id,
@@ -70,7 +73,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories
                                 {
                                     ObjectiveSetId = objectiveSet.ObjectiveSetId,
                                     ObjectiveGroupId = objectiveSet.ObjectiveGroupId
-                                }
+                                },
+                                ImageSet = imageSet
                             };
 
                 return await query.ToListAsync();

@@ -20,6 +20,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly CharactersDirectiveObjectiveCollection _charactersDirectiveObjectiveCollection;
         private readonly CharactersDirectiveTierCollection _charactersDirectiveTierCollection;
         private readonly CharactersDirectiveTreeCollection _charactersDirectiveTreeCollection;
+        private readonly ICharacterStore _characterStore;
         private readonly IStoreUpdaterHelper _storeUpdaterHelper;
         private readonly ICache _cache;
 
@@ -34,6 +35,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             CharactersDirectiveObjectiveCollection charactersDirectiveObjectiveCollection,
             CharactersDirectiveTierCollection charactersDirectiveTierCollection,
             CharactersDirectiveTreeCollection charactersDirectiveTreeCollection,
+            ICharacterStore characterStore,
             IStoreUpdaterHelper storeUpdaterHelper,
             ICache cache)
         {
@@ -42,6 +44,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             _charactersDirectiveObjectiveCollection = charactersDirectiveObjectiveCollection;
             _charactersDirectiveTierCollection = charactersDirectiveTierCollection;
             _charactersDirectiveTreeCollection = charactersDirectiveTreeCollection;
+            _characterStore = characterStore;
             _storeUpdaterHelper = storeUpdaterHelper;
             _cache = cache;
         }
@@ -55,7 +58,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
                 {
                     try
                     {
-                        await UpdateCharacterDirectiveDataAsync(characterId);
+                        await Task.WhenAll(UpdateCharacterDirectiveDataAsync(characterId), _characterStore.UpdateCharacterAchievementsAsync(characterId));
                         data = await GetCharacterDirectiveStoreDataAsync(characterId);
                     }
                     catch (CensusConnectionException)
