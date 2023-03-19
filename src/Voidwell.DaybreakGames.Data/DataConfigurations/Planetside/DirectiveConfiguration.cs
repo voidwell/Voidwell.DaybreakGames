@@ -14,7 +14,8 @@ namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside
 
             builder.Property(a => a.Id).ValueGeneratedNever();
 
-            builder.Ignore(a => a.ObjectiveSet);
+            builder.Ignore(a => a.ObjectiveSet)
+                .Ignore(a => a.ImageSet);
         }
     }
 }

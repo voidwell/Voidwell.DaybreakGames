@@ -16,5 +16,6 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside
         public int? ImageSetId { get; set; }
 
         public ObjectiveSetToObjective ObjectiveSet { get; set; }
+        public ImageSet ImageSet { get; set; }
     }
 }

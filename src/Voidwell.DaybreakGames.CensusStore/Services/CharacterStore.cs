@@ -513,7 +513,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             await _characterRepository.UpsertRangeAsync(dataModels);
         }
 
-        private async Task UpdateCharacterAchievementsAsync(string characterId, DateTime? lastLoginDate)
+        public async Task UpdateCharacterAchievementsAsync(string characterId, DateTime? lastLoginDate = null)
         {
             var achievements = await _charactersAchievementCollection.GetCharacterAchievementsAsync(characterId, lastLoginDate);
             if (achievements == null)

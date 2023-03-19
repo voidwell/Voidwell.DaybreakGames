@@ -37,7 +37,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var data = await _cache.GetAsync<IEnumerable<DirectiveTreeCategory>>(cacheKey);
             if (data != null)
             {
-                //return data;
+                return data;
             }
 
             var categoriesTask = _directiveRepository.GetDirectiveTreesCategoriesAsync();

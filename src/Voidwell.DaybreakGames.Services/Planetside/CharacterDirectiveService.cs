@@ -41,7 +41,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var data = await _cache.GetAsync<CharacterDirectivesOutline>(cacheKey);
             if (data != null)
             {
-                return data;
+                //return data;
             }
 
             var character = await _characterService.GetCharacter(characterId);
@@ -90,9 +90,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                             var outlineTier = _mapper.Map<CharacterDirectivesOutlineTier>(tier);
                             outlineTree.Tiers.Add(outlineTier);
 
-                            var factionRewards = tier.RewardGroupSets.SelectManyNotNull(a => a.RewardGroups)
-                                .Where(a => a.Reward?.Item?.FactionId == null || a.Reward?.Item?.FactionId == 0 || a.Reward?.Item?.FactionId == character.FactionId);
-                            outlineTier.Rewards = _mapper.Map<List<DirectivesOutlineReward>>(factionRewards);
+                            outlineTier.Rewards = GetTierRewardsForFactionId(tier, character.FactionId);
 
                             var characterTier = characterTree?.CharacterDirectiveTiers.FirstOrDefault(a => a.DirectiveTierId == tier.DirectiveTierId && a.DirectiveTreeId == tier.DirectiveTreeId);
                             if (characterTier != null)
@@ -104,8 +102,13 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                             {
                                 var storeObjective = directive.ObjectiveSet.Objectives.FirstOrDefault();
 
-                                var objectiveFactionId = storeObjective.Item?.FactionId ?? storeObjective.Achievement?.Objective?.Item?.FactionId;
-                                if (objectiveFactionId != null && objectiveFactionId != character.FactionId)
+                                var objectiveFactionId = GetFactionIdForDirective(directive);
+                                if (objectiveFactionId != null && objectiveFactionId != 0 && objectiveFactionId != character.FactionId)
+                                {
+                                    continue;
+                                }
+
+                                if (tier.Directives.Any(d => d.Id != directive.Id && d.Name == directive.Name && GetFactionIdForDirective(d) == character.FactionId))
                                 {
                                     continue;
                                 }
@@ -123,19 +126,23 @@ namespace Voidwell.DaybreakGames.Services.Planetside
 
                                 if (outlineTier.CompletionDate == null)
                                 {
-                                    outlineDirective.Progress = characterDirective?.CharacterDirectiveObjectives?.FirstOrDefault()?.StateData;
-
                                     if (storeObjective != null && storeObjective.ObjectiveTypeId == 66)
                                     {
                                         var characterAchievement = characterAchievements.FirstOrDefault(a => a.AchievementId.ToString() == storeObjective.Param1);
-                                        outlineDirective.Progress = GetAchievementProgress(characterAchievement, characterWeapons);
+                                        outlineDirective.Progress = GetAchievementProgress(characterAchievement, characterWeapons) ?? 0;
+                                    }
+                                    else
+                                    {
+                                        outlineDirective.Progress = characterDirective?.CharacterDirectiveObjectives?.FirstOrDefault()?.StateData ?? 0;
                                     }
                                 };
                             }
 
                             outlineTier.Directives = outlineTier.Directives.Where(a => a.CompletionDate != null).OrderBy(a => a.CompletionDate).ThenBy(a => a.Id)
-                                .Union(outlineTier.Directives.Where(a => a.CompletionDate == null).OrderBy(a => a.Id))
+                                .Union(outlineTier.Directives.Where(a => a.CompletionDate == null).OrderByDescending(a => (double)a.Progress / a.Objective.GoalValue.GetValueOrDefault()).ThenBy(a => a.Id))
                                 .ToList();
+
+                            outlineTier.CompletionPercent = GetTierCompletionPercent(outlineTier);
                         }
                     }
                 }
@@ -152,6 +159,56 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return data;
+        }
+
+        private List<DirectivesOutlineReward> GetTierRewardsForFactionId(DirectiveTier tier, int factionId)
+        {
+            var factionRewards = tier.RewardGroupSets.SelectManyNotNull(a => a.RewardGroups)
+                                .Where(a => a.Reward?.Item?.FactionId == null || a.Reward?.Item?.FactionId == 0 || a.Reward?.Item?.FactionId == factionId);
+            return _mapper.Map<List<DirectivesOutlineReward>>(factionRewards);
+        }
+
+        private static double GetTierCompletionPercent(CharacterDirectivesOutlineTier tier)
+        {
+            if (tier.CompletionDate != null)
+            {
+                return 100;
+            }
+
+            if (tier.Directives.Any())
+            {
+                var directiveAverage = tier.Directives
+                    .Select(a =>
+                    {
+                        if (a.CompletionDate != null)
+                        {
+                            return 1.0;
+                        }
+
+                        if (a.Objective?.GoalValue != null)
+                        {
+                            return (double)a.Progress / a.Objective.GoalValue.GetValueOrDefault();
+                        }
+
+                        return 0;
+                    })
+                    .OrderByDescending(a => a)
+                    .Take(tier.CompletionCount)
+                    .Average();
+
+                if (!double.IsNaN(directiveAverage) && !double.IsInfinity(directiveAverage))
+                {
+                    return Math.Round(directiveAverage * 100, 2);
+                }
+            }
+
+            return 0;
+        }
+
+        private static int? GetFactionIdForDirective(Directive directive)
+        {
+            var storeObjective = directive.ObjectiveSet.Objectives.FirstOrDefault();
+            return storeObjective.Item?.FactionId ?? storeObjective.Achievement?.Objective?.Item?.FactionId;
         }
 
         private int? GetObjectiveTargetValue(Objective storeObjective)

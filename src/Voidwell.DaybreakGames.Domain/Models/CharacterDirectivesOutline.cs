@@ -38,6 +38,7 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public string Name { get; set; }
         public int? ImageId { get; set; }
         public DateTime? CompletionDate { get; set; }
+        public double CompletionPercent { get; set; }
 
         public List<DirectivesOutlineReward> Rewards { get; set; } = new();
         public List<CharacterDirectivesOutlineDirective> Directives { get; set; } = new();
@@ -53,7 +54,7 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public int? ImageId { get; set; }
         public DateTime? CompletionDate { get; set; }
 
-        public int? Progress { get; set; }
+        public int Progress { get; set; }
 
         public DirectivesOutlineObjective Objective { get; set; } = new();
     }
