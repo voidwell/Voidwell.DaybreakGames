@@ -31,6 +31,7 @@ namespace Voidwell.DaybreakGames.Census
             services.TryAddTransient<ExperienceCollection>();
             services.TryAddTransient<FacilityLinkCollection>();
             services.TryAddTransient<FactionCollection>();
+            services.TryAddTransient<ImageSetCollection>();
             services.TryAddTransient<ItemCollection>();
             services.TryAddTransient<ItemCategoryCollection>();
             services.TryAddTransient<LoadoutCollection>();

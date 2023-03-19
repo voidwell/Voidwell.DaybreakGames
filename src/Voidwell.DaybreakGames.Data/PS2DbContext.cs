@@ -69,6 +69,7 @@ namespace Voidwell.DaybreakGames.Data
         public DbSet<RewardSetToRewardGroup> RewardSetsToRewardGroup { get; set; }
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<CharacterAchievement> CharacterAchievements { get; set; }
+        public DbSet<ImageSet> ImageSets { get; set; }
 
         public DbSet<AchievementEarned> AchievementEarnedEvents { get; set; }
         public DbSet<BattlerankUp> BattleRankUpEvents { get; set; }
