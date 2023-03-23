@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
@@ -19,6 +20,7 @@ namespace Voidwell.DaybreakGames.Test.MapTests
             jsonSerializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new UnderscorePropertyJsonNamingPolicy(),
+                NumberHandling = JsonNumberHandling.AllowReadingFromString,
                 Converters =
                 {
                     new BooleanJsonConverter(),
