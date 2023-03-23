@@ -83,7 +83,7 @@ namespace Voidwell.DaybreakGames.Api
             app.UseRouting();
 
             //app.UseTracing();
-            //app.UseAuthentication();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,9 +1,0 @@
-﻿{
-    "CensusServiceKey": "LampjawScraper",
-    "CensusServiceNamespace": "ps2",
-    "DBConnectionString": "Server=192.168.2.102;Database=voidwell.daybreakgames;Username=localdev;Password=localdev;Keepalive=1;Include Error Detail=true",
-    "CensusWebsocketServices": "",
-    "CensusWebsocketExperienceIds": "",
-    "DisableCharacterUpdater": true,
-    "DisableCensusMonitor": true
-}
