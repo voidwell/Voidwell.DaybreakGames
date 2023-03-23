@@ -54,7 +54,7 @@ jobs:
             workflow_id: 'deploy-release.yml',
             ref: 'master',
             inputs: {
-              project: ${{ vars.DOCKER_SERVICE }},
-              version: ${{ steps.version.outputs.value }}
+              project: '${{ vars.DOCKER_SERVICE }}',
+              version: '${{ steps.version.outputs.value }}'
             }
           })
