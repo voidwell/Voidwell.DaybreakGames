@@ -1,8 +1,8 @@
-bin\
-obj\
-.git
-.dockerignore
-.gitignore
-.gitattributes
-build
-.vs
+**/.git
+**/.dockerignore
+**/.gitignore
+**/.gitattributes
+**/.vs
+**/obj/
+**/bin/
+**/build/
