@@ -16,6 +16,7 @@ namespace Voidwell.DaybreakGames.Live
     {
         private readonly ICharacterUpdaterRepository _characterUpdaterRepository;
         private readonly ICharacterService _characterService;
+        private readonly ICharacterDirectiveService _characterDirectiveService;
         private readonly HostedServiceState<ICharacterUpdaterService> _state;
         private readonly LiveOptions _options;
         private readonly ILogger _logger;
@@ -122,7 +123,11 @@ namespace Voidwell.DaybreakGames.Live
                 {
                     var lastSaveDate = character?.Time?.LastSaveDate;
                     lastSaveDate = lastSaveDate?.AddHours(-12);
-                    await _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, lastSaveDate);
+
+                    await Task.WhenAll(
+                        _characterService.UpdateAllCharacterInfo(characterItem.CharacterId, lastSaveDate),
+                        _characterDirectiveService.UpdateCharacterDirectivesAsync(characterItem.CharacterId));
+
                     await _characterUpdaterRepository.RemoveAsync(characterItem);
                 }
                 catch (CensusServiceUnavailableException)

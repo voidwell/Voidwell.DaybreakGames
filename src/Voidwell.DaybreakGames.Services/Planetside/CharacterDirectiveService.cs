@@ -41,7 +41,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             var data = await _cache.GetAsync<CharacterDirectivesOutline>(cacheKey);
             if (data != null)
             {
-                //return data;
+                return data;
             }
 
             var character = await _characterService.GetCharacter(characterId);
@@ -159,6 +159,11 @@ namespace Voidwell.DaybreakGames.Services.Planetside
             }
 
             return data;
+        }
+
+        public Task UpdateCharacterDirectivesAsync(string characterId)
+        {
+            return _characterDirectiveStore.UpdateCharacterDirectiveDataAsync(characterId);
         }
 
         private List<DirectivesOutlineReward> GetTierRewardsForFactionId(DirectiveTier tier, int factionId)

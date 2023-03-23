@@ -6,5 +6,6 @@ namespace Voidwell.DaybreakGames.Services.Planetside
     public interface ICharacterDirectiveService
     {
         Task<CharacterDirectivesOutline> GetCharacterDirectivesAsync(string characterId);
+        Task UpdateCharacterDirectivesAsync(string characterId);
     }
 }
