@@ -1,9 +1,7 @@
 ﻿using DaybreakGames.Census.Exceptions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Microservice.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories;
@@ -22,10 +20,6 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
         private readonly CharactersDirectiveTreeCollection _charactersDirectiveTreeCollection;
         private readonly ICharacterStore _characterStore;
         private readonly IStoreUpdaterHelper _storeUpdaterHelper;
-        private readonly ICache _cache;
-
-        private const string _cacheKey = "ps2.characterDirectiveStore";
-        private readonly Func<string, string> _getCharacterDirectiveCacheKey = characterId => $"{_cacheKey}_directives_{characterId}";
 
         private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
 
@@ -36,8 +30,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             CharactersDirectiveTierCollection charactersDirectiveTierCollection,
             CharactersDirectiveTreeCollection charactersDirectiveTreeCollection,
             ICharacterStore characterStore,
-            IStoreUpdaterHelper storeUpdaterHelper,
-            ICache cache)
+            IStoreUpdaterHelper storeUpdaterHelper)
         {
             _repository = repository;
             _charactersDirectiveCollection = charactersDirectiveCollection;
@@ -46,7 +39,6 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             _charactersDirectiveTreeCollection = charactersDirectiveTreeCollection;
             _characterStore = characterStore;
             _storeUpdaterHelper = storeUpdaterHelper;
-            _cache = cache;
         }
 
         public async Task<IEnumerable<CharacterDirectiveTree>> GetCharacterDirectivesAsync(string characterId)
@@ -54,20 +46,20 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             using (await _characterLock.WaitAsync(characterId))
             {
                 var data = await GetCharacterDirectiveStoreDataAsync(characterId);
-                if (data == null || !data.Any())
+                if (data != null && data.Any())
                 {
-                    try
-                    {
-                        await Task.WhenAll(UpdateCharacterDirectiveDataAsync(characterId), _characterStore.UpdateCharacterAchievementsAsync(characterId));
-                        data = await GetCharacterDirectiveStoreDataAsync(characterId);
-                    }
-                    catch (CensusConnectionException)
-                    {
-                        return null;
-                    }
+                    return data;
                 }
 
-                return data;
+                try
+                {
+                    await Task.WhenAll(UpdateCharacterDirectiveDataAsync(characterId), _characterStore.UpdateCharacterAchievementsAsync(characterId));
+                    return await GetCharacterDirectiveStoreDataAsync(characterId);
+                }
+                catch (CensusConnectionException)
+                {
+                    return null;
+                }
             }
         }
 
@@ -111,9 +103,6 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
 
                 _storeUpdaterHelper.UpdateAsync<CensusCharacterDirectiveTreeModel, CharacterDirectiveTree>(
                     () => _charactersDirectiveTreeCollection.GetCharacterDirectiveTreesAsync(characterId)));
-
-            var cacheKey = _getCharacterDirectiveCacheKey(characterId);
-            await _cache.RemoveAsync(cacheKey);
         }
     }
 }
