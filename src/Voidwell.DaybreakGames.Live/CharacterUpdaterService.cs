@@ -30,11 +30,12 @@ namespace Voidwell.DaybreakGames.Live
         private SemaphoreSlim _parallelSemaphore;
 
         public CharacterUpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService,
-            HostedServiceState<ICharacterUpdaterService> state, IOptions<LiveOptions> options,
-            ILogger<CharacterUpdaterService> logger)
+            ICharacterDirectiveService characterDirectiveService, HostedServiceState<ICharacterUpdaterService> state,
+            IOptions<LiveOptions> options, ILogger<CharacterUpdaterService> logger)
         {
             _characterUpdaterRepository = characterUpdaterRepository;
             _characterService = characterService;
+            _characterDirectiveService = characterDirectiveService;
             _state = state;
             _options = options.Value;
             _logger = logger;

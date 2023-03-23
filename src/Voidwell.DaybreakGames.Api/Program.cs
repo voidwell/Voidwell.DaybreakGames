@@ -23,7 +23,7 @@ namespace Voidwell.DaybreakGames.Api
                 {
                     options.MinLogLevel = LogEventLevel.Information;
                     options.IncludeMicrosoftInformation = true;
-                    options.LoggingOutput = "flat";
+                    //options.LoggingOutput = "flat";
                     options.IgnoreRules = new List<Func<LogEvent, bool>>
                     {
                         e => Matching.FromSource("Microsoft.AspNetCore.Routing")(e),
