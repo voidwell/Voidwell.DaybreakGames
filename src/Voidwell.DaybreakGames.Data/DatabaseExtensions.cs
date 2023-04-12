@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
 namespace Voidwell.DaybreakGames.Data
 {

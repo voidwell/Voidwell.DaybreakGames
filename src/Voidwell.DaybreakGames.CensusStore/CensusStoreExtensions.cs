@@ -3,9 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
-using Voidwell.DaybreakGames.Utils.HostedService; 
+using Voidwell.DaybreakGames.Utils.HostedService;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 
 namespace Voidwell.DaybreakGames.CensusStore
 {

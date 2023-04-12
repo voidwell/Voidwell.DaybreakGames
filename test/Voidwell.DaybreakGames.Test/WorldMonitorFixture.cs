@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using Voidwell.DaybreakGames.CensusStore.Services;
+using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Live.GameState;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Test
 {
@@ -24,8 +24,8 @@ namespace Voidwell.DaybreakGames.Test
         {
             WorldEventService = Mock.Of<IWorldEventsService>();
             ZoneStore = Mock.Of<IZoneStore>();
-            WorldService = Mock.Of<Services.Planetside.IWorldService>();
-            MapService = Mock.Of<Services.Planetside.IMapService>();
+            WorldService = Mock.Of<IWorldService>();
+            MapService = Mock.Of<IMapService>();
             PlayerMonitor = Mock.Of<IPlayerMonitor>();
             Logger = Mock.Of<ILogger<WorldMonitor>>();
         }

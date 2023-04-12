@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Moq;
-using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Live.Mappers;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Test
 {

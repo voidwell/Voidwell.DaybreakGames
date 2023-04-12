@@ -6,8 +6,9 @@ using System;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.Microservice.Cache;
 using System.Threading;
-using Voidwell.DaybreakGames.CensusStore.Services;
 using AutoMapper;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Api.Models;
-using Voidwell.DaybreakGames.Services.Planetside;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
 {

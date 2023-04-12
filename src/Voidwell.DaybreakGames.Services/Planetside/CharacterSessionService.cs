@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Microservice.Cache;
-using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.Microservice.Utility;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {

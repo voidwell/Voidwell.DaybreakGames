@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Models;
-using Voidwell.DaybreakGames.Data.Repositories;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Utils.HostedService;
 using Voidwell.Microservice.EntityFramework;
 

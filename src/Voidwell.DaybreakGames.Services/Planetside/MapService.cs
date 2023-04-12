@@ -7,7 +7,8 @@ using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.Microservice.Cache;
 using System.Threading;
 using Voidwell.Microservice.Utility;
-using Voidwell.DaybreakGames.CensusStore.Services;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {

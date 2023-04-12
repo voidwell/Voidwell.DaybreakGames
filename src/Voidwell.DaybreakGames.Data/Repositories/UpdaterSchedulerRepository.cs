@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data.Repositories

@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
-using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Live.GameState;
 using AutoMapper;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream.EventProcessors
 {

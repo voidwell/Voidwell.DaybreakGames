@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Data.Repositories;
 using Voidwell.Microservice.Utility;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Utils;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services
 {

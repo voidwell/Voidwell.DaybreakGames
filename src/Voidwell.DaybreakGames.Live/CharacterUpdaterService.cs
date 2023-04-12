@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Data.Repositories;
-using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Utils.HostedService;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
 namespace Voidwell.DaybreakGames.Live
 {
