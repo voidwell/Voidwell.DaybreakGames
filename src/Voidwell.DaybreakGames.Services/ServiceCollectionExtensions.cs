@@ -38,7 +38,6 @@ namespace Voidwell.DaybreakGames.Services
             services.TryAddSingleton<IPSBUtilityService, PSBUtilityService>();
             services.TryAddSingleton<IDirectiveService, DirectiveService>();
             services.TryAddSingleton<ICharacterDirectiveService, CharacterDirectiveService>();
-            services.TryAddSingleton<IHexGridService, HexGridService>();
 
             return services;
         }
