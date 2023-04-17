@@ -7,5 +7,6 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public IEnumerable<ZoneRegion> Regions { get; set; }
         public IEnumerable<ZoneLink> Links { get; set; }
         public IEnumerable<ZoneHex> Hexs { get; set; }
+        public int? HexSize { get; set; }
     }
 }

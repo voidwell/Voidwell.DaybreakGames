@@ -33,7 +33,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             return _zoneRepository.GetAllZonesAsync();
         }
 
-        public async Task<Zone> GetZone(int zoneId)
+        public async Task<Zone> GetZoneAsync(int zoneId)
         {
             var cacheKey = $"{_cacheKeyPrefix}_{zoneId}";
 

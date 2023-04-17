@@ -9,6 +9,7 @@ using System.Threading;
 using Voidwell.Microservice.Utility;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
+using AutoMapper;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -19,7 +20,9 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly IMapRegionStore _mapRegionStore;
         private readonly IFacilityLinkStore _facilityLinkStore;
         private readonly IWorldEventsService _worldEventsService;
+        private readonly IZoneStore _zoneStore;
         private readonly ICache _cache;
+        private readonly IMapper _mapper;
 
         private readonly KeyedSemaphoreSlim _zoneMapLock = new KeyedSemaphoreSlim();
         private readonly KeyedSemaphoreSlim _zoneHistoryLock = new KeyedSemaphoreSlim();
@@ -33,14 +36,17 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly TimeSpan _zoneStateCacheExpiration = TimeSpan.FromSeconds(30);
 
         public MapService(IMapStore mapStore, IMapHexStore mapHexStore, IMapRegionStore mapRegionStore,
-            IFacilityLinkStore facilityLinkStore, IWorldEventsService worldEventsService, ICache cache)
+            IFacilityLinkStore facilityLinkStore, IWorldEventsService worldEventsService,
+            IZoneStore zoneStore, ICache cache, IMapper mapper)
         {
             _mapStore = mapStore;
             _mapHexStore = mapHexStore;
             _mapRegionStore = mapRegionStore;
             _facilityLinkStore = facilityLinkStore;
             _worldEventsService = worldEventsService;
+            _zoneStore = zoneStore;
             _cache = cache;
+            _mapper = mapper;
         }
 
         public async Task<ZoneMap> GetZoneMapAsync(int zoneId)
@@ -53,44 +59,26 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                     return zoneMap;
                 }
 
+                var zoneTask = _zoneStore.GetZoneAsync(zoneId);
                 var linksTask = _facilityLinkStore.GetFacilityLinksByZoneIdAsync(zoneId);
-                var hexsTask = _mapHexStore.GetMapHexsByZoneIdAsync(zoneId);
+                var hexesTask = _mapHexStore.GetMapHexsByZoneIdAsync(zoneId);
                 var regionsTask = _mapRegionStore.GetMapRegionsByZoneIdAsync(zoneId);
 
-                await Task.WhenAll(linksTask, hexsTask, regionsTask);
+                await Task.WhenAll(zoneTask, linksTask, hexesTask, regionsTask);
 
-                var links = linksTask.Result.Select(a => new ZoneLink
-                {
-                    FacilityIdA = a.FacilityIdA,
-                    FacilityIdB = a.FacilityIdB
-                });
+                var zone = zoneTask.Result;
+                var links = _mapper.Map<IEnumerable<ZoneLink>>(linksTask.Result);
+                var hexes = _mapper.Map<IEnumerable<ZoneHex>>(hexesTask.Result);
 
-                var hexs = hexsTask.Result.Select(a => new ZoneHex
-                {
-                    MapRegionId = a.MapRegionId,
-                    X = a.XPos,
-                    Y = a.YPos
-                });
-
-                var regions = regionsTask.Result
-                    .Where(a => links.Any(b => a.FacilityId == b.FacilityIdA || a.FacilityId == b.FacilityIdB))
-                    .Select(a => new ZoneRegion
-                    {
-                        RegionId = a.Id,
-                        FacilityId = a.FacilityId,
-                        FacilityName = a.FacilityName,
-                        FacilityType = a.FacilityType,
-                        FacilityTypeId = a.FacilityTypeId,
-                        X = a.XPos,
-                        Y = a.YPos,
-                        Z = a.ZPos
-                    });
+                var filteredRegions = regionsTask.Result?.Where(a => links.Any(b => a.FacilityId == b.FacilityIdA || a.FacilityId == b.FacilityIdB)).ToList();
+                var regions = _mapper.Map<IEnumerable<ZoneRegion>>(filteredRegions);
 
                 zoneMap = new ZoneMap
                 {
                     Regions = regions,
-                    Hexs = hexs,
-                    Links = links
+                    Hexs = hexes,
+                    Links = links,
+                    HexSize = zone?.HexSize
                 };
 
                 await _cache.SetAsync(_getZoneMapCacheKey(zoneId), zoneMap, _zoneMapCacheExpiration);

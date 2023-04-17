@@ -112,6 +112,18 @@ namespace Voidwell.DaybreakGames.Services.Mappers
 
             CreateMap<Data.Models.Planetside.CharacterDirective, Domain.Models.CharacterDirectivesOutlineDirective>()
                 .ForMember(d => d.CompletionDate, opt => opt.MapFrom(s => s.CompletionTimeDate));
+
+            CreateMap<Data.Models.Planetside.FacilityLink, Domain.Models.ZoneLink>();
+
+            CreateMap<Data.Models.Planetside.MapHex, Domain.Models.ZoneHex>()
+                .ForMember(d => d.X, opt => opt.MapFrom(s => s.XPos))
+                .ForMember(d => d.Y, opt => opt.MapFrom(s => s.YPos));
+
+            CreateMap<Data.Models.Planetside.MapRegion, Domain.Models.ZoneRegion>()
+                .ForMember(d => d.RegionId, opt => opt.MapFrom(s => s.Id))
+                .ForMember(d => d.X, opt => opt.MapFrom(s => s.XPos))
+                .ForMember(d => d.Y, opt => opt.MapFrom(s => s.YPos))
+                .ForMember(d => d.Z, opt => opt.MapFrom(s => s.ZPos));
         }
 
         private class CharacterVehicleStatsResolver : IValueResolver<Data.Models.Planetside.Character, Domain.Models.CharacterDetails, IEnumerable<Domain.Models.CharacterDetailsVehicleStat>>

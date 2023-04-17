@@ -7,7 +7,7 @@ namespace Voidwell.DaybreakGames.CensusStore.Services.Abstractions
     public interface IZoneStore
     {
         Task<IEnumerable<Zone>> GetAllZones();
-        Task<Zone> GetZone(int zoneId);
+        Task<Zone> GetZoneAsync(int zoneId);
         Task<IEnumerable<Zone>> GetPlayableZones();
     }
 }

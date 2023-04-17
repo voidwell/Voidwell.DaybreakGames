@@ -122,7 +122,7 @@ namespace Voidwell.DaybreakGames.Live.GameState
 
         public async Task<bool> SetupWorldZone(int worldId, int zoneId, bool retryAsync = false)
         {
-            var zone = await _zoneStore.GetZone(zoneId);
+            var zone = await _zoneStore.GetZoneAsync(zoneId);
             if (zone == null)
             {
                 throw new InvalidOperationException($"Invalid zone id {zoneId} for world {worldId} provided.");
