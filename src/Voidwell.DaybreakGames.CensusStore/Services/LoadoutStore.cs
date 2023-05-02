@@ -16,9 +16,6 @@ namespace Voidwell.DaybreakGames.CensusStore.Services
             _loadoutRepository = loadoutRepository;
         }
 
-        public string StoreName => "LoadoutStore";
-        public TimeSpan UpdateInterval => TimeSpan.FromDays(7);
-
         public Task<IEnumerable<Loadout>> GetAllLoadoutsAsync()
         {
             return _loadoutRepository.GetAllLoadoutsAsync();

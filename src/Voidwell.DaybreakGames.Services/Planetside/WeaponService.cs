@@ -14,6 +14,7 @@ using Voidwell.Microservice.Utility;
 using static Voidwell.DaybreakGames.Census.Models.Extensions.CensusWeaponInfoModelExtensions;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside
 {
@@ -22,6 +23,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly ISanctionedWeaponsRepository _sanctionedWeaponsRepository;
         private readonly IWorldEventsService _worldEventsService;
         private readonly IItemService _itemService;
+        private readonly IFactionStore _factionStore;
         private readonly ICache _cache;
         private readonly ILogger _logger;
 
@@ -35,11 +37,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
         private readonly SemaphoreSlim _sanctionedStoreLock = new SemaphoreSlim(1);
 
         public WeaponService(ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService,
-            IItemService itemService, ICache cache, ILogger<WeaponService> logger)
+            IItemService itemService, IFactionStore factionStore, ICache cache, ILogger<WeaponService> logger)
         {
             _sanctionedWeaponsRepository = sanctionedWeaponRepository;
             _worldEventsService = worldEventsService;
             _itemService = itemService;
+            _factionStore = factionStore;
             _cache = cache;
             _logger = logger;
         }
@@ -58,6 +61,12 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 return null;
             }
 
+            Faction faction = null;
+            if (info.FactionId != null)
+            {
+                faction = await _factionStore.GetFactionByIdAsync(info.FactionId.Value);
+            }
+
             var hipModes = info.GetFireModesOfType(FireModeType.Primary)?.ToList();
             var aimModes = info.GetFireModesOfType(FireModeType.Secondary)?.ToList();
 
@@ -67,6 +76,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside
                 ItemId = weaponItemId,
                 Category = info.GetCategory(),
                 FactionId = info.FactionId,
+                FactionName = faction?.Name,
                 ImageId = info.ImageId,
                 Description = info.GetDescription(),
                 MaxStackSize = info.MaxStackSize,

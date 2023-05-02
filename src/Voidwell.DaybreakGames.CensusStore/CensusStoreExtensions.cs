@@ -25,6 +25,7 @@ namespace Voidwell.DaybreakGames.CensusStore
 
             services.AddSingleton<ICharacterStore, CharacterStore>();
             services.AddSingleton<ICharacterDirectiveStore, CharacterDirectiveStore>();
+            services.AddSingleton<IFactionStore, FactionStore>();
             services.AddSingleton<IFacilityLinkStore, FacilityLinkStore>();
             services.AddSingleton<IItemStore, ItemStore>();
             services.AddSingleton<ILoadoutStore, LoadoutStore>();

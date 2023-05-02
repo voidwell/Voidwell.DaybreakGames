@@ -8,6 +8,7 @@ namespace Voidwell.DaybreakGames.Domain.Models
         public int ItemId { get; set; }
         public string Category { get; set; }
         public int? FactionId { get; set; }
+        public string FactionName { get; set; }
         public int? ImageId { get; set; }
         public string Description { get; set; }
         public int MaxStackSize { get; set; }

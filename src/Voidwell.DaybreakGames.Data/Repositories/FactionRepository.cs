@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.Microservice.EntityFramework;
 
 namespace Voidwell.DaybreakGames.Data.Repositories
 {
@@ -15,13 +13,13 @@ namespace Voidwell.DaybreakGames.Data.Repositories
             _dbContextHelper = dbContextHelper;
         }
 
-        public async Task UpsertRangeAsync(IEnumerable<Faction> entities)
+        public async Task<Faction> GetFactionByIdAsync(int factionId)
         {
             using (var factory = _dbContextHelper.GetFactory())
             {
                 var dbContext = factory.GetDbContext();
 
-                await dbContext.UpsertAsync(entities);
+                return await dbContext.Factions.FindAsync(factionId);
             }
         }
     }
