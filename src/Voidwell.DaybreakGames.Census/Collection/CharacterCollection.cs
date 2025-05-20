@@ -42,7 +42,7 @@ namespace Voidwell.DaybreakGames.Census.Collection
                 .SetLimit(limit)
                 .UseExactMatchFirst()
                 .AddResolve("online_status", "world")
-                .ShowFields("character_id", "name.first", "battle_rank.value", "faction_id", "times.last_login")
+                .ShowFields("character_id", "name.first", "name.first_lower", "battle_rank.value", "faction_id", "times.last_login")
                 .Where("name.first_lower", a => a.StartsWith(name.ToLower()))
                 .Where("battle_rank.value", a => a.IsGreaterThan(0))
                 .GetListAsync<CensusCharacterModel>();
