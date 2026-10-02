@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Voidwell.DaybreakGames.Api.Authentication;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 
 namespace Voidwell.DaybreakGames.Api.Controllers
 {
     [Route("store")]
+    [Authorize(Roles = AuthConstants.Roles.Administrator)]
     public class StoreController : Controller
     {
         private readonly IStoreUpdaterService _storeUpdaterService;

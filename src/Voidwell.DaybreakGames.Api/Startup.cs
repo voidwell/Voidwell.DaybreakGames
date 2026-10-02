@@ -14,6 +14,13 @@ using Voidwell.Microservice.Configuration;
 using Voidwell.Microservice.Cache;
 using Voidwell.Microservice.Authentication;
 using Voidwell.Microservice.Tracing;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Collections.Generic;
+using System.Linq;
+using Voidwell.Microservice.Http.AuthenticatedHttpClient;
+using IdentityModel;
+using Voidwell.DaybreakGames.Api.Authentication;
 
 namespace Voidwell.DaybreakGames.Api
 {
@@ -56,12 +63,44 @@ namespace Voidwell.DaybreakGames.Api
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddServiceAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    options.Authority = "http://voidwellauth:5000";
-                    options.SupportedTokens = Microservice.Authentication.SupportedTokens.Jwt;
+                    options.Authority = "https://auth.voidwell.com";
+                    options.ClientId = "voidwell-daybreakgames";
+                    options.ClientSecret = Configuration.GetValue<string>("ApiResourceSecret");
+                    options.SupportedTokens = Microservice.Authentication.SupportedTokens.Both;
                     options.RequireHttpsMetadata = false;
                     options.EnableCaching = true;
-                    options.CacheDuration = TimeSpan.FromMinutes(10);
+                    options.CacheDuration = TimeSpan.FromMinutes(2);
                 });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(AuthConstants.Policies.Mutterblack, policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
+                });
+            });
+
+            services.AddMemoryCache();
+            services.AddAuthenticatedHttpClient<IUserRolesClient, UserRolesClient>(options =>
+            {
+                options.TokenServiceAddress = "https://auth.voidwell.com/connect/token";
+                options.ClientId = "voidwell-daybreakgames";
+                options.ClientSecret = Configuration.GetValue<string>("ClientSecret");
+                options.Scopes = new List<string> { "voidwell-usermanagement" };
+            });
+            services.AddSingleton<IClaimsTransformation, RoleClaimsTransformation>();
+
+            var allowedOrigins = Configuration.GetValue<string>("OriginAddress");
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins(new[] { "http://localhost:4200", allowedOrigins }.Where(o => !string.IsNullOrEmpty(o)).ToArray())
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
 
             services.AddCensusServices(options =>
             {
@@ -80,15 +119,35 @@ namespace Voidwell.DaybreakGames.Api
         {
             app.InitializeDatabases();
 
+            app.UseForwardedHeaders(GetForwardedHeaderOptions());
+
             app.UseRouting();
+
+            app.UseCors();
 
             //app.UseTracing();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private static ForwardedHeadersOptions GetForwardedHeaderOptions()
+        {
+            var options = new ForwardedHeadersOptions
+            {
+                RequireHeaderSymmetry = false,
+                ForwardLimit = 15,
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            };
+
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+
+            return options;
         }
     }
 }

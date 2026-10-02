@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Voidwell.DaybreakGames.Api.Authentication;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Live.GameState;
 
@@ -42,6 +44,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             return Ok(result);
         }
 
+        [Authorize(Roles = AuthConstants.Roles.Administrator)]
         [HttpPost("{worldId}/zone")]
         public Task SetupWorldZones(int worldId)
         {

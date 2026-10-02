@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Voidwell.DaybreakGames.Api.Authentication;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
@@ -33,6 +35,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             return Ok(result);
         }
 
+        [Authorize(AuthConstants.Policies.Mutterblack)]
         [HttpGet("byalias/{outfitAlias}")]
         public async Task<ActionResult> GetOutfitByAlias(string outfitAlias)
         {

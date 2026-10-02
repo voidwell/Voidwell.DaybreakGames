@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Voidwell.DaybreakGames.Api.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Utils.HostedService;
@@ -6,6 +8,7 @@ using Voidwell.DaybreakGames.Utils.HostedService;
 namespace Voidwell.DaybreakGames.Api.Controllers
 {
     [Route("services")]
+    [Authorize(Roles = AuthConstants.Roles.Administrator)]
     public class ServicesController : Controller
     {
         private readonly IStatefulHostedServiceManager _serviceManager;

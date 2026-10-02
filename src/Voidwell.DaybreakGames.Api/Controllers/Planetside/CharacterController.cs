@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Voidwell.DaybreakGames.Api.Authentication;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -64,6 +66,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             return Ok(result);
         }
 
+        [Authorize(AuthConstants.Policies.Mutterblack)]
         [HttpGet("byname/{characterName}")]
         public async Task<ActionResult> GetCharacterStatsByName(string characterName)
         {
@@ -76,6 +79,7 @@ namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
             return Ok(result);
         }
 
+        [Authorize(AuthConstants.Policies.Mutterblack)]
         [HttpGet("byname/{characterName}/weapon/{weaponName}")]
         public async Task<ActionResult> GetCharacterWeaponStatsByName(string characterName, string weaponName)
         {
