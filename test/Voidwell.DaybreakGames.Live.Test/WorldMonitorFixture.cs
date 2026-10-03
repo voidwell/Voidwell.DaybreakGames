@@ -1,0 +1,32 @@
+﻿using Microsoft.Extensions.Logging;
+using Moq;
+using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
+using Voidwell.DaybreakGames.Live.GameState;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+namespace Voidwell.DaybreakGames.Live.Test;
+
+public class WorldMonitorFixture
+{
+    public IWorldEventsService WorldEventService { get; set; }
+    public IZoneStore ZoneStore { get; set; }
+    public IWorldService WorldService { get; set; }
+    public IMapService MapService { get; set; }
+    public IPlayerMonitor PlayerMonitor { get; set; }
+    private ILogger<WorldMonitor> Logger { get; set; }
+
+    public WorldMonitor CreateSut()
+    {
+        return new WorldMonitor(WorldEventService, ZoneStore, WorldService, MapService, PlayerMonitor, Logger);
+    }
+
+    public void ResetFixture()
+    {
+        WorldEventService = Mock.Of<IWorldEventsService>();
+        ZoneStore = Mock.Of<IZoneStore>();
+        WorldService = Mock.Of<IWorldService>();
+        MapService = Mock.Of<IMapService>();
+        PlayerMonitor = Mock.Of<IPlayerMonitor>();
+        Logger = Mock.Of<ILogger<WorldMonitor>>();
+    }
+}

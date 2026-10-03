@@ -39,6 +39,19 @@ public sealed class RedisListStore(IOptions<CacheOptions> options) : IListStore,
         }
     }
 
+    public async Task ClearAsync(string key)
+    {
+        try
+        {
+            var db = await GetDatabaseAsync();
+            await db.KeyDeleteAsync(FormatKey(key));
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+    }
+
     public async Task<IReadOnlyCollection<string>?> GetAsync(string key)
     {
         try

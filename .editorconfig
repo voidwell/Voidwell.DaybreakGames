@@ -51,6 +51,7 @@ dotnet_diagnostic.CA1812.severity = warning
 # Test projects commonly use descriptive underscore-separated names to read clearly.
 [test/**/*.cs]
 dotnet_diagnostic.IDE1006.severity = none
+dotnet_diagnostic.CA1812.severity = none
 dotnet_diagnostic.CA1707.severity = none
 
 [src/Voidwell.DaybreakGames.Data/Migrations/**.cs]

@@ -83,6 +83,8 @@ Tests use xunit v3 on Microsoft Testing Platform (enabled through `global.json`)
 dotnet test --solution Voidwell.DaybreakGames.slnx
 ```
 
+Each application project has a matching test project named `<Project>.Test` under `test/` (Cache, Census, CensusStore, Domain, Live, Services, Utils). Shared test helpers (mock extensions, an in-memory `ICache`, map test data) live in `test/Shared`, and common packages are set once in `test/Directory.Build.props`. Run a single project with `dotnet test --project test/Voidwell.DaybreakGames.Live.Test`.
+
 ## Docker
 
 ```bash

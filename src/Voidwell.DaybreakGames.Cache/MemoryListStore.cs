@@ -33,6 +33,13 @@ public class MemoryListStore : IListStore
         return Task.CompletedTask;
     }
 
+    public Task ClearAsync(string key)
+    {
+        _lists.TryRemove(key, out _);
+
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyCollection<string>?> GetAsync(string key)
     {
         if (!_lists.TryGetValue(key, out var set))

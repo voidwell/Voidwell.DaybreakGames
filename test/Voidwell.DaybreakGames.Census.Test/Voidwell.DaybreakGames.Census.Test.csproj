@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
+  </ItemGroup>
+
+</Project>

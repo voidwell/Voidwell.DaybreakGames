@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Domain\Voidwell.DaybreakGames.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Live\Voidwell.DaybreakGames.Live.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\MapTests\MapHelper.cs" Link="Shared\MapTests\MapHelper.cs" />
+    <None Include="..\Shared\MapTests\TestData\*.json" Link="MapTests\TestData\%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

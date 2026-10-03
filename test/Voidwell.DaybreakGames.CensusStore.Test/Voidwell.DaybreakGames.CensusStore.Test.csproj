@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Caching\TestCache.cs" Link="Shared\Caching\TestCache.cs" />
+  </ItemGroup>
+
+</Project>

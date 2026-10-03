@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Services\Voidwell.DaybreakGames.Services.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.CensusStore\Voidwell.DaybreakGames.CensusStore.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Domain\Voidwell.DaybreakGames.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Caching\TestCache.cs" Link="Shared\Caching\TestCache.cs" />
+  </ItemGroup>
+
+</Project>

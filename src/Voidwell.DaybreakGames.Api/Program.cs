@@ -49,14 +49,12 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.CacheDuration = TimeSpan.FromMinutes(2);
     });
 
-services.AddAuthorization(options =>
-{
-    options.AddPolicy(AuthConstants.Policies.Mutterblack, policy =>
+services.AddAuthorizationBuilder()
+    .AddPolicy(AuthConstants.Policies.Mutterblack, policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
     });
-});
 
 services.AddMemoryCache();
 services.AddAuthenticatedHttpClient<IUserRolesClient, UserRolesClient>(options =>

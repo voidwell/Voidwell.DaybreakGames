@@ -27,6 +27,11 @@ public class Cache(IFusionCache cache, IListStore lists) : ICache
         return _lists.RemoveAsync(key, item);
     }
 
+    public Task ClearListAsync(string key)
+    {
+        return _lists.ClearAsync(key);
+    }
+
     public async Task<IEnumerable<string>> GetListAsync(string key)
     {
         return await _lists.GetAsync(key) ?? Enumerable.Empty<string>();

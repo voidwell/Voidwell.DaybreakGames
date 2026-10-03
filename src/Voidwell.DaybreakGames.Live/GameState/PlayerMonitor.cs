@@ -146,7 +146,7 @@ public class PlayerMonitor : IPlayerMonitor
 
     public Task ClearWorldAsync(int worldId)
     {
-        return _cache.RemoveAsync(GetListCacheKey(worldId));
+        return _cache.ClearListAsync(GetListCacheKey(worldId));
     }
 
     private Task RemoveFromCacheList(Character character)

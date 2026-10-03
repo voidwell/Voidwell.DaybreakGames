@@ -26,6 +26,7 @@ public interface ICache
     Task<T?> GetOrSetIfNotNullAsync<T>(string key, Func<CancellationToken, Task<T?>> factory, TimeSpan expires, CancellationToken token = default);
     Task AddToListAsync(string key, string item);
     Task RemoveFromListAsync(string key, string item);
+    Task ClearListAsync(string key);
     Task<IEnumerable<string>> GetListAsync(string key);
     Task<bool> TryGetListAsync(string key, Action<IEnumerable<string>> callback);
     Task<long> GetListLengthAsync(string key);

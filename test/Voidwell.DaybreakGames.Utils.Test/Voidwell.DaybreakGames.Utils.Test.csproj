@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -13,7 +13,14 @@ COPY ./src/Voidwell.DaybreakGames.Live/*.csproj ./src/Voidwell.DaybreakGames.Liv
 COPY ./src/Voidwell.DaybreakGames.Services/*.csproj ./src/Voidwell.DaybreakGames.Services/
 COPY ./src/Voidwell.DaybreakGames.Utils/*.csproj ./src/Voidwell.DaybreakGames.Utils/
 
-COPY ./test/Voidwell.DaybreakGames.Test/*.csproj ./test/Voidwell.DaybreakGames.Test/
+COPY ./test/Directory.Build.props ./test/
+COPY ./test/Voidwell.DaybreakGames.Cache.Test/*.csproj ./test/Voidwell.DaybreakGames.Cache.Test/
+COPY ./test/Voidwell.DaybreakGames.Census.Test/*.csproj ./test/Voidwell.DaybreakGames.Census.Test/
+COPY ./test/Voidwell.DaybreakGames.CensusStore.Test/*.csproj ./test/Voidwell.DaybreakGames.CensusStore.Test/
+COPY ./test/Voidwell.DaybreakGames.Domain.Test/*.csproj ./test/Voidwell.DaybreakGames.Domain.Test/
+COPY ./test/Voidwell.DaybreakGames.Live.Test/*.csproj ./test/Voidwell.DaybreakGames.Live.Test/
+COPY ./test/Voidwell.DaybreakGames.Services.Test/*.csproj ./test/Voidwell.DaybreakGames.Services.Test/
+COPY ./test/Voidwell.DaybreakGames.Utils.Test/*.csproj ./test/Voidwell.DaybreakGames.Utils.Test/
 
 RUN dotnet restore
 
