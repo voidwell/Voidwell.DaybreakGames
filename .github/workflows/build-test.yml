@@ -18,6 +18,9 @@ jobs:
       - name: Restore
         run: dotnet restore Voidwell.DaybreakGames.sln
 
+      - name: Lint
+        run: dotnet format DaybreakGames.Census.slnx --verify-no-changes --severity error --no-restore
+
       - name: Build
         run: dotnet build Voidwell.DaybreakGames.sln --configuration Release --no-restore
 
