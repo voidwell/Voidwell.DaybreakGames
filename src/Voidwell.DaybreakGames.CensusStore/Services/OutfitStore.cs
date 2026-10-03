@@ -1,4 +1,5 @@
-﻿using DaybreakGames.Census.Exceptions;
+﻿using AsyncKeyedLock;
+using DaybreakGames.Census.Exceptions;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
@@ -6,7 +7,6 @@ using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services;
 
@@ -29,8 +29,8 @@ public class OutfitStore : IOutfitStore
     private readonly TimeSpan _cacheOutfitMemberExpiration = TimeSpan.FromMinutes(10);
     private readonly TimeSpan _cacheOutfitMemberDetailsExpiration = TimeSpan.FromMinutes(30);
 
-    private readonly KeyedSemaphoreSlim _outfitLock = new KeyedSemaphoreSlim();
-    private readonly KeyedSemaphoreSlim _outfitMembershipLock = new KeyedSemaphoreSlim();
+    private readonly AsyncKeyedLocker<string> _outfitLock = new();
+    private readonly AsyncKeyedLocker<string> _outfitMembershipLock = new();
 
     public OutfitStore(IOutfitRepository outfitRepository, OutfitCollection outfitCollection,
         OutfitMembershipCollection outfitMembershipCollection, CharacterCollection characterCollection, ICache cache,
@@ -87,7 +87,7 @@ public class OutfitStore : IOutfitStore
     {
         OutfitMember outfitMember;
 
-        using (await _outfitMembershipLock.WaitAsync(character.Id!))
+        using (await _outfitMembershipLock.LockAsync(character.Id!))
         {
             var cacheKey = $"{_cacheKey}_member_{character.Id}";
 
@@ -143,7 +143,7 @@ public class OutfitStore : IOutfitStore
     {
         Outfit outfit;
 
-        using (await _outfitLock.WaitAsync(outfitId))
+        using (await _outfitLock.LockAsync(outfitId))
         {
             outfit = (await GetKnownOutfitAsync(outfitId))!;
             if (outfit == null)
@@ -211,7 +211,7 @@ public class OutfitStore : IOutfitStore
     {
         Outfit outfit;
 
-        using (await _outfitLock.WaitAsync(outfitId))
+        using (await _outfitLock.LockAsync(outfitId))
         {
             outfit = await _cache.GetAsync<Outfit>(_getOutfitCacheKey(outfitId));
             if (outfit != null)

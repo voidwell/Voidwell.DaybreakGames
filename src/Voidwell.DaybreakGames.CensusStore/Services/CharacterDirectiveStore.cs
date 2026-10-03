@@ -1,4 +1,5 @@
-﻿using DaybreakGames.Census.Exceptions;
+﻿using AsyncKeyedLock;
+using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
@@ -18,7 +19,7 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
     private readonly ICharacterStore _characterStore;
     private readonly IStoreUpdaterHelper _storeUpdaterHelper;
 
-    private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
+    private readonly AsyncKeyedLocker<string> _characterLock = new();
 
     public CharacterDirectiveStore(
         ICharacterDirectiveRepository repository,
@@ -40,7 +41,7 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
 
     public async Task<IEnumerable<CharacterDirectiveTree>?> GetCharacterDirectivesAsync(string characterId)
     {
-        using (await _characterLock.WaitAsync(characterId))
+        using (await _characterLock.LockAsync(characterId))
         {
             var data = await GetCharacterDirectiveStoreDataAsync(characterId);
             if (data != null && data.Any())

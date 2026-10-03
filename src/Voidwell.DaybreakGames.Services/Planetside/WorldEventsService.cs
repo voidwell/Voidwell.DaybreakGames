@@ -1,8 +1,8 @@
-﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using AsyncKeyedLock;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside;
 
@@ -10,7 +10,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
 {
     private readonly IEventRepository _eventRepository;
 
-    private readonly KeyedSemaphoreSlim _facilityControlsByDateSemaphore = new KeyedSemaphoreSlim();
+    private readonly AsyncKeyedLocker<string> _facilityControlsByDateLock = new();
 
     public WorldEventsService(IEventRepository eventRepository)
     {
@@ -54,7 +54,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
 
     public async Task<IEnumerable<FacilityControl>> GetFacilityControlsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
     {
-        using (await _facilityControlsByDateSemaphore.WaitAsync($"{worldId}_{startDate}_{endDate}_{zoneId}"))
+        using (await _facilityControlsByDateLock.LockAsync($"{worldId}_{startDate}_{endDate}_{zoneId}"))
         {
             return await _eventRepository.GetFacilityControlsByDateAsync(worldId, startDate, endDate, zoneId);
         }
@@ -122,7 +122,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
 
     public void Dispose()
     {
-        _facilityControlsByDateSemaphore.Dispose();
+        _facilityControlsByDateLock.Dispose();
     }
 
     private static class Experience

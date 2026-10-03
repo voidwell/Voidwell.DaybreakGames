@@ -1,10 +1,10 @@
-﻿using AutoMapper;
+﻿using AsyncKeyedLock;
+using AutoMapper;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside;
 
@@ -19,8 +19,8 @@ public class MapService : IMapService
     private readonly ICache _cache;
     private readonly IMapper _mapper;
 
-    private readonly KeyedSemaphoreSlim _zoneMapLock = new KeyedSemaphoreSlim();
-    private readonly KeyedSemaphoreSlim _zoneHistoryLock = new KeyedSemaphoreSlim();
+    private readonly AsyncKeyedLocker<string> _zoneMapLock = new();
+    private readonly AsyncKeyedLocker<string> _zoneHistoryLock = new();
     private readonly SemaphoreSlim _zoneStateLock = new SemaphoreSlim(1);
 
     private const string _cacheKey = "ps2.map_service";
@@ -46,7 +46,7 @@ public class MapService : IMapService
 
     public async Task<ZoneMap> GetZoneMapAsync(int zoneId)
     {
-        using (await _zoneMapLock.WaitAsync(zoneId.ToString()))
+        using (await _zoneMapLock.LockAsync(zoneId.ToString()))
         {
             return await _cache.GetOrSetAsync<ZoneMap>(_getZoneMapCacheKey(zoneId), async ct =>
             {
@@ -86,7 +86,7 @@ public class MapService : IMapService
 
     public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnershipFromHistory(int worldId, int zoneId)
     {
-        using (await _zoneHistoryLock.WaitAsync(worldId.ToString()))
+        using (await _zoneHistoryLock.LockAsync(worldId.ToString()))
         {
             var regionsTask = _mapRegionStore.GetMapRegionsByZoneIdAsync(zoneId);
             var eventsTask = _mapStore.GetCensusFacilityWorldEventsByZoneIdAsync(worldId, zoneId);

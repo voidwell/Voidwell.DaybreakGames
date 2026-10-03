@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="AsyncKeyedLock" Version="8.1.2" />
     <PackageVersion Include="AutoMapper" Version="16.2.0" />
     <PackageVersion Include="DaybreakGames.Census" Version="10.0.0" />
     <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="10.1.0" />

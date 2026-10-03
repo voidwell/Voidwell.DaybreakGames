@@ -1,8 +1,8 @@
-﻿using Voidwell.DaybreakGames.Cache;
+﻿using AsyncKeyedLock;
+using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside;
 
@@ -22,8 +22,8 @@ public class CharacterSessionService : ICharacterSessionService
     private readonly TimeSpan _cacheCharacterSessionExpiration = TimeSpan.FromMinutes(10);
     private readonly TimeSpan _cacheCharacterLiveSessionExpiration = TimeSpan.FromSeconds(10);
 
-    private readonly KeyedSemaphoreSlim _characterSessionLock = new KeyedSemaphoreSlim();
-    private readonly KeyedSemaphoreSlim _characterLiveSessionLock = new KeyedSemaphoreSlim();
+    private readonly AsyncKeyedLocker<string> _characterSessionLock = new();
+    private readonly AsyncKeyedLocker<string> _characterLiveSessionLock = new();
 
     public CharacterSessionService(IPlayerSessionRepository playerSessionRepository, IWorldEventsService worldEventService, ICache cache)
     {
@@ -41,7 +41,7 @@ public class CharacterSessionService : ICharacterSessionService
 
     public async Task<PlayerSession?> GetSession(string characterId, int sessionId)
     {
-        using (await _characterSessionLock.WaitAsync($"{characterId}_{sessionId}"))
+        using (await _characterSessionLock.LockAsync($"{characterId}_{sessionId}"))
         {
             var cacheKey = _getSessionCacheKey(characterId, sessionId);
 
@@ -78,7 +78,7 @@ public class CharacterSessionService : ICharacterSessionService
 
     public async Task<PlayerSession?> GetSession(string characterId)
     {
-        using (await _characterLiveSessionLock.WaitAsync(characterId))
+        using (await _characterLiveSessionLock.LockAsync(characterId))
         {
             var cacheKey = _getLiveSessionCacheKey(characterId);
 

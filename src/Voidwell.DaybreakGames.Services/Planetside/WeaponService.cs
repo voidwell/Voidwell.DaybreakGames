@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using AsyncKeyedLock;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Census.Models;
@@ -7,7 +8,6 @@ using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
-using Voidwell.DaybreakGames.Utils;
 using static Voidwell.DaybreakGames.Census.Models.Extensions.CensusWeaponInfoModelExtensions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside;
@@ -27,8 +27,8 @@ public class WeaponService : IWeaponService
     private readonly TimeSpan _weaponInfoCacheExpiration = TimeSpan.FromHours(8);
     private readonly TimeSpan _sanctionedWeaponsCacheExpiration = TimeSpan.FromHours(8);
 
-    private readonly KeyedSemaphoreSlim _oracleStatLock = new KeyedSemaphoreSlim();
-    private readonly SemaphoreSlim _sanctionedStoreLock = new SemaphoreSlim(1);
+    private readonly AsyncKeyedLocker<string> _oracleStatLock = new();
+    private readonly SemaphoreSlim _sanctionedStoreLock = new(1);
 
     public WeaponService(ISanctionedWeaponsRepository sanctionedWeaponRepository, IWorldEventsService worldEventsService,
         IItemService itemService, IFactionStore factionStore, ICache cache, ILogger<WeaponService> logger)
@@ -177,7 +177,7 @@ public class WeaponService : IWeaponService
     {
         var cacheKey = $"ps2.oracle_{weaponId}_{start.Year}-{start.Month}-{start.Day}_{end.Year}-{end.Month}-{end.Day}";
 
-        using (await _oracleStatLock.WaitAsync(cacheKey))
+        using (await _oracleStatLock.LockAsync(cacheKey))
         {
 
             return await _cache.GetOrSetAsync<IEnumerable<DailyWeaponStats>>(cacheKey, ct => _worldEventsService.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end), TimeSpan.FromHours(1));
