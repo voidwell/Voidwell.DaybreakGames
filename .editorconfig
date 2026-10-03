@@ -49,5 +49,13 @@ dotnet_diagnostic.CA1822.severity = warning
 dotnet_diagnostic.CA1812.severity = warning
 
 # Test projects commonly use descriptive underscore-separated names to read clearly.
-[tests/**/*.cs]
+[test/**/*.cs]
+dotnet_diagnostic.IDE1006.severity = none
 dotnet_diagnostic.CA1707.severity = none
+
+[src/Voidwell.DaybreakGames.Data/Migrations/**.cs]
+generated_code = true
+
+[src/Voidwell.DaybreakGames.Data/DataConfigurations/**.cs]
+# Entity type configurations are instantiated by EF via reflection
+dotnet_diagnostic.CA1812.severity = none

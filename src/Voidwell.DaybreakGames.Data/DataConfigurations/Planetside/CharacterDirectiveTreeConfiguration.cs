@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class CharacterDirectiveTreeConfiguration : IEntityTypeConfiguration<CharacterDirectiveTree>
 {
-    public class CharacterDirectiveTreeConfiguration : IEntityTypeConfiguration<CharacterDirectiveTree>
+    public void Configure(EntityTypeBuilder<CharacterDirectiveTree> builder)
     {
-        public void Configure(EntityTypeBuilder<CharacterDirectiveTree> builder)
-        {
-            builder.ToTable("CharacterDirectiveTree");
+        builder.ToTable("CharacterDirectiveTree");
 
-            builder.HasKey(a => new { a.CharacterId, a.DirectiveTreeId });
+        builder.HasKey(a => new { a.CharacterId, a.DirectiveTreeId });
 
-            builder.Ignore(a => a.CharacterDirectiveTiers);
-        }
+        builder.Ignore(a => a.CharacterDirectiveTiers);
     }
 }

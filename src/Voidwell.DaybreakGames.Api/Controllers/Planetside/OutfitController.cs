@@ -1,51 +1,49 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Voidwell.DaybreakGames.Api.Authentication;
-using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
-namespace Voidwell.DaybreakGames.Api.Controllers.Planetside
+namespace Voidwell.DaybreakGames.Api.Controllers.Planetside;
+
+[Route("ps2/outfit")]
+public class OutfitController : Controller
 {
-    [Route("ps2/outfit")]
-    public class OutfitController : Controller
+    private readonly IOutfitService _outfitService;
+
+    public OutfitController(IOutfitService outfitService)
     {
-        private readonly IOutfitService _outfitService;
+        _outfitService = outfitService;
+    }
 
-        public OutfitController(IOutfitService outfitService)
+    [HttpGet("{outfitId}")]
+    public async Task<ActionResult> GetOutfitAsync(string outfitId)
+    {
+        var details = await _outfitService.GetOutfitDetails(outfitId);
+        if (details == null)
         {
-            _outfitService = outfitService;
+            return NotFound($"Unable to find outfit with id: '{outfitId}'");
         }
 
-        [HttpGet("{outfitId}")]
-        public async Task<ActionResult> GetOutfit(string outfitId)
-        {
-            var details = await _outfitService.GetOutfitDetails(outfitId);
-            if (details == null)
-            {
-                return NotFound($"Unable to find outfit with id: '{outfitId}'");
-            }
+        return Ok(details);
+    }
 
-            return Ok(details);
+    [HttpGet("{outfitId}/members")]
+    public async Task<ActionResult> GetOutfitMembersAsync(string outfitId)
+    {
+        var result = await _outfitService.GetOutfitMembers(outfitId);
+        return Ok(result);
+    }
+
+    [Authorize(AuthConstants.Policies.Mutterblack)]
+    [HttpGet("byalias/{outfitAlias}")]
+    public async Task<ActionResult> GetOutfitByAliasAsync(string outfitAlias)
+    {
+        var result = await _outfitService.GetOutfitByAlias(outfitAlias);
+        if (result == null)
+        {
+            return NotFound($"Unable to find stats with outfit: '{outfitAlias}'");
         }
 
-        [HttpGet("{outfitId}/members")]
-        public async Task<ActionResult> GetOutfitMembers(string outfitId)
-        {
-            var result = await _outfitService.GetOutfitMembers(outfitId);
-            return Ok(result);
-        }
-
-        [Authorize(AuthConstants.Policies.Mutterblack)]
-        [HttpGet("byalias/{outfitAlias}")]
-        public async Task<ActionResult> GetOutfitByAlias(string outfitAlias)
-        {
-            var result = await _outfitService.GetOutfitByAlias(outfitAlias);
-            if (result == null)
-            {
-                return NotFound($"Unable to find stats with outfit: '{outfitAlias}'");
-            }
-
-            return Ok(result);
-        }
+        return Ok(result);
     }
 }

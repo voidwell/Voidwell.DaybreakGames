@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
+﻿namespace Voidwell.DaybreakGames.Domain.Models;
 
-namespace Voidwell.DaybreakGames.Domain.Models
+public class WorldZoneRegion : ZoneRegion
 {
-    public class WorldZoneRegion : ZoneRegion
-    {
-        public List<WorldZoneRegion> Links { get; set; } = new List<WorldZoneRegion>();
-    }
+    public List<WorldZoneRegion> Links { get; set; } = new List<WorldZoneRegion>();
 }

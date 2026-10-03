@@ -1,16 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class DailyWeaponStatsConfiguration : IEntityTypeConfiguration<DailyWeaponStats>
 {
-    public class DailyWeaponStatsConfiguration : IEntityTypeConfiguration<DailyWeaponStats>
+    public void Configure(EntityTypeBuilder<DailyWeaponStats> builder)
     {
-        public void Configure(EntityTypeBuilder<DailyWeaponStats> builder)
-        {
-            builder.ToTable("DailyWeaponStats");
+        builder.ToTable("DailyWeaponStats");
 
-            builder.HasKey(a => new { a.WeaponId, a.Date });
-        }
+        builder.HasKey(a => new { a.WeaponId, a.Date });
     }
 }

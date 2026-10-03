@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface IExperienceRepository
 {
-    public interface IExperienceRepository
-    {
-        Task<Experience> GetExperienceById(int experienceId);
-        Task UpsertRangeAsync(IEnumerable<Experience> entities);
-    }
+    Task<Experience?> GetExperienceById(int experienceId);
+    Task UpsertRangeAsync(IEnumerable<Experience> entities);
 }

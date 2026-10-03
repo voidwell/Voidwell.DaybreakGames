@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Domain.Models;
+﻿using Voidwell.DaybreakGames.Domain.Models;
 
-namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions
+namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+public interface IMetagameEventService
 {
-    public interface IMetagameEventService
-    {
-        Task<ZoneMetagameEvent> GetMetagameEvent(int metagameEventId);
-    }
+    Task<ZoneMetagameEvent?> GetMetagameEvent(int metagameEventId);
 }

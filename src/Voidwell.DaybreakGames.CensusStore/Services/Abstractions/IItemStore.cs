@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Census.Models;
+﻿using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.CensusStore.Services.Abstractions
+namespace Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
+
+public interface IItemStore
 {
-    public interface IItemStore
-    {
-        Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<int> itemIds);
-        Task<IEnumerable<Item>> GetItemsByCategoryIdsAsync(IEnumerable<int> categoryIds);
-        Task<IEnumerable<Item>> FindWeaponsByNameAsync(string name, int limit = 12);
-        Task<CensusWeaponInfoModel> GetWeaponInfoAsync(int weaponItemId);
-    }
+    Task<IEnumerable<Item>> FindItemsByIdsAsync(IEnumerable<int> itemIds);
+    Task<IEnumerable<Item>?> GetItemsByCategoryIdsAsync(IEnumerable<int> categoryIds);
+    Task<IEnumerable<Item>> FindWeaponsByNameAsync(string name, int limit = 12);
+    Task<CensusWeaponInfoModel> GetWeaponInfoAsync(int weaponItemId);
 }

@@ -1,40 +1,38 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Voidwell.DaybreakGames.Api.Authentication;
-using System.Threading.Tasks;
 using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 
-namespace Voidwell.DaybreakGames.Api.Controllers
+namespace Voidwell.DaybreakGames.Api.Controllers;
+
+[Route("store")]
+[Authorize(Roles = AuthConstants.Roles.Administrator)]
+public class StoreController : Controller
 {
-    [Route("store")]
-    [Authorize(Roles = AuthConstants.Roles.Administrator)]
-    public class StoreController : Controller
+    private readonly IStoreUpdaterService _storeUpdaterService;
+
+    public StoreController(IStoreUpdaterService storeUpdaterService)
     {
-        private readonly IStoreUpdaterService _storeUpdaterService;
+        _storeUpdaterService = storeUpdaterService;
+    }
 
-        public StoreController(IStoreUpdaterService storeUpdaterService)
+    [HttpGet("updatelog")]
+    public ActionResult GetAllUpdateLogs()
+    {
+        var logs = _storeUpdaterService.GetStoreUpdateLog();
+
+        return Ok(logs);
+    }
+
+    [HttpPost("update/{storeName}")]
+    public async Task<ActionResult> PostForceUpdateStoreAsync(string storeName)
+    {
+        var result = await _storeUpdaterService.UpdateStoreAsync(storeName);
+        if (result == null)
         {
-            _storeUpdaterService = storeUpdaterService;
+            return NotFound();
         }
 
-        [HttpGet("updatelog")]
-        public ActionResult GetAllUpdateLogs()
-        {
-            var logs = _storeUpdaterService.GetStoreUpdateLog();
-
-            return Ok(logs);
-        }
-
-        [HttpPost("update/{storeName}")]
-        public async Task<ActionResult> PostForceUpdateStore(string storeName)
-        {
-            var result = await _storeUpdaterService.UpdateStoreAsync(storeName);
-            if (result == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(result);
-        }
+        return Ok(result);
     }
 }

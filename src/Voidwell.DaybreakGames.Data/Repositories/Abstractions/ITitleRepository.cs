@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface ITitleRepository
 {
-    public interface ITitleRepository
-    {
-        Task UpdateRangeAsync(IEnumerable<Title> entities);
-    }
+    Task UpdateRangeAsync(IEnumerable<Title> entities);
 }

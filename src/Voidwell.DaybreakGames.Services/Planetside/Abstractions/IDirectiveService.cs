@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Domain.Models;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions
+namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+public interface IDirectiveService
 {
-    public interface IDirectiveService
-    {
-        Task<IEnumerable<DirectiveTreeCategory>> GetDirectiveDataAsync();
-    }
+    Task<IEnumerable<DirectiveTreeCategory>?> GetDirectiveDataAsync();
 }

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0
+FROM mcr.microsoft.com/dotnet/sdk:10.0
 
 #setup remote debugger
 WORKDIR /
@@ -19,7 +19,7 @@ ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 ENV ASPNETCORE_ENVIRONMENT Development
 
 COPY ./src/Voidwell.DaybreakGames.Api/*.csproj /tmp/
-COPY ./Directory.Build.props /
+COPY ./Directory.Build.props ./Directory.Packages.props /
 
 WORKDIR /tmp
 

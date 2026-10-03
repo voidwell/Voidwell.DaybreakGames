@@ -1,9 +1,16 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="OutDir;Configuration">
+<Project>
+
   <PropertyGroup>
-      <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
-      <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-      <OutputPath>$(RepositoryRootDirectory)\build\$(MSBuildProjectName)\$(Configuration)\bin\</OutputPath>
-      <BaseIntermediateOutputPath>$(RepositoryRootDirectory)\build\$(MSBuildProjectName)\$(Configuration)\obj\</BaseIntermediateOutputPath>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+  </PropertyGroup>
+
 </Project>

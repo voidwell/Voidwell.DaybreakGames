@@ -1,9 +1,10 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-env
 WORKDIR /app
 
 # Copy and restore as distinct layers
-COPY *.sln ./
+COPY *.slnx global.json Directory.Build.props Directory.Packages.props ./
 COPY ./src/Voidwell.DaybreakGames.Api/*.csproj ./src/Voidwell.DaybreakGames.Api/
+COPY ./src/Voidwell.DaybreakGames.Cache/*.csproj ./src/Voidwell.DaybreakGames.Cache/
 COPY ./src/Voidwell.DaybreakGames.Census/*.csproj ./src/Voidwell.DaybreakGames.Census/
 COPY ./src/Voidwell.DaybreakGames.CensusStore/*.csproj ./src/Voidwell.DaybreakGames.CensusStore/
 COPY ./src/Voidwell.DaybreakGames.Data/*.csproj ./src/Voidwell.DaybreakGames.Data/
@@ -22,7 +23,7 @@ RUN find -type d -name bin -prune -exec rm -rf {} \; && find -type d -name obj -
 RUN dotnet publish -c Release -o /app/out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 # Copy the app
 WORKDIR /app

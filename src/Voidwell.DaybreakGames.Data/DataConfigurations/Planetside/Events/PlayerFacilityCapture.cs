@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+internal class PlayerFacilityCapture : IEntityTypeConfiguration<Models.Planetside.Events.PlayerFacilityCapture>
 {
-    internal class PlayerFacilityCapture : IEntityTypeConfiguration<Models.Planetside.Events.PlayerFacilityCapture>
+    public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityCapture> builder)
     {
-        public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityCapture> builder)
-        {
-            builder.ToTable("EventPlayerFacilityCapture");
+        builder.ToTable("EventPlayerFacilityCapture");
 
-            builder.HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
+        builder.HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
 
-            builder
-                .Ignore(a => a.Facility);
-        }
+        builder
+            .Ignore(a => a.Facility);
     }
 }

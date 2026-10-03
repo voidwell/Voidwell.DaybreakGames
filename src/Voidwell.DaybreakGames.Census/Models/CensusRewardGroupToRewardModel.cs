@@ -1,8 +1,7 @@
-﻿namespace Voidwell.DaybreakGames.Census.Models
+﻿namespace Voidwell.DaybreakGames.Census.Models;
+
+public class CensusRewardGroupToRewardModel
 {
-    public class CensusRewardGroupToRewardModel
-    {
-        public int RewardGroupId { get; set; }
-        public int RewardId { get; set; }
-    }
+    public int RewardGroupId { get; set; }
+    public int RewardId { get; set; }
 }

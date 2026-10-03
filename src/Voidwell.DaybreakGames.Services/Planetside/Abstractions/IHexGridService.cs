@@ -1,6 +1,5 @@
-﻿namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions
+﻿namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+public interface IHexGridService
 {
-    public interface IHexGridService
-    {
-    }
 }

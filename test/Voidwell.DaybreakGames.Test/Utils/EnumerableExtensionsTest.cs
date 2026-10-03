@@ -1,96 +1,94 @@
 ﻿using FluentAssertions;
-using System.Collections.Generic;
 using Voidwell.DaybreakGames.Utils;
 using Xunit;
 
-namespace Voidwell.DaybreakGames.Test.Utils
+namespace Voidwell.DaybreakGames.Test.Utils;
+
+public class EnumerableExtensionsTest
 {
-    public class EnumerableExtensionsTest
+    [Fact]
+    public void SetGroupJoin_MapsJoinedData()
     {
-        [Fact]
-        public void SetGroupJoin_MapsJoinedData()
+        // Arrange
+        var parents = GetTestParents();
+        var children = GetTestChildren();
+        var expected = GetExpectedResult();
+
+        // Act
+        parents.SetGroupJoin(children, a => a.Id, a => a.ParentId, a => a.Children);
+
+        //Assert
+        parents.Should()
+            .BeEquivalentTo(expected);
+    }
+
+    private static IEnumerable<SimpleParent> GetTestParents()
+    {
+        return new[]
         {
-            // Arrange
-            var parents = GetTestParents();
-            var children = GetTestChildren();
-            var expected = GetExpectedResult();
+            new SimpleParent(1),
+            new SimpleParent(2),
+            new SimpleParent(3)
+        };
+    }
 
-            // Act
-            parents.SetGroupJoin(children, a => a.Id, a => a.ParentId, a => a.Children);
-
-            //Assert
-            parents.Should()
-                .BeEquivalentTo(expected);
-        }
-
-        private IEnumerable<SimpleParent> GetTestParents()
+    private static IEnumerable<SimpleChild> GetTestChildren()
+    {
+        return new[]
         {
-            return new[]
+            new SimpleChild(1, 1),
+            new SimpleChild(1, 2),
+            new SimpleChild(1, 3),
+            new SimpleChild(2, 1),
+            new SimpleChild(4, 1),
+            new SimpleChild(4, 2)
+        };
+    }
+
+    private static IEnumerable<SimpleParent> GetExpectedResult()
+    {
+        return new[]
+        {
+            new SimpleParent(1)
             {
-                new SimpleParent(1),
-                new SimpleParent(2),
-                new SimpleParent(3)
-            };
-        }
-
-        private IEnumerable<SimpleChild> GetTestChildren()
-        {
-            return new[]
-            {
-                new SimpleChild(1, 1),
-                new SimpleChild(1, 2),
-                new SimpleChild(1, 3),
-                new SimpleChild(2, 1),
-                new SimpleChild(4, 1),
-                new SimpleChild(4, 2)
-            };
-        }
-
-        private IEnumerable<SimpleParent> GetExpectedResult()
-        {
-            return new[]
-            {
-                new SimpleParent(1)
+                Children = new[]
                 {
-                    Children = new[]
-                    {
-                        new SimpleChild(1, 1),
-                        new SimpleChild(1, 2),
-                        new SimpleChild(1, 3)
-                    }
-                },
-                new SimpleParent(2)
+                    new SimpleChild(1, 1),
+                    new SimpleChild(1, 2),
+                    new SimpleChild(1, 3)
+                }
+            },
+            new SimpleParent(2)
+            {
+                Children = new[]
                 {
-                    Children = new[]
-                    {
-                        new SimpleChild(2, 1)
-                    }
-                },
-                new SimpleParent(3)
-            };
-        }
+                    new SimpleChild(2, 1)
+                }
+            },
+            new SimpleParent(3)
+        };
+    }
 
-        private class SimpleParent
+    private class SimpleParent
+    {
+        public SimpleParent(int id)
         {
-            public SimpleParent(int id)
-            {
-                Id = id;
-            }
-
-            public int Id { get; set; }
-            public IEnumerable<SimpleChild> Children { get; set; } = new List<SimpleChild>();
+            Id = id;
         }
 
-        private class SimpleChild
+        public int Id { get; set; }
+        public IEnumerable<SimpleChild> Children { get; set; } = new List<SimpleChild>();
+    }
+
+    private class SimpleChild
+    {
+        public SimpleChild(int parentId, int id)
         {
-            public SimpleChild(int parentId, int id)
-            {
-                ParentId = parentId;
-                Id = id;
-            }
-
-            public int ParentId { get; set; }
-            public int Id { get; set; }
+            ParentId = parentId;
+            Id = id;
         }
+
+        public int ParentId { get; set; }
+        public int Id { get; set; }
     }
 }

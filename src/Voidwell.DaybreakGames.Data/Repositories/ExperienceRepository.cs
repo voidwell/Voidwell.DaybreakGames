@@ -1,39 +1,36 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Extensions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.Microservice.EntityFramework;
 
-namespace Voidwell.DaybreakGames.Data.Repositories
+namespace Voidwell.DaybreakGames.Data.Repositories;
+
+public class ExperienceRepository : IExperienceRepository
 {
-    public class ExperienceRepository : IExperienceRepository
+    private readonly IDbContextHelper _dbContextHelper;
+
+    public ExperienceRepository(IDbContextHelper dbContextHelper)
     {
-        private readonly IDbContextHelper _dbContextHelper;
+        _dbContextHelper = dbContextHelper;
+    }
 
-        public ExperienceRepository(IDbContextHelper dbContextHelper)
+    public async Task<Experience?> GetExperienceById(int experienceId)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            _dbContextHelper = dbContextHelper;
+            var dbContext = factory.GetDbContext();
+
+            return await dbContext.Experience.FirstOrDefaultAsync(a => a.Id == experienceId);
         }
+    }
 
-        public async Task<Experience> GetExperienceById(int experienceId)
+    public async Task UpsertRangeAsync(IEnumerable<Experience> entities)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                return await dbContext.Experience.FirstOrDefaultAsync(a => a.Id == experienceId);
-            }
-        }
-
-        public async Task UpsertRangeAsync(IEnumerable<Experience> entities)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                await dbContext.UpsertAsync(entities);
-            }
+            await dbContext.UpsertAsync(entities);
         }
     }
 }

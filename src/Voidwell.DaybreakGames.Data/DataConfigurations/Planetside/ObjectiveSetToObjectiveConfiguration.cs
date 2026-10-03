@@ -1,20 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class ObjectiveSetToObjectiveConfiguration : IEntityTypeConfiguration<ObjectiveSetToObjective>
 {
-    public class ObjectiveSetToObjectiveConfiguration : IEntityTypeConfiguration<ObjectiveSetToObjective>
+    public void Configure(EntityTypeBuilder<ObjectiveSetToObjective> builder)
     {
-        public void Configure(EntityTypeBuilder<ObjectiveSetToObjective> builder)
-        {
-            builder.ToTable("ObjectiveSetToObjective");
+        builder.ToTable("ObjectiveSetToObjective");
 
-            builder.HasKey(a => a.ObjectiveSetId);
+        builder.HasKey(a => a.ObjectiveSetId);
 
-            builder.Property(a => a.ObjectiveSetId).ValueGeneratedNever();
+        builder.Property(a => a.ObjectiveSetId).ValueGeneratedNever();
 
-            builder.Ignore(a => a.Objectives);
-        }
+        builder.Ignore(a => a.Objectives);
     }
 }

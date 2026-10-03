@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface IFactionRepository : IRepository<Faction>
 {
-    public interface IFactionRepository : IRepository<Faction>
-    {
-        Task<Faction> GetFactionByIdAsync(int factionId);
-    }
+    Task<Faction?> GetFactionByIdAsync(int factionId);
 }

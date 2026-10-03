@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.DaybreakGames.Data.Models.Planetside
+namespace Voidwell.DaybreakGames.Data.Models.Planetside;
+
+public class DirectiveTreeCategory
 {
-    public class DirectiveTreeCategory
-    {
-        [Required]
-        public int Id { get; set; }
-        public string Name { get; set; }
+    [Required]
+    public int Id { get; set; }
+    public string? Name { get; set; }
 
-        public IEnumerable<DirectiveTree> Trees { get; set; }
-    }
+    public IEnumerable<DirectiveTree>? Trees { get; set; }
 }

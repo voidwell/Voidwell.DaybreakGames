@@ -1,9 +1,8 @@
 ﻿using static Voidwell.DaybreakGames.Data.DbContextHelper;
 
-namespace Voidwell.DaybreakGames.Data
+namespace Voidwell.DaybreakGames.Data;
+
+public interface IDbContextHelper
 {
-    public interface IDbContextHelper
-    {
-        DbContextFactory GetFactory();
-    }
+    DbContextFactory GetFactory();
 }

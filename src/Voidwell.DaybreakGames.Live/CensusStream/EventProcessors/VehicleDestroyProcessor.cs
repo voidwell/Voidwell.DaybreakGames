@@ -1,26 +1,24 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Live.CensusStream.Models;
-using AutoMapper;
+﻿using AutoMapper;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+using Voidwell.DaybreakGames.Live.CensusStream.Models;
 
-namespace Voidwell.DaybreakGames.Live.CensusStream.EventProcessors
+namespace Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
+
+[CensusEventProcessor("VehicleDestroy")]
+public class VehicleDestroyProcessor : IEventProcessor<VehicleDestroy>
 {
-    [CensusEventProcessor("VehicleDestroy")]
-    public class VehicleDestroyProcessor : IEventProcessor<VehicleDestroy>
+    private readonly IEventRepository _eventRepository;
+    private readonly IMapper _mapper;
+
+    public VehicleDestroyProcessor(IEventRepository eventRepository, IMapper mapper)
     {
-        private readonly IEventRepository _eventRepository;
-        private readonly IMapper _mapper;
+        _eventRepository = eventRepository;
+        _mapper = mapper;
+    }
 
-        public VehicleDestroyProcessor(IEventRepository eventRepository, IMapper mapper)
-        {
-            _eventRepository = eventRepository;
-            _mapper = mapper;
-        }
-
-        public async Task Process(VehicleDestroy payload)
-        {
-            var dataModel = _mapper.Map<Data.Models.Planetside.Events.VehicleDestroy>(payload);
-            await _eventRepository.AddAsync(dataModel);
-        }
+    public async Task Process(VehicleDestroy payload)
+    {
+        var dataModel = _mapper.Map<Data.Models.Planetside.Events.VehicleDestroy>(payload);
+        await _eventRepository.AddAsync(dataModel);
     }
 }

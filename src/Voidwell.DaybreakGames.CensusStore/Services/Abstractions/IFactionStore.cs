@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.CensusStore.Services.Abstractions
+namespace Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
+
+public interface IFactionStore
 {
-    public interface IFactionStore
-    {
-        Task<Faction> GetFactionByIdAsync(int factionId);
-    }
+    Task<Faction?> GetFactionByIdAsync(int factionId);
 }

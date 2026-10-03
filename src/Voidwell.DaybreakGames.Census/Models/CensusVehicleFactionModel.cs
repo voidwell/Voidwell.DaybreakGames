@@ -1,8 +1,7 @@
-﻿namespace Voidwell.DaybreakGames.Census.Models
+﻿namespace Voidwell.DaybreakGames.Census.Models;
+
+public class CensusVehicleFactionModel
 {
-    public class CensusVehicleFactionModel
-    {
-        public int VehicleId { get; set; }
-        public int FactionId { get; set; }
-    }
+    public int VehicleId { get; set; }
+    public int FactionId { get; set; }
 }

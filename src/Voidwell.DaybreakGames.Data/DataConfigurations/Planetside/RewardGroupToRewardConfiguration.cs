@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class RewardGroupToRewardConfiguration : IEntityTypeConfiguration<RewardGroupToReward>
 {
-    public class RewardGroupToRewardConfiguration : IEntityTypeConfiguration<RewardGroupToReward>
+    public void Configure(EntityTypeBuilder<RewardGroupToReward> builder)
     {
-        public void Configure(EntityTypeBuilder<RewardGroupToReward> builder)
-        {
-            builder.ToTable("RewardGroupToReward");
+        builder.ToTable("RewardGroupToReward");
 
-            builder.HasKey(a => new { a.RewardGroupId, a.RewardId });
+        builder.HasKey(a => new { a.RewardGroupId, a.RewardId });
 
-            builder.Ignore(a => a.Reward);
-        }
+        builder.Ignore(a => a.Reward);
     }
 }

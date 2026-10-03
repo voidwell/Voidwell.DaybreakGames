@@ -1,15 +1,12 @@
-﻿using System;
+﻿namespace Voidwell.DaybreakGames.Live.CensusStream;
 
-namespace Voidwell.DaybreakGames.Live.CensusStream
+[AttributeUsage(AttributeTargets.Class)]
+public class CensusEventProcessorAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CensusEventProcessorAttribute : Attribute
-    {
-        public string EventName { get; private set; }
+    public string EventName { get; private set; }
 
-        public CensusEventProcessorAttribute(string eventName)
-        {
-            EventName = eventName;
-        }
+    public CensusEventProcessorAttribute(string eventName)
+    {
+        EventName = eventName;
     }
 }

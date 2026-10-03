@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface ISanctionedWeaponsRepository
 {
-    public interface ISanctionedWeaponsRepository
-    {
-        Task<IEnumerable<SanctionedWeapon>> GetAllSanctionedWeapons();
-    }
+    Task<IEnumerable<SanctionedWeapon>> GetAllSanctionedWeapons();
 }

@@ -1,153 +1,136 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Voidwell.DaybreakGames.Data;
-using IdentityServer4.AccessTokenValidation;
-using System;
-using Voidwell.DaybreakGames.CensusStore;
-using Voidwell.DaybreakGames.Services;
-using Voidwell.DaybreakGames.Live;
-using Voidwell.DaybreakGames.Utils.HostedService;
-using Voidwell.Microservice.Hosting;
-using Voidwell.Microservice.Configuration;
-using Voidwell.Microservice.Cache;
-using Voidwell.Microservice.Authentication;
-using Voidwell.Microservice.Tracing;
+﻿using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
-using System.Collections.Generic;
-using System.Linq;
-using Voidwell.Microservice.Http.AuthenticatedHttpClient;
-using IdentityModel;
 using Voidwell.DaybreakGames.Api.Authentication;
+using Voidwell.DaybreakGames.Api.Json;
+using Voidwell.DaybreakGames.Cache;
+using Voidwell.DaybreakGames.CensusStore;
+using Voidwell.DaybreakGames.Data;
+using Voidwell.DaybreakGames.Live;
+using Voidwell.DaybreakGames.Services;
+using Voidwell.DaybreakGames.Utils.HostedService;
 
-namespace Voidwell.DaybreakGames.Api
+namespace Voidwell.DaybreakGames.Api;
+
+public class Startup
 {
-    public class Startup
+    public Startup(IWebHostEnvironment env)
     {
-        public Startup(IWebHostEnvironment env)
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(env.ContentRootPath)
+            .AddJsonFile("appsettings.json", false, true);
+
+        if (env.EnvironmentName == "Development")
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", false, true);
-
-            if (env.EnvironmentName == "Development")
-            {
-                builder.AddJsonFile("devsettings.json", true, true);
-            }
-
-            builder.AddEnvironmentVariables();
-
-            Configuration = builder.Build();
+            builder.AddJsonFile("devsettings.json", true, true);
         }
 
-        public IConfiguration Configuration { get; }
+        builder.AddEnvironmentVariables();
 
-        public void ConfigureServices(IServiceCollection services)
+        Configuration = builder.Build();
+    }
+
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddControllers()
+            .AddApiJsonOptions();
+
+        services.AddEntityFrameworkContext(Configuration);
+
+        services.AddCache(options =>
         {
-            services.AddControllers()
-                .AddMicroserviceJsonOptions();
+            options.RedisConfiguration = Configuration.GetValue<string>("RedisConfiguration");
+            options.KeyPrefix = "Voidwell.DaybreakGames";
+        });
 
-            services.AddEntityFrameworkContext(Configuration);
-
-            services.ConfigureServiceProperties("Voidwell.DaybreakGames");
-
-            services.AddCache(options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddServiceAuthentication(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.RedisConfiguration = Configuration.GetValue<string>("RedisConfiguration");
-            });
-
-            //services.AddTracing();
-
-            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddServiceAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme, options =>
-                {
-                    options.Authority = "https://auth.voidwell.com";
-                    options.ClientId = "voidwell-daybreakgames";
-                    options.ClientSecret = Configuration.GetValue<string>("ApiResourceSecret");
-                    options.SupportedTokens = Microservice.Authentication.SupportedTokens.Both;
-                    options.RequireHttpsMetadata = false;
-                    options.EnableCaching = true;
-                    options.CacheDuration = TimeSpan.FromMinutes(2);
-                });
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy(AuthConstants.Policies.Mutterblack, policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
-                });
-            });
-
-            services.AddMemoryCache();
-            services.AddAuthenticatedHttpClient<IUserRolesClient, UserRolesClient>(options =>
-            {
-                options.TokenServiceAddress = "https://auth.voidwell.com/connect/token";
+                options.Authority = "https://auth.voidwell.com";
                 options.ClientId = "voidwell-daybreakgames";
-                options.ClientSecret = Configuration.GetValue<string>("ClientSecret");
-                options.Scopes = new List<string> { "voidwell-usermanagement" };
-            });
-            services.AddSingleton<IClaimsTransformation, RoleClaimsTransformation>();
-
-            var allowedOrigins = Configuration.GetValue<string>("OriginAddress");
-            services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder.WithOrigins(new[] { "http://localhost:4200", allowedOrigins }.Where(o => !string.IsNullOrEmpty(o)).ToArray())
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
+                options.ClientSecret = Configuration.GetValue<string>("ApiResourceSecret");
+                options.SupportedTokens = SupportedTokens.Both;
+                options.RequireHttpsMetadata = false;
+                options.EnableCaching = true;
+                options.CacheDuration = TimeSpan.FromMinutes(2);
             });
 
-            services.AddCensusServices(options =>
-            {
-                options.CensusServiceId = Configuration.GetValue<string>("CensusServiceKey");
-                options.CensusServiceNamespace = Configuration.GetValue<string>("CensusServiceNamespace");
-                options.LogCensusErrors = Configuration.GetValue<bool>("LogCensusErrors", false);
-            });
-
-            services.AddStatefulServiceDependencies();
-            services.AddCensusStores(Configuration);
-            services.AddApplicationServices();
-            services.AddLiveServices(Configuration);
-        }
-
-        public void Configure(IApplicationBuilder app)
+        services.AddAuthorization(options =>
         {
-            app.InitializeDatabases();
-
-            app.UseForwardedHeaders(GetForwardedHeaderOptions());
-
-            app.UseRouting();
-
-            app.UseCors();
-
-            //app.UseTracing();
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
+            options.AddPolicy(AuthConstants.Policies.Mutterblack, policy =>
             {
-                endpoints.MapControllers();
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
             });
-        }
+        });
 
-        private static ForwardedHeadersOptions GetForwardedHeaderOptions()
+        services.AddMemoryCache();
+        services.AddAuthenticatedHttpClient<IUserRolesClient, UserRolesClient>(options =>
         {
-            var options = new ForwardedHeadersOptions
+            options.TokenServiceAddress = "https://auth.voidwell.com/connect/token";
+            options.ClientId = "voidwell-daybreakgames";
+            options.ClientSecret = Configuration.GetValue<string>("ClientSecret");
+            options.Scopes = new List<string> { "voidwell-usermanagement" };
+        });
+        services.AddSingleton<IClaimsTransformation, RoleClaimsTransformation>();
+
+        var allowedOrigins = Configuration.GetValue<string>("OriginAddress");
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
             {
-                RequireHeaderSymmetry = false,
-                ForwardLimit = 15,
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-            };
+                builder.WithOrigins(new[] { "http://localhost:4200", allowedOrigins }.Where(o => !string.IsNullOrEmpty(o)).ToArray()!)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
 
-            options.KnownNetworks.Clear();
-            options.KnownProxies.Clear();
+        services.AddCensusServices(options =>
+        {
+            options.CensusServiceId = Configuration.GetValue<string>("CensusServiceKey")!;
+            options.CensusServiceNamespace = Configuration.GetValue<string>("CensusServiceNamespace")!;
+            options.LogCensusErrors = Configuration.GetValue<bool>("LogCensusErrors", false);
+        });
 
-            return options;
-        }
+        services.AddStatefulServiceDependencies();
+        services.AddCensusStores(Configuration);
+        services.AddApplicationServices();
+        services.AddLiveServices(Configuration);
+    }
+
+    public void Configure(IApplicationBuilder app)
+    {
+        app.InitializeDatabases();
+
+        app.UseForwardedHeaders(GetForwardedHeaderOptions());
+
+        app.UseRouting();
+
+        app.UseCors();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
+    }
+
+    private static ForwardedHeadersOptions GetForwardedHeaderOptions()
+    {
+        var options = new ForwardedHeadersOptions
+        {
+            RequireHeaderSymmetry = false,
+            ForwardLimit = 15,
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+        };
+
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+
+        return options;
     }
 }

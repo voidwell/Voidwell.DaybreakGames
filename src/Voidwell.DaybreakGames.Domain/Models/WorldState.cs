@@ -1,145 +1,141 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Voidwell.DaybreakGames.Domain.Models
+namespace Voidwell.DaybreakGames.Domain.Models;
+
+public class WorldState
 {
-    public class WorldState
+    public int Id { get; private set; }
+    public string Name { get; private set; }
+    public bool IsOnline { get; private set; } = false;
+
+    private ConcurrentDictionary<int, WorldZoneState> ZoneStates { get; set; }
+
+    public WorldState(int worldId, string worldName)
     {
-        public int Id { get; private set; }
-        public string Name { get; private set; }
-        public bool IsOnline { get; private set; } = false;
+        Id = worldId;
+        Name = worldName;
+        ZoneStates = new ConcurrentDictionary<int, WorldZoneState>();
+    }
 
-        private ConcurrentDictionary<int, WorldZoneState> ZoneStates { get; set; }
+    public void SetWorldOnline()
+    {
+        ZoneStates.Clear();
+        IsOnline = true;
+    }
 
-        public WorldState(int worldId, string worldName)
+    public void SetWorldOffline()
+    {
+        foreach (var zone in ZoneStates)
         {
-            Id = worldId;
-            Name = worldName;
-            ZoneStates = new ConcurrentDictionary<int, WorldZoneState>();
+            zone.Value.DisableTracking();
+        }
+        IsOnline = false;
+    }
+
+    public void SetZoneState(WorldZoneState zoneState)
+    {
+        if (!ZoneStates.ContainsKey(zoneState.ZoneId))
+        {
+            ZoneStates.TryAdd(zoneState.ZoneId, zoneState);
+            return;
         }
 
-        public void SetWorldOnline()
+        ZoneStates[zoneState.ZoneId] = zoneState;
+    }
+
+    public void InitZoneState(int zoneId, string zoneName)
+    {
+        var zoneState = new WorldZoneState(Id, zoneId, zoneName);
+        SetZoneState(zoneState);
+    }
+
+    public bool TrySetupZoneState(int zoneId, ZoneMap zoneMap, IEnumerable<ZoneRegionOwnership> ownership)
+    {
+        if (!ZoneStates.ContainsKey(zoneId))
         {
-            ZoneStates.Clear();
-            IsOnline = true;
+            return false;
         }
 
-        public void SetWorldOffline()
+        ZoneStates[zoneId].Setup(zoneMap, ownership);
+        return true;
+    }
+
+    public IEnumerable<WorldOnlineZoneState> GetZoneStates()
+    {
+        return ZoneStates.Keys.Select(GetZoneState)!;
+    }
+
+    public WorldOnlineZoneState? GetZoneState(int zoneId)
+    {
+        if (!ZoneStates.ContainsKey(zoneId))
         {
-            foreach(var zone in ZoneStates)
-            {
-                zone.Value.DisableTracking();
-            }
-            IsOnline = false;
+            return null;
         }
 
-        public void SetZoneState(WorldZoneState zoneState)
+        var zoneState = ZoneStates[zoneId];
+        return new WorldOnlineZoneState
         {
-            if (!ZoneStates.ContainsKey(zoneState.ZoneId))
-            {
-                ZoneStates.TryAdd(zoneState.ZoneId, zoneState);
-                return;
-            }
+            Id = zoneId,
+            Name = zoneState.Name,
+            IsTracking = zoneState.IsTracking,
+            LockState = zoneState.LockState,
+            AlertState = zoneState.GetAlertState()
+        };
+    }
 
-            ZoneStates[zoneState.ZoneId] = zoneState;
+    public IEnumerable<ZoneRegionOwnership>? GetZoneMapOwnership(int zoneId)
+    {
+        if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
+        {
+            return null;
         }
 
-        public void InitZoneState(int zoneId, string zoneName)
+        return ZoneStates[zoneId].GetMapOwnership() ?? Enumerable.Empty<ZoneRegionOwnership>();
+    }
+
+    public MapScore? GetZoneMapScore(int zoneId)
+    {
+        if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
         {
-            var zoneState = new WorldZoneState(Id, zoneId, zoneName);
-            SetZoneState(zoneState);
+            return null;
         }
 
-        public bool TrySetupZoneState(int zoneId, ZoneMap zoneMap, IEnumerable<ZoneRegionOwnership> ownership)
-        {
-            if (!ZoneStates.ContainsKey(zoneId))
-            {
-                return false;
-            }
+        return ZoneStates[zoneId].MapScore;
+    }
 
-            ZoneStates[zoneId].Setup(zoneMap, ownership);
-            return true;
+    public void UpdateZoneLockState(int zoneId, ZoneLockState lockState)
+    {
+        if (!ZoneStates.ContainsKey(zoneId))
+        {
+            return;
         }
 
-        public IEnumerable<WorldOnlineZoneState> GetZoneStates()
+        ZoneStates[zoneId].UpdateLockState(lockState);
+    }
+
+    public void UpdateZoneAlertState(int zoneId, ZoneAlertState? alertState = null)
+    {
+        if (!ZoneStates.ContainsKey(zoneId))
         {
-            return ZoneStates.Keys.Select(GetZoneState);
+            return;
         }
 
-        public WorldOnlineZoneState GetZoneState(int zoneId)
-        {
-            if (!ZoneStates.ContainsKey(zoneId))
-            {
-                return null;
-            }
+        ZoneStates[zoneId].UpdateAlertState(alertState);
+    }
 
-            var zoneState = ZoneStates[zoneId];
-            return new WorldOnlineZoneState
-            {
-                Id = zoneId,
-                Name = zoneState.Name,
-                IsTracking = zoneState.IsTracking,
-                LockState = zoneState.LockState,
-                AlertState = zoneState.GetAlertState()
-            };
-        }
-        
-        public IEnumerable<ZoneRegionOwnership> GetZoneMapOwnership(int zoneId)
+    public async Task<FacilityControlChange?> UpdateZoneFacilityFactionAsync(int zoneId, int facilityId, int factionId)
+    {
+        if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
         {
-            if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
-            {
-                return null;
-            }
-
-            return ZoneStates[zoneId].GetMapOwnership() ?? Enumerable.Empty<ZoneRegionOwnership>();
+            return null;
         }
 
-        public MapScore GetZoneMapScore(int zoneId)
+        await ZoneStates[zoneId].FacilityFactionChangeAsync(facilityId, factionId);
+
+        return new FacilityControlChange
         {
-            if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
-            {
-                return null;
-            }
-
-            return ZoneStates[zoneId].MapScore;
-        }
-
-        public void UpdateZoneLockState(int zoneId, ZoneLockState lockState)
-        {
-            if (!ZoneStates.ContainsKey(zoneId))
-            {
-                return;
-            }
-
-            ZoneStates[zoneId].UpdateLockState(lockState);
-        }
-
-        public void UpdateZoneAlertState(int zoneId, ZoneAlertState alertState = null)
-        {
-            if (!ZoneStates.ContainsKey(zoneId))
-            {
-                return;
-            }
-
-            ZoneStates[zoneId].UpdateAlertState(alertState);
-        }
-
-        public async Task<FacilityControlChange> UpdateZoneFacilityFaction(int zoneId, int facilityId, int factionId)
-        {
-            if (!ZoneStates.ContainsKey(zoneId) || !ZoneStates[zoneId].IsTracking)
-            {
-                return null;
-            }
-
-            await ZoneStates[zoneId].FacilityFactionChange(facilityId, factionId);
-
-            return new FacilityControlChange
-            {
-                Region = ZoneStates[zoneId].GetRegionByFacilityId(facilityId),
-                Score = ZoneStates[zoneId].MapScore
-            };
-        }
+            Region = ZoneStates[zoneId].GetRegionByFacilityId(facilityId),
+            Score = ZoneStates[zoneId].MapScore
+        };
     }
 }

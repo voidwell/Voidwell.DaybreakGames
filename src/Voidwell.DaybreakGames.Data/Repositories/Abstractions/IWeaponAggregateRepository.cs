@@ -1,11 +1,9 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface IWeaponAggregateRepository
 {
-    public interface IWeaponAggregateRepository
-    {
-        Task<WeaponAggregate> GetWeaponAggregateByItemId(int itemId);
-        Task<WeaponAggregate> GetWeaponAggregateByVehicleId(int vehicleId);
-    }
+    Task<WeaponAggregate?> GetWeaponAggregateByItemId(int itemId);
+    Task<WeaponAggregate?> GetWeaponAggregateByVehicleId(int vehicleId);
 }

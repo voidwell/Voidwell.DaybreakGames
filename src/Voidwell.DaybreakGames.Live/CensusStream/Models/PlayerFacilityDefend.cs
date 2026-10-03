@@ -1,9 +1,8 @@
-﻿namespace Voidwell.DaybreakGames.Live.CensusStream.Models
+﻿namespace Voidwell.DaybreakGames.Live.CensusStream.Models;
+
+public class PlayerFacilityDefend : PayloadBase
 {
-    public class PlayerFacilityDefend : PayloadBase
-    {
-        public string CharacterId { get; set; }
-        public int FacilityId { get; set; }
-        public string OutfitId { get; set; }
-    }
+    public string? CharacterId { get; set; }
+    public int FacilityId { get; set; }
+    public string? OutfitId { get; set; }
 }

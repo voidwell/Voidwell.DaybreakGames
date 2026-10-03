@@ -1,36 +1,32 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading.Tasks;
-using Voidwell.Microservice.Utility;
+﻿using System.Collections.Concurrent;
+using Voidwell.DaybreakGames.Utils;
 
-namespace Voidwell.DaybreakGames.Live.CensusStream
+namespace Voidwell.DaybreakGames.Live.CensusStream;
+
+public class EventValidator : IEventValidator, IDisposable
 {
-    public class EventValidator : IEventValidator, IDisposable
+    private readonly ConcurrentDictionary<string, object> _eventBuffer = new ConcurrentDictionary<string, object>();
+    private readonly KeyedSemaphoreSlim _eventSemaphore = new KeyedSemaphoreSlim();
+
+    public async Task<bool> Validiate<T>(T ev, Func<T, string?> keyExpr, Func<T, bool> cleanupExpr) where T : class
     {
-        private readonly ConcurrentDictionary<string, object> _eventBuffer = new ConcurrentDictionary<string, object>();
-        private readonly KeyedSemaphoreSlim _eventSemaphore = new KeyedSemaphoreSlim();
-
-        public async Task<bool> Validiate<T>(T ev, Func<T, string> keyExpr, Func<T, bool> cleanupExpr) where T : class
+        var eventKey = $"{typeof(T).Name}:{keyExpr(ev)}";
+        using (await _eventSemaphore.WaitAsync(eventKey))
         {
-            var eventKey = $"{typeof(T).Name}:{keyExpr(ev)}";
-            using (await _eventSemaphore.WaitAsync(eventKey))
-            {
-                var isValid = !_eventBuffer.ContainsKey(eventKey);
+            var isValid = !_eventBuffer.ContainsKey(eventKey);
 
-                var expiredKeys = _eventBuffer.Keys.ToList()
-                    .Where(k => _eventBuffer.TryGetValue(k, out var value) && value is T && cleanupExpr(value as T)).ToList();
-                expiredKeys.ForEach(k => _eventBuffer.TryRemove(k, out var value));
+            var expiredKeys = _eventBuffer.Keys.ToList()
+                .Where(k => _eventBuffer.TryGetValue(k, out var value) && value is T && cleanupExpr((value as T)!)).ToList();
+            expiredKeys.ForEach(k => _eventBuffer.TryRemove(k, out var value));
 
-                _eventBuffer.TryAdd(eventKey, ev);
+            _eventBuffer.TryAdd(eventKey, ev);
 
-                return isValid;
-            }
+            return isValid;
         }
+    }
 
-        public void Dispose()
-        {
-            _eventSemaphore.Dispose();
-        }
+    public void Dispose()
+    {
+        _eventSemaphore.Dispose();
     }
 }

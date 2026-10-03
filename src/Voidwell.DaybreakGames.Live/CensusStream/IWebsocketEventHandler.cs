@@ -1,10 +1,8 @@
 ﻿using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace Voidwell.DaybreakGames.Live.CensusStream
+namespace Voidwell.DaybreakGames.Live.CensusStream;
+
+public interface IWebsocketEventHandler
 {
-    public interface IWebsocketEventHandler
-    {
-        Task Process(JsonElement jPayload);
-    }
+    Task Process(JsonElement jPayload);
 }

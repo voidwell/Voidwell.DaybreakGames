@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
@@ -6,31 +7,30 @@ using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
-namespace Voidwell.DaybreakGames.Test
+namespace Voidwell.DaybreakGames.Test;
+
+public class MetagameEventProcessorFixture
 {
-    public class MetagameEventProcessorFixture
+    public IEventRepository EventRepository { get; set; }
+    public IMetagameEventService MetagameEventService { get; set; }
+    public IWorldMonitor WorldMonitor { get; set; }
+    public IAlertRepository AlertRepository { get; set; }
+    public IMapService MapService { get; set; }
+
+    public MetagameEventProcessor CreateSut()
     {
-        public IEventRepository EventRepository { get; set; }
-        public IMetagameEventService MetagameEventService { get; set; }
-        public IWorldMonitor WorldMonitor { get; set; }
-        public IAlertRepository AlertRepository { get; set; }
-        public IMapService MapService { get; set; }
+        var mapper = new MapperConfiguration(a => a.AddProfile<CensusToDataMappingProfile>(), NullLoggerFactory.Instance)
+            .CreateMapper();
 
-        public MetagameEventProcessor CreateSut()
-        {
-            var mapper = new MapperConfiguration(a => a.AddProfile<CensusToDataMappingProfile>())
-                .CreateMapper();
+        return new MetagameEventProcessor(EventRepository, MetagameEventService, WorldMonitor, AlertRepository, MapService, mapper);
+    }
 
-            return new MetagameEventProcessor(EventRepository, MetagameEventService, WorldMonitor, AlertRepository, MapService, mapper);
-        }
-
-        public void ResetFixture()
-        {
-            EventRepository = Mock.Of<IEventRepository>();
-            MetagameEventService = Mock.Of<IMetagameEventService>();
-            WorldMonitor = Mock.Of<IWorldMonitor>();
-            AlertRepository = Mock.Of<IAlertRepository>();
-            MapService = Mock.Of<IMapService>();
-        }
+    public void ResetFixture()
+    {
+        EventRepository = Mock.Of<IEventRepository>();
+        MetagameEventService = Mock.Of<IMetagameEventService>();
+        WorldMonitor = Mock.Of<IWorldMonitor>();
+        AlertRepository = Mock.Of<IAlertRepository>();
+        MapService = Mock.Of<IMapService>();
     }
 }

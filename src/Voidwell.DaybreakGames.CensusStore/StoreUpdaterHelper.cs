@@ -1,42 +1,38 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data;
-using Voidwell.Microservice.EntityFramework;
+using Voidwell.DaybreakGames.Data.Extensions;
 
-namespace Voidwell.DaybreakGames.CensusStore
+namespace Voidwell.DaybreakGames.CensusStore;
+
+public class StoreUpdaterHelper : IStoreUpdaterHelper
 {
-    public class StoreUpdaterHelper : IStoreUpdaterHelper
+    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IMapper _mapper;
+
+    public StoreUpdaterHelper(IDbContextHelper dbContextHelper, IMapper mapper)
     {
-        private readonly IDbContextHelper _dbContextHelper;
-        private readonly IMapper _mapper;
+        _dbContextHelper = dbContextHelper;
+        _mapper = mapper;
+    }
 
-        public StoreUpdaterHelper(IDbContextHelper dbContextHelper, IMapper mapper)
+    public async Task UpdateAsync<TCollectionEntity, TDataEntity>(Func<Task<IEnumerable<TCollectionEntity>>> collectionFunc)
+        where TCollectionEntity : class
+        where TDataEntity : class
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            _dbContextHelper = dbContextHelper;
-            _mapper = mapper;
-        }
+            var dbContext = factory.GetDbContext();
 
-        public async Task UpdateAsync<TCollectionEntity, TDataEntity>(Func<Task<IEnumerable<TCollectionEntity>>> collectionFunc)
-            where TCollectionEntity : class
-            where TDataEntity : class
-        {
-            using (var factory = _dbContextHelper.GetFactory())
+            var data = await collectionFunc();
+
+            if (data == null)
             {
-                var dbContext = factory.GetDbContext();
-
-                var data = await collectionFunc();
-
-                if (data == null)
-                {
-                    return;
-                }
-
-                var dataModels = _mapper.Map<IEnumerable<TDataEntity>>(data);
-
-                await dbContext.UpsertAsync(dataModels);
+                return;
             }
+
+            var dataModels = _mapper.Map<IEnumerable<TDataEntity>>(data);
+
+            await dbContext.UpsertAsync(dataModels);
         }
     }
 }

@@ -1,52 +1,48 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Extensions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.Microservice.EntityFramework;
 
-namespace Voidwell.DaybreakGames.Data.Repositories
+namespace Voidwell.DaybreakGames.Data.Repositories;
+
+public class WorldRepository : IWorldRepository
 {
-    public class WorldRepository : IWorldRepository
+    private readonly IDbContextHelper _dbContextHelper;
+
+    public WorldRepository(IDbContextHelper dbContextHelper)
     {
-        private readonly IDbContextHelper _dbContextHelper;
+        _dbContextHelper = dbContextHelper;
+    }
 
-        public WorldRepository(IDbContextHelper dbContextHelper)
+    public async Task<IEnumerable<World>> GetAllWorldsAsync()
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            _dbContextHelper = dbContextHelper;
+            var dbContext = factory.GetDbContext();
+
+            return await dbContext.Worlds.ToListAsync();
         }
+    }
 
-        public async Task<IEnumerable<World>> GetAllWorldsAsync()
+    public async Task<IEnumerable<DailyPopulation>> GetDailyPopulationsByWorldIdAsync(int worldId)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                return await dbContext.Worlds.ToListAsync();
-            }
+            return await dbContext.DailyPopulations
+                .Where(a => a.WorldId == worldId)
+                .ToListAsync();
         }
+    }
 
-        public async Task<IEnumerable<DailyPopulation>> GetDailyPopulationsByWorldIdAsync(int worldId)
+    public async Task UpsertRangeAsync(IEnumerable<World> entities)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                return await dbContext.DailyPopulations
-                    .Where(a => a.WorldId == worldId)
-                    .ToListAsync();
-            }
-        }
-
-        public async Task UpsertRangeAsync(IEnumerable<World> entities)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                await dbContext.UpsertAsync(entities);
-            }
+            await dbContext.UpsertAsync(entities);
         }
     }
 }

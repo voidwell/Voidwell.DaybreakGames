@@ -1,17 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
 
-namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions
+namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+public interface IOutfitService
 {
-    public interface IOutfitService
-    {
-        Task<IEnumerable<Outfit>> LookupOutfitsByName(string name, int limit = 12);
-        Task<Outfit> LookupOutfitByAlias(string alias);
-        Task<OutfitDetails> GetOutfitDetails(string outfitId);
-        Task<IEnumerable<OutfitMemberDetails>> GetOutfitMembers(string outfitId);
-        Task<IEnumerable<Outfit>> FindOutfits(IEnumerable<string> outfitIds);
-        Task<OutfitDetails> GetOutfitByAlias(string outfitAlias);
-    }
+    Task<IEnumerable<Outfit>> LookupOutfitsByName(string name, int limit = 12);
+    Task<Outfit> LookupOutfitByAlias(string alias);
+    Task<OutfitDetails?> GetOutfitDetails(string outfitId);
+    Task<IEnumerable<OutfitMemberDetails>> GetOutfitMembers(string outfitId);
+    Task<IEnumerable<Outfit>> FindOutfits(IEnumerable<string> outfitIds);
+    Task<OutfitDetails?> GetOutfitByAlias(string outfitAlias);
 }

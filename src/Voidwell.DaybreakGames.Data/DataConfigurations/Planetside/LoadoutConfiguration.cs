@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class LoadoutConfiguration : IEntityTypeConfiguration<Loadout>
 {
-    public class LoadoutConfiguration : IEntityTypeConfiguration<Loadout>
+    public void Configure(EntityTypeBuilder<Loadout> builder)
     {
-        public void Configure(EntityTypeBuilder<Loadout> builder)
-        {
-            builder.ToTable("Loadout");
+        builder.ToTable("Loadout");
 
-            builder.HasKey(a => a.Id);
+        builder.HasKey(a => a.Id);
 
-            builder.Property(a => a.Id).ValueGeneratedNever();
-        }
+        builder.Property(a => a.Id).ValueGeneratedNever();
     }
 }

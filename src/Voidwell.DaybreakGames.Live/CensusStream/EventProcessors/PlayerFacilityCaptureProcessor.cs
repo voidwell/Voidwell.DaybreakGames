@@ -1,48 +1,44 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
-using AutoMapper;
-using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
-namespace Voidwell.DaybreakGames.Live.CensusStream.EventProcessors
+namespace Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
+
+[CensusEventProcessor("PlayerFacilityCapture")]
+public class PlayerFacilityCaptureProcessor : IEventProcessor<PlayerFacilityCapture>, IDisposable
 {
-    [CensusEventProcessor("PlayerFacilityCapture")]
-    public class PlayerFacilityCaptureProcessor : IEventProcessor<PlayerFacilityCapture>, IDisposable
+    private readonly IEventRepository _eventRepository;
+    private readonly IPlayerMonitor _playerMonitor;
+    private readonly IMapper _mapper;
+
+    private readonly SemaphoreSlim _playerFacilityCaptureSemaphore = new SemaphoreSlim(5);
+
+    public PlayerFacilityCaptureProcessor(IEventRepository eventRepository, IPlayerMonitor playerMonitor, IMapper mapper)
     {
-        private readonly IEventRepository _eventRepository;
-        private readonly IPlayerMonitor _playerMonitor;
-        private readonly IMapper _mapper;
+        _eventRepository = eventRepository;
+        _playerMonitor = playerMonitor;
+        _mapper = mapper;
+    }
 
-        private readonly SemaphoreSlim _playerFacilityCaptureSemaphore = new SemaphoreSlim(5);
+    public async Task Process(PlayerFacilityCapture payload)
+    {
+        var model = _mapper.Map<Data.Models.Planetside.Events.PlayerFacilityCapture>(payload);
 
-        public PlayerFacilityCaptureProcessor(IEventRepository eventRepository, IPlayerMonitor playerMonitor, IMapper mapper)
+        await _playerFacilityCaptureSemaphore.WaitAsync();
+
+        try
         {
-            _eventRepository = eventRepository;
-            _playerMonitor = playerMonitor;
-            _mapper = mapper;
+            await Task.WhenAll(_eventRepository.AddAsync(model), _playerMonitor.SetLastSeenAsync(model.CharacterId!, model.ZoneId, model.Timestamp));
         }
-
-        public async Task Process(PlayerFacilityCapture payload)
+        finally
         {
-            var model = _mapper.Map<Data.Models.Planetside.Events.PlayerFacilityCapture>(payload);
-
-            await _playerFacilityCaptureSemaphore.WaitAsync();
-
-            try
-            {
-                await Task.WhenAll(_eventRepository.AddAsync(model), _playerMonitor.SetLastSeenAsync(model.CharacterId, model.ZoneId, model.Timestamp));
-            }
-            finally
-            {
-                _playerFacilityCaptureSemaphore.Release();
-            }
+            _playerFacilityCaptureSemaphore.Release();
         }
+    }
 
-        public void Dispose()
-        {
-            _playerFacilityCaptureSemaphore.Dispose();
-        }
+    public void Dispose()
+    {
+        _playerFacilityCaptureSemaphore.Dispose();
     }
 }

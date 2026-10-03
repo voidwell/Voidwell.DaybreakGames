@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class ExperienceConfiguration : IEntityTypeConfiguration<Experience>
 {
-    public class ExperienceConfiguration : IEntityTypeConfiguration<Experience>
+    public void Configure(EntityTypeBuilder<Experience> builder)
     {
-        public void Configure(EntityTypeBuilder<Experience> builder)
-        {
-            builder.ToTable("Experience");
+        builder.ToTable("Experience");
 
-            builder.HasKey(a => a.Id );
+        builder.HasKey(a => a.Id);
 
-            builder.Property(a => a.Id).ValueGeneratedNever();
-        }
+        builder.Property(a => a.Id).ValueGeneratedNever();
     }
 }

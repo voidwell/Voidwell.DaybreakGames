@@ -1,16 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class DailyPopulationConfiguration : IEntityTypeConfiguration<DailyPopulation>
 {
-    public class DailyPopulationConfiguration : IEntityTypeConfiguration<DailyPopulation>
+    public void Configure(EntityTypeBuilder<DailyPopulation> builder)
     {
-        public void Configure(EntityTypeBuilder<DailyPopulation> builder)
-        {
-            builder.ToTable("DailyPopulation");
+        builder.ToTable("DailyPopulation");
 
-            builder.HasKey(a => new { a.Date, a.WorldId });
-        }
+        builder.HasKey(a => new { a.Date, a.WorldId });
     }
 }

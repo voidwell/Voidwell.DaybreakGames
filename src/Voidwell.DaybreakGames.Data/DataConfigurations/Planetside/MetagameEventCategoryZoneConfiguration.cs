@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class MetagameEventCategoryZoneConfiguration : IEntityTypeConfiguration<MetagameEventCategoryZone>
 {
-    public class MetagameEventCategoryZoneConfiguration : IEntityTypeConfiguration<MetagameEventCategoryZone>
+    public void Configure(EntityTypeBuilder<MetagameEventCategoryZone> builder)
     {
-        public void Configure(EntityTypeBuilder<MetagameEventCategoryZone> builder)
-        {
-            builder.ToTable("MetagameEventCategoryZone");
+        builder.ToTable("MetagameEventCategoryZone");
 
-            builder.HasKey(a => a.MetagameEventCategoryId);
+        builder.HasKey(a => a.MetagameEventCategoryId);
 
-            builder.Property(a => a.MetagameEventCategoryId).ValueGeneratedNever();
-        }
+        builder.Property(a => a.MetagameEventCategoryId).ValueGeneratedNever();
     }
 }

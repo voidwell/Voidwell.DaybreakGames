@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿namespace Voidwell.DaybreakGames.Api.Authentication;
 
-namespace Voidwell.DaybreakGames.Api.Authentication
+public interface IUserRolesClient
 {
-    public interface IUserRolesClient
-    {
-        Task<IEnumerable<string>> GetRolesAsync(Guid userId);
-    }
+    Task<IEnumerable<string>?> GetRolesAsync(Guid userId);
 }

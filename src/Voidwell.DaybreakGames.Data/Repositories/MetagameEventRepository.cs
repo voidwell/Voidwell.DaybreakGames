@@ -1,60 +1,57 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Extensions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.Microservice.EntityFramework;
 
-namespace Voidwell.DaybreakGames.Data.Repositories
+namespace Voidwell.DaybreakGames.Data.Repositories;
+
+public class MetagameEventRepository : IMetagameEventRepository
 {
-    public class MetagameEventRepository : IMetagameEventRepository
+    private readonly IDbContextHelper _dbContextHelper;
+
+    public MetagameEventRepository(IDbContextHelper dbContextHelper)
     {
-        private readonly IDbContextHelper _dbContextHelper;
+        _dbContextHelper = dbContextHelper;
+    }
 
-        public MetagameEventRepository(IDbContextHelper dbContextHelper)
+    public async Task<MetagameEventCategory?> GetMetagameEventCategory(int metagameEventId)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            _dbContextHelper = dbContextHelper;
+            var dbContext = factory.GetDbContext();
+
+            return await dbContext.MetagameEventCategories.FirstOrDefaultAsync(a => a.Id == metagameEventId);
         }
+    }
 
-        public async Task<MetagameEventCategory> GetMetagameEventCategory(int metagameEventId)
+    public async Task<int?> GetMetagameCategoryZoneId(int metagameEventId)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                return await dbContext.MetagameEventCategories.FirstOrDefaultAsync(a => a.Id == metagameEventId);
-            }
+            var categoryZone = await dbContext.MetagameEventCategoryZones.FirstOrDefaultAsync(a => a.MetagameEventCategoryId == metagameEventId);
+            return categoryZone?.ZoneId;
         }
+    }
 
-        public async Task<int?> GetMetagameCategoryZoneId(int metagameEventId)
+    public async Task UpsertRangeAsync(IEnumerable<MetagameEventCategory> entities)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                var categoryZone = await dbContext.MetagameEventCategoryZones.FirstOrDefaultAsync(a => a.MetagameEventCategoryId == metagameEventId);
-                return categoryZone?.ZoneId;
-            }
+            await dbContext.UpsertAsync(entities);
         }
+    }
 
-        public async Task UpsertRangeAsync(IEnumerable<MetagameEventCategory> entities)
+    public async Task UpsertRangeAsync(IEnumerable<MetagameEventState> entities)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                await dbContext.UpsertAsync(entities);
-            }
-        }
-
-        public async Task UpsertRangeAsync(IEnumerable<MetagameEventState> entities)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                await dbContext.UpsertAsync(entities);
-            }
+            await dbContext.UpsertAsync(entities);
         }
     }
 }

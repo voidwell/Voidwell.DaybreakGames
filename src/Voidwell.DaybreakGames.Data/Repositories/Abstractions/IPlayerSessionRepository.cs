@@ -1,13 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface IPlayerSessionRepository
 {
-    public interface IPlayerSessionRepository
-    {
-        Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit, int page = 0);
-        Task<PlayerSession> GetPlayerSessionAsync(int sessionId);
-        Task AddAsync(PlayerSession entity);
-    }
+    Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit, int page = 0);
+    Task<PlayerSession?> GetPlayerSessionAsync(int sessionId);
+    Task AddAsync(PlayerSession entity);
 }

@@ -1,11 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="DaybreakGames.Census" Version="6.0.3" />
+    <PackageReference Include="DaybreakGames.Census" />
   </ItemGroup>
 
 </Project>

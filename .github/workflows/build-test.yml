@@ -13,16 +13,16 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore Voidwell.DaybreakGames.sln
+        run: dotnet restore Voidwell.DaybreakGames.slnx
 
       - name: Lint
-        run: dotnet format DaybreakGames.Census.slnx --verify-no-changes --severity error --no-restore
+        run: dotnet format Voidwell.DaybreakGames.slnx --verify-no-changes --severity error --no-restore
 
       - name: Build
-        run: dotnet build Voidwell.DaybreakGames.sln --configuration Release --no-restore
+        run: dotnet build Voidwell.DaybreakGames.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test Voidwell.DaybreakGames.sln --configuration Release --no-build --verbosity normal
+        run: dotnet test --solution Voidwell.DaybreakGames.slnx --configuration Release --no-build --verbosity normal

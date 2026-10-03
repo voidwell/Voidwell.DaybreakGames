@@ -1,50 +1,47 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Voidwell.DaybreakGames.Data.Extensions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.Microservice.EntityFramework;
 
-namespace Voidwell.DaybreakGames.Data.Repositories
+namespace Voidwell.DaybreakGames.Data.Repositories;
+
+public class VehicleRepository : IVehicleRepository
 {
-    public class VehicleRepository : IVehicleRepository
+    private readonly IDbContextHelper _dbContextHelper;
+
+    public VehicleRepository(IDbContextHelper dbContextHelper)
     {
-        private readonly IDbContextHelper _dbContextHelper;
+        _dbContextHelper = dbContextHelper;
+    }
 
-        public VehicleRepository(IDbContextHelper dbContextHelper)
+    public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            _dbContextHelper = dbContextHelper;
+            var dbContext = factory.GetDbContext();
+
+            return await dbContext.Vehicles.Include(i => i.Faction)
+                .ToListAsync();
         }
+    }
 
-        public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
+    public async Task UpsertRangeAsync(IEnumerable<Vehicle> entities)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                return await dbContext.Vehicles.Include(i => i.Faction)
-                    .ToListAsync();
-            }
+            await dbContext.UpsertAsync(entities);
         }
+    }
 
-        public async Task UpsertRangeAsync(IEnumerable<Vehicle> entities)
+    public async Task UpsertRangeAsync(IEnumerable<VehicleFaction> entities)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
+            var dbContext = factory.GetDbContext();
 
-                await dbContext.UpsertAsync(entities);
-            }
-        }
-
-        public async Task UpsertRangeAsync(IEnumerable<VehicleFaction> entities)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                await dbContext.UpsertAsync(entities);
-            }
+            await dbContext.UpsertAsync(entities);
         }
     }
 }

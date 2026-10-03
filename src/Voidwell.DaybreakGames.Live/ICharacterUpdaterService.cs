@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Utils.HostedService;
+﻿using Voidwell.DaybreakGames.Utils.HostedService;
 
-namespace Voidwell.DaybreakGames.Live
+namespace Voidwell.DaybreakGames.Live;
+
+public interface ICharacterUpdaterService : IStatefulHostedService
 {
-    public interface ICharacterUpdaterService : IStatefulHostedService
-    {
-        Task AddToQueue(string characterId);
-    }
+    Task AddToQueue(string characterId);
 }

@@ -1,8 +1,7 @@
-﻿namespace Voidwell.DaybreakGames.Domain.Models
+﻿namespace Voidwell.DaybreakGames.Domain.Models;
+
+public class ZoneLink
 {
-    public class ZoneLink
-    {
-        public int FacilityIdA { get; set; }
-        public int FacilityIdB { get; set; }
-    }
+    public int FacilityIdA { get; set; }
+    public int FacilityIdB { get; set; }
 }

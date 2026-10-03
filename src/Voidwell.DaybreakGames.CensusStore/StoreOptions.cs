@@ -1,7 +1,6 @@
-﻿namespace Voidwell.DaybreakGames.CensusStore
+﻿namespace Voidwell.DaybreakGames.CensusStore;
+
+public class StoreOptions
 {
-    public class StoreOptions
-    {
-        public bool DisableUpdater { get; set; } = false;
-    }
+    public bool DisableUpdater { get; set; } = false;
 }

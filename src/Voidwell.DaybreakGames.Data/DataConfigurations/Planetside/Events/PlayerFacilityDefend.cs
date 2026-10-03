@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+internal class PlayerFacilityDefend : IEntityTypeConfiguration<Models.Planetside.Events.PlayerFacilityDefend>
 {
-    internal class PlayerFacilityDefend : IEntityTypeConfiguration<Models.Planetside.Events.PlayerFacilityDefend>
+    public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityDefend> builder)
     {
-        public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityDefend> builder)
-        {
-            builder.ToTable("EventPlayerFacilityDefend");
+        builder.ToTable("EventPlayerFacilityDefend");
 
-            builder.HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
+        builder.HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
 
-            builder
-                .Ignore(a => a.Facility);
-        }
+        builder
+            .Ignore(a => a.Facility);
     }
 }

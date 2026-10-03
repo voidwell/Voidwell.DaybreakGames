@@ -1,6 +1,5 @@
-﻿namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+﻿namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface IRepository<T> where T : class
 {
-    public interface IRepository<T> where T : class
-    {
-    }
 }

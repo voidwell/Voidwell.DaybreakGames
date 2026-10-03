@@ -1,8 +1,7 @@
-﻿namespace Voidwell.DaybreakGames.Domain.Models
+﻿namespace Voidwell.DaybreakGames.Domain.Models;
+
+public class FacilityControlChange
 {
-    public class FacilityControlChange
-    {
-        public WorldZoneRegion Region { get; set; }
-        public MapScore Score { get; set; }
-    }
+    public WorldZoneRegion? Region { get; set; }
+    public MapScore? Score { get; set; }
 }

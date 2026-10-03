@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Domain.Models;
+﻿using Voidwell.DaybreakGames.Domain.Models;
 
-namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions
+namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+public interface IVehicleService
 {
-    public interface IVehicleService
-    {
-        Task<IEnumerable<VehicleInfo>> GetAllVehicles();
-    }
+    Task<IEnumerable<VehicleInfo>> GetAllVehicles();
 }

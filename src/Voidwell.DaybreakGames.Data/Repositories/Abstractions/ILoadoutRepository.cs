@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions
+namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+
+public interface ILoadoutRepository
 {
-    public interface ILoadoutRepository
-    {
-        Task<IEnumerable<Loadout>> GetAllLoadoutsAsync();
-        Task UpsertRangeAsync(IEnumerable<Loadout> entities);
-    }
+    Task<IEnumerable<Loadout>> GetAllLoadoutsAsync();
+    Task UpsertRangeAsync(IEnumerable<Loadout> entities);
 }

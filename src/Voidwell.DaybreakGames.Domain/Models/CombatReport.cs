@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
+﻿namespace Voidwell.DaybreakGames.Domain.Models;
 
-namespace Voidwell.DaybreakGames.Domain.Models
+public class CombatReport
 {
-    public class CombatReport
-    {
-        public CombatReportStats Stats { get; set; }
-        public IEnumerable<CaptureLogRow> CaptureLog { get; set; }
-    }
+    public CombatReportStats? Stats { get; set; }
+    public IEnumerable<CaptureLogRow>? CaptureLog { get; set; }
 }

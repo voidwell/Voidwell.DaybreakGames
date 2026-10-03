@@ -1,11 +1,9 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.CensusStore.Services.Abstractions
+namespace Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
+
+public interface IMetagameEventStore
 {
-    public interface IMetagameEventStore
-    {
-        Task<MetagameEventCategory> GetMetagameEventCategoryAsync(int metagameEventId);
-        Task<int?> GetMetagameCategoryZoneIdAsync(int metagameEventId);
-    }
+    Task<MetagameEventCategory> GetMetagameEventCategoryAsync(int metagameEventId);
+    Task<int?> GetMetagameCategoryZoneIdAsync(int metagameEventId);
 }

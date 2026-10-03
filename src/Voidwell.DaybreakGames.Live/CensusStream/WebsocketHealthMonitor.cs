@@ -1,93 +1,90 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
 
-namespace Voidwell.DaybreakGames.Live.CensusStream
+namespace Voidwell.DaybreakGames.Live.CensusStream;
+
+public class WebsocketHealthMonitor : IWebsocketHealthMonitor
 {
-    public class WebsocketHealthMonitor : IWebsocketHealthMonitor
+    private readonly ILogger<WebsocketHealthMonitor> _logger;
+
+    private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>> _worldsLastSeenEvents = new ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>>();
+
+    private readonly List<int> _ignorableWorlds = new List<int> { 19, 25 };
+    private readonly Dictionary<string, TimeSpan> _unhealthyEventIntervals = new Dictionary<string, TimeSpan>
     {
-        private readonly ILogger<WebsocketHealthMonitor> _logger;
+        {  "Death", TimeSpan.FromMinutes(5) }
+    };
 
-        private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>> _worldsLastSeenEvents = new ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>>();
+    public WebsocketHealthMonitor(ILogger<WebsocketHealthMonitor> logger)
+    {
+        _logger = logger;
+    }
 
-        private readonly List<int> _ignorableWorlds = new List<int> { 19, 25 };
-        private readonly Dictionary<string, TimeSpan> _unhealthyEventIntervals = new Dictionary<string, TimeSpan>
+    public void ReceivedEvent(int worldId, string eventName, DateTime? timestamp = null)
+    {
+        if (timestamp == null)
         {
-            {  "Death", TimeSpan.FromMinutes(5) }
-        };
-
-        public WebsocketHealthMonitor(ILogger<WebsocketHealthMonitor> logger)
-        {
-            _logger = logger;
+            timestamp = DateTime.UtcNow;
         }
 
-        public void ReceivedEvent(int worldId, string eventName, DateTime? timestamp = null)
+        try
         {
-            if (timestamp == null)
+            if (!_worldsLastSeenEvents.ContainsKey(worldId))
             {
-                timestamp = DateTime.UtcNow;
+                _worldsLastSeenEvents.TryAdd(worldId, new ConcurrentDictionary<string, DateTime>());
             }
 
-            try
+            _worldsLastSeenEvents[worldId].AddOrUpdate(eventName, timestamp.Value, (k, v) => timestamp.Value);
+        }
+        catch (Exception)
+        { }
+    }
+
+    public void ClearWorld(int worldId)
+    {
+        _worldsLastSeenEvents.TryRemove(worldId, out var _);
+    }
+
+    public void ClearAllWorlds()
+    {
+        _worldsLastSeenEvents.Clear();
+    }
+
+    public bool IsHealthy()
+    {
+        var worldIds = _worldsLastSeenEvents.Keys.Where(a => !_ignorableWorlds.Contains(a)).ToList();
+
+        return !worldIds.Where(a => !TryEvaluateWorldHealth(a)).Any();
+    }
+
+    private bool TryEvaluateWorldHealth(int worldId)
+    {
+        if (_worldsLastSeenEvents.TryGetValue(worldId, out var eventList))
+        {
+            if (!EvaluateWorldHealth(eventList))
             {
-                if (!_worldsLastSeenEvents.ContainsKey(worldId))
-                {
-                    _worldsLastSeenEvents.TryAdd(worldId, new ConcurrentDictionary<string, DateTime>());
-                }
-
-                _worldsLastSeenEvents[worldId].AddOrUpdate(eventName, timestamp.Value, (k, v) => timestamp.Value);
-            } catch(Exception)
-            { }
+                _logger.LogWarning(34214, "Stream for world '{worldId}' failed health check", worldId);
+                return false;
+            }
         }
+        return true;
+    }
 
-        public void ClearWorld(int worldId)
+    private bool EvaluateWorldHealth(ConcurrentDictionary<string, DateTime> worldEvents)
+    {
+        var now = DateTime.UtcNow;
+
+        foreach ((var eventName, var interval) in _unhealthyEventIntervals)
         {
-            _worldsLastSeenEvents.TryRemove(worldId, out var _);
-        }
-
-        public void ClearAllWorlds()
-        {
-            _worldsLastSeenEvents.Clear();
-        }
-
-        public bool IsHealthy()
-        {
-            var worldIds = _worldsLastSeenEvents.Keys.Where(a => !_ignorableWorlds.Contains(a)).ToList();
-
-            return !worldIds.Where(a => !TryEvaluateWorldHealth(a)).Any();
-        }
-
-        private bool TryEvaluateWorldHealth(int worldId)
-        {
-            if (_worldsLastSeenEvents.TryGetValue(worldId, out var eventList))
+            if (worldEvents != null && worldEvents.TryGetValue(eventName, out var lastReceivedTime))
             {
-                if (!EvaluateWorldHealth(eventList))
+                if (now - lastReceivedTime > interval)
                 {
-                    _logger.LogWarning(34214, "Stream for world '{worldId}' failed health check", worldId);
                     return false;
                 }
             }
-            return true;
         }
 
-        private bool EvaluateWorldHealth(ConcurrentDictionary<string, DateTime> worldEvents)
-        {
-            var now = DateTime.UtcNow;
-
-            foreach ((var eventName, var interval) in _unhealthyEventIntervals)
-            {
-                if (worldEvents != null && worldEvents.TryGetValue(eventName, out var lastReceivedTime))
-                {
-                    if (now - lastReceivedTime > interval)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
+        return true;
     }
 }

@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
+﻿namespace Voidwell.DaybreakGames.Domain.Models;
 
-namespace Voidwell.DaybreakGames.Domain.Models
+public class ZoneMap
 {
-    public class ZoneMap
-    {
-        public IEnumerable<ZoneRegion> Regions { get; set; }
-        public IEnumerable<ZoneLink> Links { get; set; }
-        public IEnumerable<ZoneHex> Hexs { get; set; }
-        public int? HexSize { get; set; }
-    }
+    public IEnumerable<ZoneRegion>? Regions { get; set; }
+    public IEnumerable<ZoneLink>? Links { get; set; }
+    public IEnumerable<ZoneHex>? Hexs { get; set; }
+    public int? HexSize { get; set; }
 }

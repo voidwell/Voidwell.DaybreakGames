@@ -1,38 +1,19 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Serilog.Events;
-using Serilog.Filters;
-using System;
-using System.Collections.Generic;
-using Voidwell.Microservice.Logging;
+﻿using Voidwell.DaybreakGames.Api;
+using Voidwell.DaybreakGames.Api.Logging;
 
-namespace Voidwell.DaybreakGames.Api
+var builder = Host.CreateDefaultBuilder();
+
+builder.ConfigureWebHostDefaults(webBuilder =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            BuildWebHost(args).Run();
-        }
+    webBuilder
+        .UseStartup<Startup>()
+        .UseUrls("http://0.0.0.0:5000");
+});
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .UseUrls("http://0.0.0.0:5000")
-                .UseMicroserviceLogging(options =>
-                {
-                    options.MinLogLevel = LogEventLevel.Information;
-                    options.IncludeMicrosoftInformation = true;
-                    //options.LoggingOutput = "flat";
-                    options.IgnoreRules = new List<Func<LogEvent, bool>>
-                    {
-                        e => Matching.FromSource("Microsoft.AspNetCore.Routing")(e),
-                        e => Matching.FromSource("Microsoft.AspNetCore.Mvc")(e),
-                        e => Matching.FromSource("Microsoft.EntityFrameworkCore")(e) && e.Level < LogEventLevel.Error,
-                        e => Matching.FromSource("Microsoft.EntityFrameworkCore.Update")(e),
-                        e => Matching.FromSource("Microsoft.EntityFrameworkCore.Database.Command")(e)
-                    };
-                })
-                .Build();
-    }
-}
+builder.ConfigureLogging((context, logging) =>
+{
+    logging.AddApiLogging(context.HostingEnvironment, context.Configuration);
+});
+
+var app = builder.Build();
+await app.RunAsync();

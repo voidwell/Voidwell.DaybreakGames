@@ -1,17 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+internal class PlayerLogin : IEntityTypeConfiguration<Models.Planetside.Events.PlayerLogin>
 {
-    internal class PlayerLogin : IEntityTypeConfiguration<Models.Planetside.Events.PlayerLogin>
+    public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerLogin> builder)
     {
-        public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerLogin> builder)
-        {
-            builder.ToTable("EventPlayerLogin");
+        builder.ToTable("EventPlayerLogin");
 
-            builder.HasKey(a => new { a.Timestamp, a.CharacterId });
+        builder.HasKey(a => new { a.Timestamp, a.CharacterId });
 
-            builder.HasIndex(a => new { a.Timestamp, a.WorldId });
-        }
+        builder.HasIndex(a => new { a.Timestamp, a.WorldId });
     }
 }

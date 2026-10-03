@@ -1,32 +1,29 @@
-﻿using System;
+﻿namespace Voidwell.DaybreakGames.Domain.Models.GridMap;
 
-namespace Voidwell.DaybreakGames.Domain.Models.GridMap
+public class GridMapVertex
 {
-    public class GridMapVertex
+    public GridMapVertex() { }
+
+    public GridMapVertex(double x, double y)
     {
-        public GridMapVertex() { }
+        X = Math.Round(y * 1000.0) / 1000.0;
+        Y = Math.Round(x * 1000.0) / 1000.0;
+    }
 
-        public GridMapVertex(double x, double y)
+    public double X { get; set; }
+    public double Y { get; set; }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is GridMapVertex other)
         {
-            X = Math.Round(y * 1000.0) / 1000.0;
-            Y = Math.Round(x * 1000.0) / 1000.0;
+            return X == other.X && Y == other.Y;
         }
+        return false;
+    }
 
-        public double X { get; set; }
-        public double Y { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is GridMapVertex other)
-            {
-                return X == other.X && Y == other.Y;
-            }
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(X, Y);
-        }
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(X, Y);
     }
 }

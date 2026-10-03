@@ -1,16 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class MapHexConfiguration : IEntityTypeConfiguration<MapHex>
 {
-    public class MapHexConfiguration : IEntityTypeConfiguration<MapHex>
+    public void Configure(EntityTypeBuilder<MapHex> builder)
     {
-        public void Configure(EntityTypeBuilder<MapHex> builder)
-        {
-            builder.ToTable("MapHex");
+        builder.ToTable("MapHex");
 
-            builder.HasKey(a => new { a.MapRegionId, a.XPos, a.YPos, a.ZoneId });
-        }
+        builder.HasKey(a => new { a.MapRegionId, a.XPos, a.YPos, a.ZoneId });
     }
 }

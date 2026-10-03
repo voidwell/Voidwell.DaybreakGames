@@ -1,11 +1,10 @@
-﻿namespace Voidwell.DaybreakGames.Census.Collection.Abstract
-{
-    public interface ICensusCollection<TCensusType> : ICensusCollection where TCensusType : class
-    {
-    }
+﻿namespace Voidwell.DaybreakGames.Census.Collection.Abstract;
 
-    public interface ICensusCollection
-    {
-        public string CollectionName { get; }
-    }
+public interface ICensusCollection<TCensusType> : ICensusCollection where TCensusType : class
+{
+}
+
+public interface ICensusCollection
+{
+    public string CollectionName { get; }
 }

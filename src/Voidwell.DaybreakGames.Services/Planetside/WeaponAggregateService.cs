@@ -1,52 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Voidwell.Microservice.Cache;
+﻿using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
-namespace Voidwell.DaybreakGames.Services.Planetside
+namespace Voidwell.DaybreakGames.Services.Planetside;
+
+public class WeaponAggregateService : IWeaponAggregateService
 {
-    public class WeaponAggregateService : IWeaponAggregateService
+    private readonly IWeaponAggregateRepository _weaponAggregateRepository;
+    private readonly ICache _cache;
+
+    private const string _cacheKey = "ps2.weaponAggregates";
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(8);
+
+    public WeaponAggregateService(IWeaponAggregateRepository weaponAggregateRepository, ICache cache)
     {
-        private readonly IWeaponAggregateRepository _weaponAggregateRepository;
-        private readonly ICache _cache;
+        _weaponAggregateRepository = weaponAggregateRepository;
+        _cache = cache;
+    }
 
-        private const string _cacheKey = "ps2.weaponAggregates";
-        private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(8);
+    public async Task<WeaponAggregate?> GetAggregateForItem(int itemId)
+    {
+        var cacheKey = $"{_cacheKey}_{itemId}";
 
-        public WeaponAggregateService(IWeaponAggregateRepository weaponAggregateRepository, ICache cache)
+        var aggregate = await _cache.GetAsync<WeaponAggregate>(cacheKey);
+        if (aggregate != null)
         {
-            _weaponAggregateRepository = weaponAggregateRepository;
-            _cache = cache;
-        }
-
-        public async Task<WeaponAggregate> GetAggregateForItem(int itemId)
-        {
-            var cacheKey = $"{_cacheKey}_{itemId}";
-
-            var aggregate = await _cache.GetAsync<WeaponAggregate>(cacheKey);
-            if (aggregate != null)
-            {
-                return aggregate;
-            }
-
-            aggregate = await _weaponAggregateRepository.GetWeaponAggregateByItemId(itemId);
-            if (aggregate != null)
-            {
-                await _cache.SetAsync(cacheKey, aggregate, _cacheExpiration);
-            }
-
             return aggregate;
         }
 
-        public async Task<Dictionary<string, WeaponAggregate>> GetAggregates(IEnumerable<int> itemIds)
+        aggregate = await _weaponAggregateRepository.GetWeaponAggregateByItemId(itemId);
+        if (aggregate != null)
         {
-            var aggregates = await Task.WhenAll(itemIds.Distinct().Select(GetAggregateForItem));
-
-            return aggregates.Where(a => a != null).ToDictionary(a => $"{a.ItemId}-{a.VehicleId}", a => a);
+            await _cache.SetAsync(cacheKey, aggregate, _cacheExpiration);
         }
+
+        return aggregate;
+    }
+
+    public async Task<Dictionary<string, WeaponAggregate>> GetAggregates(IEnumerable<int> itemIds)
+    {
+        var aggregates = await Task.WhenAll(itemIds.Distinct().Select(GetAggregateForItem));
+
+        return aggregates.Where(a => a != null).ToDictionary(a => $"{a!.ItemId}-{a.VehicleId}", a => a)!;
     }
 }

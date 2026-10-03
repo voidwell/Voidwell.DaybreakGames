@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using Voidwell.DaybreakGames.Domain.Models;
+﻿using Voidwell.DaybreakGames.Domain.Models;
 
-namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions
+namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+public interface IGradeService
 {
-    public interface IGradeService
-    {
-        IEnumerable<StatGrade> GetAllGrades();
-        string GetGradeByDelta(double? delta);
-    }
+    IEnumerable<StatGrade> GetAllGrades();
+    string? GetGradeByDelta(double? delta);
 }

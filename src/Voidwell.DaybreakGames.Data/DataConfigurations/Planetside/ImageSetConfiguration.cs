@@ -2,17 +2,16 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside
+namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside;
+
+public class ImageSetConfiguration : IEntityTypeConfiguration<ImageSet>
 {
-    public class ImageSetConfiguration : IEntityTypeConfiguration<ImageSet>
+    public void Configure(EntityTypeBuilder<ImageSet> builder)
     {
-        public void Configure(EntityTypeBuilder<ImageSet> builder)
-        {
-            builder.ToTable("ImageSet");
+        builder.ToTable("ImageSet");
 
-            builder.HasKey(a => new { a.Id, a.TypeId });
+        builder.HasKey(a => new { a.Id, a.TypeId });
 
-            builder.Property(a => a.Id).ValueGeneratedNever();
-        }
+        builder.Property(a => a.Id).ValueGeneratedNever();
     }
 }

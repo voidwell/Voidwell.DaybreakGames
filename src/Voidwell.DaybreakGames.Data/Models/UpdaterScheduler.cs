@@ -1,13 +1,11 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.DaybreakGames.Data.Models
+namespace Voidwell.DaybreakGames.Data.Models;
+
+public class UpdaterScheduler
 {
-    public class UpdaterScheduler
-    {
-        [Required]
-        public string Id { get; set; }
-        [Required]
-        public DateTime LastUpdateDate { get; set; }
-    }
+    [Required]
+    public string? Id { get; set; }
+    [Required]
+    public DateTime LastUpdateDate { get; set; }
 }

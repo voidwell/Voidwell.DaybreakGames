@@ -1,27 +1,25 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
+﻿using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
-namespace Voidwell.DaybreakGames.CensusStore.Services
+namespace Voidwell.DaybreakGames.CensusStore.Services;
+
+public class MetagameEventStore : IMetagameEventStore
 {
-    public class MetagameEventStore : IMetagameEventStore
+    private readonly IMetagameEventRepository _metagameEventRepository;
+
+    public MetagameEventStore(IMetagameEventRepository metagameEventRepository)
     {
-        private readonly IMetagameEventRepository _metagameEventRepository;
+        _metagameEventRepository = metagameEventRepository;
+    }
 
-        public MetagameEventStore(IMetagameEventRepository metagameEventRepository)
-        {
-            _metagameEventRepository = metagameEventRepository;
-        }
+    public Task<MetagameEventCategory> GetMetagameEventCategoryAsync(int metagameEventId)
+    {
+        return _metagameEventRepository.GetMetagameEventCategory(metagameEventId)!;
+    }
 
-        public Task<MetagameEventCategory> GetMetagameEventCategoryAsync(int metagameEventId)
-        {
-            return _metagameEventRepository.GetMetagameEventCategory(metagameEventId);
-        }
-
-        public Task<int?> GetMetagameCategoryZoneIdAsync(int metagameEventId)
-        {
-            return _metagameEventRepository.GetMetagameCategoryZoneId(metagameEventId);
-        }
+    public Task<int?> GetMetagameCategoryZoneIdAsync(int metagameEventId)
+    {
+        return _metagameEventRepository.GetMetagameCategoryZoneId(metagameEventId);
     }
 }

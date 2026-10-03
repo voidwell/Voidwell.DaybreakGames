@@ -2,20 +2,19 @@
 using Moq;
 using Voidwell.DaybreakGames.Live.CensusStream;
 
-namespace Voidwell.DaybreakGames.Test
+namespace Voidwell.DaybreakGames.Test;
+
+public class WebsocketHealthMonitorFixture
 {
-    public class WebsocketHealthMonitorFixture
+    private ILogger<WebsocketHealthMonitor> Logger { get; set; }
+
+    public WebsocketHealthMonitor CreateSut()
     {
-        private ILogger<WebsocketHealthMonitor> Logger { get; set; }
+        return new WebsocketHealthMonitor(Logger);
+    }
 
-        public WebsocketHealthMonitor CreateSut()
-        {
-            return new WebsocketHealthMonitor(Logger);
-        }
-
-        public void ResetFixture()
-        {
-            Logger = Mock.Of<ILogger<WebsocketHealthMonitor>>();
-        }
+    public void ResetFixture()
+    {
+        Logger = Mock.Of<ILogger<WebsocketHealthMonitor>>();
     }
 }

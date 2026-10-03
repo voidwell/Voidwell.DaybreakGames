@@ -1,8 +1,7 @@
-﻿namespace Voidwell.DaybreakGames.Census.Models
+﻿namespace Voidwell.DaybreakGames.Census.Models;
+
+public class CensusMetagameEventStateModel
 {
-    public class CensusMetagameEventStateModel
-    {
-        public int MetagameEventStateId { get; set; }
-        public string Name { get; set; }
-    }
+    public int MetagameEventStateId { get; set; }
+    public string? Name { get; set; }
 }

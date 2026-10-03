@@ -1,55 +1,54 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Voidwell.DaybreakGames.Utils.HostedService
+namespace Voidwell.DaybreakGames.Utils.HostedService;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddStatefulServiceDependencies(this IServiceCollection services)
     {
-        public static IServiceCollection AddStatefulServiceDependencies(this IServiceCollection services)
+        services.AddSingleton<IStatefulHostedServiceManager, StatefulHostedServiceManager>();
+
+        services.AddHostedService(sp =>
         {
-            services.AddSingleton<IStatefulHostedServiceManager, StatefulHostedServiceManager>();
+            return (StatefulHostedServiceManager)sp.GetRequiredService<IStatefulHostedServiceManager>();
+        });
 
-            services.AddHostedService(sp =>
-            {
-                return (StatefulHostedServiceManager)sp.GetRequiredService<IStatefulHostedServiceManager>();
-            });
+        services.AddSingleton(typeof(HostedServiceState<>));
 
-            services.AddSingleton(typeof(HostedServiceState<>));
+        return services;
+    }
 
-            return services;
-        }
+    public static IServiceCollection AddStatefulHostedService<TImplementation>(this IServiceCollection services)
+        where TImplementation : class, IStatefulHostedService
+    {
+        services.AddSingleton<TImplementation>();
 
-        public static IServiceCollection AddStatefulHostedService<TImplementation>(this IServiceCollection services)
-            where TImplementation : class, IStatefulHostedService
+        services.AddSingleton(sp =>
         {
-            services.AddSingleton<TImplementation>();
+            return (HostedServiceState)sp.GetRequiredService<HostedServiceState<TImplementation>>();
+        });
 
-            services.AddSingleton(sp =>
-            {
-                return (HostedServiceState)sp.GetRequiredService<HostedServiceState<TImplementation>>();
-            });
+        services.AddHostedService<StatefulHostedServiceWrapper<TImplementation>>();
 
-            services.AddHostedService<StatefulHostedServiceWrapper<TImplementation>>();
+        return services;
+    }
 
-            return services;
-        }
+    public static IServiceCollection AddStatefulHostedService<TService, TImplementation>(this IServiceCollection services)
+        where TService : class
+        where TImplementation : class, TService, IStatefulHostedService
+    {
+        services.AddSingleton<TService, TImplementation>();
 
-        public static IServiceCollection AddStatefulHostedService<TService, TImplementation>(this IServiceCollection services)
-            where TService : class
-            where TImplementation : class, TService, IStatefulHostedService
+        services.AddSingleton(sp =>
         {
-            services.AddSingleton<TService, TImplementation>();
+            return (HostedServiceState)sp.GetRequiredService<HostedServiceState<TService>>();
+        });
 
-            services.AddSingleton(sp =>
-            {
-                return (HostedServiceState)sp.GetRequiredService<HostedServiceState<TService>>();
-            });
+        services.AddHostedService(sp =>
+        {
+            return new StatefulHostedServiceWrapper<TImplementation>((TImplementation)sp.GetRequiredService<TService>());
+        });
 
-            services.AddHostedService(sp =>
-            {
-                return new StatefulHostedServiceWrapper<TImplementation>((TImplementation)sp.GetRequiredService<TService>());
-            });
-
-            return services;
-        }
+        return services;
     }
 }

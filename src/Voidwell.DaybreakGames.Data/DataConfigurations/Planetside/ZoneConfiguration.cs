@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class ZoneConfiguration : IEntityTypeConfiguration<Zone>
 {
-    public class ZoneConfiguration : IEntityTypeConfiguration<Zone>
+    public void Configure(EntityTypeBuilder<Zone> builder)
     {
-        public void Configure(EntityTypeBuilder<Zone> builder)
-        {
-            builder.ToTable("Zone");
+        builder.ToTable("Zone");
 
-            builder.HasKey(a => a.Id);
+        builder.HasKey(a => a.Id);
 
-            builder.Property(a => a.Id).ValueGeneratedNever();
-        }
+        builder.Property(a => a.Id).ValueGeneratedNever();
     }
 }

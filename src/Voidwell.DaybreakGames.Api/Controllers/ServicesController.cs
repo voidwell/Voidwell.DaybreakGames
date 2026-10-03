@@ -1,71 +1,68 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Voidwell.DaybreakGames.Api.Authentication;
-using System.Threading;
-using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Utils.HostedService;
 
-namespace Voidwell.DaybreakGames.Api.Controllers
+namespace Voidwell.DaybreakGames.Api.Controllers;
+
+[Route("services")]
+[Authorize(Roles = AuthConstants.Roles.Administrator)]
+public class ServicesController : Controller
 {
-    [Route("services")]
-    [Authorize(Roles = AuthConstants.Roles.Administrator)]
-    public class ServicesController : Controller
+    private readonly IStatefulHostedServiceManager _serviceManager;
+
+    public ServicesController(IStatefulHostedServiceManager serviceManager)
     {
-        private readonly IStatefulHostedServiceManager _serviceManager;
+        _serviceManager = serviceManager;
+    }
 
-        public ServicesController(IStatefulHostedServiceManager serviceManager)
+    [HttpGet("status")]
+    public async Task<ActionResult> GetAllServiceStatusAsync()
+    {
+        var states = await _serviceManager.GetServiceStatusAsync(CancellationToken.None);
+
+        return Ok(states);
+    }
+
+    [HttpGet("{serviceName}/status")]
+    public async Task<ActionResult> GetServiceStatusAsync(string serviceName)
+    {
+        var state = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
+        if (state == null)
         {
-            _serviceManager = serviceManager;
+            return NotFound();
         }
 
-        [HttpGet("status")]
-        public async Task<ActionResult> GetAllServiceStatus()
-        {
-            var states = await _serviceManager.GetServiceStatusAsync(CancellationToken.None);
+        return Ok(state);
+    }
 
-            return Ok(states);
+    [HttpPost("{serviceName}/enable")]
+    public async Task<ActionResult> PostEnableServiceAsync(string serviceName)
+    {
+        if (!_serviceManager.VerifyServiceExists(serviceName))
+        {
+            return NotFound();
         }
 
-        [HttpGet("{serviceName}/status")]
-        public async Task<ActionResult> GetServiceStatus(string serviceName)
-        {
-            var state = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
-            if (state == null)
-            {
-                return NotFound();
-            }
+        await _serviceManager.StartServiceAsync(serviceName, CancellationToken.None);
 
-            return Ok(state);
+        var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
+
+        return Ok(status);
+    }
+
+    [HttpPost("{serviceName}/disable")]
+    public async Task<ActionResult> PostDisableServiceAsync(string serviceName)
+    {
+        if (!_serviceManager.VerifyServiceExists(serviceName))
+        {
+            return NotFound();
         }
 
-        [HttpPost("{serviceName}/enable")]
-        public async Task<ActionResult> PostEnableService(string serviceName)
-        {
-            if (!_serviceManager.VerifyServiceExists(serviceName))
-            {
-                return NotFound();
-            }
+        await _serviceManager.StopServiceAsync(serviceName, CancellationToken.None);
 
-            await _serviceManager.StartServiceAsync(serviceName, CancellationToken.None);
+        var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
 
-            var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
-
-            return Ok(status);
-        }
-
-        [HttpPost("{serviceName}/disable")]
-        public async Task<ActionResult> PostDisableService(string serviceName)
-        {
-            if (!_serviceManager.VerifyServiceExists(serviceName))
-            {
-                return NotFound();
-            }
-
-            await _serviceManager.StopServiceAsync(serviceName, CancellationToken.None);
-
-            var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
-
-            return Ok(status);
-        }
+        return Ok(status);
     }
 }

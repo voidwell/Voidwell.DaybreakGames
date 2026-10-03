@@ -1,31 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
-namespace Voidwell.DaybreakGames.Data.Repositories
+namespace Voidwell.DaybreakGames.Data.Repositories;
+
+public class SanctionedWeaponsRepository : ISanctionedWeaponsRepository
 {
-    public class SanctionedWeaponsRepository : ISanctionedWeaponsRepository
+    private readonly IDbContextHelper _dbContextHelper;
+
+    public SanctionedWeaponsRepository(IDbContextHelper dbContextHelper)
     {
-        private readonly IDbContextHelper _dbContextHelper;
+        _dbContextHelper = dbContextHelper;
+    }
 
-        public SanctionedWeaponsRepository(IDbContextHelper dbContextHelper)
+    public async Task<IEnumerable<SanctionedWeapon>> GetAllSanctionedWeapons()
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            _dbContextHelper = dbContextHelper;
-        }
+            var dbContext = factory.GetDbContext();
 
-        public async Task<IEnumerable<SanctionedWeapon>> GetAllSanctionedWeapons()
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                return await dbContext.SanctionedWeapons
-                    .Where(a => a.Type == "i")
-                    .ToListAsync();
-            }
+            return await dbContext.SanctionedWeapons
+                .Where(a => a.Type == "i")
+                .ToListAsync();
         }
     }
 }

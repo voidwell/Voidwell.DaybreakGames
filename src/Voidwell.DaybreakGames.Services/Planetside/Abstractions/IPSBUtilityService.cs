@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Repositories.Models;
+﻿using Voidwell.DaybreakGames.Data.Repositories.Models;
 
-namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions
+namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+
+public interface IPSBUtilityService
 {
-    public interface IPSBUtilityService
-    {
-        Task<IEnumerable<CharacterLastSession>> GetLastOnlinePSBAccounts();
-    }
+    Task<IEnumerable<CharacterLastSession>?> GetLastOnlinePSBAccounts();
 }

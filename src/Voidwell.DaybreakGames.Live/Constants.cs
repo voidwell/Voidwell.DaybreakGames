@@ -1,7 +1,6 @@
-﻿namespace Voidwell.DaybreakGames.Live
+﻿namespace Voidwell.DaybreakGames.Live;
+
+public static class Constants
 {
-    public static class Constants
-    {
-        public static int KoltyrZoneId = 14;
-    }
+    public static int KoltyrZoneId = 14;
 }

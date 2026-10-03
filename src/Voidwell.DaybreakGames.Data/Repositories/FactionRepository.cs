@@ -1,26 +1,24 @@
-﻿using System.Threading.Tasks;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+﻿using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
-namespace Voidwell.DaybreakGames.Data.Repositories
+namespace Voidwell.DaybreakGames.Data.Repositories;
+
+public class FactionRepository : IFactionRepository
 {
-    public class FactionRepository : IFactionRepository
+    private readonly IDbContextHelper _dbContextHelper;
+
+    public FactionRepository(IDbContextHelper dbContextHelper)
     {
-        private readonly IDbContextHelper _dbContextHelper;
+        _dbContextHelper = dbContextHelper;
+    }
 
-        public FactionRepository(IDbContextHelper dbContextHelper)
+    public async Task<Faction?> GetFactionByIdAsync(int factionId)
+    {
+        using (var factory = _dbContextHelper.GetFactory())
         {
-            _dbContextHelper = dbContextHelper;
-        }
+            var dbContext = factory.GetDbContext();
 
-        public async Task<Faction> GetFactionByIdAsync(int factionId)
-        {
-            using (var factory = _dbContextHelper.GetFactory())
-            {
-                var dbContext = factory.GetDbContext();
-
-                return await dbContext.Factions.FindAsync(factionId);
-            }
+            return await dbContext.Factions.FindAsync(factionId);
         }
     }
 }

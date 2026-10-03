@@ -1,0 +1,29 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="Dockerfile" />
+    <File Path="Dockerfile.debug" />
+    <File Path="global.json" />
+    <File Path="init-migrate.bat" />
+    <File Path="init-update.bat" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Voidwell.DaybreakGames.Api/Voidwell.DaybreakGames.Api.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.Cache/Voidwell.DaybreakGames.Cache.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.Census/Voidwell.DaybreakGames.Census.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.CensusStore/Voidwell.DaybreakGames.CensusStore.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.Data/Voidwell.DaybreakGames.Data.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.Domain/Voidwell.DaybreakGames.Domain.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.Live/Voidwell.DaybreakGames.Live.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.Services/Voidwell.DaybreakGames.Services.csproj" />
+    <Project Path="src/Voidwell.DaybreakGames.Utils/Voidwell.DaybreakGames.Utils.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Voidwell.DaybreakGames.Test/Voidwell.DaybreakGames.Test.csproj" />
+  </Folder>
+</Solution>

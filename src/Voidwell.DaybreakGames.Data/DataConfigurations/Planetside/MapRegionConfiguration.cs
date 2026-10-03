@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Voidwell.DaybreakGames.Data.Models.Planetside;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations
+namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+
+public class MapRegionConfiguration : IEntityTypeConfiguration<MapRegion>
 {
-    public class MapRegionConfiguration : IEntityTypeConfiguration<MapRegion>
+    public void Configure(EntityTypeBuilder<MapRegion> builder)
     {
-        public void Configure(EntityTypeBuilder<MapRegion> builder)
-        {
-            builder.ToTable("MapRegion");
+        builder.ToTable("MapRegion");
 
-            builder.HasKey(a => new { a.Id });
+        builder.HasKey(a => new { a.Id });
 
-            builder.Property(a => a.Id).ValueGeneratedNever();
-        }
+        builder.Property(a => a.Id).ValueGeneratedNever();
     }
 }
