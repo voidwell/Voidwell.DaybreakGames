@@ -68,70 +68,65 @@ public class WorldService : IWorldService
 
         using (await _activityPopulationLock.WaitAsync(cacheKey))
         {
-            var cachedActivity = await _cache.GetAsync<WorldActivity>(cacheKey);
-            if (cachedActivity != null)
+            return await _cache.GetOrSetAsync<WorldActivity>(cacheKey, async ct =>
             {
-                return cachedActivity;
-            }
-
-            var activity = new WorldActivity
-            {
-                ActivityPeriodStart = startDate,
-                ActivityPeriodEnd = endDate
-            };
-
-            var combatStatsTask = _combatReportService.GetCombatStats(worldId, startDate, endDate);
-            var experienceTask = GetWorldActivityExperienceAsync(worldId, startDate, endDate);
-            var playerSessionsTask = GetPlayerSessionsAsync(worldId, startDate, endDate);
-
-            await Task.WhenAll(combatStatsTask, experienceTask, playerSessionsTask);
-
-            var combatStats = combatStatsTask.Result;
-            var playerSessions = playerSessionsTask.Result;
-
-            var topPlayers = combatStats.Participants!.OrderByDescending(a => a.Kills).Take(25).ToList();
-
-            var sessionsDic = playerSessions.GroupBy(a => a.CharacterId!)
-                .ToDictionary(a => a.Key, a => a.FirstOrDefault());
-
-            var sessionKillsTasks = topPlayers.Select(a =>
-            {
-                if (sessionsDic.TryGetValue(a.Character!.Id!, out var session) && session!.LoginDate.HasValue)
+                var activity = new WorldActivity
                 {
-                    return GetKillCountByCharacterIdAsync(a.Character.Id!, session.LoginDate.Value,
-                        session.LogoutDate);
+                    ActivityPeriodStart = startDate,
+                    ActivityPeriodEnd = endDate
+                };
+
+                var combatStatsTask = _combatReportService.GetCombatStats(worldId, startDate, endDate);
+                var experienceTask = GetWorldActivityExperienceAsync(worldId, startDate, endDate);
+                var playerSessionsTask = GetPlayerSessionsAsync(worldId, startDate, endDate);
+
+                await Task.WhenAll(combatStatsTask, experienceTask, playerSessionsTask);
+
+                var combatStats = combatStatsTask.Result;
+                var playerSessions = playerSessionsTask.Result;
+
+                var topPlayers = combatStats.Participants!.OrderByDescending(a => a.Kills).Take(25).ToList();
+
+                var sessionsDic = playerSessions.GroupBy(a => a.CharacterId!)
+                    .ToDictionary(a => a.Key, a => a.FirstOrDefault());
+
+                var sessionKillsTasks = topPlayers.Select(a =>
+                {
+                    if (sessionsDic.TryGetValue(a.Character!.Id!, out var session) && session!.LoginDate.HasValue)
+                    {
+                        return GetKillCountByCharacterIdAsync(a.Character.Id!, session.LoginDate.Value,
+                            session.LogoutDate);
+                    }
+
+                    return Task.FromResult(0);
+                });
+
+                var sessionKillsResults = await Task.WhenAll(sessionKillsTasks);
+
+                for (var i = 0; i < topPlayers.Count; i++)
+                {
+                    var player = topPlayers[i];
+
+                    player.SessionKills = sessionKillsResults[i];
+
+                    if (sessionsDic.TryGetValue(player.Character!.Id!, out var session))
+                    {
+                        player.LoginDate = session!.LoginDate;
+                        player.LogoutDate = session.LogoutDate;
+                    }
                 }
 
-                return Task.FromResult(0);
-            });
+                activity.Stats = CreateWorldActivityStats(combatStats.Participants!);
+                activity.ClassStats = combatStats.Classes!.OrderBy(a => a.Profile!.ProfileTypeId);
+                activity.TopVehicles = combatStats.Vehicles!.OrderByDescending(a => a.Kills).Where(a => a.Kills > 0).Take(20);
+                activity.TopPlayers = topPlayers;
+                activity.TopOutfits = combatStats.Outfits!.Where(a => a.ParticipantCount > 4).OrderByDescending(a => a.Kills / a.ParticipantCount).Take(10);
+                activity.TopWeapons = combatStats.Weapons!.OrderByDescending(a => a.Kills).Take(20);
+                activity.HistoricalPopulations = GetPopulationPeriods(playerSessions, startDate, endDate);
+                activity.TopExperience = experienceTask.Result;
 
-            var sessionKillsResults = await Task.WhenAll(sessionKillsTasks);
-
-            for (var i = 0; i < topPlayers.Count; i++)
-            {
-                var player = topPlayers[i];
-
-                player.SessionKills = sessionKillsResults[i];
-
-                if (sessionsDic.TryGetValue(player.Character!.Id!, out var session))
-                {
-                    player.LoginDate = session!.LoginDate;
-                    player.LogoutDate = session.LogoutDate;
-                }
-            }
-
-            activity.Stats = CreateWorldActivityStats(combatStats.Participants!);
-            activity.ClassStats = combatStats.Classes!.OrderBy(a => a.Profile!.ProfileTypeId);
-            activity.TopVehicles = combatStats.Vehicles!.OrderByDescending(a => a.Kills).Where(a => a.Kills > 0).Take(20);
-            activity.TopPlayers = topPlayers;
-            activity.TopOutfits = combatStats.Outfits!.Where(a => a.ParticipantCount > 4).OrderByDescending(a => a.Kills / a.ParticipantCount).Take(10);
-            activity.TopWeapons = combatStats.Weapons!.OrderByDescending(a => a.Kills).Take(20);
-            activity.HistoricalPopulations = GetPopulationPeriods(playerSessions, startDate, endDate);
-            activity.TopExperience = experienceTask.Result;
-
-            await _cache.SetAsync(cacheKey, activity, _activityCacheExpiration);
-
-            return activity;
+                return activity;
+            }, _activityCacheExpiration);
         }
     }
 

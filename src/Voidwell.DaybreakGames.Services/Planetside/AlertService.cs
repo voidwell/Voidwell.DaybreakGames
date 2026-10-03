@@ -39,20 +39,11 @@ public class AlertService : IAlertService
     {
         var cacheKey = $"{_cacheKey}_alerts_{pageNumber}:{worldId}";
 
-        var alerts = await _cache.GetAsync<IEnumerable<Alert>>(cacheKey);
-        if (alerts != null)
-        {
-            return alerts;
-        }
-
-        alerts = await _alertRepository.GetAlerts(pageNumber, limit, worldId);
-
-        if (alerts != null && alerts.Any())
-        {
-            await _cache.SetAsync(cacheKey, alerts, _cacheAlertsExpiration);
-        }
-
-        return alerts;
+        return await _cache.GetOrSetAsync(
+            cacheKey,
+            ct => _alertRepository.GetAlerts(pageNumber, limit, worldId),
+            _cacheAlertsExpiration,
+            alerts => alerts != null && alerts.Any());
     }
 
     public Task<IEnumerable<Alert>> GetActiveAlertsByWorldId(int worldId)
@@ -64,66 +55,61 @@ public class AlertService : IAlertService
     {
         var cacheKey = $"{_cacheKey}_alert_{worldId}_{instanceId}";
 
-        var alertResult = await _cache.GetAsync<AlertResult>(cacheKey);
-        if (alertResult != null)
+        return await _cache.GetOrSetIfNotNullAsync<AlertResult>(cacheKey, async ct =>
         {
+            var alert = await _alertRepository.GetAlert(worldId, instanceId);
+            if (alert?.ZoneId == null || !alert.StartDate.HasValue)
+            {
+                return null;
+            }
+
+            var combatReportTask = _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId.Value, alert.StartDate.Value, alert.EndDate);
+            var zoneSnapshotTask = _mapService.GetZoneSnapshotByMetagameEvent(worldId, instanceId);
+
+            await Task.WhenAll(combatReportTask, zoneSnapshotTask);
+
+            if (combatReportTask.Result == null)
+            {
+                return null;
+            }
+
+            var neuturalScore = 0.0f;
+            if (alert.MetagameEvent?.Type == 1 || alert.MetagameEvent?.Type == 8 || alert.MetagameEvent?.Type == 9)
+            {
+                neuturalScore = 100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault() + alert.LastFactionNs.GetValueOrDefault());
+            }
+
+            var alertResult = new AlertResult
+            {
+                WorldId = alert.WorldId,
+                ZoneId = alert.ZoneId,
+                MetagameInstanceId = alert.MetagameInstanceId,
+                MetagameEventId = alert.MetagameEventId,
+                StartDate = alert.StartDate,
+                EndDate = alert.EndDate,
+                StartFactionVS = alert.StartFactionVs.GetValueOrDefault(),
+                StartFactionNC = alert.StartFactionNc.GetValueOrDefault(),
+                StartFactionTR = alert.StartFactionTr.GetValueOrDefault(),
+                StartFactionNS = alert.StartFactionNs.GetValueOrDefault(),
+                LastFactionVS = alert.LastFactionVs.GetValueOrDefault(),
+                LastFactionNC = alert.LastFactionNc.GetValueOrDefault(),
+                LastFactionTR = alert.LastFactionTr.GetValueOrDefault(),
+                LastFactionNS = alert.LastFactionNs.GetValueOrDefault(),
+                MetagameEvent = alert.MetagameEvent,
+                Log = combatReportTask.Result,
+                Score = new[] {
+                    neuturalScore,
+                    alert.LastFactionVs.GetValueOrDefault(),
+                    alert.LastFactionNc.GetValueOrDefault(),
+                    alert.LastFactionTr.GetValueOrDefault(),
+                    alert.LastFactionNs.GetValueOrDefault()
+                },
+                ServerId = alert.WorldId.ToString(),
+                MapId = alert.ZoneId.ToString(),
+                ZoneSnapshot = zoneSnapshotTask.Result?.Ownership
+            };
+
             return alertResult;
-        }
-
-        var alert = await _alertRepository.GetAlert(worldId, instanceId);
-        if (alert?.ZoneId == null || !alert.StartDate.HasValue)
-        {
-            return null;
-        }
-
-        var combatReportTask = _combatReportService.GetCombatReport(alert.WorldId, alert.ZoneId.Value, alert.StartDate.Value, alert.EndDate);
-        var zoneSnapshotTask = _mapService.GetZoneSnapshotByMetagameEvent(worldId, instanceId);
-
-        await Task.WhenAll(combatReportTask, zoneSnapshotTask);
-
-        if (combatReportTask.Result == null)
-        {
-            return null;
-        }
-
-        var neuturalScore = 0.0f;
-        if (alert.MetagameEvent?.Type == 1 || alert.MetagameEvent?.Type == 8 || alert.MetagameEvent?.Type == 9)
-        {
-            neuturalScore = 100 - (alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionVs.GetValueOrDefault() + alert.LastFactionTr.GetValueOrDefault() + alert.LastFactionNs.GetValueOrDefault());
-        }
-
-        alertResult = new AlertResult
-        {
-            WorldId = alert.WorldId,
-            ZoneId = alert.ZoneId,
-            MetagameInstanceId = alert.MetagameInstanceId,
-            MetagameEventId = alert.MetagameEventId,
-            StartDate = alert.StartDate,
-            EndDate = alert.EndDate,
-            StartFactionVS = alert.StartFactionVs.GetValueOrDefault(),
-            StartFactionNC = alert.StartFactionNc.GetValueOrDefault(),
-            StartFactionTR = alert.StartFactionTr.GetValueOrDefault(),
-            StartFactionNS = alert.StartFactionNs.GetValueOrDefault(),
-            LastFactionVS = alert.LastFactionVs.GetValueOrDefault(),
-            LastFactionNC = alert.LastFactionNc.GetValueOrDefault(),
-            LastFactionTR = alert.LastFactionTr.GetValueOrDefault(),
-            LastFactionNS = alert.LastFactionNs.GetValueOrDefault(),
-            MetagameEvent = alert.MetagameEvent,
-            Log = combatReportTask.Result,
-            Score = new[] {
-                neuturalScore,
-                alert.LastFactionVs.GetValueOrDefault(),
-                alert.LastFactionNc.GetValueOrDefault(),
-                alert.LastFactionTr.GetValueOrDefault(),
-                alert.LastFactionNs.GetValueOrDefault()
-            },
-            ServerId = alert.WorldId.ToString(),
-            MapId = alert.ZoneId.ToString(),
-            ZoneSnapshot = zoneSnapshotTask.Result?.Ownership
-        };
-
-        await _cache.SetAsync(cacheKey, alertResult, _cacheAlertExpiration);
-
-        return alertResult;
+        }, _cacheAlertExpiration);
     }
 }

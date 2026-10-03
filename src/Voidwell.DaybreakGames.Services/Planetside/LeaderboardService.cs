@@ -27,24 +27,19 @@ public class LeaderboardService : ILeaderboardService
     {
         var cacheKey = _getCharacterLeaderboardCacheKey(weaponItemId, page, sort, sortDir);
 
-        var result = await _cache.GetAsync<IEnumerable<WeaponLeaderboardRow>>(cacheKey);
-        if (result != null)
+        return await _cache.GetOrSetAsync<IEnumerable<WeaponLeaderboardRow>>(cacheKey, async ct =>
         {
+            var stats = await _characterStore.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit, sort, sortDir);
+            if (stats == null || !stats.Any())
+            {
+                return Enumerable.Empty<WeaponLeaderboardRow>();
+            }
+
+            var aggregate = await _weaponAggregateService.GetAggregateForItem(weaponItemId);
+            var result = stats.Select(s => ConvertToLeaderboardRow(s, aggregate!)).ToList();
+
             return result;
-        }
-
-        var stats = await _characterStore.GetCharacterWeaponLeaderboardAsync(weaponItemId, page, limit, sort, sortDir);
-        if (stats == null || !stats.Any())
-        {
-            return Enumerable.Empty<WeaponLeaderboardRow>();
-        }
-
-        var aggregate = await _weaponAggregateService.GetAggregateForItem(weaponItemId);
-        result = stats.Select(s => ConvertToLeaderboardRow(s, aggregate!));
-
-        await _cache.SetAsync(cacheKey, result, _cacheCharacterLeaderboardExpiration);
-
-        return result;
+        }, _cacheCharacterLeaderboardExpiration, rows => rows.Any());
     }
 
     private static WeaponLeaderboardRow ConvertToLeaderboardRow(CharacterWeaponStat model, WeaponAggregate aggregate)

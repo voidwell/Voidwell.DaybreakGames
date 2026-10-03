@@ -65,34 +65,12 @@ public class OutfitStore : IOutfitStore
 
     public async Task<string?> GetOutfitIdByAliasAsync(string outfitAlias)
     {
-        var outfitId = await _cache.GetAsync<string>(_getAliasIdCacheKey(outfitAlias));
-        if (outfitId != null)
-        {
-            return outfitId;
-        }
-
-        outfitId = await _outfitRepository.GetOutfitIdByAlias(outfitAlias);
-        if (outfitId != null)
-        {
-            await _cache.SetAsync(_getAliasIdCacheKey(outfitAlias), outfitId, _cacheOutfitNameExpiration);
-        }
-
-        return outfitId;
+        return await _cache.GetOrSetIfNotNullAsync<string>(_getAliasIdCacheKey(outfitAlias), ct => _outfitRepository.GetOutfitIdByAlias(outfitAlias), _cacheOutfitNameExpiration);
     }
 
     public async Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(string outfitId)
     {
-        var members = await _cache.GetAsync<IEnumerable<OutfitMember>>(_getMemberCacheKey(outfitId));
-        if (members != null)
-        {
-            return members;
-        }
-
-        members = await _outfitRepository.GetOutfitMembersAsync(outfitId);
-
-        await _cache.SetAsync(_getMemberCacheKey(outfitId), members, _cacheOutfitMemberDetailsExpiration);
-
-        return members;
+        return await _cache.GetOrSetAsync<IEnumerable<OutfitMember>>(_getMemberCacheKey(outfitId), ct => _outfitRepository.GetOutfitMembersAsync(outfitId), _cacheOutfitMemberDetailsExpiration);
     }
 
     public Task<IEnumerable<Outfit>> GetOutfitsByNameAsync(string name, int limit = 12)

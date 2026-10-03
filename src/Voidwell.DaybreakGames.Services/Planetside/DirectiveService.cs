@@ -31,50 +31,42 @@ public class DirectiveService : IDirectiveService
     {
         var cacheKey = _getDirectiveDataCacheKey();
 
-        var data = await _cache.GetAsync<IEnumerable<DirectiveTreeCategory>>(cacheKey);
-        if (data != null)
+        return await _cache.GetOrSetIfNotNullAsync<IEnumerable<DirectiveTreeCategory>>(cacheKey, async ct =>
         {
-            return data;
-        }
+            var categoriesTask = _directiveRepository.GetDirectiveTreesCategoriesAsync();
+            var treesTask = _directiveRepository.GetDirectiveTreesAsync();
+            var tiersTask = _directiveRepository.GetDirectiveTiersAsync();
+            var directivesTask = _directiveRepository.GetDirectivesAsync();
 
-        var categoriesTask = _directiveRepository.GetDirectiveTreesCategoriesAsync();
-        var treesTask = _directiveRepository.GetDirectiveTreesAsync();
-        var tiersTask = _directiveRepository.GetDirectiveTiersAsync();
-        var directivesTask = _directiveRepository.GetDirectivesAsync();
+            await Task.WhenAll(categoriesTask, treesTask, tiersTask, directivesTask);
 
-        await Task.WhenAll(categoriesTask, treesTask, tiersTask, directivesTask);
+            var categories = categoriesTask.Result.ToList();
+            var trees = treesTask.Result.ToList();
+            var tiers = tiersTask.Result.ToList();
+            var directives = directivesTask.Result.ToList();
 
-        var categories = categoriesTask.Result.ToList();
-        var trees = treesTask.Result.ToList();
-        var tiers = tiersTask.Result.ToList();
-        var directives = directivesTask.Result.ToList();
+            var objectiveGroupIds = directives.Where(a => a.ObjectiveSet?.ObjectiveGroupId != null).Select(a => a.ObjectiveSet!.ObjectiveGroupId).Distinct();
+            var objectivesTask = _objectiveRepository.GetObjectivesByGroupIdAsync(objectiveGroupIds);
 
-        var objectiveGroupIds = directives.Where(a => a.ObjectiveSet?.ObjectiveGroupId != null).Select(a => a.ObjectiveSet!.ObjectiveGroupId).Distinct();
-        var objectivesTask = _objectiveRepository.GetObjectivesByGroupIdAsync(objectiveGroupIds);
+            var rewardSetIds = tiers.Where(a => a.RewardSetId != null).Select(a => a.RewardSetId!.Value).Distinct();
+            var rewardSetTask = _rewardRepository.GetRewardSetsAsync(rewardSetIds);
 
-        var rewardSetIds = tiers.Where(a => a.RewardSetId != null).Select(a => a.RewardSetId!.Value).Distinct();
-        var rewardSetTask = _rewardRepository.GetRewardSetsAsync(rewardSetIds);
+            await Task.WhenAll(objectivesTask, rewardSetTask);
 
-        await Task.WhenAll(objectivesTask, rewardSetTask);
+            var objectives = objectivesTask.Result;
+            var rewardSets = rewardSetTask.Result;
 
-        var objectives = objectivesTask.Result;
-        var rewardSets = rewardSetTask.Result;
+            directives
+                .Where(a => a.ObjectiveSet != null)
+                .Select(a => a.ObjectiveSet)
+                .SetGroupJoin(objectives, a => a!.ObjectiveGroupId, a => a.ObjectiveGroupId, a => a!.Objectives);
 
-        directives
-            .Where(a => a.ObjectiveSet != null)
-            .Select(a => a.ObjectiveSet)
-            .SetGroupJoin(objectives, a => a!.ObjectiveGroupId, a => a.ObjectiveGroupId, a => a!.Objectives);
+            tiers.SetGroupJoin(directives, a => new { a.DirectiveTreeId, a.DirectiveTierId }, a => new { a.DirectiveTreeId, a.DirectiveTierId }, a => a.Directives);
+            tiers.SetGroupJoin(rewardSets, a => a.RewardSetId, a => a.RewardSetId, a => a.RewardGroupSets);
+            trees.SetGroupJoin(tiers, a => a.Id, a => a.DirectiveTreeId, a => a.Tiers);
+            categories.SetGroupJoin(trees, a => a.Id, a => a.DirectiveTreeCategoryId, a => a.Trees);
 
-        tiers.SetGroupJoin(directives, a => new { a.DirectiveTreeId, a.DirectiveTierId }, a => new { a.DirectiveTreeId, a.DirectiveTierId }, a => a.Directives);
-        tiers.SetGroupJoin(rewardSets, a => a.RewardSetId, a => a.RewardSetId, a => a.RewardGroupSets);
-        trees.SetGroupJoin(tiers, a => a.Id, a => a.DirectiveTreeId, a => a.Tiers);
-        categories.SetGroupJoin(trees, a => a.Id, a => a.DirectiveTreeCategoryId, a => a.Trees);
-
-        if (categories != null)
-        {
-            await _cache.SetAsync(cacheKey, categories, _cacheDirectiveDataExpiration);
-        }
-
-        return categories;
+            return categories;
+        }, _cacheDirectiveDataExpiration);
     }
 }

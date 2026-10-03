@@ -23,19 +23,7 @@ public class WeaponAggregateService : IWeaponAggregateService
     {
         var cacheKey = $"{_cacheKey}_{itemId}";
 
-        var aggregate = await _cache.GetAsync<WeaponAggregate>(cacheKey);
-        if (aggregate != null)
-        {
-            return aggregate;
-        }
-
-        aggregate = await _weaponAggregateRepository.GetWeaponAggregateByItemId(itemId);
-        if (aggregate != null)
-        {
-            await _cache.SetAsync(cacheKey, aggregate, _cacheExpiration);
-        }
-
-        return aggregate;
+        return await _cache.GetOrSetIfNotNullAsync<WeaponAggregate>(cacheKey, ct => _weaponAggregateRepository.GetWeaponAggregateByItemId(itemId), _cacheExpiration);
     }
 
     public async Task<Dictionary<string, WeaponAggregate>> GetAggregates(IEnumerable<int> itemIds)

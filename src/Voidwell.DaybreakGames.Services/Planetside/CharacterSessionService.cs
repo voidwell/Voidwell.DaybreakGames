@@ -36,17 +36,7 @@ public class CharacterSessionService : ICharacterSessionService
     {
         var cacheKey = _getSessionsListCacheKey(characterId);
 
-        var sessions = await _cache.GetAsync<IEnumerable<Data.Models.Planetside.PlayerSession>>(cacheKey);
-        if (sessions != null)
-        {
-            return sessions;
-        }
-
-        sessions = await _playerSessionRepository.GetPlayerSessionsByCharacterIdAsync(characterId, limit, page);
-
-        await _cache.SetAsync(cacheKey, sessions, _cacheCharacterSessionsListExpiration);
-
-        return sessions;
+        return await _cache.GetOrSetAsync<IEnumerable<Data.Models.Planetside.PlayerSession>>(cacheKey, ct => _playerSessionRepository.GetPlayerSessionsByCharacterIdAsync(characterId, limit, page), _cacheCharacterSessionsListExpiration);
     }
 
     public async Task<PlayerSession?> GetSession(string characterId, int sessionId)
@@ -55,39 +45,34 @@ public class CharacterSessionService : ICharacterSessionService
         {
             var cacheKey = _getSessionCacheKey(characterId, sessionId);
 
-            var sessionInfo = await _cache.GetAsync<PlayerSession>(cacheKey);
-            if (sessionInfo != null)
+            return await _cache.GetOrSetIfNotNullAsync<PlayerSession>(cacheKey, async ct =>
             {
-                return sessionInfo;
-            }
-
-            var playerSession = await _playerSessionRepository.GetPlayerSessionAsync(sessionId);
-            if (playerSession == null)
-            {
-                return null;
-            }
-
-            var sessionEvents = await GetSessionEventsForCharacterAsync(characterId, playerSession.LoginDate, playerSession.LogoutDate);
-
-            sessionEvents.Insert(0, new PlayerSessionLoginEvent { Timestamp = playerSession.LoginDate });
-            sessionEvents.Add(new PlayerSessionLogoutEvent { Timestamp = playerSession.LogoutDate });
-
-            sessionInfo = new PlayerSession
-            {
-                Events = sessionEvents,
-                Session = new PlayerSessionInfo
+                var playerSession = await _playerSessionRepository.GetPlayerSessionAsync(sessionId);
+                if (playerSession == null)
                 {
-                    CharacterId = playerSession.CharacterId,
-                    Id = playerSession.Id.ToString(),
-                    Duration = playerSession.Duration,
-                    LoginDate = playerSession.LoginDate,
-                    LogoutDate = playerSession.LogoutDate
+                    return null;
                 }
-            };
 
-            await _cache.SetAsync(cacheKey, sessionInfo, _cacheCharacterSessionExpiration);
+                var sessionEvents = await GetSessionEventsForCharacterAsync(characterId, playerSession.LoginDate, playerSession.LogoutDate);
 
-            return sessionInfo;
+                sessionEvents.Insert(0, new PlayerSessionLoginEvent { Timestamp = playerSession.LoginDate });
+                sessionEvents.Add(new PlayerSessionLogoutEvent { Timestamp = playerSession.LogoutDate });
+
+                var sessionInfo = new PlayerSession
+                {
+                    Events = sessionEvents,
+                    Session = new PlayerSessionInfo
+                    {
+                        CharacterId = playerSession.CharacterId,
+                        Id = playerSession.Id.ToString(),
+                        Duration = playerSession.Duration,
+                        LoginDate = playerSession.LoginDate,
+                        LogoutDate = playerSession.LogoutDate
+                    }
+                };
+
+                return sessionInfo;
+            }, _cacheCharacterSessionExpiration);
         }
     }
 
@@ -97,43 +82,38 @@ public class CharacterSessionService : ICharacterSessionService
         {
             var cacheKey = _getLiveSessionCacheKey(characterId);
 
-            var sessionInfo = await _cache.GetAsync<PlayerSession>(cacheKey);
-            if (sessionInfo != null)
+            return await _cache.GetOrSetIfNotNullAsync<PlayerSession>(cacheKey, async ct =>
             {
-                return sessionInfo;
-            }
+                var lastLoginTask = _worldEventService.GetLastPlayerLoginEventAsync(characterId);
+                var lastLogoutTask = _worldEventService.GetLastPlayerLogoutEventAsync(characterId);
 
-            var lastLoginTask = _worldEventService.GetLastPlayerLoginEventAsync(characterId);
-            var lastLogoutTask = _worldEventService.GetLastPlayerLogoutEventAsync(characterId);
+                await Task.WhenAll(lastLoginTask, lastLogoutTask);
 
-            await Task.WhenAll(lastLoginTask, lastLogoutTask);
+                var lastLogin = lastLoginTask.Result;
+                var lastLogout = lastLogoutTask.Result;
 
-            var lastLogin = lastLoginTask.Result;
-            var lastLogout = lastLogoutTask.Result;
-
-            if (lastLogin == null || (lastLogout != null && lastLogout.Timestamp >= lastLogin.Timestamp) || DateTime.UtcNow - lastLogin.Timestamp > TimeSpan.FromHours(24))
-            {
-                return null;
-            }
-
-            var sessionEvents = await GetSessionEventsForCharacterAsync(characterId, lastLogin.Timestamp, DateTime.UtcNow);
-
-            sessionEvents.Insert(0, new PlayerSessionLoginEvent { Timestamp = lastLogin.Timestamp });
-
-            sessionInfo = new PlayerSession
-            {
-                Events = sessionEvents,
-                Session = new PlayerSessionInfo
+                if (lastLogin == null || (lastLogout != null && lastLogout.Timestamp >= lastLogin.Timestamp) || DateTime.UtcNow - lastLogin.Timestamp > TimeSpan.FromHours(24))
                 {
-                    CharacterId = characterId,
-                    Duration = (int)(DateTime.UtcNow - lastLogin.Timestamp).TotalMilliseconds,
-                    LoginDate = lastLogin.Timestamp
+                    return null;
                 }
-            };
 
-            await _cache.SetAsync(cacheKey, sessionInfo, _cacheCharacterLiveSessionExpiration);
+                var sessionEvents = await GetSessionEventsForCharacterAsync(characterId, lastLogin.Timestamp, DateTime.UtcNow);
 
-            return sessionInfo;
+                sessionEvents.Insert(0, new PlayerSessionLoginEvent { Timestamp = lastLogin.Timestamp });
+
+                var sessionInfo = new PlayerSession
+                {
+                    Events = sessionEvents,
+                    Session = new PlayerSessionInfo
+                    {
+                        CharacterId = characterId,
+                        Duration = (int)(DateTime.UtcNow - lastLogin.Timestamp).TotalMilliseconds,
+                        LoginDate = lastLogin.Timestamp
+                    }
+                };
+
+                return sessionInfo;
+            }, _cacheCharacterLiveSessionExpiration);
         }
     }
 

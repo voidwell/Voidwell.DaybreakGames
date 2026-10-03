@@ -27,20 +27,7 @@ public class PSBUtilityService : IPSBUtilityService
 
         try
         {
-            var lastOnlineResults = await _cache.GetAsync<IEnumerable<CharacterLastSession>>(_cacheKey);
-            if (lastOnlineResults != null)
-            {
-                return lastOnlineResults;
-            }
-
-            lastOnlineResults = await _functionalRepository.GetPSBLastOnline();
-
-            if (lastOnlineResults != null)
-            {
-                await _cache.SetAsync(_cacheKey, lastOnlineResults, _lastOnlineAccountsExpiration);
-            }
-
-            return lastOnlineResults;
+            return await _cache.GetOrSetAsync<IEnumerable<CharacterLastSession>>(_cacheKey, ct => _functionalRepository.GetPSBLastOnline(), _lastOnlineAccountsExpiration);
         }
         finally
         {

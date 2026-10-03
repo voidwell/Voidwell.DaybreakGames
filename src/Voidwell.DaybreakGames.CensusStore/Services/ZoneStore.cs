@@ -31,37 +31,17 @@ public class ZoneStore : IZoneStore
 
     public async Task<Zone?> GetZoneAsync(int zoneId)
     {
-        var cacheKey = $"{_cacheKeyPrefix}_{zoneId}";
-
-        var zone = await _cache.GetAsync<Zone>(cacheKey);
-        if (zone != null)
-        {
-            return zone;
-        }
-
-        zone = (await _zoneRepository.GetZonesByIdsAsync(zoneId)).FirstOrDefault();
-        if (zone != null)
-        {
-            await _cache.SetAsync(cacheKey, zone, _zoneCacheExpiration);
-        }
-
-        return zone;
+        return await _cache.GetOrSetIfNotNullAsync(
+            $"{_cacheKeyPrefix}_{zoneId}",
+            async ct => (await _zoneRepository.GetZonesByIdsAsync(zoneId)).FirstOrDefault(),
+            _zoneCacheExpiration);
     }
 
     public async Task<IEnumerable<Zone>?> GetPlayableZones()
     {
-        var zones = await _cache.GetAsync<IEnumerable<Zone>>(_playableZonesCacheKey);
-        if (zones != null)
-        {
-            return zones;
-        }
-
-        zones = await _zoneRepository.GetZonesByIdsAsync(_playableZoneIds);
-        if (zones != null)
-        {
-            await _cache.SetAsync(_playableZonesCacheKey, zones, _zoneCacheExpiration);
-        }
-
-        return zones;
+        return await _cache.GetOrSetAsync(
+            _playableZonesCacheKey,
+            ct => _zoneRepository.GetZonesByIdsAsync(_playableZoneIds),
+            _zoneCacheExpiration);
     }
 }

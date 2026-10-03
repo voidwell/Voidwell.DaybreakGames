@@ -60,15 +60,10 @@ public class CharacterRatingService : ICharacterRatingService
     {
         var cacheKey = GetCacheKey(characterId);
 
-        var rating = await _cache.GetAsync<CharacterRating>(cacheKey);
-        if (rating == null)
-        {
-            rating = await _characterRepository.GetCharacterRatingAsync(characterId) ?? new CharacterRating { CharacterId = characterId, Rating = DefaultRating, Deviation = DefaultDeviation, Volatility = DefaultVolatility };
-
-            await _cache.SetAsync(cacheKey, rating, _cacheExpiration);
-        }
-
-        return rating;
+        return await _cache.GetOrSetAsync(
+            cacheKey,
+            async ct => await _characterRepository.GetCharacterRatingAsync(characterId) ?? new CharacterRating { CharacterId = characterId, Rating = DefaultRating, Deviation = DefaultDeviation, Volatility = DefaultVolatility },
+            _cacheExpiration);
     }
 
     public async Task SaveCachedRatingAsync(string characterId)
@@ -90,31 +85,25 @@ public class CharacterRatingService : ICharacterRatingService
 
     public async Task<IEnumerable<RatingCharacterModel>> GetRatingsLeaderboardAsync(int limit)
     {
-        var cacheLeaderboard = await _cache.GetAsync<IEnumerable<RatingCharacterModel>>(_leaderboardCacheKey);
-        if (cacheLeaderboard != null)
-        {
-            return cacheLeaderboard;
-        }
+        return await _cache.GetOrSetAsync<IEnumerable<RatingCharacterModel>>(
+            _leaderboardCacheKey,
+            async ct =>
+            {
+                var results = await _characterRepository.GetCharacterRatingLeaderboardAsync(limit);
 
-        var results = await _characterRepository.GetCharacterRatingLeaderboardAsync(limit);
-
-        var leaderboard = results.Select(a => new RatingCharacterModel
-        {
-            CharacterId = a.CharacterId,
-            Rating = a.Rating,
-            Deviation = a.Deviation,
-            Name = a.Character?.Name,
-            BattleRank = a.Character?.BattleRank,
-            WorldId = a.Character?.WorldId,
-            FactionId = a.Character?.FactionId
-        }).ToList();
-
-        if (leaderboard.Any())
-        {
-            await _cache.SetAsync(_leaderboardCacheKey, leaderboard, _leaderboardCacheExpiration);
-        }
-
-        return leaderboard;
+                return results.Select(a => new RatingCharacterModel
+                {
+                    CharacterId = a.CharacterId,
+                    Rating = a.Rating,
+                    Deviation = a.Deviation,
+                    Name = a.Character?.Name,
+                    BattleRank = a.Character?.BattleRank,
+                    WorldId = a.Character?.WorldId,
+                    FactionId = a.Character?.FactionId
+                }).ToList();
+            },
+            _leaderboardCacheExpiration,
+            leaderboard => leaderboard.Any());
     }
 
     /*

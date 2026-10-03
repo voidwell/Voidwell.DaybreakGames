@@ -21,20 +21,9 @@ public class FactionStore : IFactionStore
 
     public async Task<Faction?> GetFactionByIdAsync(int factionId)
     {
-        var cacheKey = $"{_factionCacheKey}_{factionId}";
-
-        var faction = await _cache.GetAsync<Faction>(cacheKey);
-        if (faction != null)
-        {
-            return faction;
-        }
-
-        faction = await _repository.GetFactionByIdAsync(factionId);
-        if (faction != null)
-        {
-            await _cache.SetAsync(cacheKey, faction, _factionCacheExpiration);
-        }
-
-        return faction;
+        return await _cache.GetOrSetIfNotNullAsync(
+            $"{_factionCacheKey}_{factionId}",
+            ct => _repository.GetFactionByIdAsync(factionId),
+            _factionCacheExpiration);
     }
 }

@@ -35,128 +35,120 @@ public class CharacterDirectiveService : ICharacterDirectiveService
     {
         var cacheKey = _getDirectivesCacheKey(characterId);
 
-        var data = await _cache.GetAsync<CharacterDirectivesOutline>(cacheKey);
-        if (data != null)
+        return await _cache.GetOrSetIfNotNullAsync<CharacterDirectivesOutline>(cacheKey, async ct =>
         {
-            return data;
-        }
+            var character = await _characterService.GetCharacter(characterId);
 
-        var character = await _characterService.GetCharacter(characterId);
+            var characterTreesTask = _characterDirectiveStore.GetCharacterDirectivesAsync(characterId);
+            var categoriesTask = _directiveService.GetDirectiveDataAsync();
+            var characterAchievementsTask = _characterService.GetCharacterAchievementsAsync(characterId);
+            var characterWeaponsTask = _characterService.GetWeaponStatsAsync(characterId);
 
-        var characterTreesTask = _characterDirectiveStore.GetCharacterDirectivesAsync(characterId);
-        var categoriesTask = _directiveService.GetDirectiveDataAsync();
-        var characterAchievementsTask = _characterService.GetCharacterAchievementsAsync(characterId);
-        var characterWeaponsTask = _characterService.GetWeaponStatsAsync(characterId);
+            await Task.WhenAll(characterTreesTask, categoriesTask, characterAchievementsTask, characterWeaponsTask);
 
-        await Task.WhenAll(characterTreesTask, categoriesTask, characterAchievementsTask, characterWeaponsTask);
+            var characterTrees = characterTreesTask.Result;
+            var categories = categoriesTask.Result;
+            var characterAchievements = characterAchievementsTask.Result;
+            var characterWeapons = characterWeaponsTask.Result;
 
-        var characterTrees = characterTreesTask.Result;
-        var categories = categoriesTask.Result;
-        var characterAchievements = characterAchievementsTask.Result;
-        var characterWeapons = characterWeaponsTask.Result;
-
-        if (character == null || characterTrees == null || !characterTrees.Any())
-        {
-            return null;
-        }
-
-        foreach (var category in categories!)
-        {
-            category.Trees = category.Trees!.Where(a => characterTrees.Any(b => b.DirectiveTreeId == a.Id));
-        }
-        categories = categories.Where(a => a.Trees!.Any());
-
-        data = new CharacterDirectivesOutline();
-
-        foreach (var category in categories)
-        {
-            var outlineCategory = _mapper.Map<CharacterDirectivesOutlineCategory>(category);
-
-            foreach (var tree in category.Trees!.OrderBy(a => a.Name))
+            if (character == null || characterTrees == null || !characterTrees.Any())
             {
-                var characterTree = characterTrees.FirstOrDefault(a => a.DirectiveTreeId == tree.Id);
-                if (characterTree != null)
+                return null;
+            }
+
+            foreach (var category in categories!)
+            {
+                category.Trees = category.Trees!.Where(a => characterTrees.Any(b => b.DirectiveTreeId == a.Id));
+            }
+            categories = categories.Where(a => a.Trees!.Any());
+
+            var data = new CharacterDirectivesOutline();
+
+            foreach (var category in categories)
+            {
+                var outlineCategory = _mapper.Map<CharacterDirectivesOutlineCategory>(category);
+
+                foreach (var tree in category.Trees!.OrderBy(a => a.Name))
                 {
-                    var outlineTree = _mapper.Map<CharacterDirectivesOutlineTree>(tree);
-                    outlineCategory.Trees.Add(outlineTree);
-
-                    _mapper.Map(characterTree, outlineTree);
-
-                    foreach (var tier in tree.Tiers!)
+                    var characterTree = characterTrees.FirstOrDefault(a => a.DirectiveTreeId == tree.Id);
+                    if (characterTree != null)
                     {
-                        var outlineTier = _mapper.Map<CharacterDirectivesOutlineTier>(tier);
-                        outlineTree.Tiers.Add(outlineTier);
+                        var outlineTree = _mapper.Map<CharacterDirectivesOutlineTree>(tree);
+                        outlineCategory.Trees.Add(outlineTree);
 
-                        outlineTier.Rewards = GetTierRewardsForFactionId(tier, character.FactionId);
+                        _mapper.Map(characterTree, outlineTree);
 
-                        var characterTier = characterTree?.CharacterDirectiveTiers!.FirstOrDefault(a => a.DirectiveTierId == tier.DirectiveTierId && a.DirectiveTreeId == tier.DirectiveTreeId);
-                        if (characterTier != null)
+                        foreach (var tier in tree.Tiers!)
                         {
-                            _mapper.Map(characterTier, outlineTier);
-                        }
+                            var outlineTier = _mapper.Map<CharacterDirectivesOutlineTier>(tier);
+                            outlineTree.Tiers.Add(outlineTier);
 
-                        foreach (var directive in tier.Directives!)
-                        {
-                            var storeObjective = directive.ObjectiveSet!.Objectives!.FirstOrDefault();
+                            outlineTier.Rewards = GetTierRewardsForFactionId(tier, character.FactionId);
 
-                            var objectiveFactionId = GetFactionIdForDirective(directive);
-                            if (objectiveFactionId != null && objectiveFactionId != 0 && objectiveFactionId != character.FactionId)
+                            var characterTier = characterTree?.CharacterDirectiveTiers!.FirstOrDefault(a => a.DirectiveTierId == tier.DirectiveTierId && a.DirectiveTreeId == tier.DirectiveTreeId);
+                            if (characterTier != null)
                             {
-                                continue;
+                                _mapper.Map(characterTier, outlineTier);
                             }
 
-                            if (tier.Directives.Any(d => d.Id != directive.Id && d.Name == directive.Name && GetFactionIdForDirective(d) == character.FactionId))
+                            foreach (var directive in tier.Directives!)
                             {
-                                continue;
-                            }
+                                var storeObjective = directive.ObjectiveSet!.Objectives!.FirstOrDefault();
 
-                            var outlineDirective = _mapper.Map<CharacterDirectivesOutlineDirective>(directive);
-                            outlineTier.Directives.Add(outlineDirective);
-
-                            outlineDirective.Objective.GoalValue = GetObjectiveTargetValue(storeObjective!);
-
-                            var characterDirective = characterTier?.CharacterDirectives!.FirstOrDefault(a => a.DirectiveId == directive.Id);
-                            if (characterDirective != null)
-                            {
-                                _mapper.Map(characterDirective, outlineDirective);
-                            }
-
-                            if (outlineTier.CompletionDate == null)
-                            {
-                                if (storeObjective != null && storeObjective.ObjectiveTypeId == 66)
+                                var objectiveFactionId = GetFactionIdForDirective(directive);
+                                if (objectiveFactionId != null && objectiveFactionId != 0 && objectiveFactionId != character.FactionId)
                                 {
-                                    var characterAchievement = characterAchievements.FirstOrDefault(a => a.AchievementId.ToString() == storeObjective.Param1);
-                                    outlineDirective.Progress = GetAchievementProgress(characterAchievement!, characterWeapons) ?? 0;
+                                    continue;
                                 }
-                                else
+
+                                if (tier.Directives.Any(d => d.Id != directive.Id && d.Name == directive.Name && GetFactionIdForDirective(d) == character.FactionId))
                                 {
-                                    outlineDirective.Progress = characterDirective?.CharacterDirectiveObjectives?.FirstOrDefault()?.StateData ?? 0;
+                                    continue;
                                 }
+
+                                var outlineDirective = _mapper.Map<CharacterDirectivesOutlineDirective>(directive);
+                                outlineTier.Directives.Add(outlineDirective);
+
+                                outlineDirective.Objective.GoalValue = GetObjectiveTargetValue(storeObjective!);
+
+                                var characterDirective = characterTier?.CharacterDirectives!.FirstOrDefault(a => a.DirectiveId == directive.Id);
+                                if (characterDirective != null)
+                                {
+                                    _mapper.Map(characterDirective, outlineDirective);
+                                }
+
+                                if (outlineTier.CompletionDate == null)
+                                {
+                                    if (storeObjective != null && storeObjective.ObjectiveTypeId == 66)
+                                    {
+                                        var characterAchievement = characterAchievements.FirstOrDefault(a => a.AchievementId.ToString() == storeObjective.Param1);
+                                        outlineDirective.Progress = GetAchievementProgress(characterAchievement!, characterWeapons) ?? 0;
+                                    }
+                                    else
+                                    {
+                                        outlineDirective.Progress = characterDirective?.CharacterDirectiveObjectives?.FirstOrDefault()?.StateData ?? 0;
+                                    }
+                                }
+                                ;
                             }
-                            ;
+
+                            outlineTier.Directives = outlineTier.Directives.Where(a => a.CompletionDate != null).OrderBy(a => a.CompletionDate).ThenBy(a => a.Id)
+                                .Union(outlineTier.Directives.Where(a => a.CompletionDate == null).OrderByDescending(a => (double)a.Progress / a.Objective.GoalValue.GetValueOrDefault()).ThenBy(a => a.Id))
+                                .ToList();
+
+                            outlineTier.CompletionPercent = GetTierCompletionPercent(outlineTier);
                         }
-
-                        outlineTier.Directives = outlineTier.Directives.Where(a => a.CompletionDate != null).OrderBy(a => a.CompletionDate).ThenBy(a => a.Id)
-                            .Union(outlineTier.Directives.Where(a => a.CompletionDate == null).OrderByDescending(a => (double)a.Progress / a.Objective.GoalValue.GetValueOrDefault()).ThenBy(a => a.Id))
-                            .ToList();
-
-                        outlineTier.CompletionPercent = GetTierCompletionPercent(outlineTier);
                     }
+                }
+
+                if (outlineCategory.Trees.Any())
+                {
+                    data.Categories.Add(outlineCategory);
                 }
             }
 
-            if (outlineCategory.Trees.Any())
-            {
-                data.Categories.Add(outlineCategory);
-            }
-        }
-
-        if (data != null)
-        {
-            await _cache.SetAsync(cacheKey, data, _cacheDirectivesCharacterExpiration);
-        }
-
-        return data;
+            return data;
+        }, _cacheDirectivesCharacterExpiration);
     }
 
     public Task UpdateCharacterDirectivesAsync(string characterId)

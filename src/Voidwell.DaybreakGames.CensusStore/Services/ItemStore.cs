@@ -30,21 +30,10 @@ public class ItemStore : IItemStore
 
     public async Task<IEnumerable<Item>?> GetItemsByCategoryIdsAsync(IEnumerable<int> categoryIds)
     {
-        var cacheKey = $"{_categoryItemsCacheKey}_{string.Join("-", categoryIds)}";
-
-        var items = await _cache.GetAsync<IEnumerable<Item>>(cacheKey);
-        if (items != null)
-        {
-            return items;
-        }
-
-        items = await _itemRepository.GetItemsByCategoryIds(categoryIds);
-        if (items != null)
-        {
-            await _cache.SetAsync(cacheKey, items, _categoryItemsCacheExpiration);
-        }
-
-        return items;
+        return await _cache.GetOrSetAsync(
+            $"{_categoryItemsCacheKey}_{string.Join("-", categoryIds)}",
+            ct => _itemRepository.GetItemsByCategoryIds(categoryIds),
+            _categoryItemsCacheExpiration);
     }
 
     public Task<IEnumerable<Item>> FindWeaponsByNameAsync(string name, int limit = 12)

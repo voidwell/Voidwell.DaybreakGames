@@ -7,7 +7,6 @@ using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.CensusStore.Services;
 
@@ -36,7 +35,6 @@ public class CharacterStore : ICharacterStore
     private readonly TimeSpan _cacheCharacterIdExpiration = TimeSpan.FromMinutes(30);
     private readonly TimeSpan _cacheWeaponLeaderboardDataExpiration = TimeSpan.FromMinutes(5);
 
-    private readonly KeyedSemaphoreSlim _characterLock = new KeyedSemaphoreSlim();
 
     public CharacterStore(
         ICharacterRepository characterRepository,
@@ -78,38 +76,17 @@ public class CharacterStore : ICharacterStore
 
     public async Task<Character?> GetCharacter(string characterId)
     {
-        Character character;
-
-        using (await _characterLock.WaitAsync(characterId))
+        try
         {
-            var cacheKey = _getCharacterCacheKey(characterId);
-
-            character = await _cache.GetAsync<Character>(cacheKey);
-            if (character != null)
-            {
-                return character;
-            }
-
-            character = (await _characterRepository.GetCharacterAsync(characterId))!;
-            if (character == null)
-            {
-                try
-                {
-                    character = (await UpdateCharacterAsync(characterId))!;
-                }
-                catch (CensusConnectionException)
-                {
-                    return null;
-                }
-            }
-
-            if (character != null)
-            {
-                await _cache.SetAsync(cacheKey, character, _cacheCharacterExpiration);
-            }
+            return await _cache.GetOrSetIfNotNullAsync(
+                _getCharacterCacheKey(characterId),
+                async ct => await _characterRepository.GetCharacterAsync(characterId) ?? await UpdateCharacterAsync(characterId),
+                _cacheCharacterExpiration);
         }
-
-        return character;
+        catch (CensusConnectionException)
+        {
+            return null;
+        }
     }
 
     public async Task UpdateAllCharacterInfo(string characterId, DateTime? lastLoginDate = null)
@@ -176,14 +153,10 @@ public class CharacterStore : ICharacterStore
 
     public async Task<IEnumerable<CharacterWeaponStat>?> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50, string? sort = null, string? sortDir = null)
     {
-        var cacheKey = _getLeaderboardDataCacheKey(weaponItemId);
-
-        var data = await _cache.GetAsync<IEnumerable<CharacterWeaponStat>>(cacheKey);
-        if (data == null)
-        {
-            data = await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, 0, 1000);
-            await _cache.SetAsync(cacheKey, data, _cacheWeaponLeaderboardDataExpiration);
-        }
+        var data = await _cache.GetOrSetAsync(
+            _getLeaderboardDataCacheKey(weaponItemId),
+            ct => _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, 0, 1000),
+            _cacheWeaponLeaderboardDataExpiration);
 
         if (sort != null)
         {
@@ -213,22 +186,10 @@ public class CharacterStore : ICharacterStore
 
     public async Task<string?> GetCharacterIdByName(string characterName)
     {
-        var cacheKey = _getCharacterIdCacheKey(characterName);
-
-        var characterId = await _cache.GetAsync<string>(cacheKey);
-        if (characterId != null)
-        {
-            return characterId;
-        }
-
-        characterId = await _characterRepository.GetCharacterIdByName(characterName) ?? await _characterNameCollection.GetCharacterIdByNameAsync(characterName);
-
-        if (characterId != null)
-        {
-            await _cache.SetAsync(cacheKey, characterId, _cacheCharacterIdExpiration);
-        }
-
-        return characterId;
+        return await _cache.GetOrSetIfNotNullAsync(
+            _getCharacterIdCacheKey(characterName),
+            async ct => await _characterRepository.GetCharacterIdByName(characterName) ?? await _characterNameCollection.GetCharacterIdByNameAsync(characterName),
+            _cacheCharacterIdExpiration);
     }
 
     public async Task<OutfitMember?> GetCharactersOutfitAsync(string characterId)

@@ -29,43 +29,38 @@ public class OutfitService : IOutfitService
 
     public async Task<OutfitDetails?> GetOutfitDetails(string outfitId)
     {
-        var details = await _cache.GetAsync<OutfitDetails>(_getDetailsCacheKey(outfitId));
-        if (details != null)
+        return await _cache.GetOrSetIfNotNullAsync<OutfitDetails>(_getDetailsCacheKey(outfitId), async ct =>
         {
+            var outfit = await _outfitStore.GetOutfitDetailsAsync(outfitId);
+            if (outfit == null)
+            {
+                return null;
+            }
+
+            var outfitMembers = await GetOutfitMembers(outfitId);
+
+            var details = new OutfitDetails
+            {
+                OutfitId = outfit.Id,
+                Name = outfit.Name,
+                Alias = outfit.Alias,
+                CreatedDate = outfit.CreatedDate,
+                FactionId = outfit.FactionId,
+                FactionName = outfit.Faction?.Name,
+                FactionImageId = outfit.Faction?.ImageId,
+                MemberCount = outfit.MemberCount,
+                WorldId = outfit.WorldId,
+                WorldName = outfit.World?.Name,
+                LeaderCharacterId = outfit.LeaderCharacterId,
+                LeaderName = outfit.LeaderCharacter?.Name,
+                TrackedMemberCount = outfitMembers.Count(),
+                Activity7Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(7)),
+                Activity30Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(30)),
+                Activity90Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(90))
+            };
+
             return details;
-        }
-
-        var outfit = await _outfitStore.GetOutfitDetailsAsync(outfitId);
-        if (outfit == null)
-        {
-            return null;
-        }
-
-        var outfitMembers = await GetOutfitMembers(outfitId);
-
-        details = new OutfitDetails
-        {
-            OutfitId = outfit.Id,
-            Name = outfit.Name,
-            Alias = outfit.Alias,
-            CreatedDate = outfit.CreatedDate,
-            FactionId = outfit.FactionId,
-            FactionName = outfit.Faction?.Name,
-            FactionImageId = outfit.Faction?.ImageId,
-            MemberCount = outfit.MemberCount,
-            WorldId = outfit.WorldId,
-            WorldName = outfit.World?.Name,
-            LeaderCharacterId = outfit.LeaderCharacterId,
-            LeaderName = outfit.LeaderCharacter?.Name,
-            TrackedMemberCount = outfitMembers.Count(),
-            Activity7Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(7)),
-            Activity30Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(30)),
-            Activity90Days = outfitMembers.Count(a => DateTime.UtcNow - a.LastLoginDate.GetValueOrDefault() <= TimeSpan.FromDays(90))
-        };
-
-        await _cache.SetAsync(_getDetailsCacheKey(outfitId), details, _cacheOutfitDetailsExpiration);
-
-        return details;
+        }, _cacheOutfitDetailsExpiration);
     }
 
     public async Task<OutfitDetails?> GetOutfitByAlias(string outfitAlias)

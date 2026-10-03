@@ -12,7 +12,7 @@ Backend API for Voidwell's PlanetSide 2 data. It ingests Daybreak Games' Census 
 |---|---|---|
 | [.NET SDK](https://dotnet.microsoft.com/download) | 10.0 (`net10.0`) | Build and run |
 | PostgreSQL | any supported release | Primary data store (EF Core + Npgsql); migrations run automatically on startup |
-| Redis | optional | Cache. If `RedisConfiguration` is empty, caching is silently disabled |
+| Redis | optional | Shared cache (FusionCache L2 + backplane) and list storage. If `RedisConfiguration` is empty, caching is in-memory per instance |
 | Daybreak Games Census service ID | n/a | Access to the Census API and event stream |
 | Voidwell auth server (`https://auth.voidwell.com`) | n/a | Validates incoming JWT / reference tokens and issues client-credentials tokens used to look up user roles |
 | Docker | optional | Container build and deployment |
@@ -30,7 +30,7 @@ Settings are read from `appsettings.json`, then `devsettings.json` (Development 
 | `CensusServiceNamespace` | Yes | Census namespace, normally `ps2` |
 | `ApiResourceSecret` | Yes | Secret for this API's resource (`voidwell-daybreakgames`), used for token introspection |
 | `ClientSecret` | Yes | Client secret used to request tokens for the `voidwell-usermanagement` scope |
-| `RedisConfiguration` | No | StackExchange.Redis connection string. Empty disables caching. Cache keys are prefixed `Voidwell.DaybreakGames_` |
+| `RedisConfiguration` | No | StackExchange.Redis connection string. Empty keeps the cache in memory only. List keys are prefixed `Voidwell.DaybreakGames_` |
 | `OriginAddress` | No | Extra allowed CORS origin (`http://localhost:4200` is always allowed) |
 | `CensusWebsocketServices` | No | Comma-separated event names to subscribe to (e.g. `Death, FacilityControl, PlayerLogin`). Defaults are in `appsettings.json`. Empty disables event processing |
 | `CensusWebsocketExperienceIds` | No | Experience IDs to subscribe to |
@@ -103,5 +103,5 @@ docker run -p 5000:5000 -e DBConnectionString=... -e CensusServiceKey=... voidwe
 | `Voidwell.DaybreakGames.Census` | Census API collections and models |
 | `Voidwell.DaybreakGames.Data` | EF Core context, repositories, migrations |
 | `Voidwell.DaybreakGames.Domain` | Domain models |
-| `Voidwell.DaybreakGames.Cache` | Redis-backed `ICache` |
+| `Voidwell.DaybreakGames.Cache` | `ICache` over FusionCache (memory + optional Redis) |
 | `Voidwell.DaybreakGames.Utils` | Shared helpers and hosted-service management |

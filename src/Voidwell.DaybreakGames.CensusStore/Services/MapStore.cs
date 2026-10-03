@@ -77,15 +77,10 @@ public class MapStore : IMapStore
 
     public async Task<IEnumerable<CensusFacilityWorldEventModel>> GetCensusFacilityWorldEventsByZoneIdAsync(int worldId, int zoneId)
     {
-        var events = await _cache.GetAsync<IEnumerable<CensusFacilityWorldEventModel>>(_getFacilityWorldEventsCacheKey(worldId));
-        if (events == null)
-        {
-            events = await GetAllCensusFacilityWorldEventsAsync(worldId);
-            if (events != null)
-            {
-                await _cache.SetAsync(_getFacilityWorldEventsCacheKey(worldId), events, _facilityWorldEventCacheExpiration);
-            }
-        }
+        var events = await _cache.GetOrSetIfNotNullAsync(
+            _getFacilityWorldEventsCacheKey(worldId),
+            ct => GetAllCensusFacilityWorldEventsAsync(worldId),
+            _facilityWorldEventCacheExpiration);
 
         return events?.Where(a => a.ZoneId == zoneId) ?? Enumerable.Empty<CensusFacilityWorldEventModel>();
     }

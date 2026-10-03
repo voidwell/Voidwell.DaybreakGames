@@ -48,37 +48,32 @@ public class MapService : IMapService
     {
         using (await _zoneMapLock.WaitAsync(zoneId.ToString()))
         {
-            var zoneMap = await _cache.GetAsync<ZoneMap>(_getZoneMapCacheKey(zoneId));
-            if (zoneMap != null)
+            return await _cache.GetOrSetAsync<ZoneMap>(_getZoneMapCacheKey(zoneId), async ct =>
             {
+                var zoneTask = _zoneStore.GetZoneAsync(zoneId);
+                var linksTask = _facilityLinkStore.GetFacilityLinksByZoneIdAsync(zoneId);
+                var hexesTask = _mapHexStore.GetMapHexsByZoneIdAsync(zoneId);
+                var regionsTask = _mapRegionStore.GetMapRegionsByZoneIdAsync(zoneId);
+
+                await Task.WhenAll(zoneTask, linksTask, hexesTask, regionsTask);
+
+                var zone = zoneTask.Result;
+                var links = _mapper.Map<IEnumerable<ZoneLink>>(linksTask.Result);
+                var hexes = _mapper.Map<IEnumerable<ZoneHex>>(hexesTask.Result);
+
+                var filteredRegions = regionsTask.Result?.Where(a => links.Any(b => a.FacilityId == b.FacilityIdA || a.FacilityId == b.FacilityIdB)).ToList();
+                var regions = _mapper.Map<IEnumerable<ZoneRegion>>(filteredRegions);
+
+                var zoneMap = new ZoneMap
+                {
+                    Regions = regions,
+                    Hexs = hexes,
+                    Links = links,
+                    HexSize = zone?.HexSize
+                };
+
                 return zoneMap;
-            }
-
-            var zoneTask = _zoneStore.GetZoneAsync(zoneId);
-            var linksTask = _facilityLinkStore.GetFacilityLinksByZoneIdAsync(zoneId);
-            var hexesTask = _mapHexStore.GetMapHexsByZoneIdAsync(zoneId);
-            var regionsTask = _mapRegionStore.GetMapRegionsByZoneIdAsync(zoneId);
-
-            await Task.WhenAll(zoneTask, linksTask, hexesTask, regionsTask);
-
-            var zone = zoneTask.Result;
-            var links = _mapper.Map<IEnumerable<ZoneLink>>(linksTask.Result);
-            var hexes = _mapper.Map<IEnumerable<ZoneHex>>(hexesTask.Result);
-
-            var filteredRegions = regionsTask.Result?.Where(a => links.Any(b => a.FacilityId == b.FacilityIdA || a.FacilityId == b.FacilityIdB)).ToList();
-            var regions = _mapper.Map<IEnumerable<ZoneRegion>>(filteredRegions);
-
-            zoneMap = new ZoneMap
-            {
-                Regions = regions,
-                Hexs = hexes,
-                Links = links,
-                HexSize = zone?.HexSize
-            };
-
-            await _cache.SetAsync(_getZoneMapCacheKey(zoneId), zoneMap, _zoneMapCacheExpiration);
-
-            return zoneMap;
+            }, _zoneMapCacheExpiration);
         }
     }
 
@@ -177,21 +172,16 @@ public class MapService : IMapService
 
         try
         {
-            var results = await _cache.GetAsync<ZoneStateHistorical>(_getZoneStateHistoricalCacheKey);
-            if (results != null)
+            return await _cache.GetOrSetAsync<ZoneStateHistorical>(_getZoneStateHistoricalCacheKey, async ct =>
             {
+                var zoneLocks = _worldEventsService.GetAllLatestZoneLocks();
+                var zoneUnlocks = _worldEventsService.GetAllLatestZoneUnlocks();
+
+                await Task.WhenAll(zoneLocks, zoneUnlocks);
+
+                var results = new ZoneStateHistorical(zoneLocks.Result, zoneUnlocks.Result);
                 return results;
-            }
-
-            var zoneLocks = _worldEventsService.GetAllLatestZoneLocks();
-            var zoneUnlocks = _worldEventsService.GetAllLatestZoneUnlocks();
-
-            await Task.WhenAll(zoneLocks, zoneUnlocks);
-
-            results = new ZoneStateHistorical(zoneLocks.Result, zoneUnlocks.Result);
-            await _cache.SetAsync(_getZoneStateHistoricalCacheKey, results, _zoneStateCacheExpiration);
-
-            return results;
+            }, _zoneStateCacheExpiration);
         }
         finally
         {

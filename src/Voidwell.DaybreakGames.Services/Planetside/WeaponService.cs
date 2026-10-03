@@ -43,63 +43,58 @@ public class WeaponService : IWeaponService
 
     public async Task<WeaponInfoResult?> GetWeaponInfo(int weaponItemId)
     {
-        var cachedInfo = await _cache.GetAsync<WeaponInfoResult>($"{_weaponInfoCacheKey}_{weaponItemId}");
-        if (cachedInfo != null)
+        return await _cache.GetOrSetIfNotNullAsync<WeaponInfoResult>($"{_weaponInfoCacheKey}_{weaponItemId}", async ct =>
         {
-            return cachedInfo;
-        }
+            var info = await _itemService.GetWeaponInfoAsync(weaponItemId);
+            if (info == null)
+            {
+                return null;
+            }
 
-        var info = await _itemService.GetWeaponInfoAsync(weaponItemId);
-        if (info == null)
-        {
-            return null;
-        }
+            Faction faction = null!;
+            if (info.FactionId != null)
+            {
+                faction = (await _factionStore.GetFactionByIdAsync(info.FactionId.Value))!;
+            }
 
-        Faction faction = null!;
-        if (info.FactionId != null)
-        {
-            faction = (await _factionStore.GetFactionByIdAsync(info.FactionId.Value))!;
-        }
+            var hipModes = info.GetFireModesOfType(FireModeType.Primary)?.ToList();
+            var aimModes = info.GetFireModesOfType(FireModeType.Secondary)?.ToList();
 
-        var hipModes = info.GetFireModesOfType(FireModeType.Primary)?.ToList();
-        var aimModes = info.GetFireModesOfType(FireModeType.Secondary)?.ToList();
+            var weaponInfo = new WeaponInfoResult
+            {
+                Name = info.GetName(),
+                ItemId = weaponItemId,
+                Category = info.GetCategory(),
+                FactionId = info.FactionId,
+                FactionName = faction?.Name,
+                ImageId = info.ImageId,
+                Description = info.GetDescription(),
+                MaxStackSize = info.MaxStackSize,
+                Range = info.GetRange(),
+                FireRateMs = info.Datasheet?.FireRateMs,
+                ClipSize = info.Datasheet?.ClipSize,
+                Capacity = info.Datasheet?.Capacity,
+                MuzzleVelocity = info.GetWeaponSpeed(),
+                MinDamage = info.GetMinDamage(),
+                MaxDamage = info.GetMaxDamage(),
+                MinDamageRange = info.GetMinDamageRange(),
+                MaxDamageRange = info.GetMaxDamageRange(),
+                IndirectMinDamage = info.GetIndirectMinDamage(),
+                IndirectMaxDamage = info.GetIndirectMaxDamage(),
+                IndirectMinDamageRange = info.GetIndirectMinDamageRange(),
+                IndirectMaxDamageRange = info.GetIndirectMaxDamageRange(),
+                MinReloadSpeed = info.GetMinReloadSpeed(),
+                MaxReloadSpeed = info.GetMaxReloadSpeed(),
+                IronSightZoom = aimModes?.GetDefaultZoom(),
+                FireModes = hipModes?.GetFireModeNames()!,
+                IsVehicleWeapon = info.IsVehicleWeapon,
+                DamageRadius = info.GetDamageRadius(),
+                HipAcc = GetAccuracyStateFromFireMode(hipModes!),
+                AimAcc = GetAccuracyStateFromFireMode(aimModes!)
+            };
 
-        var weaponInfo = new WeaponInfoResult
-        {
-            Name = info.GetName(),
-            ItemId = weaponItemId,
-            Category = info.GetCategory(),
-            FactionId = info.FactionId,
-            FactionName = faction?.Name,
-            ImageId = info.ImageId,
-            Description = info.GetDescription(),
-            MaxStackSize = info.MaxStackSize,
-            Range = info.GetRange(),
-            FireRateMs = info.Datasheet?.FireRateMs,
-            ClipSize = info.Datasheet?.ClipSize,
-            Capacity = info.Datasheet?.Capacity,
-            MuzzleVelocity = info.GetWeaponSpeed(),
-            MinDamage = info.GetMinDamage(),
-            MaxDamage = info.GetMaxDamage(),
-            MinDamageRange = info.GetMinDamageRange(),
-            MaxDamageRange = info.GetMaxDamageRange(),
-            IndirectMinDamage = info.GetIndirectMinDamage(),
-            IndirectMaxDamage = info.GetIndirectMaxDamage(),
-            IndirectMinDamageRange = info.GetIndirectMinDamageRange(),
-            IndirectMaxDamageRange = info.GetIndirectMaxDamageRange(),
-            MinReloadSpeed = info.GetMinReloadSpeed(),
-            MaxReloadSpeed = info.GetMaxReloadSpeed(),
-            IronSightZoom = aimModes?.GetDefaultZoom(),
-            FireModes = hipModes?.GetFireModeNames()!,
-            IsVehicleWeapon = info.IsVehicleWeapon,
-            DamageRadius = info.GetDamageRadius(),
-            HipAcc = GetAccuracyStateFromFireMode(hipModes!),
-            AimAcc = GetAccuracyStateFromFireMode(aimModes!)
-        };
-
-        await _cache.SetAsync($"{_weaponInfoCacheKey}_{weaponItemId}", weaponInfo, _weaponInfoCacheExpiration);
-
-        return weaponInfo;
+            return weaponInfo;
+        }, _weaponInfoCacheExpiration);
     }
 
     public async Task<WeaponInfoResult?> GetWeaponInfoByName(string weaponName)
@@ -142,25 +137,21 @@ public class WeaponService : IWeaponService
 
         try
         {
-            var weapons = await _cache.GetAsync<IEnumerable<int>>(_sanctionedWeaponsCacheKey);
-            if (weapons != null)
-            {
-                return weapons;
-            }
+            return await _cache.GetOrSetAsync<IEnumerable<int>>(
+                _sanctionedWeaponsCacheKey,
+                async ct =>
+                {
+                    var weapons = await GetSanctionedWeaponsFromMasterListAsync();
+                    if (weapons == null)
+                    {
+                        var repoWeapons = await _sanctionedWeaponsRepository.GetAllSanctionedWeapons();
+                        weapons = repoWeapons.Select(a => a.Id).ToList();
+                    }
 
-            weapons = await GetSanctionedWeaponsFromMasterListAsync();
-            if (weapons == null)
-            {
-                var repoWeapons = await _sanctionedWeaponsRepository.GetAllSanctionedWeapons();
-                weapons = repoWeapons.Select(a => a.Id);
-            }
-
-            if (weapons.Any())
-            {
-                await _cache.SetAsync(_sanctionedWeaponsCacheKey, weapons, _sanctionedWeaponsCacheExpiration);
-            }
-
-            return weapons;
+                    return weapons;
+                },
+                _sanctionedWeaponsCacheExpiration,
+                weapons => weapons.Any());
         }
         finally
         {
@@ -189,19 +180,7 @@ public class WeaponService : IWeaponService
         using (await _oracleStatLock.WaitAsync(cacheKey))
         {
 
-            var stats = await _cache.GetAsync<IEnumerable<DailyWeaponStats>>(cacheKey);
-            if (stats != null)
-            {
-                return stats;
-            }
-
-            stats = await _worldEventsService.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end);
-            if (stats != null)
-            {
-                await _cache.SetAsync(cacheKey, stats, TimeSpan.FromHours(1));
-            }
-
-            return stats;
+            return await _cache.GetOrSetAsync<IEnumerable<DailyWeaponStats>>(cacheKey, ct => _worldEventsService.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end), TimeSpan.FromHours(1));
         }
     }
 

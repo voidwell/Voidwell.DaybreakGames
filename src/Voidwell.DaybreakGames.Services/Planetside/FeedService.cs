@@ -38,21 +38,12 @@ public class FeedService : IFeedService
 
     private async Task<IEnumerable<FeedItem>?> GetCachedFeedAsync(string feedUri, string cacheKey, TimeSpan cacheExpiration)
     {
-        var feed = await _cache.GetAsync<IEnumerable<FeedItem>>(cacheKey);
-        if (feed != null)
+        return await _cache.GetOrSetIfNotNullAsync<IEnumerable<FeedItem>>(cacheKey, async ct =>
         {
-            return feed;
-        }
+            _logger.LogInformation($"Fetching feed: {feedUri}");
 
-        _logger.LogInformation($"Fetching feed: {feedUri}");
-
-        feed = await GetFeedAsync(feedUri);
-        if (feed != null)
-        {
-            await _cache.SetAsync(cacheKey, feed, cacheExpiration);
-        }
-
-        return feed;
+            return await GetFeedAsync(feedUri);
+        }, cacheExpiration);
     }
 
     private static async Task<IEnumerable<FeedItem>> GetFeedAsync(string feedAddress)
