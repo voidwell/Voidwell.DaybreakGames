@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using FluentAssertions;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Voidwell.DaybreakGames.Live.CensusStream.JsonConverters;
@@ -12,7 +12,7 @@ public class StreamJsonTest
     private record BoolHolder(bool Value);
     private record DateHolder(DateTime Value);
 
-    private static readonly JsonSerializerOptions ConverterOptions = new()
+    private static readonly JsonSerializerOptions _converterOptions = new()
     {
         Converters = { new BooleanJsonConverter(), new DateTimeJsonConverter() }
     };
@@ -26,20 +26,20 @@ public class StreamJsonTest
     [InlineData("\"anything else\"", false)]
     public void BooleanJsonConverter_ReadsCensusStyleStrings(string json, bool expected)
     {
-        JsonSerializer.Deserialize<bool>(json, ConverterOptions).Should().Be(expected);
+        JsonSerializer.Deserialize<bool>(json, _converterOptions).Should().Be(expected);
     }
 
     [Fact]
     public void BooleanJsonConverter_WritesJsonBoolean()
     {
-        JsonSerializer.Serialize(true, ConverterOptions).Should().Be("true");
-        JsonSerializer.Serialize(false, ConverterOptions).Should().Be("false");
+        JsonSerializer.Serialize(true, _converterOptions).Should().Be("true");
+        JsonSerializer.Serialize(false, _converterOptions).Should().Be("false");
     }
 
     [Fact]
     public void DateTimeJsonConverter_ReadsEpochSecondsAsUtc()
     {
-        var result = JsonSerializer.Deserialize<DateTime>("\"1700000000\"", ConverterOptions);
+        var result = JsonSerializer.Deserialize<DateTime>("\"1700000000\"", _converterOptions);
 
         result.Should().Be(new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc));
         result.Kind.Should().Be(DateTimeKind.Utc);
@@ -48,7 +48,7 @@ public class StreamJsonTest
     [Fact]
     public void DateTimeJsonConverter_ReadsIsoStringsAsUtc()
     {
-        var result = JsonSerializer.Deserialize<DateTime>("\"2024-03-05T10:20:30\"", ConverterOptions);
+        var result = JsonSerializer.Deserialize<DateTime>("\"2024-03-05T10:20:30\"", _converterOptions);
 
         result.Should().Be(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Utc));
         result.Kind.Should().Be(DateTimeKind.Utc);
@@ -57,7 +57,7 @@ public class StreamJsonTest
     [Fact]
     public void DateTimeJsonConverter_WritesUtcIsoString()
     {
-        var json = JsonSerializer.Serialize(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Utc), ConverterOptions);
+        var json = JsonSerializer.Serialize(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Utc), _converterOptions);
 
         json.Should().Be("\"2024-03-05T10:20:30Z\"");
     }

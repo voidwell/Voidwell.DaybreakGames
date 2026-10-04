@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 
@@ -26,7 +26,9 @@ public class DailyPopulationComparer : IEqualityComparer<DailyPopulation>
     public bool Equals(DailyPopulation? x, DailyPopulation? y)
     {
         if (ReferenceEquals(x, y))
+        {
             return true;
+        }
 
         return x != null && y != null && x.Date.Equals(y.Date);
     }

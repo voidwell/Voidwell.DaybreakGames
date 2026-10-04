@@ -1,4 +1,4 @@
-﻿using DaybreakGames.Census;
+using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
 

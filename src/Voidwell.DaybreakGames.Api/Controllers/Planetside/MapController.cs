@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Voidwell.DaybreakGames.Api.Models;
 using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;

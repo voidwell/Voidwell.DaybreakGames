@@ -1,4 +1,4 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;

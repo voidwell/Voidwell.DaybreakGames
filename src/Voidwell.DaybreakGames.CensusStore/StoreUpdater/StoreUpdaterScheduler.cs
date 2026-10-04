@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -125,7 +125,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
                 return true;
             }
 
-            _logger.LogInformation($"Updating {updateConfig.StoreName}.");
+            _logger.LogInformation("Updating {StoreName}.", updateConfig.StoreName);
 
             var collectionValues = await GetCollectionValuesAsync(updateConfig.CollectionType!);
             if (collectionValues == null)
@@ -137,7 +137,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
 
             await UpsertAsync(entityValues);
 
-            _logger.LogInformation($"Update complete for {updateConfig.StoreName}.");
+            _logger.LogInformation("Update complete for {StoreName}.", updateConfig.StoreName);
 
             var dataModel = new UpdaterScheduler
             {
@@ -150,7 +150,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Update failed for {updateConfig.StoreName}: {ex}");
+            _logger.LogError(ex, "Update failed for {StoreName}", updateConfig.StoreName);
             return false;
         }
         finally
@@ -161,7 +161,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         return true;
     }
 
-    private readonly MethodInfo UpsertMethod = typeof(DbSetExtensions).GetMethods()
+    private readonly MethodInfo _upsertMethod = typeof(DbSetExtensions).GetMethods()
                 .First(a => a.Name == "UpsertAsync" && a.GetParameters()[1].ParameterType.IsGenericType && typeof(IEnumerable<>).IsAssignableTo(a.GetParameters()[1].ParameterType.GetGenericTypeDefinition()));
     private async Task UpsertAsync(object values)
     {
@@ -169,7 +169,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         {
             var dbContext = factory.GetDbContext();
 
-            var task = (Task)UpsertMethod.MakeGenericMethod(values.GetType().GetGenericArguments()[0])
+            var task = (Task)_upsertMethod.MakeGenericMethod(values.GetType().GetGenericArguments()[0])
                 .Invoke(dbContext, new[] { dbContext, values })!;
 
             await task!.WaitAsync(CancellationToken.None);

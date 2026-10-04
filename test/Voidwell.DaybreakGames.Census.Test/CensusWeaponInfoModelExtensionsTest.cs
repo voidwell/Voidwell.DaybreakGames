@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Census.Models.Extensions;
 using Xunit;

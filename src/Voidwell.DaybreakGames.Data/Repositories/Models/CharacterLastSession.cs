@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Data.Repositories.Models;
+namespace Voidwell.DaybreakGames.Data.Repositories.Models;
 
 public class CharacterLastSession
 {

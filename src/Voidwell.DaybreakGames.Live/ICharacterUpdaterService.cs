@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Utils.HostedService;
+using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Live;
 

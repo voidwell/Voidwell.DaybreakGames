@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Census.Models.Extensions;
+namespace Voidwell.DaybreakGames.Census.Models.Extensions;
 
 public static class CensusWeaponInfoModelExtensions
 {

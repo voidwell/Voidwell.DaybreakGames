@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Test;

@@ -1,4 +1,4 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;

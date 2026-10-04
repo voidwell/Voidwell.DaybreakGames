@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
+using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 namespace Voidwell.DaybreakGames.Domain.Models;
 

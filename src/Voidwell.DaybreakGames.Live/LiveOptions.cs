@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Live;
+namespace Voidwell.DaybreakGames.Live;
 
 public class LiveOptions
 {

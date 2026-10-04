@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Voidwell.DaybreakGames.Data.DataConfigurations;
+namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
 internal class MetagameEvent : IEntityTypeConfiguration<Models.Planetside.Events.MetagameEvent>
 {

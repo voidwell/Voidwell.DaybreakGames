@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events;
+namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 public class MetagameEvent
 {

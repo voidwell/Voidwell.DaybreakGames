@@ -1,4 +1,4 @@
-﻿using DaybreakGames.Census;
+using DaybreakGames.Census;
 
 namespace Voidwell.DaybreakGames.Census.Patcher;
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService;
 

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Voidwell.DaybreakGames.Census.Models;
@@ -9,15 +9,15 @@ namespace Voidwell.DaybreakGames.CensusStore.Test;
 
 public class CensusToEntityMappingProfileTest
 {
-    private static readonly MapperConfiguration Configuration =
+    private static readonly MapperConfiguration _configuration =
         new(cfg => cfg.AddProfile<CensusToEntityMappingProfile>(), NullLoggerFactory.Instance);
 
-    private readonly IMapper _mapper = Configuration.CreateMapper();
+    private readonly IMapper _mapper = _configuration.CreateMapper();
 
     [Fact]
     public void Configuration_AllMapsCompile()
     {
-        var act = () => Configuration.CompileMappings();
+        var act = () => _configuration.CompileMappings();
 
         act.Should().NotThrow();
     }

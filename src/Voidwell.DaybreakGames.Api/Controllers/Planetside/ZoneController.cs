@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside;

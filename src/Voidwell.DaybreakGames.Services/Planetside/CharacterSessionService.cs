@@ -1,4 +1,4 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Domain.Models;

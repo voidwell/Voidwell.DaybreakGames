@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Xunit;
 

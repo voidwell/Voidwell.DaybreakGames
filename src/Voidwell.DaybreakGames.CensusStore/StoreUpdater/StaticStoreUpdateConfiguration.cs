@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;
+namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 
 public class StaticStoreUpdateConfiguration
 {

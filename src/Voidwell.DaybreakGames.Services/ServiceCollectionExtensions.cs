@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Voidwell.DaybreakGames.Services.Mappers;
 using Voidwell.DaybreakGames.Services.Planetside;

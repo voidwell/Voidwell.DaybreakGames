@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -12,8 +12,8 @@ namespace Voidwell.DaybreakGames.Live.Test;
 
 public class PlayerMonitorTest
 {
-    private const int WorldId = 17;
-    private static readonly DateTime Login = new(2024, 6, 1, 12, 0, 0, DateTimeKind.Utc);
+    private const int _worldId = 17;
+    private static readonly DateTime _login = new(2024, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
     private readonly Mock<ICharacterService> _characterService = new();
     private readonly Mock<ICharacterUpdaterService> _updaterService = new();
@@ -30,7 +30,7 @@ public class PlayerMonitorTest
         return new PlayerMonitor(_characterService.Object, _updaterService.Object, _sessionRepository.Object, _ratingService.Object, _cache);
     }
 
-    private void GivenCharacter(string id, int worldId = WorldId, string name = null)
+    private void GivenCharacter(string id, int worldId = _worldId, string name = null)
     {
         _characterService.Setup(a => a.GetCharacter(id)).ReturnsAsync(new Character { Id = id, Name = name ?? id, FactionId = 2, WorldId = worldId });
     }
@@ -40,7 +40,7 @@ public class PlayerMonitorTest
     {
         _characterService.Setup(a => a.GetCharacter("missing")).ReturnsAsync((Character)null);
 
-        (await CreateSut().SetOnlineAsync("missing", Login)).Should().BeNull();
+        (await CreateSut().SetOnlineAsync("missing", _login)).Should().BeNull();
     }
 
     [Fact]
@@ -49,15 +49,15 @@ public class PlayerMonitorTest
         GivenCharacter("c1", name: "Bob");
         var sut = CreateSut();
 
-        var online = await sut.SetOnlineAsync("c1", Login);
+        var online = await sut.SetOnlineAsync("c1", _login);
 
         online.Character.CharacterId.Should().Be("c1");
         online.Character.Name.Should().Be("Bob");
         online.Character.FactionId.Should().Be(2);
-        online.Character.WorldId.Should().Be(WorldId);
-        online.LoginDate.Should().Be(Login);
+        online.Character.WorldId.Should().Be(_worldId);
+        online.LoginDate.Should().Be(_login);
         (await sut.GetAsync("c1")).Should().BeEquivalentTo(online);
-        (await sut.GetPlayerCountAsync(WorldId)).Should().Be(1);
+        (await sut.GetPlayerCountAsync(_worldId)).Should().Be(1);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class PlayerMonitorTest
     {
         _characterService.Setup(a => a.GetCharacter("missing")).ReturnsAsync((Character)null);
 
-        (await CreateSut().SetOfflineAsync("missing", Login)).Should().BeNull();
+        (await CreateSut().SetOfflineAsync("missing", _login)).Should().BeNull();
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class PlayerMonitorTest
     {
         GivenCharacter("c1");
 
-        var result = await CreateSut().SetOfflineAsync("c1", Login);
+        var result = await CreateSut().SetOfflineAsync("c1", _login);
 
         result.Should().BeNull();
         _sessionRepository.Verify(a => a.AddAsync(It.IsAny<PlayerSession>()), Times.Never);
@@ -84,13 +84,13 @@ public class PlayerMonitorTest
     {
         GivenCharacter("c1");
         var sut = CreateSut();
-        await sut.SetOnlineAsync("c1", Login);
+        await sut.SetOnlineAsync("c1", _login);
 
-        var result = await sut.SetOfflineAsync("c1", Login.AddMinutes(30));
+        var result = await sut.SetOfflineAsync("c1", _login.AddMinutes(30));
 
         result.Should().NotBeNull();
         _sessionRepository.Verify(a => a.AddAsync(It.Is<PlayerSession>(s =>
-            s.CharacterId == "c1" && s.LoginDate == Login && s.LogoutDate == Login.AddMinutes(30) && s.Duration == 30 * 60 * 1000)), Times.Once);
+            s.CharacterId == "c1" && s.LoginDate == _login && s.LogoutDate == _login.AddMinutes(30) && s.Duration == 30 * 60 * 1000)), Times.Once);
         _updaterService.Verify(a => a.AddToQueue("c1"), Times.Once);
         _ratingService.Verify(a => a.SaveCachedRatingAsync("c1"), Times.Once);
     }
@@ -100,9 +100,9 @@ public class PlayerMonitorTest
     {
         GivenCharacter("c1");
         var sut = CreateSut();
-        await sut.SetOnlineAsync("c1", Login);
+        await sut.SetOnlineAsync("c1", _login);
 
-        await sut.SetOfflineAsync("c1", Login.AddMinutes(4));
+        await sut.SetOfflineAsync("c1", _login.AddMinutes(4));
 
         _updaterService.Verify(a => a.AddToQueue(It.IsAny<string>()), Times.Never);
         _sessionRepository.Verify(a => a.AddAsync(It.IsAny<PlayerSession>()), Times.Once);
@@ -113,12 +113,12 @@ public class PlayerMonitorTest
     {
         GivenCharacter("c1");
         var sut = CreateSut();
-        await sut.SetOnlineAsync("c1", Login);
+        await sut.SetOnlineAsync("c1", _login);
 
-        await sut.SetOfflineAsync("c1", Login.AddMinutes(10));
+        await sut.SetOfflineAsync("c1", _login.AddMinutes(10));
 
         (await sut.GetAsync("c1")).Should().BeNull();
-        (await sut.GetPlayerCountAsync(WorldId)).Should().Be(0);
+        (await sut.GetPlayerCountAsync(_worldId)).Should().Be(0);
     }
 
     [Fact]
@@ -127,12 +127,12 @@ public class PlayerMonitorTest
         GivenCharacter("c1");
         var sut = CreateSut();
 
-        var result = await sut.SetLastSeenAsync("c1", zoneId: 4, Login);
+        var result = await sut.SetLastSeenAsync("c1", zoneId: 4, _login);
 
-        result.LoginDate.Should().Be(Login);
+        result.LoginDate.Should().Be(_login);
         result.LastSeen.ZoneId.Should().Be(4);
-        result.LastSeen.Timestamp.Should().Be(Login);
-        (await sut.GetPlayerCountAsync(WorldId)).Should().Be(1);
+        result.LastSeen.Timestamp.Should().Be(_login);
+        (await sut.GetPlayerCountAsync(_worldId)).Should().Be(1);
     }
 
     [Fact]
@@ -140,14 +140,14 @@ public class PlayerMonitorTest
     {
         GivenCharacter("c1");
         var sut = CreateSut();
-        await sut.SetOnlineAsync("c1", Login);
+        await sut.SetOnlineAsync("c1", _login);
 
-        await sut.SetLastSeenAsync("c1", zoneId: 6, Login.AddMinutes(5));
+        await sut.SetLastSeenAsync("c1", zoneId: 6, _login.AddMinutes(5));
 
         var stored = await sut.GetAsync("c1");
-        stored.LoginDate.Should().Be(Login);
+        stored.LoginDate.Should().Be(_login);
         stored.LastSeen.ZoneId.Should().Be(6);
-        stored.LastSeen.Timestamp.Should().Be(Login.AddMinutes(5));
+        stored.LastSeen.Timestamp.Should().Be(_login.AddMinutes(5));
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public class PlayerMonitorTest
     {
         _characterService.Setup(a => a.GetCharacter("missing")).ReturnsAsync((Character)null);
 
-        (await CreateSut().SetLastSeenAsync("missing", 2, Login)).Should().BeNull();
+        (await CreateSut().SetLastSeenAsync("missing", 2, _login)).Should().BeNull();
     }
 
     [Fact]
@@ -165,11 +165,11 @@ public class PlayerMonitorTest
         GivenCharacter("c2");
         GivenCharacter("other", worldId: 99);
         var sut = CreateSut();
-        await sut.SetOnlineAsync("c1", Login);
-        await sut.SetOnlineAsync("c2", Login);
-        await sut.SetOnlineAsync("other", Login);
+        await sut.SetOnlineAsync("c1", _login);
+        await sut.SetOnlineAsync("c2", _login);
+        await sut.SetOnlineAsync("other", _login);
 
-        var players = await sut.GetAllAsync(WorldId);
+        var players = await sut.GetAllAsync(_worldId);
 
         players.Select(a => a.Character.CharacterId).Should().BeEquivalentTo(new[] { "c1", "c2" });
     }
@@ -180,14 +180,14 @@ public class PlayerMonitorTest
         GivenCharacter("c1");
         GivenCharacter("c2");
         var sut = CreateSut();
-        await sut.SetOnlineAsync("c1", Login);
-        await sut.SetOnlineAsync("c2", Login);
+        await sut.SetOnlineAsync("c1", _login);
+        await sut.SetOnlineAsync("c2", _login);
         await _cache.RemoveAsync("ps2.online-players_character_c2");
 
-        var players = await sut.GetAllAsync(WorldId);
+        var players = await sut.GetAllAsync(_worldId);
 
         players.Select(a => a.Character.CharacterId).Should().Equal("c1");
-        (await sut.GetPlayerCountAsync(WorldId)).Should().Be(1);
+        (await sut.GetPlayerCountAsync(_worldId)).Should().Be(1);
     }
 
     [Fact]
@@ -201,7 +201,7 @@ public class PlayerMonitorTest
         await sut.SetLastSeenAsync("stale", 2, DateTime.UtcNow.AddMinutes(-30));
         await sut.SetLastSeenAsync("elsewhere", 4, DateTime.UtcNow.AddMinutes(-1));
 
-        var players = await sut.GetAllAsync(WorldId, zoneId: 2);
+        var players = await sut.GetAllAsync(_worldId, zoneId: 2);
 
         players.Select(a => a.Character.CharacterId).Should().Equal("recent");
     }
@@ -211,10 +211,10 @@ public class PlayerMonitorTest
     {
         GivenCharacter("c1");
         var sut = CreateSut();
-        await sut.SetOnlineAsync("c1", Login);
+        await sut.SetOnlineAsync("c1", _login);
 
-        await sut.ClearWorldAsync(WorldId);
+        await sut.ClearWorldAsync(_worldId);
 
-        (await sut.GetPlayerCountAsync(WorldId)).Should().Be(0);
+        (await sut.GetPlayerCountAsync(_worldId)).Should().Be(0);
     }
 }

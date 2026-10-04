@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Voidwell.DaybreakGames.Utils.HostedService;
 using Xunit;
 

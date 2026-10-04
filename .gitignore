@@ -287,5 +287,5 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 testsettings.json
-/src/Voidwell.DaybreakGames.Api/devsettings.json
-/src/Voidwell.DaybreakGames.Data/devsettings.json
+/src/Voidwell.DaybreakGames.Api/appsettings.Development.json
+/src/Voidwell.DaybreakGames.Data/appsettings.Development.json

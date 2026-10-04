@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Voidwell.DaybreakGames.Domain.Models.GridMap;
 using Xunit;
 

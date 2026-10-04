@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Live.CensusStream.Models;
+namespace Voidwell.DaybreakGames.Live.CensusStream.Models;
 
 public class Death : PayloadBase
 {

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Voidwell.DaybreakGames.Api.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
@@ -23,11 +23,11 @@ public class OracleController : Controller
         List<int> categoryIds;
         if (categoryId == "all")
         {
-            categoryIds = OracleCategoryMap.SelectMany(a => a.Value).Distinct().ToList();
+            categoryIds = _oracleCategoryMap.SelectMany(a => a.Value).Distinct().ToList();
         }
-        else if (OracleCategoryMap.ContainsKey(categoryId))
+        else if (_oracleCategoryMap.ContainsKey(categoryId))
         {
-            categoryIds = OracleCategoryMap[categoryId].ToList();
+            categoryIds = _oracleCategoryMap[categoryId].ToList();
         }
         else
         {
@@ -48,7 +48,7 @@ public class OracleController : Controller
     [HttpGet("stats/{statId}")]
     public async Task<ActionResult> GetOracleStatsAsync(string statId, [FromQuery(Name = "q")] string sWeaponIds)
     {
-        if (!OracleStatTransforms.ContainsKey(statId))
+        if (!_oracleStatTransforms.ContainsKey(statId))
         {
             return BadRequest($"Invalid stat type '{statId}'");
         }
@@ -61,7 +61,7 @@ public class OracleController : Controller
 
         var stats = await _weaponService.GetOracleStatsFromWeaponByDateAsync(weaponIds, DateTime.MinValue, DateTime.UtcNow.Date.AddSeconds(-1));
 
-        var oracleStats = stats.ToDictionary(a => a.Key, a => a.Value.Select(v => new OracleStat { Period = v.Date, Value = OracleStatTransforms[statId](v) }));
+        var oracleStats = stats.ToDictionary(a => a.Key, a => a.Value.Select(v => new OracleStat { Period = v.Date, Value = _oracleStatTransforms[statId](v) }));
         var paddedStats = PadPeriods(oracleStats);
 
         return Ok(paddedStats);
@@ -148,7 +148,7 @@ public class OracleController : Controller
         return name;
     }
 
-    private static readonly Dictionary<string, Func<DailyWeaponStats, float>> OracleStatTransforms = new Dictionary<string, Func<DailyWeaponStats, float>>
+    private static readonly Dictionary<string, Func<DailyWeaponStats, float>> _oracleStatTransforms = new Dictionary<string, Func<DailyWeaponStats, float>>
     {
         { "kills", a => a.Kills },
         { "uniques", a => a.Uniques },
@@ -171,7 +171,7 @@ public class OracleController : Controller
         { "akph", a => a.AircraftKills / (float)24 }
     };
 
-    private static readonly Dictionary<string, IEnumerable<int>> OracleCategoryMap = new Dictionary<string, IEnumerable<int>>
+    private static readonly Dictionary<string, IEnumerable<int>> _oracleCategoryMap = new Dictionary<string, IEnumerable<int>>
     {
         { "melee", new[] { 2 } },
         { "sidearms", new[] { 3, 24 } },

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;

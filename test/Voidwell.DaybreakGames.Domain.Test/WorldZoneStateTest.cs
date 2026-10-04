@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Test.MapTests;
+using Voidwell.DaybreakGames.Test.MapTests;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Domain.Test;

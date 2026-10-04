@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Data.Models.Planetside;
+namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 
 public class CharacterRating
 {

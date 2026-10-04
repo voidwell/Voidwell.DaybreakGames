@@ -21,7 +21,7 @@ NuGet versions are managed centrally in [Directory.Packages.props](Directory.Pac
 
 ## Configuration
 
-Settings are read from `appsettings.json`, then `devsettings.json` (Development environment only, optional), then environment variables. Environment variables override files; use `__` for nesting if needed.
+Settings are read from `appsettings.json`, then `appsettings.{Environment}.json` (for example `appsettings.Development.json`, optional), then environment variables. Environment variables override files; use `__` for nesting if needed.
 
 | Key | Required | Description |
 |---|---|---|
@@ -39,7 +39,7 @@ Settings are read from `appsettings.json`, then `devsettings.json` (Development 
 | `LogCensusErrors` | No | `true` logs Census client errors (default `false`) |
 | `Serilog` | No | Standard Serilog configuration section (levels and overrides) in `appsettings.json` |
 
-Example `devsettings.json` (placed in `src/Voidwell.DaybreakGames.Api/`; it is not committed with real secrets):
+Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Api/`; it is gitignored, so keep real secrets there):
 
 ```json
 {
@@ -54,7 +54,7 @@ Example `devsettings.json` (placed in `src/Voidwell.DaybreakGames.Api/`; it is n
 }
 ```
 
-The EF design-time factory reads `DBConnectionString` from a `devsettings.json` in the working directory of the Data project, so migration commands need that file in `src/Voidwell.DaybreakGames.Data/` too.
+The EF design-time factory reads `DBConnectionString` from `appsettings.json` and `appsettings.{Environment}.json` (default `Development`) in the working directory of the Data project, then environment variables, so migration commands need an `appsettings.Development.json` in `src/Voidwell.DaybreakGames.Data/` too.
 
 ### Logging
 

@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.CensusStore;
+namespace Voidwell.DaybreakGames.CensusStore;
 
 public interface IStoreUpdaterHelper
 {

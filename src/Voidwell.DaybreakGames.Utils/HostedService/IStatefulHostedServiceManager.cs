@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Utils.HostedService;
+namespace Voidwell.DaybreakGames.Utils.HostedService;
 
 public interface IStatefulHostedServiceManager
 {

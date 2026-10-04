@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Domain.Models;
+namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class WorldZoneState
 {
@@ -12,7 +12,7 @@ public class WorldZoneState
     public Dictionary<int, int> MapRegionOwnership { get; private set; } = new Dictionary<int, int>();
     public ZoneLockState? LockState { get; private set; }
 
-    private ZoneAlertState? _alertState { get; set; }
+    private ZoneAlertState? _alertState;
     private readonly SemaphoreSlim _facilityFactionChangeLock = new SemaphoreSlim(1);
 
     public WorldZoneState(int worldId, int zoneId, string zoneName)

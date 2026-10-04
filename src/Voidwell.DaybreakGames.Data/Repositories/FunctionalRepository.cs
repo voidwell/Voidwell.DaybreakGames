@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Voidwell.DaybreakGames.Data.Repositories.Models;
 
 namespace Voidwell.DaybreakGames.Data.Repositories;

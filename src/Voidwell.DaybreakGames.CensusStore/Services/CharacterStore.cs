@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using AutoMapper;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Cache;
@@ -444,17 +444,17 @@ public class CharacterStore : ICharacterStore
         var dataModels = statsHistory.Select(a =>
         {
             var day = new List<int> {
-                a.Day!.d01, a.Day.d02, a.Day.d03, a.Day.d04, a.Day.d05, a.Day.d06, a.Day.d07, a.Day.d08, a.Day.d09, a.Day.d10, a.Day.d11, a.Day.d12,
-                a.Day.d13, a.Day.d14, a.Day.d15, a.Day.d16, a.Day.d17, a.Day.d18, a.Day.d19, a.Day.d20, a.Day.d21, a.Day.d22, a.Day.d23, a.Day.d24,
-                a.Day.d25, a.Day.d26, a.Day.d27, a.Day.d28, a.Day.d29, a.Day.d30, a.Day.d31
+                a.Day!.D01, a.Day.D02, a.Day.D03, a.Day.D04, a.Day.D05, a.Day.D06, a.Day.D07, a.Day.D08, a.Day.D09, a.Day.D10, a.Day.D11, a.Day.D12,
+                a.Day.D13, a.Day.D14, a.Day.D15, a.Day.D16, a.Day.D17, a.Day.D18, a.Day.D19, a.Day.D20, a.Day.D21, a.Day.D22, a.Day.D23, a.Day.D24,
+                a.Day.D25, a.Day.D26, a.Day.D27, a.Day.D28, a.Day.D29, a.Day.D30, a.Day.D31
             };
 
             var month = new List<int> {
-                a.Month!.m01, a.Month.m02, a.Month.m03, a.Month.m04, a.Month.m05, a.Month.m06, a.Month.m07, a.Month.m08, a.Month.m09, a.Month.m10, a.Month.m11, a.Month.m12
+                a.Month!.M01, a.Month.M02, a.Month.M03, a.Month.M04, a.Month.M05, a.Month.M06, a.Month.M07, a.Month.M08, a.Month.M09, a.Month.M10, a.Month.M11, a.Month.M12
             };
 
             var week = new List<int> {
-                a.Week!.w01, a.Week.w02, a.Week.w03, a.Week.w04, a.Week.w05, a.Week.w06, a.Week.w07, a.Week.w08, a.Week.w09, a.Week.w10, a.Week.w11, a.Week.w12, a.Week.w13
+                a.Week!.W01, a.Week.W02, a.Week.W03, a.Week.W04, a.Week.W05, a.Week.W06, a.Week.W07, a.Week.W08, a.Week.W09, a.Week.W10, a.Week.W11, a.Week.W12, a.Week.W13
             };
 
             return new CharacterStatHistory

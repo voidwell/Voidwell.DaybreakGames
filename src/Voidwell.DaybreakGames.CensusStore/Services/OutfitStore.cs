@@ -1,4 +1,4 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using DaybreakGames.Census.Exceptions;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Cache;
@@ -118,7 +118,7 @@ public class OutfitStore : IOutfitStore
             var outfit = await GetLatestOutfitAsync(membership.OutfitId!, character);
             if (outfit == null)
             {
-                _logger.LogError(84624, $"Unable to resolve outfit {membership.OutfitId} for character {character.Id}");
+                _logger.LogError(84624, "Unable to resolve outfit {OutfitId} for character {CharacterId}", membership.OutfitId, character.Id);
                 await _cache.SetAsync(cacheKey, new OutfitMember(), _cacheOutfitMemberExpiration);
                 return null;
             }

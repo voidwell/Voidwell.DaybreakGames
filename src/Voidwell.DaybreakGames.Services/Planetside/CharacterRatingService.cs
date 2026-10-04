@@ -1,4 +1,4 @@
-﻿//using Glicko2;
+//using Glicko2;
 using AsyncKeyedLock;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -13,9 +13,9 @@ public class CharacterRatingService : ICharacterRatingService
     private readonly ICharacterRepository _characterRepository;
     private readonly ICache _cache;
 
-    private const double DefaultRating = 1500;
-    private const double DefaultDeviation = 100;
-    private const double DefaultVolatility = 0.02;
+    private const double _defaultRating = 1500;
+    private const double _defaultDeviation = 100;
+    private const double _defaultVolatility = 0.02;
 
     private static Func<string, string> GetCacheKey => characterId => $"ps2.characterRating_{characterId}";
     private const string _leaderboardCacheKey = "ps2.characterRatingLeaderboard";
@@ -62,7 +62,7 @@ public class CharacterRatingService : ICharacterRatingService
 
         return await _cache.GetOrSetAsync(
             cacheKey,
-            async ct => await _characterRepository.GetCharacterRatingAsync(characterId) ?? new CharacterRating { CharacterId = characterId, Rating = DefaultRating, Deviation = DefaultDeviation, Volatility = DefaultVolatility },
+            async ct => await _characterRepository.GetCharacterRatingAsync(characterId) ?? new CharacterRating { CharacterId = characterId, Rating = _defaultRating, Deviation = _defaultDeviation, Volatility = _defaultVolatility },
             _cacheExpiration);
     }
 

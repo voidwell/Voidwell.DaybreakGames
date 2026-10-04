@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
@@ -9,14 +9,14 @@ namespace Voidwell.DaybreakGames.Services.Test;
 
 public class PlayerSessionEventMapperTest
 {
-    private static readonly DateTime Time = new(2024, 6, 1, 12, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime _time = new(2024, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
     [Fact]
     public void Death_MapsParticipantsWeaponAndFlags()
     {
         var death = new Death
         {
-            Timestamp = Time,
+            Timestamp = _time,
             ZoneId = 2,
             CharacterId = "victim",
             Character = new Character { Name = "Victim", FactionId = 2 },
@@ -35,7 +35,7 @@ public class PlayerSessionEventMapperTest
 
         var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).Single().Should().BeOfType<PlayerSessionDeathEvent>().Subject;
 
-        result.Timestamp.Should().Be(Time);
+        result.Timestamp.Should().Be(_time);
         result.ZoneId.Should().Be(2);
         result.Attacker.Id.Should().Be("attacker");
         result.Attacker.Name.Should().Be("Attacker");
@@ -84,7 +84,7 @@ public class PlayerSessionEventMapperTest
     {
         var capture = new PlayerFacilityCapture
         {
-            Timestamp = Time,
+            Timestamp = _time,
             ZoneId = 4,
             FacilityId = 9,
             Facility = new MapRegion { FacilityName = "Peris", FacilityTypeId = 5, FacilityType = "Large Outpost" }
@@ -92,7 +92,7 @@ public class PlayerSessionEventMapperTest
 
         var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { capture }).Single().Should().BeOfType<PlayerSessionFacilityCaptureEvent>().Subject;
 
-        result.Timestamp.Should().Be(Time);
+        result.Timestamp.Should().Be(_time);
         result.ZoneId.Should().Be(4);
         result.Facility.Id.Should().Be(9);
         result.Facility.Name.Should().Be("Peris");
@@ -105,7 +105,7 @@ public class PlayerSessionEventMapperTest
     {
         var defend = new PlayerFacilityDefend
         {
-            Timestamp = Time,
+            Timestamp = _time,
             ZoneId = 4,
             FacilityId = 9,
             Facility = new MapRegion { FacilityName = "Peris", FacilityTypeId = 5, FacilityType = "Large Outpost" }
@@ -120,11 +120,11 @@ public class PlayerSessionEventMapperTest
     [Fact]
     public void BattleRankUp_MapsRank()
     {
-        var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { new BattlerankUp { Timestamp = Time, ZoneId = 2, BattleRank = 42 } })
+        var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { new BattlerankUp { Timestamp = _time, ZoneId = 2, BattleRank = 42 } })
             .Single().Should().BeOfType<PlayerSessionBattleRankUpEvent>().Subject;
 
         result.BattleRank.Should().Be(42);
-        result.Timestamp.Should().Be(Time);
+        result.Timestamp.Should().Be(_time);
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class PlayerSessionEventMapperTest
     {
         var destroy = new VehicleDestroy
         {
-            Timestamp = Time,
+            Timestamp = _time,
             ZoneId = 2,
             CharacterId = "victim",
             AttackerCharacterId = "attacker",

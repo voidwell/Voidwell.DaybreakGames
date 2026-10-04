@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
@@ -8,8 +8,8 @@ public class ObjectiveRepository : IObjectiveRepository
 {
     private readonly IDbContextHelper _dbContextHelper;
 
-    private const int TotalKillsObjectiveTypeId = 12;
-    private const int AchievementObjectiveTypeId = 66;
+    private const int _totalKillsObjectiveTypeId = 12;
+    private const int _achievementObjectiveTypeId = 66;
 
     public ObjectiveRepository(IDbContextHelper dbContextHelper)
     {
@@ -27,13 +27,13 @@ public class ObjectiveRepository : IObjectiveRepository
 
                         join item in dbContext.Items
                             on new { typeId = objective.ObjectiveTypeId, itemId = objective.Param5 }
-                            equals new { typeId = TotalKillsObjectiveTypeId, itemId = item.Id.ToString() }
+                            equals new { typeId = _totalKillsObjectiveTypeId, itemId = item.Id.ToString() }
                             into items
                         from item in items.DefaultIfEmpty()
 
                         join achievement in dbContext.Achievements
                             on new { typeId = objective.ObjectiveTypeId, achievementId = objective.Param1 }
-                            equals new { typeId = AchievementObjectiveTypeId, achievementId = achievement.Id.ToString() }
+                            equals new { typeId = _achievementObjectiveTypeId, achievementId = achievement.Id.ToString() }
                             into achievements
                         from achievement in achievements.DefaultIfEmpty()
 
@@ -45,7 +45,7 @@ public class ObjectiveRepository : IObjectiveRepository
 
                         join achItem in dbContext.Items
                             on new { typeId = achObjective.ObjectiveTypeId, itemId = achObjective.Param5 }
-                            equals new { typeId = TotalKillsObjectiveTypeId, itemId = achItem.Id.ToString() }
+                            equals new { typeId = _totalKillsObjectiveTypeId, itemId = achItem.Id.ToString() }
                             into achItems
                         from achItem in achItems.DefaultIfEmpty()
 

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Voidwell.DaybreakGames.Cache;

@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Domain.Models;
+namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class CharacterDirectivesOutline
 {

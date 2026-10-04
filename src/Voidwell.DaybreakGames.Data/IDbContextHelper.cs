@@ -1,4 +1,4 @@
-﻿using static Voidwell.DaybreakGames.Data.DbContextHelper;
+using static Voidwell.DaybreakGames.Data.DbContextHelper;
 
 namespace Voidwell.DaybreakGames.Data;
 

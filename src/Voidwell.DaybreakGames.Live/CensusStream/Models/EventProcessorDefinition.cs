@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream.Models;
 

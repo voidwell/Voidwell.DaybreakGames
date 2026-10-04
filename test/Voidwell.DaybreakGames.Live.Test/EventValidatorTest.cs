@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Xunit;
 
@@ -9,14 +9,14 @@ public class EventValidatorTest
     private sealed record LoginEvent(string CharacterId, DateTime Timestamp);
     private sealed record LogoutEvent(string CharacterId, DateTime Timestamp);
 
-    private static readonly Func<LoginEvent, bool> NeverExpire = _ => false;
+    private static readonly Func<LoginEvent, bool> _neverExpire = _ => false;
 
     [Fact]
     public async Task Validiate_FirstEvent_IsValid()
     {
         using var sut = new EventValidator();
 
-        (await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, NeverExpire)).Should().BeTrue();
+        (await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)).Should().BeTrue();
     }
 
     [Fact]
@@ -25,9 +25,9 @@ public class EventValidatorTest
         using var sut = new EventValidator();
         var ev = new LoginEvent("c1", DateTime.UtcNow);
 
-        await sut.Validiate(ev, a => a.CharacterId, NeverExpire);
+        await sut.Validiate(ev, a => a.CharacterId, _neverExpire);
 
-        (await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, NeverExpire)).Should().BeFalse();
+        (await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)).Should().BeFalse();
     }
 
     [Fact]
@@ -35,9 +35,9 @@ public class EventValidatorTest
     {
         using var sut = new EventValidator();
 
-        await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, NeverExpire);
+        await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire);
 
-        (await sut.Validiate(new LoginEvent("c2", DateTime.UtcNow), a => a.CharacterId, NeverExpire)).Should().BeTrue();
+        (await sut.Validiate(new LoginEvent("c2", DateTime.UtcNow), a => a.CharacterId, _neverExpire)).Should().BeTrue();
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class EventValidatorTest
     {
         using var sut = new EventValidator();
 
-        await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, NeverExpire);
+        await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire);
 
         (await sut.Validiate(new LogoutEvent("c1", DateTime.UtcNow), a => a.CharacterId, _ => false)).Should().BeTrue();
     }
@@ -71,7 +71,7 @@ public class EventValidatorTest
         using var sut = new EventValidator();
 
         var results = await Task.WhenAll(Enumerable.Range(0, 20)
-            .Select(_ => sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, NeverExpire)));
+            .Select(_ => sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)));
 
         results.Count(valid => valid).Should().Be(1);
     }

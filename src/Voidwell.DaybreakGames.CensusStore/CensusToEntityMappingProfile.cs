@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Census.Models;
+using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore;

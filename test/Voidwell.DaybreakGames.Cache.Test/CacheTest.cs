@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using Xunit;
 using ZiggyCreatures.Caching.Fusion;

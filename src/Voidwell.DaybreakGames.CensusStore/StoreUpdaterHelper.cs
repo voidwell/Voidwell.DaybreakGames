@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Extensions;
 

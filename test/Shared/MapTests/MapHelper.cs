@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -9,12 +9,12 @@ namespace Voidwell.DaybreakGames.Test.MapTests;
 
 public static class MapHelper
 {
-    private const string DataRoot = "MapTests/TestData/";
-    private static readonly JsonSerializerOptions jsonSerializerOptions;
+    private const string _dataRoot = "MapTests/TestData/";
+    private static readonly JsonSerializerOptions _jsonSerializerOptions;
 
     static MapHelper()
     {
-        jsonSerializerOptions = new JsonSerializerOptions
+        _jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = new UnderscorePropertyJsonNamingPolicy(),
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
@@ -59,13 +59,13 @@ public static class MapHelper
 
     public static IEnumerable<ZoneRegionOwnership> GetMapOwnership(int zoneId)
     {
-        var mapList = LoadJson<IEnumerable<CensusMapModel>>($"{DataRoot}/MapOwnership.json", "map_list");
+        var mapList = LoadJson<IEnumerable<CensusMapModel>>($"{_dataRoot}/MapOwnership.json", "map_list");
         return mapList.First(a => a.ZoneId == zoneId).Regions.Row.Select(a => new ZoneRegionOwnership(a.RowData.RegionId, a.RowData.FactionId));
     }
 
     public static IEnumerable<FacilityLink> GetFacilityLinks(int zoneId)
     {
-        var model = LoadJson<IEnumerable<CensusFacilityLinkModel>>($"{DataRoot}FacilityLinks.json", "facility_link_list");
+        var model = LoadJson<IEnumerable<CensusFacilityLinkModel>>($"{_dataRoot}FacilityLinks.json", "facility_link_list");
         return model.Select(a => new FacilityLink
         {
             ZoneId = a.ZoneId,
@@ -76,7 +76,7 @@ public static class MapHelper
 
     public static IEnumerable<MapRegion> GetMapRegions(int zoneId)
     {
-        var model = LoadJson<IEnumerable<CensusMapRegionModel>>($"{DataRoot}MapRegions.json", "map_region_list");
+        var model = LoadJson<IEnumerable<CensusMapRegionModel>>($"{_dataRoot}MapRegions.json", "map_region_list");
         return model.Select(a => new MapRegion
         {
             Id = a.MapRegionId,
@@ -97,7 +97,7 @@ public static class MapHelper
         {
             return JsonSerializer.Deserialize<JsonElement>(r.ReadToEnd())
                 .GetProperty(rootProperty)
-                .Deserialize<T>(jsonSerializerOptions);
+                .Deserialize<T>(_jsonSerializerOptions);
         }
     }
 }

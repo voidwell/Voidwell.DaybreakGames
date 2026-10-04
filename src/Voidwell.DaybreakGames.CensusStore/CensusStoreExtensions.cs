@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection;

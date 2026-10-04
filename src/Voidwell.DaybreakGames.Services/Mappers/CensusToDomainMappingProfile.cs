@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Domain.Models;
 

@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.App.Models;
+namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class PlayerActivitySession
 {

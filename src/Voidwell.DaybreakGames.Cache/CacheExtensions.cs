@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -34,6 +34,7 @@ public static class CacheExtensions
         if (!string.IsNullOrWhiteSpace(cacheOptions.RedisConfiguration))
         {
             // Redis is the shared L2 cache; the in-memory L1 cache sits in front of it
+#pragma warning disable CA2000 // RedisCache ownership passes to FusionCache and the service provider
             cacheBuilder
                 .WithSerializer(new FusionCacheSystemTextJsonSerializer(new JsonSerializerOptions
                 {
@@ -43,6 +44,7 @@ public static class CacheExtensions
                 {
                     Configuration = cacheOptions.RedisConfiguration
                 }));
+#pragma warning restore CA2000
 
             cacheBuilder.WithStackExchangeRedisBackplane(options =>
             {
@@ -60,4 +62,5 @@ public static class CacheExtensions
 
         return services;
     }
+
 }

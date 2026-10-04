@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Domain.Models;
+using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 
 namespace Voidwell.DaybreakGames.Live.GameState;

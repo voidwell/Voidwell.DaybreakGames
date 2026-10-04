@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Api.Models;
+namespace Voidwell.DaybreakGames.Api.Models;
 
 public class SimpleItem
 {

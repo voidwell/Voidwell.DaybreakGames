@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;

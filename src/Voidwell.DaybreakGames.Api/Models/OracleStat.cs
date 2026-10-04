@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Api.Models;
+namespace Voidwell.DaybreakGames.Api.Models;
 
 public class OracleStat
 {
@@ -11,7 +11,9 @@ public class OracleStatComparer : IEqualityComparer<OracleStat>
     public bool Equals(OracleStat? x, OracleStat? y)
     {
         if (ReferenceEquals(x, y))
+        {
             return true;
+        }
 
         return x != null && y != null && x.Period.Equals(y.Period);
     }

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Xunit;

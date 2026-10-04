@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Cache;
+namespace Voidwell.DaybreakGames.Cache;
 
 public interface ICache
 {

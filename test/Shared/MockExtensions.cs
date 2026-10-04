@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.Language.Flow;
 
 namespace Voidwell.DaybreakGames.Test;

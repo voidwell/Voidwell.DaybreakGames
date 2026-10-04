@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Voidwell.DaybreakGames.Live.CensusStream;
 

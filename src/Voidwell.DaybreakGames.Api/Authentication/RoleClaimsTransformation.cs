@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames.Api.Authentication;
 /// </summary>
 public class RoleClaimsTransformation : IClaimsTransformation
 {
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(2);
 
     private readonly IUserRolesClient _userRolesClient;
     private readonly IMemoryCache _cache;
@@ -58,7 +58,7 @@ public class RoleClaimsTransformation : IClaimsTransformation
         try
         {
             var roles = (await _userRolesClient.GetRolesAsync(userId) ?? Enumerable.Empty<string>()).ToArray();
-            _cache.Set(userId, roles, CacheDuration);
+            _cache.Set(userId, roles, _cacheDuration);
             return roles;
         }
         catch (Exception ex)

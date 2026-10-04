@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using AsyncKeyedLock;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.Cache;
@@ -179,7 +179,6 @@ public class WeaponService : IWeaponService
 
         using (await _oracleStatLock.LockAsync(cacheKey))
         {
-
             return await _cache.GetOrSetAsync<IEnumerable<DailyWeaponStats>>(cacheKey, ct => _worldEventsService.GetDailyWeaponAggregatesByWeaponIdAsync(weaponId, start, end), TimeSpan.FromHours(1));
         }
     }
@@ -188,11 +187,11 @@ public class WeaponService : IWeaponService
     {
         try
         {
-            var httpClient = new HttpClient();
-            var result = await httpClient.GetAsync(_masterSanctionedWeaponsEndpoint);
+            using var httpClient = new HttpClient();
+            using var result = await httpClient.GetAsync(_masterSanctionedWeaponsEndpoint);
             if (!result.IsSuccessStatusCode)
             {
-                _logger.LogError($"Failed to retrieve master sanctioned list from remote resource. Returned '{result.StatusCode}'.");
+                _logger.LogError("Failed to retrieve master sanctioned list from remote resource. Returned '{StatusCode}'.", result.StatusCode);
                 return null;
             }
 
@@ -203,7 +202,7 @@ public class WeaponService : IWeaponService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Failed to retrieve master sanctioned list: {ex.Message}");
+            _logger.LogError(ex, "Failed to retrieve master sanctioned list");
         }
 
         return null;

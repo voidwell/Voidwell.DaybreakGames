@@ -1,4 +1,4 @@
-﻿using IdentityModel;
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -15,11 +15,6 @@ using Voidwell.DaybreakGames.Utils.HostedService;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
-
-builder.Configuration
-    .AddJsonFile("appsettings.json")
-    .AddJsonFile("devsettings.json", optional: true, reloadOnChange: true)
-    .AddEnvironmentVariables();
 
 builder.Logging.AddApiLogging(builder.Environment, builder.Configuration);
 

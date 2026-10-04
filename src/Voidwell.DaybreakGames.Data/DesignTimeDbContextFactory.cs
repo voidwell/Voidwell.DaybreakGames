@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
@@ -8,9 +8,15 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<PS2DbConte
 {
     public PS2DbContext CreateDbContext(string[] args)
     {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+            ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+            ?? "Development";
+
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("devsettings.json")
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddEnvironmentVariables()
             .Build();
 
         var builder = new DbContextOptionsBuilder<PS2DbContext>();

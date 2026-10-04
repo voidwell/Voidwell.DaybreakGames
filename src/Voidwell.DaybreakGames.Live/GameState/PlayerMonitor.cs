@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Cache;
+using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Domain.Models;
@@ -14,10 +14,10 @@ public class PlayerMonitor : IPlayerMonitor
     private readonly ICharacterRatingService _characterRatingService;
     private readonly ICache _cache;
 
-    private static readonly Func<int, string> GetListCacheKey = worldId => $"ps2.online-players_world_{worldId}";
-    private static readonly Func<string, string> GetPlayerCacheKey = characterId => $"ps2.online-players_character_{characterId}";
-    private static readonly TimeSpan CacheIdleDuration = TimeSpan.FromHours(3);
-    private static readonly TimeSpan MaximumIdleDuration = TimeSpan.FromMinutes(10);
+    private static readonly Func<int, string> _getListCacheKey = worldId => $"ps2.online-players_world_{worldId}";
+    private static readonly Func<string, string> _getPlayerCacheKey = characterId => $"ps2.online-players_character_{characterId}";
+    private static readonly TimeSpan _cacheIdleDuration = TimeSpan.FromHours(3);
+    private static readonly TimeSpan _maximumIdleDuration = TimeSpan.FromMinutes(10);
 
     public PlayerMonitor(ICharacterService characterService, ICharacterUpdaterService updaterService,
         IPlayerSessionRepository playerSessionRepository, ICharacterRatingService characterRatingService,
@@ -51,8 +51,8 @@ public class PlayerMonitor : IPlayerMonitor
         };
 
         await Task.WhenAll(
-            _cache.AddToListAsync(GetListCacheKey(character.WorldId), character.Id!),
-            _cache.SetAsync(GetPlayerCacheKey(character.Id!), onlineCharacter, CacheIdleDuration));
+            _cache.AddToListAsync(_getListCacheKey(character.WorldId), character.Id!),
+            _cache.SetAsync(_getPlayerCacheKey(character.Id!), onlineCharacter, _cacheIdleDuration));
 
         return onlineCharacter;
     }
@@ -65,7 +65,7 @@ public class PlayerMonitor : IPlayerMonitor
             return null;
         }
 
-        var onlineCharacter = await _cache.GetAsync<OnlineCharacter>(GetPlayerCacheKey(characterId));
+        var onlineCharacter = await _cache.GetAsync<OnlineCharacter>(_getPlayerCacheKey(characterId));
         if (onlineCharacter == null)
         {
             return null;
@@ -106,23 +106,23 @@ public class PlayerMonitor : IPlayerMonitor
         }
 
         onlineCharacter.UpdateLastSeen(timestamp, zoneId);
-        await _cache.SetAsync(GetPlayerCacheKey(characterId), onlineCharacter, CacheIdleDuration);
+        await _cache.SetAsync(_getPlayerCacheKey(characterId), onlineCharacter, _cacheIdleDuration);
 
         return onlineCharacter;
     }
 
     public async Task<IEnumerable<OnlineCharacter>?> GetAllAsync(int worldId, int? zoneId = null)
     {
-        var idList = await _cache.GetListAsync(GetListCacheKey(worldId));
+        var idList = await _cache.GetListAsync(_getListCacheKey(worldId));
 
-        var taskList = idList.Select(characterId => _cache.GetAsync<OnlineCharacter>(GetPlayerCacheKey(characterId))).ToList();
+        var taskList = idList.Select(characterId => _cache.GetAsync<OnlineCharacter>(_getPlayerCacheKey(characterId))).ToList();
 
         var characters = (await Task.WhenAll(taskList))?.Where(a => a != null);
 
         var timedOutCharacters = idList.Where(characterId => !characters!.Any(a => a.Character!.CharacterId == characterId)).ToList();
         if (timedOutCharacters.Any())
         {
-            var clearTimedOutTasks = timedOutCharacters.Select(characterId => _cache.RemoveFromListAsync(GetListCacheKey(worldId), characterId));
+            var clearTimedOutTasks = timedOutCharacters.Select(characterId => _cache.RemoveFromListAsync(_getListCacheKey(worldId), characterId));
             await Task.WhenAll(clearTimedOutTasks);
         }
 
@@ -131,27 +131,27 @@ public class PlayerMonitor : IPlayerMonitor
             return characters;
         }
 
-        return characters!.Where(a => a.LastSeen?.ZoneId == zoneId && DateTime.UtcNow - a.LastSeen.Timestamp <= MaximumIdleDuration);
+        return characters!.Where(a => a.LastSeen?.ZoneId == zoneId && DateTime.UtcNow - a.LastSeen.Timestamp <= _maximumIdleDuration);
     }
 
     public Task<long> GetPlayerCountAsync(int worldId)
     {
-        return _cache.GetListLengthAsync(GetListCacheKey(worldId));
+        return _cache.GetListLengthAsync(_getListCacheKey(worldId));
     }
 
     public Task<OnlineCharacter> GetAsync(string characterId)
     {
-        return _cache.GetAsync<OnlineCharacter>(GetPlayerCacheKey(characterId));
+        return _cache.GetAsync<OnlineCharacter>(_getPlayerCacheKey(characterId));
     }
 
     public Task ClearWorldAsync(int worldId)
     {
-        return _cache.ClearListAsync(GetListCacheKey(worldId));
+        return _cache.ClearListAsync(_getListCacheKey(worldId));
     }
 
     private Task RemoveFromCacheList(Character character)
     {
-        return Task.WhenAll(_cache.RemoveFromListAsync(GetListCacheKey(character.WorldId), character.Id!),
-            _cache.RemoveAsync(GetPlayerCacheKey(character.Id!)));
+        return Task.WhenAll(_cache.RemoveFromListAsync(_getListCacheKey(character.WorldId), character.Id!),
+            _cache.RemoveAsync(_getPlayerCacheKey(character.Id!)));
     }
 }

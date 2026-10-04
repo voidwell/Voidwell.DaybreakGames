@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Cache;
+namespace Voidwell.DaybreakGames.Cache;
 
 /// <summary>
 /// Set-like list storage. FusionCache only handles single-value entries, so lists are stored separately.

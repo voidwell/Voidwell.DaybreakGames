@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Voidwell.DaybreakGames.Data.Extensions;

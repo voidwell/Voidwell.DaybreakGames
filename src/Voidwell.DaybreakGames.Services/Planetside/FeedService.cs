@@ -1,4 +1,4 @@
-﻿using System.Xml;
+using System.Xml;
 using Microsoft.Extensions.Logging;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Rss;
@@ -40,7 +40,7 @@ public class FeedService : IFeedService
     {
         return await _cache.GetOrSetIfNotNullAsync<IEnumerable<FeedItem>>(cacheKey, async ct =>
         {
-            _logger.LogInformation($"Fetching feed: {feedUri}");
+            _logger.LogInformation("Fetching feed: {FeedUri}", feedUri);
 
             return await GetFeedAsync(feedUri);
         }, cacheExpiration);

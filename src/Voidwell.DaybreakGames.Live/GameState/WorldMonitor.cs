@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -73,14 +73,14 @@ public class WorldMonitor : IWorldMonitor
 
     private Task SetWorldOnline(int worldId)
     {
-        _logger.LogInformation($"Set world {worldId} ONLINE");
+        _logger.LogInformation("Set world {WorldId} ONLINE", worldId);
         _worldStates[worldId].SetWorldOnline();
         return SetupWorldZones(worldId);
     }
 
     private Task SetWorldOffline(int worldId, bool preservePlayers = false)
     {
-        _logger.LogInformation($"Set world {worldId} OFFLINE");
+        _logger.LogInformation("Set world {WorldId} OFFLINE", worldId);
         _worldStates[worldId].SetWorldOffline();
 
         if (preservePlayers)
@@ -318,7 +318,10 @@ public class WorldMonitor : IWorldMonitor
         {
             var errors = new List<string>();
             if (ownership == null)
+            {
                 errors.Add("Ownership is null");
+            }
+
             if (zoneMap == null)
             {
                 errors.Add("ZoneMap is null");
@@ -326,12 +329,17 @@ public class WorldMonitor : IWorldMonitor
             else
             {
                 if (zoneMap.Regions == null)
+                {
                     errors.Add("ZoneMap.Regions is null");
+                }
+
                 if (zoneMap.Links == null)
+                {
                     errors.Add("ZoneMap.Links is null");
+                }
             }
 
-            _logger.LogError(71612, $"{string.Join(", ", errors)} for worldId {worldId} zoneId {zone.Id}");
+            _logger.LogError(71612, "{Errors} for worldId {WorldId} zoneId {ZoneId}", string.Join(", ", errors), worldId, zone.Id);
 
             if (retry)
             {

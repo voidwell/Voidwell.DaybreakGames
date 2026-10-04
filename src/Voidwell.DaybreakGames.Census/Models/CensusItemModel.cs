@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Census.Models;
+namespace Voidwell.DaybreakGames.Census.Models;
 
 public class CensusItemModel
 {

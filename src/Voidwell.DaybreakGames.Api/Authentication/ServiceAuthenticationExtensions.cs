@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Voidwell.DaybreakGames.Api.Authentication;
 
@@ -27,7 +27,7 @@ public class ServiceAuthenticationOptions
 
 public static class ServiceAuthenticationExtensions
 {
-    private const string IntrospectionScheme = "introspection";
+    private const string _introspectionScheme = "introspection";
 
     public static AuthenticationBuilder AddServiceAuthentication(this AuthenticationBuilder builder, string authenticationScheme, Action<ServiceAuthenticationOptions> optionsAction)
     {
@@ -48,14 +48,14 @@ public static class ServiceAuthenticationExtensions
 
                 if (options.SupportedTokens == SupportedTokens.Both)
                 {
-                    o.ForwardDefaultSelector = ForwardReferenceToken(IntrospectionScheme);
+                    o.ForwardDefaultSelector = ForwardReferenceToken(_introspectionScheme);
                 }
             });
         }
 
         if (options.SupportedTokens != SupportedTokens.Jwt)
         {
-            builder.AddOAuth2Introspection(options.SupportedTokens == SupportedTokens.Reference ? authenticationScheme : IntrospectionScheme, o =>
+            builder.AddOAuth2Introspection(options.SupportedTokens == SupportedTokens.Reference ? authenticationScheme : _introspectionScheme, o =>
             {
                 o.Authority = options.Authority;
                 o.ClientId = options.ClientId;

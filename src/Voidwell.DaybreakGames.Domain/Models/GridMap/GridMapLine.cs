@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Domain.Models.GridMap;
+namespace Voidwell.DaybreakGames.Domain.Models.GridMap;
 
 public class GridMapLine
 {

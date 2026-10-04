@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Utils.HostedService;

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using CensusModels = Voidwell.DaybreakGames.Live.CensusStream.Models;
 using DataModels = Voidwell.DaybreakGames.Data.Models.Planetside;
 

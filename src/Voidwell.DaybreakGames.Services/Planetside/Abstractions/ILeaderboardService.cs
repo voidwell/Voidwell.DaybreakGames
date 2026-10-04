@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Domain.Models;
+using Voidwell.DaybreakGames.Domain.Models;
 
 namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 

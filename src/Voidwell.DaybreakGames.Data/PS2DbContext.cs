@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Voidwell.DaybreakGames.Data.Extensions;
 using Voidwell.DaybreakGames.Data.Models;

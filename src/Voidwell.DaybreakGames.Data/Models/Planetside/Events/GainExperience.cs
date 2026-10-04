@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 

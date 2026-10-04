@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Live.CensusStream;
+namespace Voidwell.DaybreakGames.Live.CensusStream;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class CensusEventProcessorAttribute : Attribute

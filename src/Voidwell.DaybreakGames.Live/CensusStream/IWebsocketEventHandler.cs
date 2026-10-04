@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream;
 

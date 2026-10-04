@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 
 namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;

@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Census.Collection.Abstract;
+using Voidwell.DaybreakGames.Census.Collection.Abstract;
 
 namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 

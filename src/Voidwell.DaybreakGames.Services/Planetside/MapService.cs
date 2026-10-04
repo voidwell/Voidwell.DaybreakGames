@@ -1,4 +1,4 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using AutoMapper;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;

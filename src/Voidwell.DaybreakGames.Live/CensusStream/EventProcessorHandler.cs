@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.Json;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;

@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Api.Authentication;
+namespace Voidwell.DaybreakGames.Api.Authentication;
 
 public class UserRolesClient : IUserRolesClient
 {

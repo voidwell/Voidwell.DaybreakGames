@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using DaybreakGames.Census.Stream;
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;

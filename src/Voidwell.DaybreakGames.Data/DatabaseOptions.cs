@@ -1,4 +1,4 @@
-﻿namespace Voidwell.DaybreakGames.Data;
+namespace Voidwell.DaybreakGames.Data;
 
 public class DatabaseOptions
 {

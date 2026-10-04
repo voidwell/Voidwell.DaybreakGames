@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -76,7 +76,7 @@ public class HttpTokenManager : IHttpTokenManager, IDisposable
         }
     }
 
-    private Task<HttpResponseMessage> RequestNewToken(string clientName)
+    private async Task<HttpResponseMessage> RequestNewToken(string clientName)
     {
         var clientOptions = _optionsMonitor.Get(clientName);
 
@@ -89,7 +89,8 @@ public class HttpTokenManager : IHttpTokenManager, IDisposable
         };
 
         var httpClient = _httpClientFactory.CreateClient(nameof(HttpTokenManager));
-        return httpClient.PostAsync(clientOptions.TokenServiceAddress, new FormUrlEncodedContent(payload));
+        using var content = new FormUrlEncodedContent(payload);
+        return await httpClient.PostAsync(clientOptions.TokenServiceAddress, content);
     }
 
     private bool IsTokenValid(string clientName)

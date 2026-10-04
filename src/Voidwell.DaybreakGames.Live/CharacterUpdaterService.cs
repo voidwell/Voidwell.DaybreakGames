@@ -1,4 +1,4 @@
-﻿using DaybreakGames.Census.Exceptions;
+using DaybreakGames.Census.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -95,7 +95,9 @@ public class CharacterUpdaterService : ICharacterUpdaterService
     private async void ExecuteAsync(object? stateInfo)
     {
         if (_isWorking)
+        {
             return;
+        }
 
         _isWorking = true;
         _waitError = false;
@@ -113,7 +115,9 @@ public class CharacterUpdaterService : ICharacterUpdaterService
         try
         {
             if (!_state.IsRunning || _waitError)
+            {
                 return;
+            }
 
             var character = await _characterService.GetCharacter(characterItem.CharacterId!);
             try
@@ -129,12 +133,12 @@ public class CharacterUpdaterService : ICharacterUpdaterService
             }
             catch (CensusServiceUnavailableException)
             {
-                _logger.LogError(75214, $"Service Unavailable when trying to update character {characterItem.CharacterId}");
+                _logger.LogError(75214, "Service Unavailable when trying to update character {CharacterId}", characterItem.CharacterId);
                 _waitError = true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to update for character {characterItem.CharacterId}");
+                _logger.LogError(ex, "Failed to update for character {CharacterId}", characterItem.CharacterId);
             }
         }
         finally

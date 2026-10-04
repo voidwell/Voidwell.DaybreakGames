@@ -1,4 +1,4 @@
-﻿using Voidwell.DaybreakGames.Data.Models;
+using Voidwell.DaybreakGames.Data.Models;
 
 namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 

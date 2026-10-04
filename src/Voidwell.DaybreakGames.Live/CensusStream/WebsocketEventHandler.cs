@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using DaybreakGames.Census;
 using Microsoft.Extensions.Logging;
@@ -18,7 +18,7 @@ public class WebsocketEventHandler : IWebsocketEventHandler
     private readonly IWebsocketHealthMonitor _healthMonitor;
     private readonly ILogger<WebsocketEventHandler> _logger;
 
-    private const string RegServer = @"EventServerEndpoint_(.*)_(.*)";
+    private const string _regServer = @"EventServerEndpoint_(.*)_(.*)";
 
     public WebsocketEventHandler(IEventProcessorHandler processorHandler, IWorldMonitor worldMonitor,
         IAlertService alertService, IMetagameEventService metagameEventService, IWebsocketHealthMonitor healthMonitor,
@@ -55,7 +55,7 @@ public class WebsocketEventHandler : IWebsocketEventHandler
     {
         var detail = message.TryGetString("detail");
 
-        var r = new Regex(RegServer);
+        var r = new Regex(_regServer);
         var m = r.Match(detail!);
 
         var worldName = m.Groups[1].Value;

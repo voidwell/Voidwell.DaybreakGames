@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -10,19 +10,19 @@ namespace Voidwell.DaybreakGames.Services.Test;
 
 public class MappingProfilesTest
 {
-    private static readonly MapperConfiguration Configuration = new(cfg =>
+    private static readonly MapperConfiguration _configuration = new(cfg =>
     {
         cfg.AddProfile<CensusToDomainMappingProfile>();
         cfg.AddProfile<DataToDomainMappingProfile>();
         cfg.AddProfile<DomainToDomainMappingProfile>();
     }, NullLoggerFactory.Instance);
 
-    private readonly IMapper _mapper = Configuration.CreateMapper();
+    private readonly IMapper _mapper = _configuration.CreateMapper();
 
     [Fact]
     public void Configuration_AllMapsCompile()
     {
-        var act = () => Configuration.CompileMappings();
+        var act = () => _configuration.CompileMappings();
 
         act.Should().NotThrow();
     }
