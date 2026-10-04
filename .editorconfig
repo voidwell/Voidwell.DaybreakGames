@@ -1,58 +1,90 @@
 root = true
 
 [*]
-charset = utf-8-bom
+charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
+
+[*.json]
+indent_style = space
+indent_size = 2
 
 [*.{cs,csx}]
 indent_style = space
 indent_size = 4
 
-# .NET code-style defaults
+# Formatting
+csharp_prefer_braces = true:warning
+csharp_style_var_when_type_is_apparent = false:suggestion
+csharp_indent_labels = no_change
+csharp_using_directive_placement = outside_namespace:silent
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_top_level_statements = true:silent
+csharp_style_prefer_primary_constructors = false:suggestion
+csharp_prefer_system_threading_lock = true:suggestion
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
+csharp_space_after_keywords_in_control_flow_statements = true:warning
+csharp_space_between_parentheses = false:warning
+csharp_space_around_binary_operators = before_and_after:warning
+
+# Code Style
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
-csharp_style_namespace_declarations = file_scoped:warning
-csharp_using_directive_placement = outside_namespace:suggestion
-csharp_prefer_braces = true:suggestion
-csharp_preserve_single_line_blocks = true
-csharp_preserve_single_line_statements = false
-csharp_space_after_cast = false
-csharp_space_before_colon_in_inheritance_clause = true
-csharp_space_after_colon_in_inheritance_clause = true
-csharp_space_after_keywords_in_control_flow_statements = true
-csharp_new_line_before_open_brace = all
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_auto_properties = true:silent
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
 
-# Naming rules
-# Async methods must end in Async.
-dotnet_naming_rule.async_methods_should_end_with_async.severity = warning
-dotnet_naming_rule.async_methods_should_end_with_async.symbols = async_methods
-dotnet_naming_rule.async_methods_should_end_with_async.style = end_in_async
+# Naming Rules
+dotnet_naming_rule.non_field_members_should_be_pascalcase.symbols = non_field_members
+dotnet_naming_rule.non_field_members_should_be_pascalcase.style = pascalcase
+dotnet_naming_rule.non_field_members_should_be_pascalcase.severity = error
 
-dotnet_naming_symbols.async_methods.applicable_kinds = method
-dotnet_naming_symbols.async_methods.applicable_accessibilities = *
-dotnet_naming_symbols.async_methods.required_modifiers = async
+dotnet_naming_rule.private_fields_underscored.symbols = private_fields
+dotnet_naming_rule.private_fields_underscored.style = underscored
+dotnet_naming_rule.private_fields_underscored.severity = warning
 
-dotnet_naming_style.end_in_async.required_suffix = Async
-dotnet_naming_style.end_in_async.capitalization = PascalCase
+# Symbol Groups
+dotnet_naming_symbols.non_field_members.applicable_kinds = property, method, event
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 
-# Quality checks
-dotnet_diagnostic.IDE0005.severity = warning
-dotnet_diagnostic.IDE0051.severity = warning
-dotnet_diagnostic.IDE0060.severity = warning
+# Naming Styles
+dotnet_naming_style.pascalcase.capitalization = pascal_case
+dotnet_naming_style.camelcase.capitalization = camel_case
 
-dotnet_diagnostic.CS1591.severity = none
+dotnet_naming_style.underscored.capitalization = camel_case
+dotnet_naming_style.underscored.required_prefix = _
 
-dotnet_diagnostic.CA1707.severity = warning
-dotnet_diagnostic.CA1822.severity = warning
-dotnet_diagnostic.CA1812.severity = warning
+dotnet_diagnostic.IDE0005.severity = warning     # Remove unused usings
+dotnet_diagnostic.IDE0008.severity = none        # Use explicit type
+dotnet_diagnostic.IDE0052.severity = warning     # Value assigned is never used
+dotnet_diagnostic.IDE0059.severity = warning     # Unnecessary assignment of a value
+dotnet_diagnostic.IDE0130.severity = warning     # Namespace must match folder structure
+dotnet_diagnostic.IDE1006.severity = warning     # Naming rule violation
 
-# Test projects commonly use descriptive underscore-separated names to read clearly.
-[test/**/*.cs]
-dotnet_diagnostic.IDE1006.severity = none
-dotnet_diagnostic.CA1812.severity = none
-dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1062.severity = silent       # Validate arguments null
+dotnet_diagnostic.CA1305.severity = none         # Globalization overloads
+dotnet_diagnostic.CA1822.severity = warning      # Mark members static where possible
+dotnet_diagnostic.CA1848.severity = none         # Use LoggerMessage for structured logging
+dotnet_diagnostic.CA2000.severity = error        # Dispose objects correctly
+dotnet_diagnostic.CA2007.severity = none         # Do not directly await a Task
+dotnet_diagnostic.CA2012.severity = warning      # ValueTask usage guidance
+dotnet_diagnostic.CA2254.severity = warning      # Logging message should be constant
+
+dotnet_diagnostic.CS1591.severity = none         # Missing XML comment for publicly visible type or member
 
 [src/Voidwell.DaybreakGames.Data/Migrations/**.cs]
 generated_code = true

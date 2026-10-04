@@ -6,14 +6,14 @@ on:
       - 'v*.*.*'
 
 env:
+  SOLUTION: Voidwell.DaybreakGames.slnx
+  CONFIGURATION: Release
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    # Pushing to GHCR needs packages:write and creating the release needs contents:write —
-    # the default GITHUB_TOKEN is read-only unless granted these explicitly.
     permissions:
       contents: write
       packages: write
@@ -25,13 +25,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore Voidwell.DaybreakGames.slnx
+        run: dotnet restore ${{ env.SOLUTION }}
 
       - name: Build
-        run: dotnet build Voidwell.DaybreakGames.slnx --configuration Release --no-restore
+        run: dotnet build ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
 
       - name: Test
-        run: dotnet test --solution Voidwell.DaybreakGames.slnx --configuration Release --no-build --verbosity normal
+        run: dotnet test --solution ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4

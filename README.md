@@ -107,3 +107,7 @@ docker run -p 5000:5000 -e DBConnectionString=... -e CensusServiceKey=... voidwe
 | `Voidwell.DaybreakGames.Domain` | Domain models |
 | `Voidwell.DaybreakGames.Cache` | `ICache` over FusionCache (memory + optional Redis) |
 | `Voidwell.DaybreakGames.Utils` | Shared helpers and hosted-service management |
+
+## License
+
+[MIT](LICENSE)

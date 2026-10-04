@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+env:
+  SOLUTION: Voidwell.DaybreakGames.slnx
+  CONFIGURATION: Release
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,13 +20,28 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore Voidwell.DaybreakGames.slnx
+        run: dotnet restore ${{ env.SOLUTION }}
 
       - name: Lint
-        run: dotnet format Voidwell.DaybreakGames.slnx --verify-no-changes --severity error --no-restore
+        run: dotnet format ${{ env.SOLUTION }} --verify-no-changes --severity error --no-restore
 
       - name: Build
-        run: dotnet build Voidwell.DaybreakGames.slnx --configuration Release --no-restore
+        run: dotnet build ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
 
       - name: Test
-        run: dotnet test --solution Voidwell.DaybreakGames.slnx --configuration Release --no-build --verbosity normal
+        run: dotnet test --solution ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
