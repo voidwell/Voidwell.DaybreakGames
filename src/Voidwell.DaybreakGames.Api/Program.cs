@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Api.Json;
 using Voidwell.DaybreakGames.Api.Logging;
+using Voidwell.DaybreakGames.Api.Options;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Data;
@@ -34,13 +35,15 @@ services.AddCache(options =>
     options.KeyPrefix = "Voidwell.DaybreakGames";
 });
 
+var authOptions = configuration.GetSection("Auth").Get<AuthOptions>() ?? throw new InvalidOperationException("Auth configuration section is missing.");
+
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddServiceAuthentication(JwtBearerDefaults.AuthenticationScheme, options =>
     {
-        options.Authority = "https://auth.voidwell.com";
-        options.ClientId = "voidwell-daybreakgames";
-        options.ClientSecret = configuration.GetValue<string>("ApiResourceSecret");
-        options.RoleClaimType = "roles";
+        options.Authority = authOptions.Authority;
+        options.ClientId = authOptions.ClientId;
+        options.ClientSecret = authOptions.ClientSecret;
+        options.RoleClaimType = authOptions.RoleClaimType;
         options.SupportedTokens = SupportedTokens.Both;
         options.RequireHttpsMetadata = false;
         options.EnableCaching = true;
