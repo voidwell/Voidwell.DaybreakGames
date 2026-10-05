@@ -10,7 +10,6 @@
     <File Path="Dockerfile" />
     <File Path="global.json" />
     <File Path="init-migrate.bat" />
-    <File Path="init-update.bat" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Voidwell.DaybreakGames.Api/Voidwell.DaybreakGames.Api.csproj" />

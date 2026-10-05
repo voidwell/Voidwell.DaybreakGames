@@ -68,10 +68,10 @@ The API listens on `http://0.0.0.0:5000`. Pending EF migrations are applied on s
 
 ## Database migrations
 
-Windows helper scripts in the repo root wrap `dotnet ef`:
+Helper scripts wrap `dotnet ef`:
 
-- `init-migrate.bat`: add a new timestamped migration
-- `init-update.bat`: apply migrations to the configured database
+- `scripts/init-migrate.sh [name]`: add a new migration (timestamped unless a name is given)
+- `init-update.bat` (repo root): apply migrations to the configured database
 
 ## Tests
 
