@@ -44,7 +44,10 @@ public static class ServiceAuthenticationExtensions
                 o.RequireHttpsMetadata = options.RequireHttpsMetadata;
                 o.BackchannelHttpHandler = options.BackchannelHttpHandler;
 
-                o.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+                if (!string.IsNullOrEmpty(options.RoleClaimType))
+                {
+                    o.TokenValidationParameters.RoleClaimType = options.RoleClaimType;
+                }
 
                 if (options.SupportedTokens == SupportedTokens.Both)
                 {

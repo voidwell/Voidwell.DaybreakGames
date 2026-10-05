@@ -29,7 +29,6 @@ Settings are read from `appsettings.json`, then `appsettings.{Environment}.json`
 | `CensusServiceKey` | Yes | Census service ID (without the `s:` prefix) |
 | `CensusServiceNamespace` | Yes | Census namespace, normally `ps2` |
 | `ApiResourceSecret` | Yes | Secret for this API's resource (`voidwell-daybreakgames`), used for token introspection |
-| `ClientSecret` | Yes | Client secret used to request tokens for the `voidwell-usermanagement` scope |
 | `RedisConfiguration` | No | StackExchange.Redis connection string. Empty keeps the cache in memory only. List keys are prefixed `Voidwell.DaybreakGames_` |
 | `OriginAddress` | No | Extra allowed CORS origin (`http://localhost:4200` is always allowed) |
 | `CensusWebsocketServices` | No | Comma-separated event names to subscribe to (e.g. `Death, FacilityControl, PlayerLogin`). Defaults are in `appsettings.json`. Empty disables event processing |
@@ -47,7 +46,6 @@ Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Ap
   "CensusServiceKey": "your-service-id",
   "CensusServiceNamespace": "ps2",
   "ApiResourceSecret": "dev-secret",
-  "ClientSecret": "dev-secret",
   "RedisConfiguration": "localhost:6379",
   "CensusWebsocketServices": "",
   "DisableUpdater": true

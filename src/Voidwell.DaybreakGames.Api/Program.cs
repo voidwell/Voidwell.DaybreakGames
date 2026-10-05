@@ -1,5 +1,4 @@
 using IdentityModel;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Voidwell.DaybreakGames.Api.Authentication;
@@ -12,7 +11,10 @@ using Voidwell.DaybreakGames.Live;
 using Voidwell.DaybreakGames.Services;
 using Voidwell.DaybreakGames.Utils.HostedService;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    ApplicationName = "Voidwell.DaybreakGames",
+});
 
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
@@ -38,6 +40,7 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Authority = "https://auth.voidwell.com";
         options.ClientId = "voidwell-daybreakgames";
         options.ClientSecret = configuration.GetValue<string>("ApiResourceSecret");
+        options.RoleClaimType = "roles";
         options.SupportedTokens = SupportedTokens.Both;
         options.RequireHttpsMetadata = false;
         options.EnableCaching = true;
@@ -50,16 +53,6 @@ services.AddAuthorizationBuilder()
         policy.RequireAuthenticatedUser();
         policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
     });
-
-services.AddMemoryCache();
-services.AddAuthenticatedHttpClient<IUserRolesClient, UserRolesClient>(options =>
-{
-    options.TokenServiceAddress = "https://auth.voidwell.com/connect/token";
-    options.ClientId = "voidwell-daybreakgames";
-    options.ClientSecret = configuration.GetValue<string>("ClientSecret");
-    options.Scopes = new List<string> { "voidwell-usermanagement" };
-});
-services.AddSingleton<IClaimsTransformation, RoleClaimsTransformation>();
 
 var allowedOrigins = configuration.GetValue<string>("OriginAddress");
 services.AddCors(options =>
