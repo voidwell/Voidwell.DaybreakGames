@@ -5,6 +5,7 @@ using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Api.Json;
 using Voidwell.DaybreakGames.Api.Logging;
 using Voidwell.DaybreakGames.Api.Options;
+using Voidwell.DaybreakGames.Api.Swagger;
 using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Data;
@@ -12,20 +13,19 @@ using Voidwell.DaybreakGames.Live;
 using Voidwell.DaybreakGames.Services;
 using Voidwell.DaybreakGames.Utils.HostedService;
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    ApplicationName = Environment.GetEnvironmentVariable("ApplicationName") ?? "Voidwell.DaybreakGames"
-});
+var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
-builder.Logging.AddApiLogging(builder.Environment, builder.Configuration);
+builder.Logging.AddLogging(builder.Environment, builder.Configuration);
 
 var configuration = builder.Configuration;
 var services = builder.Services;
 
 services.AddControllers()
     .AddApiJsonOptions();
+
+services.AddApiSwagger();
 
 services.AddEntityFrameworkContext(configuration);
 
@@ -85,6 +85,8 @@ var app = builder.Build();
 app.InitializeDatabases();
 
 app.UseForwardedHeaders(GetForwardedHeaderOptions());
+
+app.UseApiSwagger();
 
 app.UseRouting();
 

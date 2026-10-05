@@ -5,12 +5,14 @@ namespace Voidwell.DaybreakGames.Api.Logging;
 
 internal static class LoggingBuilderExtensions
 {
-    public static ILoggingBuilder AddApiLogging(this ILoggingBuilder builder, IHostEnvironment hostEnvironment, IConfiguration configuration)
+    public static ILoggingBuilder AddLogging(this ILoggingBuilder builder, IHostEnvironment hostEnvironment, IConfiguration configuration)
     {
+        var applicationName = configuration.GetValue<string>("ApplicationName") ?? hostEnvironment.ApplicationName;
+
         var loggerConfig = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
             .Enrich.FromLogContext()
-            .Enrich.WithProperty("Application", hostEnvironment.ApplicationName);
+            .Enrich.WithProperty("Application", applicationName);
 
         if (hostEnvironment.IsDevelopment())
         {
