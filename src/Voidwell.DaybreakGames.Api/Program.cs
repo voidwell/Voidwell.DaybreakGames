@@ -14,7 +14,7 @@ using Voidwell.DaybreakGames.Utils.HostedService;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
-    ApplicationName = "Voidwell.DaybreakGames",
+    ApplicationName = Environment.GetEnvironmentVariable("ApplicationName") ?? "Voidwell.DaybreakGames"
 });
 
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
