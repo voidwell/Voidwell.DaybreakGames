@@ -1,7 +1,7 @@
 using System.Text.Json;
 using AsyncKeyedLock;
 using Microsoft.Extensions.Logging;
-using Voidwell.DaybreakGames.Cache;
+using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;

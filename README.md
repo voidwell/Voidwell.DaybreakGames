@@ -56,7 +56,7 @@ The EF design-time factory reads `DBConnectionString` from `appsettings.json` an
 
 ### Logging
 
-Logging uses Serilog configured from the `Serilog` section. In Development it writes readable text to the console; otherwise it writes compact JSON (`Application` is set to `Voidwell.DaybreakGames`).
+Logging, caching, authentication and Swagger come from the shared `Voidwell.Common.*` packages (Logging, Cache, Authentication, Swagger). Logging uses Serilog configured from the `Serilog` section. In Development it writes readable text to the console; otherwise it writes compact JSON (`Application` is set to `Voidwell.DaybreakGames`).
 
 ## Running
 
@@ -81,7 +81,7 @@ Tests use xunit v3 on Microsoft Testing Platform (enabled through `global.json`)
 dotnet test --solution Voidwell.DaybreakGames.slnx
 ```
 
-Each application project has a matching test project named `<Project>.Test` under `test/` (Cache, Census, CensusStore, Domain, Live, Services, Utils). Shared test helpers (mock extensions, an in-memory `ICache`, map test data) live in `test/Shared`, and common packages are set once in `test/Directory.Build.props`. Run a single project with `dotnet test --project test/Voidwell.DaybreakGames.Live.Test`.
+Each application project has a matching test project named `<Project>.Test` under `test/` (Census, CensusStore, Domain, Live, Services, Utils). Shared test helpers (mock extensions, an in-memory `ICache`, map test data) live in `test/Shared`, and common packages are set once in `test/Directory.Build.props`. Run a single project with `dotnet test --project test/Voidwell.DaybreakGames.Live.Test`.
 
 ## Docker
 
@@ -103,7 +103,6 @@ docker run -p 5000:5000 -e DBConnectionString=... -e CensusServiceKey=... voidwe
 | `Voidwell.DaybreakGames.Census` | Census API collections and models |
 | `Voidwell.DaybreakGames.Data` | EF Core context, repositories, migrations |
 | `Voidwell.DaybreakGames.Domain` | Domain models |
-| `Voidwell.DaybreakGames.Cache` | `ICache` over FusionCache (memory + optional Redis) |
 | `Voidwell.DaybreakGames.Utils` | Shared helpers and hosted-service management |
 
 ## License

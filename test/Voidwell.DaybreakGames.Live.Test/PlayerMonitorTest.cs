@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Moq;
-using Voidwell.DaybreakGames.Cache;
+using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.GameState;

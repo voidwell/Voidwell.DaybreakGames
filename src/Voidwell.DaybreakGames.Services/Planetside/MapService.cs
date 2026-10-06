@@ -1,6 +1,6 @@
 using AsyncKeyedLock;
 using AutoMapper;
-using Voidwell.DaybreakGames.Cache;
+using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;

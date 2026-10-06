@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Voidwell.DaybreakGames.Cache;
+using Voidwell.Common.Cache;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService;
 

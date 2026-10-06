@@ -21,8 +21,7 @@ WORKDIR /app
 
 COPY --from=build /app/publish ./
 
-RUN mkdir -p /data
-VOLUME ["/data"]
+ENV ASPNETCORE_URLS=http://*:5000
 EXPOSE 5000
 
 ENTRYPOINT ["sh", "-c", "exec dotnet Voidwell.DaybreakGames.Api.dll"]

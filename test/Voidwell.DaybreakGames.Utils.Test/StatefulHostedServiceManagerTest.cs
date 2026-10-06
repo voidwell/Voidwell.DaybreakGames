@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Voidwell.DaybreakGames.Cache;
+using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Utils.HostedService;
 using Xunit;
 

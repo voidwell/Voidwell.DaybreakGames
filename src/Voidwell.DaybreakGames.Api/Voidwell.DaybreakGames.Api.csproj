@@ -4,7 +4,6 @@
     <AssemblyName>Voidwell.DaybreakGames.Api</AssemblyName>
   </PropertyGroup>
 
-
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.DaybreakGames.Data\Voidwell.DaybreakGames.Data.csproj" />
     <ProjectReference Include="..\Voidwell.DaybreakGames.Services\Voidwell.DaybreakGames.Services.csproj" />
@@ -21,14 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="IdentityModel" />
-    <PackageReference Include="IdentityModel.AspNetCore.OAuth2Introspection" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-    <PackageReference Include="Serilog.Extensions.Hosting" />
-    <PackageReference Include="Serilog.Formatting.Compact" />
-    <PackageReference Include="Serilog.Settings.Configuration" />
-    <PackageReference Include="Serilog.Sinks.Console" />
-    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Voidwell.Common.Authentication" />
+    <PackageReference Include="Voidwell.Common.Cache" />
+    <PackageReference Include="Voidwell.Common.Logging" />
+    <PackageReference Include="Voidwell.Common.Swagger" />
   </ItemGroup>
 
 </Project>

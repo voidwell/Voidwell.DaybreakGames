@@ -1,12 +1,13 @@
-using IdentityModel;
+using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Voidwell.Common.Authentication;
+using Voidwell.Common.Cache;
+using Voidwell.Common.Logging;
+using Voidwell.Common.Swagger;
 using Voidwell.DaybreakGames.Api.Authentication;
-using Voidwell.DaybreakGames.Api.Json;
-using Voidwell.DaybreakGames.Api.Logging;
+using Voidwell.DaybreakGames.Api.Extensions;
 using Voidwell.DaybreakGames.Api.Options;
-using Voidwell.DaybreakGames.Api.Swagger;
-using Voidwell.DaybreakGames.Cache;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Live;
@@ -15,9 +16,7 @@ using Voidwell.DaybreakGames.Utils.HostedService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://0.0.0.0:5000");
-
-builder.Logging.AddLogging(builder.Environment, builder.Configuration);
+builder.AddApplicationLogging();
 
 var configuration = builder.Configuration;
 var services = builder.Services;
@@ -25,14 +24,13 @@ var services = builder.Services;
 services.AddControllers()
     .AddApiJsonOptions();
 
-services.AddApiSwagger();
+services.AddApiSwagger(configuration);
 
 services.AddEntityFrameworkContext(configuration);
 
 services.AddCache(options =>
 {
     options.RedisConfiguration = configuration.GetValue<string>("RedisConfiguration");
-    options.KeyPrefix = "Voidwell.DaybreakGames";
 });
 
 var authOptions = configuration.GetSection("Auth").Get<AuthOptions>() ?? throw new InvalidOperationException("Auth configuration section is missing.");

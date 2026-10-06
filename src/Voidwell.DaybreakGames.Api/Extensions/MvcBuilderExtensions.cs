@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Voidwell.DaybreakGames.Api.Json;
+namespace Voidwell.DaybreakGames.Api.Extensions;
 
-public static class MvcBuilderExtensions
+internal static class MvcBuilderExtensions
 {
     public static IMvcBuilder AddApiJsonOptions(this IMvcBuilder builder)
     {
@@ -17,7 +17,7 @@ public static class MvcBuilderExtensions
     }
 }
 
-public class DateTimeJsonConverter : JsonConverter<DateTime>
+internal sealed class DateTimeJsonConverter : JsonConverter<DateTime>
 {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

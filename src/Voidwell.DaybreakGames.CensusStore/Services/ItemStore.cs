@@ -1,4 +1,4 @@
-using Voidwell.DaybreakGames.Cache;
+using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;

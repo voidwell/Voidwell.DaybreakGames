@@ -2,7 +2,7 @@ using System.Xml;
 using Microsoft.Extensions.Logging;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Rss;
-using Voidwell.DaybreakGames.Cache;
+using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 

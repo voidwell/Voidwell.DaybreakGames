@@ -2,12 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-    <PackageReference Include="ZiggyCreatures.FusionCache" />
-    <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Voidwell.DaybreakGames.Cache\Voidwell.DaybreakGames.Cache.csproj" />
+    <PackageReference Include="Voidwell.Common.Cache" />
   </ItemGroup>
 
 </Project>
