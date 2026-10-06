@@ -14,29 +14,36 @@ Backend API for Voidwell's PlanetSide 2 data. It ingests Daybreak Games' Census 
 | PostgreSQL | any supported release | Primary data store (EF Core + Npgsql); migrations run automatically on startup |
 | Redis | optional | Shared cache (FusionCache L2 + backplane) and list storage. If `RedisConfiguration` is empty, caching is in-memory per instance |
 | Daybreak Games Census service ID | n/a | Access to the Census API and event stream |
-| Voidwell auth server (`https://auth.voidwell.com`) | n/a | Validates incoming JWT / reference tokens and issues client-credentials tokens used to look up user roles |
+| OAuth2 / OpenID Connect authority (the Voidwell auth server) | n/a | Validates incoming JWT and reference tokens; configured through the `Auth` section |
 | Docker | optional | Container build and deployment |
 
 NuGet versions are managed centrally in [Directory.Packages.props](Directory.Packages.props).
 
 ## Configuration
 
-Settings are read from `appsettings.json`, then `appsettings.{Environment}.json` (for example `appsettings.Development.json`, optional), then environment variables. Environment variables override files; use `__` for nesting if needed.
+Settings are read from `appsettings.json`, then `appsettings.{Environment}.json` (for example `appsettings.Development.json`, optional), then environment variables. Environment variables override files; use `__` for nested keys, for example `Auth__ClientSecret` for `Auth:ClientSecret`.
 
 | Key | Required | Description |
 |---|---|---|
 | `DBConnectionString` | Yes | Npgsql connection string, e.g. `Server=localhost;Database=voidwell.daybreakgames;Username=...;Password=...` |
+| `PoolSize` | No | DbContext pool size (default `100`) |
 | `CensusServiceKey` | Yes | Census service ID (without the `s:` prefix) |
 | `CensusServiceNamespace` | Yes | Census namespace, normally `ps2` |
-| `ApiResourceSecret` | Yes | Secret for this API's resource (`voidwell-daybreakgames`), used for token introspection |
-| `RedisConfiguration` | No | StackExchange.Redis connection string. Empty keeps the cache in memory only. List keys are prefixed `Voidwell.DaybreakGames_` |
+| `Auth:Authority` | Yes | Base URL of the token authority used to validate JWTs and introspect reference tokens. The app fails at startup if the `Auth` section is missing |
+| `Auth:ClientId` | Yes | Client (API resource) id used for token introspection |
+| `Auth:ClientSecret` | Yes | Secret for that client |
+| `Auth:RoleClaimType` | No | Claim type that carries user roles |
+| `ApplicationName` | No | Name used in logs and Swagger (`Voidwell.DaybreakGames` in `appsettings.json`) |
+| `RedisConfiguration` | No | StackExchange.Redis connection string. Empty keeps the cache in memory only |
 | `OriginAddress` | No | Extra allowed CORS origin (`http://localhost:4200` is always allowed) |
 | `CensusWebsocketServices` | No | Comma-separated event names to subscribe to (e.g. `Death, FacilityControl, PlayerLogin`). Defaults are in `appsettings.json`. Empty disables event processing |
 | `CensusWebsocketExperienceIds` | No | Experience IDs to subscribe to |
 | `CensusWebsocketWorlds` / `CensusWebsocketCharacters` | No | Worlds and characters to stream; `all` by default |
 | `DisableUpdater` | No | `true` disables the scheduled Census store updater |
+| `DisableCharacterUpdater` | No | `true` disables the background character updater |
+| `DisableCensusMonitor` | No | `true` disables the Census websocket monitor |
 | `LogCensusErrors` | No | `true` logs Census client errors (default `false`) |
-| `Serilog` | No | Standard Serilog configuration section (levels and overrides) in `appsettings.json` |
+| `Serilog` | No | Standard Serilog configuration section (minimum level and per-namespace overrides); defaults are in `appsettings.json` |
 
 Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Api/`; it is gitignored, so keep real secrets there):
 
@@ -45,7 +52,11 @@ Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Ap
   "DBConnectionString": "Server=localhost;Database=voidwell.daybreakgames;Username=postgres;Password=postgres",
   "CensusServiceKey": "your-service-id",
   "CensusServiceNamespace": "ps2",
-  "ApiResourceSecret": "dev-secret",
+  "Auth": {
+    "Authority": "https://auth.example.com",
+    "ClientId": "voidwell-daybreakgames",
+    "ClientSecret": "dev-secret"
+  },
   "RedisConfiguration": "localhost:6379",
   "CensusWebsocketServices": "",
   "DisableUpdater": true
@@ -56,7 +67,7 @@ The EF design-time factory reads `DBConnectionString` from `appsettings.json` an
 
 ### Logging
 
-Logging, caching, authentication and Swagger come from the shared `Voidwell.Common.*` packages (Logging, Cache, Authentication, Swagger). Logging uses Serilog configured from the `Serilog` section. In Development it writes readable text to the console; otherwise it writes compact JSON (`Application` is set to `Voidwell.DaybreakGames`).
+Logging, caching, authentication and Swagger come from the shared `Voidwell.Common.*` packages (Logging, Cache, Authentication, Swagger). Logging uses Serilog configured from the `Serilog` section. In Development it writes readable text to the console; otherwise it writes compact JSON (each event carries an `Application` property from `ApplicationName`).
 
 ## Running
 
@@ -68,10 +79,9 @@ The API listens on `http://0.0.0.0:5000`. Pending EF migrations are applied on s
 
 ## Database migrations
 
-Helper scripts wrap `dotnet ef`:
+Migrations are applied automatically when the API starts. To add one, use the helper script (it wraps `dotnet ef` and uses the `Development` environment):
 
 - `scripts/init-migrate.sh [name]`: add a new migration (timestamped unless a name is given)
-- `init-update.bat` (repo root): apply migrations to the configured database
 
 ## Tests
 
@@ -89,8 +99,6 @@ Each application project has a matching test project named `<Project>.Test` unde
 docker build -t voidwell-daybreakgames .
 docker run -p 5000:5000 -e DBConnectionString=... -e CensusServiceKey=... voidwell-daybreakgames
 ```
-
-`Dockerfile.debug` builds a development image with `vsdbg` and SSH for remote debugging.
 
 ## Project layout
 
