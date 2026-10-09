@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Extensions;
 
