@@ -9,10 +9,14 @@ namespace Voidwell.DaybreakGames.Data;
 
 public class PS2DbContext : DbContext
 {
+    static PS2DbContext()
+    {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+    }
+
     public PS2DbContext(DbContextOptions<PS2DbContext> options)
         : base(options)
     {
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
     public DbSet<Alert> Alerts => Set<Alert>();
@@ -85,31 +89,34 @@ public class PS2DbContext : DbContext
 
     public DbSet<UpdaterScheduler> UpdaterScheduler => Set<UpdaterScheduler>();
 
+    internal static DbContextOptions<PS2DbContext> CreateDefaultDbContextOptions(DatabaseOptions options)
+    {
+        var builder = new DbContextOptionsBuilder<PS2DbContext>();
+
+        Configure(builder, options);
+
+        return builder.Options;
+    }
+
+    internal static void Configure(DbContextOptionsBuilder builder, DatabaseOptions options)
+    {
+        builder.UseNpgsql(options.ConnectionString, b =>
+        {
+            b.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+
+            if (options.CommandTimeout != null)
+            {
+                b.CommandTimeout(options.CommandTimeout);
+            }
+        })
+        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        ApplyConfigurations(builder);
+        builder.ApplyConfigurationsFromAssembly(typeof(PS2DbContext).Assembly);
         builder.ConvertToSnakeCaseConvention();
-    }
-
-    private static void ApplyConfigurations(ModelBuilder builder)
-    {
-        var applyGenericMethods = typeof(ModelBuilder).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-        var applyGenericApplyConfigurationMethods = applyGenericMethods.Where(a => a.IsGenericMethod && a.Name.Equals("ApplyConfiguration", StringComparison.OrdinalIgnoreCase));
-        var applyGenericMethod = applyGenericApplyConfigurationMethods.FirstOrDefault(a => a.GetParameters().FirstOrDefault()?.ParameterType.Name == "IEntityTypeConfiguration`1");
-
-        foreach (var type in Assembly.GetExecutingAssembly().GetTypes().Where(c => c.IsClass && !c.IsAbstract && !c.ContainsGenericParameters))
-        {
-            foreach (var iface in type.GetInterfaces())
-            {
-                if (iface.IsConstructedGenericType && iface.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>))
-                {
-                    var applyConcreteMethod = applyGenericMethod!.MakeGenericMethod(iface.GenericTypeArguments[0]);
-                    applyConcreteMethod.Invoke(builder, new[] { Activator.CreateInstance(type) });
-                    break;
-                }
-            }
-        }
     }
 }

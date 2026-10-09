@@ -5,7 +5,7 @@ using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Api.Controllers;
 
-[Route("services")]
+[Route("ps2/services")]
 [Authorize(Roles = AuthConstants.Roles.Administrator)]
 public class ServicesController : Controller
 {

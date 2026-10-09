@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
@@ -8,26 +7,18 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<PS2DbConte
 {
     public PS2DbContext CreateDbContext(string[] args)
     {
-        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-            ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
-            ?? "Development";
-
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true)
-            .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddJsonFile(Path.Combine("..", "Voidwell.DaybreakGames.Api", "appsettings.json"), optional: true)
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddJsonFile(Path.Combine("..", "Voidwell.DaybreakGames.Api", "appsettings.Development.json"), optional: true)
             .AddEnvironmentVariables()
             .Build();
 
-        var builder = new DbContextOptionsBuilder<PS2DbContext>();
+        var options = configuration.Get<DatabaseOptions>() ?? new DatabaseOptions();
+        options.CommandTimeout ??= 180;
 
-        var connectionString = configuration.GetValue<string>("DBConnectionString");
-
-        builder.UseNpgsql(connectionString, o =>
-        {
-            o.CommandTimeout(7200);
-        });
-
-        return new PS2DbContext(builder.Options);
+        return new PS2DbContext(PS2DbContext.CreateDefaultDbContextOptions(options));
     }
 }

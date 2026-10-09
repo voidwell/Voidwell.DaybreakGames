@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class FacilityControl : IEntityTypeConfiguration<Models.Planetside.Events.FacilityControl>
+public class FacilityControl : IEntityTypeConfiguration<Models.Planetside.Events.FacilityControl>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.FacilityControl> builder)
     {

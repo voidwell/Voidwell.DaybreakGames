@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class PlayerFacilityDefend : IEntityTypeConfiguration<Models.Planetside.Events.PlayerFacilityDefend>
+public class PlayerFacilityDefend : IEntityTypeConfiguration<Models.Planetside.Events.PlayerFacilityDefend>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityDefend> builder)
     {

@@ -7,30 +7,22 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class ExperienceRepository : IExperienceRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public ExperienceRepository(IDbContextHelper dbContextHelper)
+    public ExperienceRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<Experience?> GetExperienceById(int experienceId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.Experience.FirstOrDefaultAsync(a => a.Id == experienceId);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.Experience.FirstOrDefaultAsync(a => a.Id == experienceId);
     }
 
     public async Task UpsertRangeAsync(IEnumerable<Experience> entities)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.UpsertAsync(entities);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.UpsertAsync(entities);
     }
 }

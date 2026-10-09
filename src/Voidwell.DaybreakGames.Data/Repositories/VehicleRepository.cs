@@ -7,41 +7,29 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class VehicleRepository : IVehicleRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public VehicleRepository(IDbContextHelper dbContextHelper)
+    public VehicleRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.Vehicles.Include(i => i.Faction)
-                .ToListAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.Vehicles.Include(i => i.Faction)
+            .ToListAsync();
     }
 
     public async Task UpsertRangeAsync(IEnumerable<Vehicle> entities)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.UpsertAsync(entities);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.UpsertAsync(entities);
     }
 
     public async Task UpsertRangeAsync(IEnumerable<VehicleFaction> entities)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.UpsertAsync(entities);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.UpsertAsync(entities);
     }
 }

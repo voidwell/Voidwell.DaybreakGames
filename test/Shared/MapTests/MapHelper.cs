@@ -93,11 +93,9 @@ public static class MapHelper
 
     private static T LoadJson<T>(string filename, string rootProperty) where T : class
     {
-        using (var r = new StreamReader(filename))
-        {
-            return JsonSerializer.Deserialize<JsonElement>(r.ReadToEnd())
-                .GetProperty(rootProperty)
-                .Deserialize<T>(_jsonSerializerOptions);
-        }
+        using var r = new StreamReader(filename);
+        return JsonSerializer.Deserialize<JsonElement>(r.ReadToEnd())
+            .GetProperty(rootProperty)
+            .Deserialize<T>(_jsonSerializerOptions);
     }
 }

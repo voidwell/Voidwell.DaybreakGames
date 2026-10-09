@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class EventVehicleDestroyConfiguration : IEntityTypeConfiguration<Models.Planetside.Events.VehicleDestroy>
+public class EventVehicleDestroyConfiguration : IEntityTypeConfiguration<Models.Planetside.Events.VehicleDestroy>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.VehicleDestroy> builder)
     {

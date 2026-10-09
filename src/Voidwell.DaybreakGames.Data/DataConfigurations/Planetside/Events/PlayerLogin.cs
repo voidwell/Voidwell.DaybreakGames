@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class PlayerLogin : IEntityTypeConfiguration<Models.Planetside.Events.PlayerLogin>
+public class PlayerLogin : IEntityTypeConfiguration<Models.Planetside.Events.PlayerLogin>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerLogin> builder)
     {

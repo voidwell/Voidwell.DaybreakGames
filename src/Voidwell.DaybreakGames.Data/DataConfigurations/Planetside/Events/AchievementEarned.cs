@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class AchievementEarned : IEntityTypeConfiguration<Models.Planetside.Events.AchievementEarned>
+public class AchievementEarned : IEntityTypeConfiguration<Models.Planetside.Events.AchievementEarned>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.AchievementEarned> builder)
     {

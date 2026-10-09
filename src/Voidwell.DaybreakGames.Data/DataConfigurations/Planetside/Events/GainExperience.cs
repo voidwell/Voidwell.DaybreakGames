@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class GainExperience : IEntityTypeConfiguration<Models.Planetside.Events.GainExperience>
+public class GainExperience : IEntityTypeConfiguration<Models.Planetside.Events.GainExperience>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.GainExperience> builder)
     {

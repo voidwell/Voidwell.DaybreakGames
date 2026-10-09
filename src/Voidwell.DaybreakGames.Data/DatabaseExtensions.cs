@@ -1,4 +1,3 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,24 +9,14 @@ namespace Voidwell.DaybreakGames.Data;
 
 public static class DatabaseExtensions
 {
-    private static readonly string _migrationAssembly = typeof(DatabaseExtensions).GetTypeInfo().Assembly.GetName().Name!;
-
     public static IServiceCollection AddEntityFrameworkContext(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions();
-        services.Configure<DatabaseOptions>(configuration);
+        var options = configuration.Get<DatabaseOptions>() ?? new DatabaseOptions();
 
-        var options = configuration.Get<DatabaseOptions>();
+        services.AddPooledDbContextFactory<PS2DbContext>(
+            builder => PS2DbContext.Configure(builder, options),
+            options.PoolSize);
 
-        services.AddEntityFrameworkNpgsql();
-
-        services.AddDbContextPool<PS2DbContext>(builder =>
-            builder.UseNpgsql(options!.DBConnectionString, b =>
-            {
-                b.MigrationsAssembly(_migrationAssembly);
-            }), options!.PoolSize);
-
-        services.AddSingleton<IDbContextHelper, DbContextHelper>();
         services.AddSingleton<IUpdaterSchedulerRepository, UpdaterSchedulerRepository>();
         services.AddSingleton<IFactionRepository, FactionRepository>();
         services.AddSingleton<IItemRepository, ItemRepository>();
@@ -59,11 +48,11 @@ public static class DatabaseExtensions
 
     public static IApplicationBuilder InitializeDatabases(this IApplicationBuilder app)
     {
-        using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
-        {
-            var dbContext = serviceScope.ServiceProvider.GetRequiredService<PS2DbContext>();
-            dbContext.Database.Migrate();
-        }
+        using var serviceScope = app.ApplicationServices.CreateScope();
+
+        var dbContextFactory = serviceScope.ServiceProvider.GetRequiredService<IDbContextFactory<PS2DbContext>>();
+        using var dbContext = dbContextFactory.CreateDbContext();
+        dbContext.Database.Migrate();
 
         return app;
     }

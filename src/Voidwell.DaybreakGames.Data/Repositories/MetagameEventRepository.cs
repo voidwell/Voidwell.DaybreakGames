@@ -7,51 +7,35 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class MetagameEventRepository : IMetagameEventRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public MetagameEventRepository(IDbContextHelper dbContextHelper)
+    public MetagameEventRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<MetagameEventCategory?> GetMetagameEventCategory(int metagameEventId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.MetagameEventCategories.FirstOrDefaultAsync(a => a.Id == metagameEventId);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.MetagameEventCategories.FirstOrDefaultAsync(a => a.Id == metagameEventId);
     }
 
     public async Task<int?> GetMetagameCategoryZoneId(int metagameEventId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            var categoryZone = await dbContext.MetagameEventCategoryZones.FirstOrDefaultAsync(a => a.MetagameEventCategoryId == metagameEventId);
-            return categoryZone?.ZoneId;
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var categoryZone = await dbContext.MetagameEventCategoryZones.FirstOrDefaultAsync(a => a.MetagameEventCategoryId == metagameEventId);
+        return categoryZone?.ZoneId;
     }
 
     public async Task UpsertRangeAsync(IEnumerable<MetagameEventCategory> entities)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.UpsertAsync(entities);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.UpsertAsync(entities);
     }
 
     public async Task UpsertRangeAsync(IEnumerable<MetagameEventState> entities)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.UpsertAsync(entities);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.UpsertAsync(entities);
     }
 }

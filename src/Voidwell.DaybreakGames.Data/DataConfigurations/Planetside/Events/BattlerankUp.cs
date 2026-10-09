@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class BattlerankUp : IEntityTypeConfiguration<Models.Planetside.Events.BattlerankUp>
+public class BattlerankUp : IEntityTypeConfiguration<Models.Planetside.Events.BattlerankUp>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.BattlerankUp> builder)
     {

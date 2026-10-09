@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,7 @@ namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedService
 {
     private readonly IUpdaterSchedulerRepository _updaterSchedulerRepository;
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
     private readonly IServiceProvider _serviceProvider;
     private readonly StaticStoreUpdaterConfiguration _options;
     private readonly ILogger<StoreUpdaterScheduler> _logger;
@@ -26,12 +27,12 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
 
     private readonly SemaphoreSlim _updateLock = new(1);
 
-    public StoreUpdaterScheduler(IUpdaterSchedulerRepository updaterSchedulerRepository, IDbContextHelper dbContextHelper,
+    public StoreUpdaterScheduler(IUpdaterSchedulerRepository updaterSchedulerRepository, IDbContextFactory<PS2DbContext> dbContextFactory,
         IServiceProvider serviceProvider, IOptions<StaticStoreUpdaterConfiguration> options, ILogger<StoreUpdaterScheduler> logger,
         IMapper mapper)
     {
         _updaterSchedulerRepository = updaterSchedulerRepository;
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
         _serviceProvider = serviceProvider;
         _options = options.Value;
         _logger = logger;
@@ -165,15 +166,11 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
                 .First(a => a.Name == "UpsertAsync" && a.GetParameters()[1].ParameterType.IsGenericType && typeof(IEnumerable<>).IsAssignableTo(a.GetParameters()[1].ParameterType.GetGenericTypeDefinition()));
     private async Task UpsertAsync(object values)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var task = (Task)_upsertMethod.MakeGenericMethod(values.GetType().GetGenericArguments()[0])
+            .Invoke(dbContext, new[] { dbContext, values })!;
 
-            var task = (Task)_upsertMethod.MakeGenericMethod(values.GetType().GetGenericArguments()[0])
-                .Invoke(dbContext, new[] { dbContext, values })!;
-
-            await task!.WaitAsync(CancellationToken.None);
-        }
+        await task!.WaitAsync(CancellationToken.None);
     }
 
     private object MapEntityValues(Type entityType, object values)

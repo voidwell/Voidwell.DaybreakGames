@@ -7,42 +7,30 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class WorldRepository : IWorldRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public WorldRepository(IDbContextHelper dbContextHelper)
+    public WorldRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<IEnumerable<World>> GetAllWorldsAsync()
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.Worlds.ToListAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.Worlds.ToListAsync();
     }
 
     public async Task<IEnumerable<DailyPopulation>> GetDailyPopulationsByWorldIdAsync(int worldId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.DailyPopulations
-                .Where(a => a.WorldId == worldId)
-                .ToListAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.DailyPopulations
+            .Where(a => a.WorldId == worldId)
+            .ToListAsync();
     }
 
     public async Task UpsertRangeAsync(IEnumerable<World> entities)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.UpsertAsync(entities);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.UpsertAsync(entities);
     }
 }

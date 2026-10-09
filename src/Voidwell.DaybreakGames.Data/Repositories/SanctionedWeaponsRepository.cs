@@ -6,22 +6,18 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class SanctionedWeaponsRepository : ISanctionedWeaponsRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public SanctionedWeaponsRepository(IDbContextHelper dbContextHelper)
+    public SanctionedWeaponsRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<IEnumerable<SanctionedWeapon>> GetAllSanctionedWeapons()
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.SanctionedWeapons
-                .Where(a => a.Type == "i")
-                .ToListAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.SanctionedWeapons
+            .Where(a => a.Type == "i")
+            .ToListAsync();
     }
 }

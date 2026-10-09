@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class PlayerLogout : IEntityTypeConfiguration<Models.Planetside.Events.PlayerLogout>
+public class PlayerLogout : IEntityTypeConfiguration<Models.Planetside.Events.PlayerLogout>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerLogout> builder)
     {

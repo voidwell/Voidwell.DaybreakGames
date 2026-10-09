@@ -9,156 +9,133 @@ public class AlertRepository : IAlertRepository
     private const int _koltyrZoneId = 14;
     private const int _zonePendingCategoryId = 5;
 
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public AlertRepository(IDbContextHelper dbContextHelper)
+    public AlertRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<Alert?> GetActiveAlert(int worldId, int zoneId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var query = from alert in dbContext.Alerts
+
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
+
+                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != _zonePendingCategoryId
+                    select new { alert, metagameEvent };
+
+        var result = await query.FirstOrDefaultAsync();
+        if (result != null)
         {
-            var dbContext = factory.GetDbContext();
-
-            var query = from alert in dbContext.Alerts
-
-                        join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                        from metagameEvent in metagameEventQ.DefaultIfEmpty()
-
-                        where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && alert.ZoneId == zoneId && metagameEvent.Type != _zonePendingCategoryId
-                        select new { alert, metagameEvent };
-
-            var result = await query.FirstOrDefaultAsync();
-            if (result != null)
-            {
-                result.alert.MetagameEvent = result.metagameEvent;
-            }
-
-            return result?.alert;
+            result.alert.MetagameEvent = result.metagameEvent;
         }
+
+        return result?.alert;
     }
 
     public async Task<IEnumerable<Alert>?> GetActiveAlertsByWorldId(int worldId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var query = from alert in dbContext.Alerts
 
-            var query = from alert in dbContext.Alerts
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
 
-                        join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                        from metagameEvent in metagameEventQ.DefaultIfEmpty()
+                    where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && metagameEvent.Type != _zonePendingCategoryId && alert.ZoneId != _koltyrZoneId
+                    select new { alert, metagameEvent };
 
-                        where alert.WorldId == worldId && alert.EndDate > DateTime.UtcNow && metagameEvent.Type != _zonePendingCategoryId && alert.ZoneId != _koltyrZoneId
-                        select new { alert, metagameEvent };
+        var results = await query.ToListAsync();
+        results?.ForEach(a => a.alert.MetagameEvent = a.metagameEvent);
 
-            var results = await query.ToListAsync();
-            results?.ForEach(a => a.alert.MetagameEvent = a.metagameEvent);
-
-            return results?.Select(a => a.alert);
-        }
+        return results?.Select(a => a.alert);
     }
 
     public async Task<IEnumerable<Alert>> GetAlerts(int pageNumber, int limit, int? worldId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var query = from alert in dbContext.Alerts
+
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
+
+                    join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
+                    from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
+
+                    where metagameEvent.Type != _zonePendingCategoryId && alert.ZoneId != _koltyrZoneId
+                    orderby alert.StartDate descending
+                    select new { alert, metagameEvent, metagameEventZone };
+
+        if (worldId != null)
         {
-            var dbContext = factory.GetDbContext();
+            query = query.Where(a => a.alert.WorldId == worldId);
+        }
 
-            var query = from alert in dbContext.Alerts
+        var result = query.Skip(pageNumber * limit).Take(limit).ToList().Select(a =>
+        {
+            a.alert.MetagameEvent = a.metagameEvent;
 
-                        join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                        from metagameEvent in metagameEventQ.DefaultIfEmpty()
-
-                        join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
-                        from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
-
-                        where metagameEvent.Type != _zonePendingCategoryId && alert.ZoneId != _koltyrZoneId
-                        orderby alert.StartDate descending
-                        select new { alert, metagameEvent, metagameEventZone };
-
-            if (worldId != null)
+            if (a.metagameEventZone != null)
             {
-                query = query.Where(a => a.alert.WorldId == worldId);
+                a.alert.ZoneId = a.alert.ZoneId ?? a.metagameEventZone.ZoneId;
             }
 
-            var result = query.Skip(pageNumber * limit).Take(limit).ToList().Select(a =>
-            {
-                a.alert.MetagameEvent = a.metagameEvent;
+            return a.alert;
+        });
 
-                if (a.metagameEventZone != null)
-                {
-                    a.alert.ZoneId = a.alert.ZoneId ?? a.metagameEventZone.ZoneId;
-                }
-
-                return a.alert;
-            });
-
-            return await Task.FromResult(result);
-        }
+        return await Task.FromResult(result);
     }
 
     public async Task<Alert?> GetAlert(int worldId, int instanceId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var query = from alert in dbContext.Alerts
+
+                    join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
+                    from metagameEvent in metagameEventQ.DefaultIfEmpty()
+
+                    join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
+                    from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
+
+                    where alert.WorldId == worldId && alert.MetagameInstanceId == instanceId
+                    select new { alert, metagameEvent, metagameEventZone };
+
+        var result = await query.FirstOrDefaultAsync();
+        if (result == null)
         {
-            var dbContext = factory.GetDbContext();
-            var query = from alert in dbContext.Alerts
-
-                        join metagameEvent in dbContext.MetagameEventCategories on alert.MetagameEventId equals metagameEvent.Id into metagameEventQ
-                        from metagameEvent in metagameEventQ.DefaultIfEmpty()
-
-                        join metagameEventZone in dbContext.MetagameEventCategoryZones on alert.MetagameEventId equals metagameEventZone.MetagameEventCategoryId into metagameEventZoneQ
-                        from metagameEventZone in metagameEventZoneQ.DefaultIfEmpty()
-
-                        where alert.WorldId == worldId && alert.MetagameInstanceId == instanceId
-                        select new { alert, metagameEvent, metagameEventZone };
-
-            var result = await query.FirstOrDefaultAsync();
-            if (result == null)
-            {
-                return null;
-            }
-
-            result.alert.MetagameEvent = result.metagameEvent;
-
-            if (result.alert.ZoneId == null && result.metagameEventZone != null)
-            {
-                result.alert.ZoneId = result.metagameEventZone.ZoneId;
-            }
-
-            return result.alert;
+            return null;
         }
+
+        result.alert.MetagameEvent = result.metagameEvent;
+
+        if (result.alert.ZoneId == null && result.metagameEventZone != null)
+        {
+            result.alert.ZoneId = result.metagameEventZone.ZoneId;
+        }
+
+        return result.alert;
     }
 
     public async Task AddAsync(Alert entity)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            dbContext.Alerts.Add(entity);
-            await dbContext.SaveChangesAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        dbContext.Alerts.Add(entity);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Alert entity)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var dbSet = dbContext.Alerts;
 
-            var dbSet = dbContext.Alerts;
+        var storeEntity = await dbSet
+            .FirstOrDefaultAsync(a => a.MetagameInstanceId == entity.MetagameInstanceId && a.WorldId == entity.WorldId);
 
-            var storeEntity = await dbSet
-                .FirstOrDefaultAsync(a => a.MetagameInstanceId == entity.MetagameInstanceId && a.WorldId == entity.WorldId);
+        storeEntity = entity;
+        dbSet.Update(storeEntity);
 
-            storeEntity = entity;
-            dbSet.Update(storeEntity);
-
-            await dbContext.SaveChangesAsync();
-        }
+        await dbContext.SaveChangesAsync();
     }
 }

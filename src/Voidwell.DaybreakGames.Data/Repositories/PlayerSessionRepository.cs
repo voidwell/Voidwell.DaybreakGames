@@ -6,45 +6,33 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class PlayerSessionRepository : IPlayerSessionRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public PlayerSessionRepository(IDbContextHelper dbContextHelper)
+    public PlayerSessionRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task AddAsync(PlayerSession entity)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.PlayerSessions.AddAsync(entity);
-            await dbContext.SaveChangesAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.PlayerSessions.AddAsync(entity);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<PlayerSession?> GetPlayerSessionAsync(int sessionId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id == sessionId);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id == sessionId);
     }
 
     public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit, int page = 0)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.Duration > 300000)
-                .OrderByDescending(a => a.LoginDate)
-                .Take(limit)
-                .Skip(page * limit)
-                .ToArrayAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.Duration > 300000)
+            .OrderByDescending(a => a.LoginDate)
+            .Take(limit)
+            .Skip(page * limit)
+            .ToArrayAsync();
     }
 }

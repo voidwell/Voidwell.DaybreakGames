@@ -6,46 +6,38 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class LoadoutRepository : ILoadoutRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public LoadoutRepository(IDbContextHelper dbContextHelper)
+    public LoadoutRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<IEnumerable<Loadout>> GetAllLoadoutsAsync()
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.Loadouts.ToListAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.Loadouts.ToListAsync();
     }
 
     public async Task UpsertRangeAsync(IEnumerable<Loadout> entities)
     {
-        using (var factory = _dbContextHelper.GetFactory())
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var dbSet = dbContext.Loadouts;
+
+        foreach (var entity in entities)
         {
-            var dbContext = factory.GetDbContext();
-
-            var dbSet = dbContext.Loadouts;
-
-            foreach (var entity in entities)
+            var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.Id == entity.Id);
+            if (storeEntity == null)
             {
-                var storeEntity = await dbSet.SingleOrDefaultAsync(a => a.Id == entity.Id);
-                if (storeEntity == null)
-                {
-                    dbSet.Add(entity);
-                }
-                else
-                {
-                    storeEntity = entity;
-                    dbSet.Update(storeEntity);
-                }
+                dbSet.Add(entity);
             }
-
-            await dbContext.SaveChangesAsync();
+            else
+            {
+                storeEntity = entity;
+                dbSet.Update(storeEntity);
+            }
         }
+
+        await dbContext.SaveChangesAsync();
     }
 }

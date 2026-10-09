@@ -5,7 +5,7 @@ using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Api.Controllers;
 
-[Route("psb")]
+[Route("ps2/psb")]
 [Authorize(Roles = AuthConstants.Roles.AdministratorOrPsb)]
 public class PSBUtilityController : Controller
 {

@@ -6,73 +6,57 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class CharacterUpdaterRepository : ICharacterUpdaterRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public CharacterUpdaterRepository(IDbContextHelper dbContextHelper)
+    public CharacterUpdaterRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task AddAsync(CharacterUpdateQueue entity)
     {
-        using (var factory = _dbContextHelper.GetFactory())
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var storeEntity = await dbContext.CharacterUpdateQueue.FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
+        if (storeEntity == null)
         {
-            var dbContext = factory.GetDbContext();
-
-            var storeEntity = await dbContext.CharacterUpdateQueue.FirstOrDefaultAsync(a => a.CharacterId == entity.CharacterId);
-            if (storeEntity == null)
-            {
-                dbContext.CharacterUpdateQueue.Add(entity);
-            }
-            else
-            {
-                storeEntity.Timestamp = DateTime.UtcNow;
-                dbContext.CharacterUpdateQueue.Update(storeEntity);
-            }
-
-            await dbContext.SaveChangesAsync();
+            dbContext.CharacterUpdateQueue.Add(entity);
         }
+        else
+        {
+            storeEntity.Timestamp = DateTime.UtcNow;
+            dbContext.CharacterUpdateQueue.Update(storeEntity);
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task RemoveAsync(CharacterUpdateQueue entity)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            dbContext.CharacterUpdateQueue.Remove(entity);
-            await dbContext.SaveChangesAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        dbContext.CharacterUpdateQueue.Remove(entity);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<CharacterUpdateQueue>> GetAllAsync(TimeSpan? delay = null)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.CharacterUpdateQueue
-                .Where(a => DateTime.UtcNow - a.Timestamp >= delay)
-                .OrderBy(a => a.Timestamp)
-                .ToListAsync();
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.CharacterUpdateQueue
+            .Where(a => DateTime.UtcNow - a.Timestamp >= delay)
+            .OrderBy(a => a.Timestamp)
+            .ToListAsync();
     }
 
     public async Task<int> GetQueueLengthAsync(TimeSpan? delay = null)
     {
-        using (var factory = _dbContextHelper.GetFactory())
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        if (delay != null)
         {
-            var dbContext = factory.GetDbContext();
-
-            if (delay != null)
-            {
-                return await dbContext.CharacterUpdateQueue
-                    .Where(a => DateTime.UtcNow - a.Timestamp >= delay)
-                    .CountAsync();
-            }
-
             return await dbContext.CharacterUpdateQueue
+                .Where(a => DateTime.UtcNow - a.Timestamp >= delay)
                 .CountAsync();
         }
+
+        return await dbContext.CharacterUpdateQueue
+            .CountAsync();
     }
 }

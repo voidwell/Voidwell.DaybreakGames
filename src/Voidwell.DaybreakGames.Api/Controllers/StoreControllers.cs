@@ -5,7 +5,7 @@ using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 
 namespace Voidwell.DaybreakGames.Api.Controllers;
 
-[Route("store")]
+[Route("ps2/store")]
 [Authorize(Roles = AuthConstants.Roles.Administrator)]
 public class StoreController : Controller
 {

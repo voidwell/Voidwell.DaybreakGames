@@ -25,7 +25,7 @@ Settings are read from `appsettings.json`, then `appsettings.{Environment}.json`
 
 | Key | Required | Description |
 |---|---|---|
-| `DBConnectionString` | Yes | Npgsql connection string, e.g. `Server=localhost;Database=voidwell.daybreakgames;Username=...;Password=...` |
+| `ConnectionString` | Yes | Npgsql connection string, e.g. `Server=localhost;Database=voidwell.daybreakgames;Username=...;Password=...` |
 | `PoolSize` | No | DbContext pool size (default `100`) |
 | `CensusServiceKey` | Yes | Census service ID (without the `s:` prefix) |
 | `CensusServiceNamespace` | Yes | Census namespace, normally `ps2` |
@@ -49,7 +49,7 @@ Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Ap
 
 ```json
 {
-  "DBConnectionString": "Server=localhost;Database=voidwell.daybreakgames;Username=postgres;Password=postgres",
+  "ConnectionString": "Server=localhost;Database=voidwell.daybreakgames;Username=postgres;Password=postgres",
   "CensusServiceKey": "your-service-id",
   "CensusServiceNamespace": "ps2",
   "Auth": {
@@ -63,7 +63,7 @@ Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Ap
 }
 ```
 
-The EF design-time factory reads `DBConnectionString` from `appsettings.json` and `appsettings.{Environment}.json` (default `Development`) in the working directory of the Data project, then environment variables, so migration commands need an `appsettings.Development.json` in `src/Voidwell.DaybreakGames.Data/` too.
+The EF design-time factory reads `ConnectionString` from `appsettings.json` and `appsettings.{Environment}.json` (default `Development`) in the working directory of the Data project, then environment variables, so migration commands need an `appsettings.Development.json` in `src/Voidwell.DaybreakGames.Data/` too.
 
 ### Logging
 
@@ -97,7 +97,7 @@ Each application project has a matching test project named `<Project>.Test` unde
 
 ```bash
 docker build -t voidwell-daybreakgames .
-docker run -p 5000:5000 -e DBConnectionString=... -e CensusServiceKey=... voidwell-daybreakgames
+docker run -p 5000:5000 -e ConnectionString=... -e CensusServiceKey=... voidwell-daybreakgames
 ```
 
 ## Project layout

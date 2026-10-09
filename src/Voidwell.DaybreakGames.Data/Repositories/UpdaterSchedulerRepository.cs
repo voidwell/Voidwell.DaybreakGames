@@ -7,30 +7,22 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class UpdaterSchedulerRepository : IUpdaterSchedulerRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public UpdaterSchedulerRepository(IDbContextHelper dbContextHelper)
+    public UpdaterSchedulerRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<UpdaterScheduler?> GetUpdaterHistoryByServiceNameAsync(string serviceName)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.UpdaterScheduler.SingleOrDefaultAsync(u => u.Id == serviceName);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.UpdaterScheduler.SingleOrDefaultAsync(u => u.Id == serviceName);
     }
 
     public async Task UpsertAsync(UpdaterScheduler entity)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            await dbContext.UpsertAsync(entity);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        await dbContext.UpsertAsync(entity);
     }
 }

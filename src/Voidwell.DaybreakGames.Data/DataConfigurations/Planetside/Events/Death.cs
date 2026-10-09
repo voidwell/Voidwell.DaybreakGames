@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class EventDeathConfiguration : IEntityTypeConfiguration<Models.Planetside.Events.Death>
+public class EventDeathConfiguration : IEntityTypeConfiguration<Models.Planetside.Events.Death>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.Death> builder)
     {

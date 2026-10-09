@@ -6,30 +6,22 @@ namespace Voidwell.DaybreakGames.Data.Repositories;
 
 public class WeaponAggregateRepository : IWeaponAggregateRepository
 {
-    private readonly IDbContextHelper _dbContextHelper;
+    private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
 
-    public WeaponAggregateRepository(IDbContextHelper dbContextHelper)
+    public WeaponAggregateRepository(IDbContextFactory<PS2DbContext> dbContextFactory)
     {
-        _dbContextHelper = dbContextHelper;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<WeaponAggregate?> GetWeaponAggregateByItemId(int itemId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.WeaponAggregates.FirstOrDefaultAsync(a => a.ItemId == itemId);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.WeaponAggregates.FirstOrDefaultAsync(a => a.ItemId == itemId);
     }
 
     public async Task<WeaponAggregate?> GetWeaponAggregateByVehicleId(int vehicleId)
     {
-        using (var factory = _dbContextHelper.GetFactory())
-        {
-            var dbContext = factory.GetDbContext();
-
-            return await dbContext.WeaponAggregates.FirstOrDefaultAsync(a => a.ItemId == 0 && a.VehicleId == vehicleId);
-        }
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        return await dbContext.WeaponAggregates.FirstOrDefaultAsync(a => a.ItemId == 0 && a.VehicleId == vehicleId);
     }
 }

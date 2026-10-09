@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Voidwell.DaybreakGames.Data.DataConfigurations.Planetside.Events;
 
-internal class ContinentLock : IEntityTypeConfiguration<Models.Planetside.Events.ContinentLock>
+public class ContinentLock : IEntityTypeConfiguration<Models.Planetside.Events.ContinentLock>
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.ContinentLock> builder)
     {
