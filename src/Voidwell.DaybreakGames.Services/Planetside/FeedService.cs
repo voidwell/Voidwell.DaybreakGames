@@ -10,6 +10,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside;
 
 public class FeedService : IFeedService
 {
+    private readonly HttpClient _httpClient;
     private readonly ICache _cache;
     private readonly ILogger<FeedService> _logger;
     private readonly TimeSpan _newsCacheExpiration = TimeSpan.FromHours(1);
@@ -20,8 +21,9 @@ public class FeedService : IFeedService
     private const string _newsFeed = "https://forums.daybreakgames.com/ps2/index.php?forums/official-news-and-announcements.19/index.rss";
     private const string _updateFeed = "https://forums.daybreakgames.com/ps2/index.php?forums/game-update-notes.73/index.rss";
 
-    public FeedService(ICache cache, ILogger<FeedService> logger)
+    public FeedService(HttpClient httpClient, ICache cache, ILogger<FeedService> logger)
     {
+        _httpClient = httpClient;
         _cache = cache;
         _logger = logger;
     }
@@ -42,15 +44,25 @@ public class FeedService : IFeedService
         {
             _logger.LogInformation("Fetching feed: {FeedUri}", feedUri);
 
-            return await GetFeedAsync(feedUri);
+            try
+            {
+                return await GetFeedAsync(feedUri, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch feed: {FeedUri}", feedUri);
+                throw;
+            }
         }, cacheExpiration);
     }
 
-    private static async Task<IEnumerable<FeedItem>> GetFeedAsync(string feedAddress)
+    private async Task<IEnumerable<FeedItem>> GetFeedAsync(string feedAddress, CancellationToken cancellationToken)
     {
         var feedResult = new List<FeedItem>();
 
-        using (var xmlReader = XmlReader.Create(feedAddress, new XmlReaderSettings { Async = true }))
+        await using var stream = await _httpClient.GetStreamAsync(feedAddress, cancellationToken);
+
+        using (var xmlReader = XmlReader.Create(stream, new XmlReaderSettings { Async = true }))
         {
             var feedReader = new RssFeedReader(xmlReader);
 

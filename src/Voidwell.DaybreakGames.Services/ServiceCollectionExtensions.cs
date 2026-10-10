@@ -16,6 +16,11 @@ public static class ServiceCollectionExtensions
             typeof(DataToDomainMappingProfile).Assembly,
             typeof(DomainToDomainMappingProfile).Assembly);
 
+        services.AddHttpClient<IFeedService, FeedService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+
         services.TryAddTransient<IItemService, ItemService>();
         services.TryAddTransient<IVehicleService, VehicleService>();
         services.TryAddTransient<IWeaponService, WeaponService>();
@@ -24,7 +29,6 @@ public static class ServiceCollectionExtensions
         services.TryAddTransient<IMetagameEventService, MetagameEventService>();
         services.TryAddTransient<ISearchService, SearchService>();
         services.TryAddTransient<IGradeService, GradeService>();
-        services.TryAddTransient<IFeedService, FeedService>();
 
         services.TryAddSingleton<ICharacterService, CharacterService>();
         services.TryAddSingleton<ILeaderboardService, LeaderboardService>();
