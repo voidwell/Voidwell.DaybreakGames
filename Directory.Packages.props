@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AsyncKeyedLock" Version="8.1.2" />
-    <PackageVersion Include="DaybreakGames.Census" Version="10.2.0" />
+    <PackageVersion Include="DaybreakGames.Census" Version="10.3.0" />
     <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="10.1.0" />
     <PackageVersion Include="FluentAssertions" Version="8.11.0" />
     <PackageVersion Include="IdentityModel" Version="7.0.0" />
