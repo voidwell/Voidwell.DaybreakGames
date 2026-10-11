@@ -70,7 +70,6 @@ services.AddCensusServices(options =>
 {
     options.CensusServiceId = configuration.GetValue<string>("CensusServiceKey")!;
     options.CensusServiceNamespace = configuration.GetValue<string>("CensusServiceNamespace")!;
-    options.LogCensusErrors = configuration.GetValue<bool>("LogCensusErrors", false);
 });
 
 services.AddStatefulServiceDependencies();

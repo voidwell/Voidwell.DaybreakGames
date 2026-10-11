@@ -42,7 +42,6 @@ Settings are read from `appsettings.json`, then `appsettings.{Environment}.json`
 | `DisableUpdater` | No | `true` disables the scheduled Census store updater |
 | `DisableCharacterUpdater` | No | `true` disables the background character updater |
 | `DisableCensusMonitor` | No | `true` disables the Census websocket monitor |
-| `LogCensusErrors` | No | `true` logs Census client errors (default `false`) |
 | `Serilog` | No | Standard Serilog configuration section (minimum level and per-namespace overrides); defaults are in `appsettings.json` |
 
 Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Api/`; it is gitignored, so keep real secrets there):
