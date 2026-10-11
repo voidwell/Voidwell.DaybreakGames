@@ -1,8 +1,8 @@
-using AutoMapper;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
+using Voidwell.DaybreakGames.Services.Mappers;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside;
@@ -14,7 +14,6 @@ public class CharacterService : ICharacterService
     private readonly IWeaponAggregateService _weaponAggregateService;
     private readonly IGradeService _gradeService;
     private readonly IWeaponService _weaponService;
-    private readonly IMapper _mapper;
 
     private const string _cacheKey = "ps2.character";
     private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
@@ -24,14 +23,13 @@ public class CharacterService : ICharacterService
     private readonly SemaphoreSlim _characterStatsLock = new SemaphoreSlim(10);
 
     public CharacterService(ICharacterStore characterStore, ICache cache, IWeaponAggregateService weaponAggregateService,
-        IGradeService gradeService, IWeaponService weaponService, IMapper mapper)
+        IGradeService gradeService, IWeaponService weaponService)
     {
         _characterStore = characterStore;
         _cache = cache;
         _weaponAggregateService = weaponAggregateService;
         _gradeService = gradeService;
         _weaponService = weaponService;
-        _mapper = mapper;
     }
 
     public Task<Character> GetCharacter(string characterId)
@@ -42,7 +40,7 @@ public class CharacterService : ICharacterService
     public async Task<IEnumerable<CharacterSearchResult>> LookupCharactersByName(string query, int limit = 12)
     {
         var characterList = await _characterStore.LookupCharactersByName(query, limit);
-        return characterList.Select(_mapper.Map<CharacterSearchResult>);
+        return characterList.Select(DomainMapper.MapSearchResult);
     }
 
     public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)
@@ -143,9 +141,9 @@ public class CharacterService : ICharacterService
         return _cache.SetAsync(cacheKey, details, _cacheCharacterDetailsExpiration);
     }
 
-    private Task<CharacterDetails> CreateCharacterDetailsAsync(Character character, Dictionary<string, WeaponAggregate> aggregates, IEnumerable<int> sanctionedWeaponIds)
+    private static Task<CharacterDetails> CreateCharacterDetailsAsync(Character character, Dictionary<string, WeaponAggregate> aggregates, IEnumerable<int> sanctionedWeaponIds)
     {
-        var details = _mapper.Map<CharacterDetails>(character);
+        var details = DomainMapper.MapCharacterDetails(character);
 
         details.WeaponStats = CalculateCharacterWeaponStats(character.WeaponStats!, aggregates);
         details.InfantryStats = CalculateInfantryStats(details.WeaponStats, details.LifetimeStats!, sanctionedWeaponIds);
@@ -153,11 +151,11 @@ public class CharacterService : ICharacterService
         return Task.FromResult(details);
     }
 
-    private IEnumerable<CharacterDetailsWeaponStat> CalculateCharacterWeaponStats(IEnumerable<CharacterWeaponStat> weaponStats, Dictionary<string, WeaponAggregate> aggregates)
+    private static IEnumerable<CharacterDetailsWeaponStat> CalculateCharacterWeaponStats(IEnumerable<CharacterWeaponStat> weaponStats, Dictionary<string, WeaponAggregate> aggregates)
     {
         foreach (var s in weaponStats?.Where(a => a.ItemId != 0)!)
         {
-            var stat = _mapper.Map<CharacterDetailsWeaponStat>(s);
+            var stat = DomainMapper.MapWeaponStat(s);
 
             if (s.FireCount!.Value > 0)
             {
@@ -319,7 +317,7 @@ public class CharacterService : ICharacterService
             .OrderByDescending(a => a.PlayTime)
             .FirstOrDefault();
 
-        var details = _mapper.Map<SimpleCharacterDetails>(character);
+        var details = DomainMapper.MapSimpleDetails(character);
 
         details.MostPlayedWeaponName = mostPlayedWeapon?.Name;
         details.MostPlayedWeaponId = mostPlayedWeapon?.ItemId;

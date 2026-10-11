@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" />
-    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="Riok.Mapperly" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
   </ItemGroup>
 

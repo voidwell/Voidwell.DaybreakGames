@@ -1,15 +1,12 @@
 using System.Text.Json;
-using AutoMapper;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
-using Voidwell.DaybreakGames.Live.Mappers;
 using Xunit;
 using DataPlayerLogin = Voidwell.DaybreakGames.Data.Models.Planetside.Events.PlayerLogin;
 
@@ -20,14 +17,13 @@ public class EventProcessorHandlerTest
     private readonly Mock<IEventRepository> _eventRepository = new();
     private readonly Mock<IPlayerMonitor> _playerMonitor = new();
     private readonly Mock<IEventValidator> _validator = new();
-    private readonly IMapper _mapper = new MapperConfiguration(cfg => cfg.AddProfile<CensusToDataMappingProfile>(), NullLoggerFactory.Instance).CreateMapper();
 
     private PlayerLoginProcessor CreateProcessor()
     {
         _eventRepository.Setup(a => a.AddAsync(It.IsAny<DataPlayerLogin>())).Returns(Task.CompletedTask);
         _playerMonitor.Setup(a => a.SetOnlineAsync(It.IsAny<string>(), It.IsAny<DateTime>())).ReturnsAsync((Domain.Models.OnlineCharacter)null);
 
-        return new PlayerLoginProcessor(_eventRepository.Object, _playerMonitor.Object, _validator.Object, _mapper);
+        return new PlayerLoginProcessor(_eventRepository.Object, _playerMonitor.Object, _validator.Object);
     }
 
     private static EventProcessorHandler CreateSut(PlayerLoginProcessor processor)
@@ -85,15 +81,5 @@ public class EventProcessorHandlerTest
         await processor.Process(new PlayerLogin { CharacterId = "c1", Timestamp = DateTime.UtcNow, WorldId = 17 });
 
         capturedKey.Should().Be("c1");
-    }
-
-    [Fact]
-    public void CensusToDataMappingProfile_AllMapsCompile()
-    {
-        var configuration = new MapperConfiguration(cfg => cfg.AddProfile<CensusToDataMappingProfile>(), NullLoggerFactory.Instance);
-
-        var act = () => configuration.CompileMappings();
-
-        act.Should().NotThrow();
     }
 }

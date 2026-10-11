@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.Live.GameState;
-using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Live;
@@ -14,8 +13,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddLiveServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddAutoMapper(cfg => { }, typeof(CensusToDataMappingProfile).Assembly);
-
         services.AddOptions();
         services.Configure<LiveOptions>(configuration);
         services.Configure<LiveOptions>(options =>

@@ -1,5 +1,4 @@
 using System.Text.Json;
-using AutoMapper;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
@@ -23,7 +22,7 @@ public class CharacterStore : ICharacterStore
     private readonly CharactersAchievementCollection _charactersAchievementCollection;
     private readonly IOutfitStore _outfitStore;
     private readonly ICache _cache;
-    private readonly IMapper _mapper;
+    private readonly ICensusToEntityMapper _mapper;
 
     private const string _cacheKey = "ps2.characterstore";
     private readonly Func<string, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
@@ -48,7 +47,7 @@ public class CharacterStore : ICharacterStore
         CharactersAchievementCollection charactersAchievementCollection,
         IOutfitStore outfitStore,
         ICache cache,
-        IMapper mapper)
+        ICensusToEntityMapper mapper)
     {
         _characterRepository = characterRepository;
         _characterCollection = characterCollection;
@@ -480,7 +479,7 @@ public class CharacterStore : ICharacterStore
             return;
         }
 
-        var dataModels = _mapper.Map<IEnumerable<CharacterAchievement>>(achievements);
+        var dataModels = _mapper.Map<CensusCharacterAchievementModel, CharacterAchievement>(achievements);
 
         await _characterRepository.UpsertRangeAsync(dataModels);
     }

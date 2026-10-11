@@ -1,9 +1,9 @@
 using AsyncKeyedLock;
-using AutoMapper;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
+using Voidwell.DaybreakGames.Services.Mappers;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Services.Planetside;
@@ -17,7 +17,6 @@ public class MapService : IMapService
     private readonly IWorldEventsService _worldEventsService;
     private readonly IZoneStore _zoneStore;
     private readonly ICache _cache;
-    private readonly IMapper _mapper;
 
     private readonly AsyncKeyedLocker<string> _zoneMapLock = new();
     private readonly AsyncKeyedLocker<string> _zoneHistoryLock = new();
@@ -32,7 +31,7 @@ public class MapService : IMapService
 
     public MapService(IMapStore mapStore, IMapHexStore mapHexStore, IMapRegionStore mapRegionStore,
         IFacilityLinkStore facilityLinkStore, IWorldEventsService worldEventsService,
-        IZoneStore zoneStore, ICache cache, IMapper mapper)
+        IZoneStore zoneStore, ICache cache)
     {
         _mapStore = mapStore;
         _mapHexStore = mapHexStore;
@@ -41,7 +40,6 @@ public class MapService : IMapService
         _worldEventsService = worldEventsService;
         _zoneStore = zoneStore;
         _cache = cache;
-        _mapper = mapper;
     }
 
     public async Task<ZoneMap> GetZoneMapAsync(int zoneId)
@@ -58,11 +56,11 @@ public class MapService : IMapService
                 await Task.WhenAll(zoneTask, linksTask, hexesTask, regionsTask);
 
                 var zone = zoneTask.Result;
-                var links = _mapper.Map<IEnumerable<ZoneLink>>(linksTask.Result);
-                var hexes = _mapper.Map<IEnumerable<ZoneHex>>(hexesTask.Result);
+                var links = DomainMapper.MapZoneLinks(linksTask.Result);
+                var hexes = DomainMapper.MapZoneHexes(hexesTask.Result);
 
                 var filteredRegions = regionsTask.Result?.Where(a => links.Any(b => a.FacilityId == b.FacilityIdA || a.FacilityId == b.FacilityIdB)).ToList();
-                var regions = _mapper.Map<IEnumerable<ZoneRegion>>(filteredRegions);
+                var regions = DomainMapper.MapZoneRegions(filteredRegions ?? []);
 
                 var zoneMap = new ZoneMap
                 {

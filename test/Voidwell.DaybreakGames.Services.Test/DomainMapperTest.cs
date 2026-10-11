@@ -1,32 +1,12 @@
-using AutoMapper;
 using FluentAssertions;
-using Microsoft.Extensions.Logging.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Mappers;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Services.Test;
 
-public class MappingProfilesTest
+public class DomainMapperTest
 {
-    private static readonly MapperConfiguration _configuration = new(cfg =>
-    {
-        cfg.AddProfile<CensusToDomainMappingProfile>();
-        cfg.AddProfile<DataToDomainMappingProfile>();
-        cfg.AddProfile<DomainToDomainMappingProfile>();
-    }, NullLoggerFactory.Instance);
-
-    private readonly IMapper _mapper = _configuration.CreateMapper();
-
-    [Fact]
-    public void Configuration_AllMapsCompile()
-    {
-        var act = () => _configuration.CompileMappings();
-
-        act.Should().NotThrow();
-    }
-
     [Fact]
     public void Character_MapsNavigationNamesOntoDetails()
     {
@@ -40,7 +20,7 @@ public class MappingProfilesTest
             WeaponStats = new List<CharacterWeaponStat>()
         };
 
-        var details = _mapper.Map<CharacterDetails>(character);
+        var details = DomainMapper.MapCharacterDetails(character);
 
         details.Faction.Should().Be("Vanu Sovereignty");
         details.FactionImageId.Should().Be(12);
@@ -63,7 +43,7 @@ public class MappingProfilesTest
             }
         };
 
-        var result = _mapper.Map<CharacterDetails>(character).VehicleStats.Should().ContainSingle().Subject;
+        var result = DomainMapper.MapCharacterDetails(character).VehicleStats.Should().ContainSingle().Subject;
 
         result.VehicleId.Should().Be(5);
         result.Kills.Should().Be(7);
@@ -89,7 +69,7 @@ public class MappingProfilesTest
             WeaponDamageTakenBy = 800
         };
 
-        var result = _mapper.Map<CharacterDetailsLifetimeStats>(stats);
+        var result = DomainMapper.MapLifetimeStats(stats);
 
         result.Kills.Should().Be(10);
         result.Deaths.Should().Be(4);
@@ -117,7 +97,7 @@ public class MappingProfilesTest
             KilledByTR = 6
         };
 
-        var result = _mapper.Map<CharacterDetailsProfileStatByFaction>(stat);
+        var result = DomainMapper.MapProfileStatByFaction(stat);
 
         result.ProfileName.Should().Be("Infiltrator");
         result.ImageId.Should().Be(5);
@@ -132,7 +112,7 @@ public class MappingProfilesTest
     [Fact]
     public void StatsByFaction_MissingValues_DefaultToZero()
     {
-        var result = _mapper.Map<CharacterDetailsProfileStatByFaction>(new CharacterStatByFaction());
+        var result = DomainMapper.MapProfileStatByFaction(new CharacterStatByFaction());
 
         result.Kills.Vs.Should().Be(0);
         result.KilledBy.Tr.Should().Be(0);
@@ -143,7 +123,7 @@ public class MappingProfilesTest
     {
         var history = new CharacterStatHistory { Day = "[1,2,3]", Week = "[4,5]", Month = "[6]" };
 
-        var result = _mapper.Map<CharacterDetailsStatsHistory>(history);
+        var result = DomainMapper.MapStatsHistory(history);
 
         result.Day.Should().Equal(1, 2, 3);
         result.Week.Should().Equal(4, 5);
@@ -155,7 +135,7 @@ public class MappingProfilesTest
     {
         var history = new CharacterStatHistory { Day = "[\n  1,\n  2\n]", Week = "[]", Month = "[]" };
 
-        _mapper.Map<CharacterDetailsStatsHistory>(history).Day.Should().Equal(1, 2);
+        DomainMapper.MapStatsHistory(history).Day.Should().Equal(1, 2);
     }
 
     [Fact]
@@ -168,7 +148,7 @@ public class MappingProfilesTest
             Outfit = new Outfit { Name = "The Outfit", Alias = "TO", CreatedDate = created, MemberCount = 123 }
         };
 
-        var result = _mapper.Map<CharacterDetailsOutfit>(member);
+        var result = DomainMapper.MapOutfit(member);
 
         result.Id.Should().Be("o1");
         result.Name.Should().Be("The Outfit");
@@ -186,7 +166,7 @@ public class MappingProfilesTest
             Vehicle = new Vehicle { Name = "Harasser", ImageId = 88 }
         };
 
-        var result = _mapper.Map<CharacterDetailsWeaponStat>(stat);
+        var result = DomainMapper.MapWeaponStat(stat);
 
         result.Name.Should().Be("Gauss SAW");
         result.Category.Should().Be("LMG");

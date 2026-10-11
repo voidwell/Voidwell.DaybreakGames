@@ -17,9 +17,9 @@ public static class CensusStoreExtensions
         services.AddOptions();
         services.Configure<StoreOptions>(configuration);
 
-        services.AddAutoMapper(cfg => { }, typeof(CensusToEntityMappingProfile).Assembly);
-
         services.AddCensusCollections();
+
+        services.AddSingleton<ICensusToEntityMapper, CensusToEntityMapper>();
 
         services.AddSingleton<IStoreUpdaterHelper, StoreUpdaterHelper>();
 

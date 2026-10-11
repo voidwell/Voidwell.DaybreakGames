@@ -1,4 +1,4 @@
-using AutoMapper;
+using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 
@@ -8,17 +8,15 @@ namespace Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 public class AchievementEarnedProcessor : IEventProcessor<AchievementEarned>
 {
     private readonly IEventRepository _eventRepository;
-    private readonly IMapper _mapper;
 
-    public AchievementEarnedProcessor(IEventRepository eventRepository, IMapper mapper)
+    public AchievementEarnedProcessor(IEventRepository eventRepository)
     {
         _eventRepository = eventRepository;
-        _mapper = mapper;
     }
 
     public Task Process(AchievementEarned payload)
     {
-        var model = _mapper.Map<Data.Models.Planetside.Events.AchievementEarned>(payload);
+        var model = CensusToDataMapper.Map(payload);
         return _eventRepository.AddAsync(model);
     }
 }

@@ -1,5 +1,4 @@
 using System.Reflection;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
     private readonly IServiceProvider _serviceProvider;
     private readonly StaticStoreUpdaterConfiguration _options;
     private readonly ILogger<StoreUpdaterScheduler> _logger;
-    private readonly IMapper _mapper;
+    private readonly ICensusToEntityMapper _mapper;
 
     private readonly Dictionary<Type, LastStoreUpdate> _collectionLog = new();
     private readonly Dictionary<Type, Timer> _updaterTimers = new();
@@ -29,7 +28,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
 
     public StoreUpdaterScheduler(IUpdaterSchedulerRepository updaterSchedulerRepository, IDbContextFactory<PS2DbContext> dbContextFactory,
         IServiceProvider serviceProvider, IOptions<StaticStoreUpdaterConfiguration> options, ILogger<StoreUpdaterScheduler> logger,
-        IMapper mapper)
+        ICensusToEntityMapper mapper)
     {
         _updaterSchedulerRepository = updaterSchedulerRepository;
         _dbContextFactory = dbContextFactory;
@@ -176,10 +175,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
     private object MapEntityValues(Type entityType, object values)
     {
         var valueType = values.GetType().BaseType!.GetGenericArguments()[0];
-        var valueTypeList = typeof(IEnumerable<>).MakeGenericType(valueType);
-        var entityTypeList = typeof(IEnumerable<>).MakeGenericType(entityType);
-
-        return _mapper.Map(values, valueTypeList, entityTypeList);
+        return _mapper.Map((System.Collections.IEnumerable)values, valueType, entityType);
     }
 
     private async Task<object?> GetCollectionValuesAsync(Type staticCollectionType)

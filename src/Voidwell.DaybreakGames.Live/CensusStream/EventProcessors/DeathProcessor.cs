@@ -1,4 +1,4 @@
-using AutoMapper;
+using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
@@ -13,16 +13,14 @@ public class DeathProcessor : IEventProcessor<Death>
     private readonly ICharacterService _characterService;
     private readonly ICharacterRatingService _characterRatingService;
     private readonly IPlayerMonitor _playerMonitor;
-    private readonly IMapper _mapper;
 
     public DeathProcessor(IEventRepository eventRepository, ICharacterService characterService,
-        ICharacterRatingService characterRatingService, IPlayerMonitor playerMonitor, IMapper mapper)
+        ICharacterRatingService characterRatingService, IPlayerMonitor playerMonitor)
     {
         _eventRepository = eventRepository;
         _characterService = characterService;
         _characterRatingService = characterRatingService;
         _playerMonitor = playerMonitor;
-        _mapper = mapper;
     }
 
     public async Task Process(Death payload)
@@ -37,7 +35,7 @@ public class DeathProcessor : IEventProcessor<Death>
             victimOutfitIdTask
         );
 
-        var dataModel = _mapper.Map<Data.Models.Planetside.Events.Death>(payload);
+        var dataModel = CensusToDataMapper.Map(payload);
         dataModel.AttackerOutfitId = attackerOutfitIdTask?.Result;
         dataModel.CharacterOutfitId = victimOutfitIdTask?.Result;
 

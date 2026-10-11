@@ -1,4 +1,4 @@
-using AutoMapper;
+using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
@@ -10,18 +10,16 @@ public class BattlerankUpProcessor : IEventProcessor<BattlerankUp>
 {
     private readonly IEventRepository _eventRepository;
     private readonly IPlayerMonitor _playerMonitor;
-    private readonly IMapper _mapper;
 
-    public BattlerankUpProcessor(IEventRepository eventRepository, IPlayerMonitor playerMonitor, IMapper mapper)
+    public BattlerankUpProcessor(IEventRepository eventRepository, IPlayerMonitor playerMonitor)
     {
         _eventRepository = eventRepository;
         _playerMonitor = playerMonitor;
-        _mapper = mapper;
     }
 
     public async Task Process(BattlerankUp payload)
     {
-        var model = _mapper.Map<Data.Models.Planetside.Events.BattlerankUp>(payload);
+        var model = CensusToDataMapper.Map(payload);
         await Task.WhenAll(_eventRepository.AddAsync(model), _playerMonitor.SetLastSeenAsync(model.CharacterId!, model.ZoneId, model.Timestamp));
     }
 }

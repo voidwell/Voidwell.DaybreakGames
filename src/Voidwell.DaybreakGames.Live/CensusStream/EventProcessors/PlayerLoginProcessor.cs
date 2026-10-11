@@ -1,4 +1,4 @@
-using AutoMapper;
+using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
@@ -11,15 +11,13 @@ public class PlayerLoginProcessor : IEventProcessor<PlayerLogin>
     private readonly IEventRepository _eventRepository;
     private readonly IPlayerMonitor _playerMonitor;
     private readonly IEventValidator _eventValidator;
-    private readonly IMapper _mapper;
 
     public PlayerLoginProcessor(IEventRepository eventRepository, IPlayerMonitor playerMonitor,
-        IEventValidator eventValidator, IMapper mapper)
+        IEventValidator eventValidator)
     {
         _eventRepository = eventRepository;
         _playerMonitor = playerMonitor;
         _eventValidator = eventValidator;
-        _mapper = mapper;
     }
 
     public async Task Process(PlayerLogin payload)
@@ -29,7 +27,7 @@ public class PlayerLoginProcessor : IEventProcessor<PlayerLogin>
             return;
         }
 
-        var model = _mapper.Map<Data.Models.Planetside.Events.PlayerLogin>(payload);
+        var model = CensusToDataMapper.Map(payload);
 
         await Task.WhenAll(_eventRepository.AddAsync(model), _playerMonitor.SetOnlineAsync(payload.CharacterId!, payload.Timestamp));
     }

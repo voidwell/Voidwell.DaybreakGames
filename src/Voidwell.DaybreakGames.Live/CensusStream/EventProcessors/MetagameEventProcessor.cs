@@ -1,5 +1,4 @@
-using AutoMapper;
-using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
@@ -16,7 +15,6 @@ public class MetagameEventProcessor : IEventProcessor<MetagameEvent>
     private readonly IWorldMonitor _worldMonitor;
     private readonly IAlertRepository _alertRepository;
     private readonly IMapService _mapService;
-    private readonly IMapper _mapper;
 
     private enum METAGAME_EVENT_STATE
     {
@@ -28,14 +26,13 @@ public class MetagameEventProcessor : IEventProcessor<MetagameEvent>
     }
 
     public MetagameEventProcessor(IEventRepository eventRepository, IMetagameEventService metagameEventService,
-        IWorldMonitor worldMonitor, IAlertRepository alertRepository, IMapService mapService, IMapper mapper)
+        IWorldMonitor worldMonitor, IAlertRepository alertRepository, IMapService mapService)
     {
         _eventRepository = eventRepository;
         _metagameEventService = metagameEventService;
         _worldMonitor = worldMonitor;
         _alertRepository = alertRepository;
         _mapService = mapService;
-        _mapper = mapper;
     }
 
     public async Task Process(MetagameEvent payload)
@@ -45,7 +42,7 @@ public class MetagameEventProcessor : IEventProcessor<MetagameEvent>
 
         var metagameCategory = await _metagameEventService.GetMetagameEvent(payload.MetagameEventId);
 
-        var model = _mapper.Map<Data.Models.Planetside.Events.MetagameEvent>(payload);
+        var model = CensusToDataMapper.Map(payload);
         model.ZoneId ??= metagameCategory?.ZoneId;
 
         await Task.WhenAll(_eventRepository.AddAsync(model), ProcessMetagameEventStateAsync(payload));
@@ -76,7 +73,7 @@ public class MetagameEventProcessor : IEventProcessor<MetagameEvent>
             _worldMonitor.UpdateZoneAlert(metagameEvent.WorldId, (int)metagameEvent.ZoneId, zoneAlert);
         }
 
-        var model = _mapper.Map<Alert>(metagameEvent);
+        var model = CensusToDataMapper.MapToAlert(metagameEvent);
         model.EndDate = category?.Duration != null ? metagameEvent.Timestamp + category.Duration : model.EndDate;
 
         var tasks = new List<Task>

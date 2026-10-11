@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Extensions;
@@ -8,9 +7,9 @@ namespace Voidwell.DaybreakGames.CensusStore;
 public class StoreUpdaterHelper : IStoreUpdaterHelper
 {
     private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
-    private readonly IMapper _mapper;
+    private readonly ICensusToEntityMapper _mapper;
 
-    public StoreUpdaterHelper(IDbContextFactory<PS2DbContext> dbContextFactory, IMapper mapper)
+    public StoreUpdaterHelper(IDbContextFactory<PS2DbContext> dbContextFactory, ICensusToEntityMapper mapper)
     {
         _dbContextFactory = dbContextFactory;
         _mapper = mapper;
@@ -28,7 +27,7 @@ public class StoreUpdaterHelper : IStoreUpdaterHelper
             return;
         }
 
-        var dataModels = _mapper.Map<IEnumerable<TDataEntity>>(data);
+        var dataModels = _mapper.Map<TCollectionEntity, TDataEntity>(data);
 
         await dbContext.UpsertAsync(dataModels);
     }

@@ -4,7 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AsyncKeyedLock" Version="8.1.2" />
-    <PackageVersion Include="AutoMapper" Version="16.2.0" />
     <PackageVersion Include="DaybreakGames.Census" Version="10.2.0" />
     <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="10.1.0" />
     <PackageVersion Include="FluentAssertions" Version="8.11.0" />
@@ -18,6 +17,7 @@
     <PackageVersion Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
     <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
     <PackageVersion Include="Voidwell.Common.Authentication" Version="1.0.2" />
     <PackageVersion Include="Voidwell.Common.Cache" Version="1.0.2" />
     <PackageVersion Include="Voidwell.Common.Logging" Version="1.0.2" />

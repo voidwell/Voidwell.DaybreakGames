@@ -1,4 +1,4 @@
-using AutoMapper;
+using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
@@ -10,20 +10,18 @@ public class PlayerFacilityCaptureProcessor : IEventProcessor<PlayerFacilityCapt
 {
     private readonly IEventRepository _eventRepository;
     private readonly IPlayerMonitor _playerMonitor;
-    private readonly IMapper _mapper;
 
     private readonly SemaphoreSlim _playerFacilityCaptureSemaphore = new SemaphoreSlim(5);
 
-    public PlayerFacilityCaptureProcessor(IEventRepository eventRepository, IPlayerMonitor playerMonitor, IMapper mapper)
+    public PlayerFacilityCaptureProcessor(IEventRepository eventRepository, IPlayerMonitor playerMonitor)
     {
         _eventRepository = eventRepository;
         _playerMonitor = playerMonitor;
-        _mapper = mapper;
     }
 
     public async Task Process(PlayerFacilityCapture payload)
     {
-        var model = _mapper.Map<Data.Models.Planetside.Events.PlayerFacilityCapture>(payload);
+        var model = CensusToDataMapper.Map(payload);
 
         await _playerFacilityCaptureSemaphore.WaitAsync();
 

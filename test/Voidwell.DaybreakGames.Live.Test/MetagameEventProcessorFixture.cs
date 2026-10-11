@@ -1,10 +1,7 @@
-using AutoMapper;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.Live.GameState;
-using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Live.Test;
@@ -19,10 +16,7 @@ public class MetagameEventProcessorFixture
 
     public MetagameEventProcessor CreateSut()
     {
-        var mapper = new MapperConfiguration(a => a.AddProfile<CensusToDataMappingProfile>(), NullLoggerFactory.Instance)
-            .CreateMapper();
-
-        return new MetagameEventProcessor(EventRepository, MetagameEventService, WorldMonitor, AlertRepository, MapService, mapper);
+        return new MetagameEventProcessor(EventRepository, MetagameEventService, WorldMonitor, AlertRepository, MapService);
     }
 
     public void ResetFixture()

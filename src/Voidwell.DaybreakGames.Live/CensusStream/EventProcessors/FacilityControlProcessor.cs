@@ -1,4 +1,4 @@
-using AutoMapper;
+using Voidwell.DaybreakGames.Live.Mappers;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
@@ -12,17 +12,15 @@ public class FacilityControlProcessor : IEventProcessor<FacilityControl>, IDispo
     private readonly IEventRepository _eventRepository;
     private readonly IAlertRepository _alertRepository;
     private readonly IWorldMonitor _worldMonitor;
-    private readonly IMapper _mapper;
 
     private readonly SemaphoreSlim _facilityControlSemaphore = new SemaphoreSlim(3);
 
     public FacilityControlProcessor(IEventRepository eventRepository, IAlertRepository alertRepository,
-        IWorldMonitor worldMonitor, IMapper mapper)
+        IWorldMonitor worldMonitor)
     {
         _eventRepository = eventRepository;
         _alertRepository = alertRepository;
         _worldMonitor = worldMonitor;
-        _mapper = mapper;
     }
 
     public async Task Process(FacilityControl payload)
@@ -41,7 +39,7 @@ public class FacilityControlProcessor : IEventProcessor<FacilityControl>, IDispo
 
             var score = mapUpdate?.Score;
 
-            var model = _mapper.Map<Data.Models.Planetside.Events.FacilityControl>(payload);
+            var model = CensusToDataMapper.Map(payload);
 
             model.ZoneControlVs = score?.ConnectedTerritories!.Vs.Percent * 100 ?? 0f;
             model.ZoneControlNc = score?.ConnectedTerritories!.Nc.Percent * 100 ?? 0f;

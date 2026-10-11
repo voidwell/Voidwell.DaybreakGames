@@ -1,8 +1,8 @@
-using AutoMapper;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
+using Voidwell.DaybreakGames.Services.Mappers;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 using Voidwell.DaybreakGames.Utils;
 
@@ -14,7 +14,6 @@ public class CharacterDirectiveService : ICharacterDirectiveService
     private readonly ICharacterService _characterService;
     private readonly IDirectiveService _directiveService;
     private readonly ICache _cache;
-    private readonly IMapper _mapper;
 
     private const string _cacheKey = "ps2.characterDirective";
     private readonly Func<string, string> _getDirectivesCacheKey = (characterId) => $"{_cacheKey}_character_{characterId}";
@@ -22,13 +21,12 @@ public class CharacterDirectiveService : ICharacterDirectiveService
     private readonly TimeSpan _cacheDirectivesCharacterExpiration = TimeSpan.FromMinutes(10);
 
     public CharacterDirectiveService(ICharacterDirectiveStore characterDirectiveStore, ICharacterService characterService,
-        IDirectiveService directiveService, ICache cache, IMapper mapper)
+        IDirectiveService directiveService, ICache cache)
     {
         _characterDirectiveStore = characterDirectiveStore;
         _characterService = characterService;
         _directiveService = directiveService;
         _cache = cache;
-        _mapper = mapper;
     }
 
     public async Task<CharacterDirectivesOutline?> GetCharacterDirectivesAsync(string characterId)
@@ -66,21 +64,21 @@ public class CharacterDirectiveService : ICharacterDirectiveService
 
             foreach (var category in categories)
             {
-                var outlineCategory = _mapper.Map<CharacterDirectivesOutlineCategory>(category);
+                var outlineCategory = DomainMapper.MapOutlineCategory(category);
 
                 foreach (var tree in category.Trees!.OrderBy(a => a.Name))
                 {
                     var characterTree = characterTrees.FirstOrDefault(a => a.DirectiveTreeId == tree.Id);
                     if (characterTree != null)
                     {
-                        var outlineTree = _mapper.Map<CharacterDirectivesOutlineTree>(tree);
+                        var outlineTree = DomainMapper.MapOutlineTree(tree);
                         outlineCategory.Trees.Add(outlineTree);
 
-                        _mapper.Map(characterTree, outlineTree);
+                        CharacterDirectiveProgressMapper.Apply(characterTree, outlineTree);
 
                         foreach (var tier in tree.Tiers!)
                         {
-                            var outlineTier = _mapper.Map<CharacterDirectivesOutlineTier>(tier);
+                            var outlineTier = DomainMapper.MapOutlineTier(tier);
                             outlineTree.Tiers.Add(outlineTier);
 
                             outlineTier.Rewards = GetTierRewardsForFactionId(tier, character.FactionId);
@@ -88,7 +86,7 @@ public class CharacterDirectiveService : ICharacterDirectiveService
                             var characterTier = characterTree?.CharacterDirectiveTiers!.FirstOrDefault(a => a.DirectiveTierId == tier.DirectiveTierId && a.DirectiveTreeId == tier.DirectiveTreeId);
                             if (characterTier != null)
                             {
-                                _mapper.Map(characterTier, outlineTier);
+                                CharacterDirectiveProgressMapper.Apply(characterTier, outlineTier);
                             }
 
                             foreach (var directive in tier.Directives!)
@@ -106,7 +104,7 @@ public class CharacterDirectiveService : ICharacterDirectiveService
                                     continue;
                                 }
 
-                                var outlineDirective = _mapper.Map<CharacterDirectivesOutlineDirective>(directive);
+                                var outlineDirective = DomainMapper.MapOutlineDirective(directive);
                                 outlineTier.Directives.Add(outlineDirective);
 
                                 outlineDirective.Objective.GoalValue = GetObjectiveTargetValue(storeObjective!);
@@ -114,7 +112,7 @@ public class CharacterDirectiveService : ICharacterDirectiveService
                                 var characterDirective = characterTier?.CharacterDirectives!.FirstOrDefault(a => a.DirectiveId == directive.Id);
                                 if (characterDirective != null)
                                 {
-                                    _mapper.Map(characterDirective, outlineDirective);
+                                    CharacterDirectiveProgressMapper.Apply(characterDirective, outlineDirective);
                                 }
 
                                 if (outlineTier.CompletionDate == null)
@@ -156,11 +154,11 @@ public class CharacterDirectiveService : ICharacterDirectiveService
         return _characterDirectiveStore.UpdateCharacterDirectiveDataAsync(characterId);
     }
 
-    private List<DirectivesOutlineReward> GetTierRewardsForFactionId(DirectiveTier tier, int factionId)
+    private static List<DirectivesOutlineReward> GetTierRewardsForFactionId(DirectiveTier tier, int factionId)
     {
         var factionRewards = tier.RewardGroupSets!.SelectManyNotNull(a => a.RewardGroups)
                             .Where(a => a.Reward?.Item?.FactionId == null || a.Reward?.Item?.FactionId == 0 || a.Reward?.Item?.FactionId == factionId);
-        return _mapper.Map<List<DirectivesOutlineReward>>(factionRewards);
+        return DomainMapper.MapOutlineRewards(factionRewards);
     }
 
     private static double GetTierCompletionPercent(CharacterDirectivesOutlineTier tier)

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Voidwell.DaybreakGames.Services.Mappers;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
@@ -10,12 +9,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddAutoMapper(
-            cfg => { },
-            typeof(CensusToDomainMappingProfile).Assembly,
-            typeof(DataToDomainMappingProfile).Assembly,
-            typeof(DomainToDomainMappingProfile).Assembly);
-
         services.AddHttpClient<IFeedService, FeedService>(client =>
         {
             client.Timeout = TimeSpan.FromSeconds(10);
