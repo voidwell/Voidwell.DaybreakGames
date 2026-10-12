@@ -126,20 +126,23 @@ public class CharacterStore : ICharacterStore
 
     public async Task<Character?> GetCharacterDetailsAsync(string characterId)
     {
-        var characterDetailsTask = _characterRepository.GetCharacterWithDetailsAsync(characterId);
-        var censusCharacterTimesTask = _characterCollection.GetCharacterTimesAsync(characterId);
+        var character = await _characterRepository.GetCharacterWithDetailsAsync(characterId);
 
-        await Task.WhenAll(characterDetailsTask, censusCharacterTimesTask);
-
-        var character = characterDetailsTask.Result;
-        var censusTimes = censusCharacterTimesTask.Result;
-
-        if (character?.Time != null && (censusTimes == null || character?.Time?.LastSaveDate == censusTimes?.LastSaveDate))
+        try
         {
-            return character;
-        }
+            var censusTimes = await _characterCollection.GetCharacterTimesAsync(characterId);
 
-        await UpdateAllCharacterInfo(characterId);
+            if (character?.Time != null && (censusTimes == null || character.Time.LastSaveDate == censusTimes.LastSaveDate))
+            {
+                return character;
+            }
+
+            await UpdateAllCharacterInfo(characterId);
+        }
+        catch (Exception) when (character != null)
+        {
+            // Census failed; serve the stored (possibly stale) data
+        }
 
         return await _characterRepository.GetCharacterWithDetailsAsync(characterId);
     }
