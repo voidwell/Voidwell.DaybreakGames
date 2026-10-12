@@ -26,6 +26,19 @@ public class CharacterRepository : ICharacterRepository
         return character?.Id;
     }
 
+    public async Task<IEnumerable<Character>> LookupCharactersByNameAsync(string query, int limit)
+    {
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var lowerQuery = query.ToLower();
+
+        return await dbContext.Characters
+            .Where(a => a.Name != null && a.Name.ToLower().StartsWith(lowerQuery) && a.BattleRank > 0)
+            .OrderByDescending(a => a.Name!.ToLower() == lowerQuery)
+            .ThenBy(a => a.Name)
+            .Take(limit)
+            .ToListAsync();
+    }
+
     public async Task<Character?> GetCharacterAsync(string characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();

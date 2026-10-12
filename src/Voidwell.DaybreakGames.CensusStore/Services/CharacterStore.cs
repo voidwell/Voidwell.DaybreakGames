@@ -63,9 +63,25 @@ public class CharacterStore : ICharacterStore
         _mapper = mapper;
     }
 
-    public Task<IEnumerable<CensusCharacterModel>> LookupCharactersByName(string query, int limit = 12)
+    public async Task<IEnumerable<CensusCharacterModel>> LookupCharactersByName(string query, int limit = 12)
     {
-        return _characterCollection.LookupCharactersByNameAsync(query, limit);
+        try
+        {
+            return await _characterCollection.LookupCharactersByNameAsync(query, limit);
+        }
+        catch (Exception)
+        {
+            var characters = await _characterRepository.LookupCharactersByNameAsync(query, limit);
+
+            return [.. characters.Select(a => new CensusCharacterModel
+            {
+                CharacterId = a.Id,
+                Name = new CensusCharacterName { First = a.Name, FirstLower = a.Name?.ToLower() },
+                FactionId = a.FactionId,
+                WorldId = a.WorldId,
+                BattleRank = new CensusCharacterModel.CharacterBattleRank { Value = a.BattleRank, PercentToNext = a.BattleRankPercentToNext }
+            })];
+        }
     }
 
     public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)

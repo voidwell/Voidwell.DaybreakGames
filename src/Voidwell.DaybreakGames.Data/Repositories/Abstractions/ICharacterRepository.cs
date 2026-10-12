@@ -6,6 +6,7 @@ public interface ICharacterRepository
 {
     Task<IEnumerable<Character>> GetCharactersByIdsAsync(IEnumerable<string> characterIds);
     Task<string?> GetCharacterIdByName(string characterName);
+    Task<IEnumerable<Character>> LookupCharactersByNameAsync(string query, int limit);
     Task<Character?> GetCharacterAsync(string characterId);
     Task<Character?> GetCharacterWithDetailsAsync(string characterId);
     Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params string[] characterIds);
