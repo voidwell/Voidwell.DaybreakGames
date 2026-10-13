@@ -17,10 +17,10 @@
     <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
-    <PackageVersion Include="Voidwell.Common.Authentication" Version="1.0.3" />
-    <PackageVersion Include="Voidwell.Common.Cache" Version="1.0.3" />
-    <PackageVersion Include="Voidwell.Common.Logging" Version="1.0.3" />
-    <PackageVersion Include="Voidwell.Common.Swagger" Version="1.0.3" />
+    <PackageVersion Include="Voidwell.Common.Authentication" Version="1.0.4" />
+    <PackageVersion Include="Voidwell.Common.Cache" Version="1.0.4" />
+    <PackageVersion Include="Voidwell.Common.Logging" Version="1.0.4" />
+    <PackageVersion Include="Voidwell.Common.Swagger" Version="1.0.4" />
     <PackageVersion Include="xunit.v3" Version="4.0.1" />
   </ItemGroup>
 </Project>
