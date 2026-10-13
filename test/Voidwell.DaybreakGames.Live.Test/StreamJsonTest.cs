@@ -1,5 +1,4 @@
 using System.Text.Json;
-using FluentAssertions;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Voidwell.DaybreakGames.Live.CensusStream.JsonConverters;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
@@ -26,14 +25,14 @@ public class StreamJsonTest
     [InlineData("\"anything else\"", false)]
     public void BooleanJsonConverter_ReadsCensusStyleStrings(string json, bool expected)
     {
-        JsonSerializer.Deserialize<bool>(json, _converterOptions).Should().Be(expected);
+        Assert.Equal(expected, JsonSerializer.Deserialize<bool>(json, _converterOptions));
     }
 
     [Fact]
     public void BooleanJsonConverter_WritesJsonBoolean()
     {
-        JsonSerializer.Serialize(true, _converterOptions).Should().Be("true");
-        JsonSerializer.Serialize(false, _converterOptions).Should().Be("false");
+        Assert.Equal("true", JsonSerializer.Serialize(true, _converterOptions));
+        Assert.Equal("false", JsonSerializer.Serialize(false, _converterOptions));
     }
 
     [Fact]
@@ -41,8 +40,8 @@ public class StreamJsonTest
     {
         var result = JsonSerializer.Deserialize<DateTime>("\"1700000000\"", _converterOptions);
 
-        result.Should().Be(new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc));
-        result.Kind.Should().Be(DateTimeKind.Utc);
+        Assert.Equal(new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc), result);
+        Assert.Equal(DateTimeKind.Utc, result.Kind);
     }
 
     [Fact]
@@ -50,8 +49,8 @@ public class StreamJsonTest
     {
         var result = JsonSerializer.Deserialize<DateTime>("\"2024-03-05T10:20:30\"", _converterOptions);
 
-        result.Should().Be(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Utc));
-        result.Kind.Should().Be(DateTimeKind.Utc);
+        Assert.Equal(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Utc), result);
+        Assert.Equal(DateTimeKind.Utc, result.Kind);
     }
 
     [Fact]
@@ -59,7 +58,7 @@ public class StreamJsonTest
     {
         var json = JsonSerializer.Serialize(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Utc), _converterOptions);
 
-        json.Should().Be("\"2024-03-05T10:20:30Z\"");
+        Assert.Equal("\"2024-03-05T10:20:30Z\"", json);
     }
 
     [Theory]
@@ -70,7 +69,7 @@ public class StreamJsonTest
     [InlineData("ZoneId", "zone_id")]
     public void UnderscorePropertyJsonNamingPolicy_ConvertsPascalCaseToSnakeCase(string name, string expected)
     {
-        new UnderscorePropertyJsonNamingPolicy().ConvertName(name).Should().Be(expected);
+        Assert.Equal(expected, new UnderscorePropertyJsonNamingPolicy().ConvertName(name));
     }
 
     [Fact]
@@ -78,7 +77,7 @@ public class StreamJsonTest
     {
         var act = () => new UnderscorePropertyJsonNamingPolicy().ConvertName(null);
 
-        act.Should().Throw<ArgumentNullException>();
+        Assert.ThrowsAny<ArgumentNullException>(act);
     }
 
     [Fact]
@@ -90,11 +89,11 @@ public class StreamJsonTest
 
         var payload = JsonSerializer.Deserialize<PlayerLogin>(json, StreamConstants.SerializerOptions);
 
-        payload.CharacterId.Should().Be("5428");
-        payload.EventName.Should().Be("PlayerLogin");
-        payload.WorldId.Should().Be(17);
-        payload.ZoneId.Should().Be(2);
-        payload.Timestamp.Should().Be(new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc));
+        Assert.Equal("5428", payload.CharacterId);
+        Assert.Equal("PlayerLogin", payload.EventName);
+        Assert.Equal(17, payload.WorldId);
+        Assert.Equal(2, payload.ZoneId);
+        Assert.Equal(new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc), payload.Timestamp);
     }
 
     [Fact]
@@ -102,6 +101,6 @@ public class StreamJsonTest
     {
         const string json = """{"event_name":"PlayerLogin","timestamp":"1700000000","world_id":"17"}""";
 
-        JsonSerializer.Deserialize<PayloadBase>(json, StreamConstants.SerializerOptions).ZoneId.Should().BeNull();
+        Assert.Null(JsonSerializer.Deserialize<PayloadBase>(json, StreamConstants.SerializerOptions).ZoneId);
     }
 }

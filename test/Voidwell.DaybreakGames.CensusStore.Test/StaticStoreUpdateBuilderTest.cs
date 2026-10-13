@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
@@ -31,12 +30,12 @@ public class StaticStoreUpdateBuilderTest
 
         new StaticStoreUpdateBuilder<AlphaCollection, AlphaEntity>(services, enabled: false, periodDays: 3);
 
-        var config = Resolve(services).Collections.Should().ContainSingle().Subject;
-        config.CollectionType.Should().Be(typeof(AlphaCollection));
-        config.EntityType.Should().Be(typeof(AlphaEntity));
-        config.StoreName.Should().Be("AlphaStore");
-        config.Enabled.Should().BeFalse();
-        config.Period.Should().Be(TimeSpan.FromDays(3));
+        var config = Assert.Single(Resolve(services).Collections);
+        Assert.Equal(typeof(AlphaCollection), config.CollectionType);
+        Assert.Equal(typeof(AlphaEntity), config.EntityType);
+        Assert.Equal("AlphaStore", config.StoreName);
+        Assert.False(config.Enabled);
+        Assert.Equal(TimeSpan.FromDays(3), config.Period);
     }
 
     [Fact]
@@ -47,8 +46,8 @@ public class StaticStoreUpdateBuilderTest
         new StaticStoreUpdateBuilder<AlphaCollection, AlphaEntity>(services);
 
         var config = Resolve(services).Collections.Single();
-        config.Enabled.Should().BeTrue();
-        config.Period.Should().Be(TimeSpan.FromDays(7));
+        Assert.True(config.Enabled);
+        Assert.Equal(TimeSpan.FromDays(7), config.Period);
     }
 
     [Fact]
@@ -60,7 +59,8 @@ public class StaticStoreUpdateBuilderTest
 
         var act = () => Resolve(services);
 
-        act.Should().Throw<ArgumentException>().WithMessage("*conflict*AlphaCollection*");
+        var ex = Assert.ThrowsAny<ArgumentException>(act);
+        Assert.Matches("(?s).*conflict.*AlphaCollection.*", ex.Message);
     }
 
     [Fact]
@@ -72,7 +72,8 @@ public class StaticStoreUpdateBuilderTest
 
         var act = () => Resolve(services);
 
-        act.Should().Throw<ArgumentException>().WithMessage("*conflict*AlphaEntity*");
+        var ex = Assert.ThrowsAny<ArgumentException>(act);
+        Assert.Matches("(?s).*conflict.*AlphaEntity.*", ex.Message);
     }
 
     [Fact]
@@ -85,8 +86,8 @@ public class StaticStoreUpdateBuilderTest
 
         var config = Resolve(services);
 
-        config.Collections.Single(a => a.CollectionType == typeof(BetaCollection)).Dependencies.Should().Equal(typeof(AlphaCollection));
-        config.Collections.Single(a => a.CollectionType == typeof(AlphaCollection)).Dependencies.Should().BeEmpty();
+        Assert.Equal(new[] { typeof(AlphaCollection) }, config.Collections.Single(a => a.CollectionType == typeof(BetaCollection)).Dependencies);
+        Assert.Empty(config.Collections.Single(a => a.CollectionType == typeof(AlphaCollection)).Dependencies);
     }
 
     [Fact]
@@ -101,8 +102,7 @@ public class StaticStoreUpdateBuilderTest
 
         var config = Resolve(services);
 
-        config.Collections.Single(a => a.CollectionType == typeof(GammaCollection)).Dependencies
-            .Should().BeEquivalentTo(new[] { typeof(AlphaCollection), typeof(BetaCollection) });
+        Assert.Equivalent(new[] { typeof(AlphaCollection), typeof(BetaCollection) }, config.Collections.Single(a => a.CollectionType == typeof(GammaCollection)).Dependencies);
     }
 
     [Fact]
@@ -113,7 +113,8 @@ public class StaticStoreUpdateBuilderTest
 
         var act = () => builder.WithUpdateDependency<AlphaCollection>();
 
-        act.Should().Throw<ArgumentException>().WithMessage("*cannot depend on itself*");
+        var ex = Assert.ThrowsAny<ArgumentException>(act);
+        Assert.Matches("(?s).*cannot\\ depend\\ on\\ itself.*", ex.Message);
     }
 
     [Fact]
@@ -125,7 +126,8 @@ public class StaticStoreUpdateBuilderTest
 
         var act = () => Resolve(services);
 
-        act.Should().Throw<ArgumentException>().WithMessage("*UnregisteredCollection*not a registered*");
+        var ex = Assert.ThrowsAny<ArgumentException>(act);
+        Assert.Matches("(?s).*UnregisteredCollection.*not\\ a\\ registered.*", ex.Message);
     }
 
     [Fact]
@@ -139,7 +141,8 @@ public class StaticStoreUpdateBuilderTest
 
         var act = () => Resolve(services);
 
-        act.Should().Throw<ArgumentException>().WithMessage("*Cyclical update dependency*");
+        var ex = Assert.ThrowsAny<ArgumentException>(act);
+        Assert.Matches("(?s).*Cyclical\\ update\\ dependency.*", ex.Message);
     }
 
     [Fact]
@@ -156,6 +159,7 @@ public class StaticStoreUpdateBuilderTest
 
         var act = () => Resolve(services);
 
-        act.Should().Throw<ArgumentException>().WithMessage("*Cyclical update dependency*->*");
+        var ex = Assert.ThrowsAny<ArgumentException>(act);
+        Assert.Matches("(?s).*Cyclical\\ update\\ dependency.*\\->.*", ex.Message);
     }
 }

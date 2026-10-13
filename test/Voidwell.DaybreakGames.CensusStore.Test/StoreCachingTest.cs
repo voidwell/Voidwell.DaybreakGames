@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -20,8 +19,8 @@ public class StoreCachingTest
         var first = await sut.GetFactionByIdAsync(1);
         var second = await sut.GetFactionByIdAsync(1);
 
-        first.Id.Should().Be(1);
-        second.Should().BeSameAs(first);
+        Assert.Equal(1, first.Id);
+        Assert.Same(first, second);
         repository.Verify(a => a.GetFactionByIdAsync(1), Times.Once);
     }
 
@@ -32,8 +31,8 @@ public class StoreCachingTest
         repository.Setup(a => a.GetFactionByIdAsync(99)).ReturnsAsync((Faction)null);
         var sut = new FactionStore(repository.Object, TestCache.Create());
 
-        (await sut.GetFactionByIdAsync(99)).Should().BeNull();
-        (await sut.GetFactionByIdAsync(99)).Should().BeNull();
+        Assert.Null((await sut.GetFactionByIdAsync(99)));
+        Assert.Null((await sut.GetFactionByIdAsync(99)));
 
         repository.Verify(a => a.GetFactionByIdAsync(99), Times.Exactly(2));
     }
@@ -45,8 +44,8 @@ public class StoreCachingTest
         repository.Setup(a => a.GetFactionByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) => new Faction { Id = id });
         var sut = new FactionStore(repository.Object, TestCache.Create());
 
-        (await sut.GetFactionByIdAsync(1)).Id.Should().Be(1);
-        (await sut.GetFactionByIdAsync(2)).Id.Should().Be(2);
+        Assert.Equal(1, (await sut.GetFactionByIdAsync(1)).Id);
+        Assert.Equal(2, (await sut.GetFactionByIdAsync(2)).Id);
 
         repository.Verify(a => a.GetFactionByIdAsync(It.IsAny<int>()), Times.Exactly(2));
     }
@@ -61,8 +60,8 @@ public class StoreCachingTest
         var first = await sut.GetZoneAsync(2);
         var second = await sut.GetZoneAsync(2);
 
-        first.Id.Should().Be(2);
-        second.Should().BeSameAs(first);
+        Assert.Equal(2, first.Id);
+        Assert.Same(first, second);
         repository.Verify(a => a.GetZonesByIdsAsync(2), Times.Once);
     }
 
@@ -73,8 +72,8 @@ public class StoreCachingTest
         repository.Setup(a => a.GetZonesByIdsAsync(It.IsAny<int[]>())).ReturnsAsync(Array.Empty<Zone>());
         var sut = new ZoneStore(repository.Object, TestCache.Create());
 
-        (await sut.GetZoneAsync(5)).Should().BeNull();
-        (await sut.GetZoneAsync(5)).Should().BeNull();
+        Assert.Null((await sut.GetZoneAsync(5)));
+        Assert.Null((await sut.GetZoneAsync(5)));
 
         repository.Verify(a => a.GetZonesByIdsAsync(5), Times.Exactly(2));
     }
@@ -89,7 +88,7 @@ public class StoreCachingTest
         await sut.GetPlayableZones();
         var zones = await sut.GetPlayableZones();
 
-        zones.Should().ContainSingle();
+        Assert.Single(zones);
         repository.Verify(a => a.GetZonesByIdsAsync(new[] { 2, 4, 6, 8, 344 }), Times.Once);
     }
 
@@ -116,7 +115,7 @@ public class StoreCachingTest
         await sut.GetAllWorlds();
         var worlds = await sut.GetAllWorlds();
 
-        worlds.Should().ContainSingle();
+        Assert.Single(worlds);
         repository.Verify(a => a.GetAllWorldsAsync(), Times.Once);
     }
 

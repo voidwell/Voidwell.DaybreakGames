@@ -1,5 +1,4 @@
 using System.Text.Json;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -43,7 +42,7 @@ public class EventProcessorHandlerTest
 
         var handled = await sut.TryProcessAsync("PlayerLogin", payload);
 
-        handled.Should().BeTrue();
+        Assert.True(handled);
         _eventRepository.Verify(a => a.AddAsync(It.Is<DataPlayerLogin>(e => e.CharacterId == "c1" && e.WorldId == 17)), Times.Once);
         _playerMonitor.Verify(a => a.SetOnlineAsync("c1", new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc)), Times.Once);
     }
@@ -54,7 +53,7 @@ public class EventProcessorHandlerTest
         var sut = CreateSut(CreateProcessor());
         var payload = JsonDocument.Parse("""{"event_name":"Nothing"}""").RootElement;
 
-        (await sut.TryProcessAsync("Nothing", payload)).Should().BeFalse();
+        Assert.False((await sut.TryProcessAsync("Nothing", payload)));
     }
 
     [Fact]
@@ -80,6 +79,6 @@ public class EventProcessorHandlerTest
 
         await processor.Process(new PlayerLogin { CharacterId = "c1", Timestamp = DateTime.UtcNow, WorldId = 17 });
 
-        capturedKey.Should().Be("c1");
+        Assert.Equal("c1", capturedKey);
     }
 }

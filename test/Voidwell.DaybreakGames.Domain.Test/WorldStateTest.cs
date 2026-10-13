@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Domain.Models;
 using Xunit;
 
@@ -29,10 +28,10 @@ public class WorldStateTest
     {
         var sut = new WorldState(17, "Emerald");
 
-        sut.Id.Should().Be(17);
-        sut.Name.Should().Be("Emerald");
-        sut.IsOnline.Should().BeFalse();
-        sut.GetZoneStates().Should().BeEmpty();
+        Assert.Equal(17, sut.Id);
+        Assert.Equal("Emerald", sut.Name);
+        Assert.False(sut.IsOnline);
+        Assert.Empty(sut.GetZoneStates());
     }
 
     [Fact]
@@ -43,8 +42,8 @@ public class WorldStateTest
 
         sut.SetWorldOnline();
 
-        sut.IsOnline.Should().BeTrue();
-        sut.GetZoneStates().Should().BeEmpty();
+        Assert.True(sut.IsOnline);
+        Assert.Empty(sut.GetZoneStates());
     }
 
     [Fact]
@@ -55,15 +54,15 @@ public class WorldStateTest
         sut.InitZoneState(2, "Indar");
 
         var zone = sut.GetZoneState(2);
-        zone.Id.Should().Be(2);
-        zone.Name.Should().Be("Indar");
-        zone.IsTracking.Should().BeFalse();
+        Assert.Equal(2, zone.Id);
+        Assert.Equal("Indar", zone.Name);
+        Assert.False(zone.IsTracking);
     }
 
     [Fact]
     public void GetZoneState_UnknownZone_ReturnsNull()
     {
-        new WorldState(17, "Emerald").GetZoneState(2).Should().BeNull();
+        Assert.Null(new WorldState(17, "Emerald").GetZoneState(2));
     }
 
     [Fact]
@@ -74,7 +73,7 @@ public class WorldStateTest
 
         sut.SetZoneState(new WorldZoneState(17, 2, "Renamed"));
 
-        sut.GetZoneStates().Should().ContainSingle().Which.Name.Should().Be("Renamed");
+        Assert.Equal("Renamed", Assert.Single(sut.GetZoneStates()).Name);
     }
 
     [Fact]
@@ -82,7 +81,7 @@ public class WorldStateTest
     {
         var sut = new WorldState(17, "Emerald");
 
-        sut.TrySetupZoneState(2, CreateMap(), CreateOwnership()).Should().BeFalse();
+        Assert.False(sut.TrySetupZoneState(2, CreateMap(), CreateOwnership()));
     }
 
     [Fact]
@@ -91,11 +90,11 @@ public class WorldStateTest
         var sut = new WorldState(17, "Emerald");
         sut.InitZoneState(2, "Indar");
 
-        sut.TrySetupZoneState(2, CreateMap(), CreateOwnership()).Should().BeTrue();
+        Assert.True(sut.TrySetupZoneState(2, CreateMap(), CreateOwnership()));
 
-        sut.GetZoneState(2).IsTracking.Should().BeTrue();
-        sut.GetZoneMapOwnership(2).Should().HaveCount(2);
-        sut.GetZoneMapScore(2).Territories.Vs.Value.Should().Be(2);
+        Assert.True(sut.GetZoneState(2).IsTracking);
+        Assert.Equal(2, sut.GetZoneMapOwnership(2).Count());
+        Assert.Equal(2, sut.GetZoneMapScore(2).Territories.Vs.Value);
     }
 
     [Fact]
@@ -104,10 +103,10 @@ public class WorldStateTest
         var sut = new WorldState(17, "Emerald");
         sut.InitZoneState(2, "Indar");
 
-        sut.GetZoneMapOwnership(2).Should().BeNull();
-        sut.GetZoneMapScore(2).Should().BeNull();
-        sut.GetZoneMapOwnership(99).Should().BeNull();
-        sut.GetZoneMapScore(99).Should().BeNull();
+        Assert.Null(sut.GetZoneMapOwnership(2));
+        Assert.Null(sut.GetZoneMapScore(2));
+        Assert.Null(sut.GetZoneMapOwnership(99));
+        Assert.Null(sut.GetZoneMapScore(99));
     }
 
     [Fact]
@@ -119,7 +118,7 @@ public class WorldStateTest
 
         sut.UpdateZoneLockState(2, lockState);
 
-        sut.GetZoneState(2).LockState.Should().BeSameAs(lockState);
+        Assert.Same(lockState, sut.GetZoneState(2).LockState);
     }
 
     [Fact]
@@ -133,7 +132,7 @@ public class WorldStateTest
             sut.UpdateZoneAlertState(99);
         };
 
-        act.Should().NotThrow();
+        Assert.Null(Record.Exception(act));
     }
 
     [Fact]
@@ -145,7 +144,7 @@ public class WorldStateTest
 
         sut.UpdateZoneAlertState(2, alert);
 
-        sut.GetZoneState(2).AlertState.Should().BeSameAs(alert);
+        Assert.Same(alert, sut.GetZoneState(2).AlertState);
     }
 
     [Fact]
@@ -158,8 +157,8 @@ public class WorldStateTest
 
         sut.SetWorldOffline();
 
-        sut.IsOnline.Should().BeFalse();
-        sut.GetZoneState(2).IsTracking.Should().BeFalse();
+        Assert.False(sut.IsOnline);
+        Assert.False(sut.GetZoneState(2).IsTracking);
     }
 
     [Fact]
@@ -171,9 +170,9 @@ public class WorldStateTest
 
         var change = await sut.UpdateZoneFacilityFactionAsync(2, facilityId: 2, factionId: 3);
 
-        change.Region.FacilityId.Should().Be(2);
-        change.Score.Territories.Tr.Value.Should().Be(1);
-        change.Score.Territories.Vs.Value.Should().Be(1);
+        Assert.Equal(2, change.Region.FacilityId);
+        Assert.Equal(1, change.Score.Territories.Tr.Value);
+        Assert.Equal(1, change.Score.Territories.Vs.Value);
     }
 
     [Fact]
@@ -182,7 +181,7 @@ public class WorldStateTest
         var sut = new WorldState(17, "Emerald");
         sut.InitZoneState(2, "Indar");
 
-        (await sut.UpdateZoneFacilityFactionAsync(2, 2, 3)).Should().BeNull();
-        (await sut.UpdateZoneFacilityFactionAsync(99, 2, 3)).Should().BeNull();
+        Assert.Null((await sut.UpdateZoneFacilityFactionAsync(2, 2, 3)));
+        Assert.Null((await sut.UpdateZoneFacilityFactionAsync(99, 2, 3)));
     }
 }

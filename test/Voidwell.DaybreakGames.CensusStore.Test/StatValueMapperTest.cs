@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Xunit;
@@ -32,7 +31,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, statName, 7);
 
-        typeof(CharacterLifetimeStat).GetProperty(propertyName)!.GetValue(model).Should().Be(7);
+        Assert.Equal(7, typeof(CharacterLifetimeStat).GetProperty(propertyName)!.GetValue(model));
     }
 
     [Fact]
@@ -42,7 +41,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, "not_a_stat", 7);
 
-        model.Should().BeEquivalentTo(new CharacterLifetimeStat());
+        Assert.Equivalent(new CharacterLifetimeStat(), model);
     }
 
     [Theory]
@@ -59,7 +58,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, statName, 7);
 
-        typeof(CharacterStat).GetProperty(propertyName)!.GetValue(model).Should().Be(7);
+        Assert.Equal(7, typeof(CharacterStat).GetProperty(propertyName)!.GetValue(model));
     }
 
     [Fact]
@@ -69,7 +68,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, "not_a_stat", 7);
 
-        model.Should().BeEquivalentTo(new CharacterStat());
+        Assert.Equivalent(new CharacterStat(), model);
     }
 
     [Theory]
@@ -89,9 +88,9 @@ public class StatValueMapperTest
         StatValueMapper.AssignStatValue(ref model, statName, 1, 2, 3);
 
         var type = typeof(CharacterLifetimeStatByFaction);
-        type.GetProperty(propertyPrefix + "VS")!.GetValue(model).Should().Be(1);
-        type.GetProperty(propertyPrefix + "NC")!.GetValue(model).Should().Be(2);
-        type.GetProperty(propertyPrefix + "TR")!.GetValue(model).Should().Be(3);
+        Assert.Equal(1, type.GetProperty(propertyPrefix + "VS")!.GetValue(model));
+        Assert.Equal(2, type.GetProperty(propertyPrefix + "NC")!.GetValue(model));
+        Assert.Equal(3, type.GetProperty(propertyPrefix + "TR")!.GetValue(model));
     }
 
     [Fact]
@@ -101,7 +100,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, "not_a_stat", 1, 2, 3);
 
-        model.Should().BeEquivalentTo(new CharacterLifetimeStatByFaction());
+        Assert.Equivalent(new CharacterLifetimeStatByFaction(), model);
     }
 
     [Theory]
@@ -114,9 +113,9 @@ public class StatValueMapperTest
         StatValueMapper.AssignStatValue(ref model, statName, 1, 2, 3);
 
         var type = typeof(CharacterStatByFaction);
-        type.GetProperty(propertyPrefix + "VS")!.GetValue(model).Should().Be(1);
-        type.GetProperty(propertyPrefix + "NC")!.GetValue(model).Should().Be(2);
-        type.GetProperty(propertyPrefix + "TR")!.GetValue(model).Should().Be(3);
+        Assert.Equal(1, type.GetProperty(propertyPrefix + "VS")!.GetValue(model));
+        Assert.Equal(2, type.GetProperty(propertyPrefix + "NC")!.GetValue(model));
+        Assert.Equal(3, type.GetProperty(propertyPrefix + "TR")!.GetValue(model));
     }
 
     [Fact]
@@ -126,7 +125,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, "not_a_stat", 1, 2, 3);
 
-        model.Should().BeEquivalentTo(new CharacterStatByFaction());
+        Assert.Equivalent(new CharacterStatByFaction(), model);
     }
 
     [Theory]
@@ -147,7 +146,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, statName, 7);
 
-        typeof(CharacterWeaponStat).GetProperty(propertyName)!.GetValue(model).Should().Be(7);
+        Assert.Equal(7, typeof(CharacterWeaponStat).GetProperty(propertyName)!.GetValue(model));
     }
 
     [Fact]
@@ -157,7 +156,7 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, "not_a_stat", 7);
 
-        model.Should().BeEquivalentTo(new CharacterWeaponStat());
+        Assert.Equivalent(new CharacterWeaponStat(), model);
     }
 
     [Theory]
@@ -174,9 +173,9 @@ public class StatValueMapperTest
         StatValueMapper.AssignStatValue(ref model, statName, 1, 2, 3);
 
         var type = typeof(CharacterWeaponStatByFaction);
-        type.GetProperty(propertyPrefix + "VS")!.GetValue(model).Should().Be(1);
-        type.GetProperty(propertyPrefix + "NC")!.GetValue(model).Should().Be(2);
-        type.GetProperty(propertyPrefix + "TR")!.GetValue(model).Should().Be(3);
+        Assert.Equal(1, type.GetProperty(propertyPrefix + "VS")!.GetValue(model));
+        Assert.Equal(2, type.GetProperty(propertyPrefix + "NC")!.GetValue(model));
+        Assert.Equal(3, type.GetProperty(propertyPrefix + "TR")!.GetValue(model));
     }
 
     [Fact]
@@ -186,6 +185,6 @@ public class StatValueMapperTest
 
         StatValueMapper.AssignStatValue(ref model, "not_a_stat", 1, 2, 3);
 
-        model.Should().BeEquivalentTo(new CharacterWeaponStatByFaction());
+        Assert.Equivalent(new CharacterWeaponStatByFaction(), model);
     }
 }

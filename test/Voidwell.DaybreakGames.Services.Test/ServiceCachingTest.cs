@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -34,7 +33,7 @@ public class ServiceCachingTest
         repository.Setup(a => a.GetAlerts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int?>())).ReturnsAsync(Array.Empty<Alert>());
         var sut = new AlertService(repository.Object, null, null, TestCache.Create());
 
-        (await sut.GetAlerts(0, 17)).Should().BeEmpty();
+        Assert.Empty((await sut.GetAlerts(0, 17)));
         await sut.GetAlerts(0, 17);
 
         repository.Verify(a => a.GetAlerts(0, 10, 17), Times.Exactly(2));
@@ -64,7 +63,7 @@ public class ServiceCachingTest
         var second = await sut.GetAggregateForItem(80);
         await sut.GetAggregateForItem(81);
 
-        second.Should().BeSameAs(first);
+        Assert.Same(first, second);
         repository.Verify(a => a.GetWeaponAggregateByItemId(80), Times.Once);
         repository.Verify(a => a.GetWeaponAggregateByItemId(81), Times.Once);
     }
@@ -76,7 +75,7 @@ public class ServiceCachingTest
         repository.Setup(a => a.GetWeaponAggregateByItemId(It.IsAny<int>())).ReturnsAsync((WeaponAggregate)null);
         var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
 
-        (await sut.GetAggregateForItem(80)).Should().BeNull();
+        Assert.Null((await sut.GetAggregateForItem(80)));
         await sut.GetAggregateForItem(80);
 
         repository.Verify(a => a.GetWeaponAggregateByItemId(80), Times.Exactly(2));
@@ -93,7 +92,7 @@ public class ServiceCachingTest
 
         var result = await sut.GetAggregates(new[] { 80, 81, 82, 80 });
 
-        result.Keys.Should().BeEquivalentTo(new[] { "80-0", "81-5" });
+        Assert.Equivalent(new[] { "80-0", "81-5" }, result.Keys);
     }
 
     [Fact]
@@ -106,11 +105,11 @@ public class ServiceCachingTest
         var rating = await sut.GetRatingAsync("c1");
         var again = await sut.GetRatingAsync("c1");
 
-        rating.CharacterId.Should().Be("c1");
-        rating.Rating.Should().Be(1500);
-        rating.Deviation.Should().Be(100);
-        rating.Volatility.Should().Be(0.02);
-        again.Should().BeSameAs(rating);
+        Assert.Equal("c1", rating.CharacterId);
+        Assert.Equal(1500, rating.Rating);
+        Assert.Equal(100, rating.Deviation);
+        Assert.Equal(0.02, rating.Volatility);
+        Assert.Same(rating, again);
         repository.Verify(a => a.GetCharacterRatingAsync("c1"), Times.Once);
     }
 
@@ -121,7 +120,7 @@ public class ServiceCachingTest
         repository.Setup(a => a.GetCharacterRatingAsync("c1")).ReturnsAsync(new CharacterRating { CharacterId = "c1", Rating = 1710 });
         var sut = new CharacterRatingService(repository.Object, TestCache.Create());
 
-        (await sut.GetRatingAsync("c1")).Rating.Should().Be(1710);
+        Assert.Equal(1710, (await sut.GetRatingAsync("c1")).Rating);
     }
 
     [Fact]
@@ -167,13 +166,13 @@ public class ServiceCachingTest
         var leaderboard = (await sut.GetRatingsLeaderboardAsync(10)).ToList();
         await sut.GetRatingsLeaderboardAsync(10);
 
-        leaderboard.Should().HaveCount(2);
-        leaderboard[0].Name.Should().Be("Bob");
-        leaderboard[0].FactionId.Should().Be(2);
-        leaderboard[0].WorldId.Should().Be(17);
-        leaderboard[0].BattleRank.Should().Be(100);
-        leaderboard[0].Rating.Should().Be(1800);
-        leaderboard[1].Name.Should().BeNull();
+        Assert.Equal(2, leaderboard.Count());
+        Assert.Equal("Bob", leaderboard[0].Name);
+        Assert.Equal(2, leaderboard[0].FactionId);
+        Assert.Equal(17, leaderboard[0].WorldId);
+        Assert.Equal(100, leaderboard[0].BattleRank);
+        Assert.Equal(1800, leaderboard[0].Rating);
+        Assert.Null(leaderboard[1].Name);
         repository.Verify(a => a.GetCharacterRatingLeaderboardAsync(10), Times.Once);
     }
 

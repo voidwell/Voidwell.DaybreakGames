@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Live.Test;
@@ -20,7 +19,7 @@ public class WebsocketHealthMonitorTest : IClassFixture<WebsocketHealthMonitorFi
 
         var result = sut.IsHealthy();
 
-        result.Should().BeTrue();
+        Assert.True(result);
     }
 
     [Fact]
@@ -32,7 +31,7 @@ public class WebsocketHealthMonitorTest : IClassFixture<WebsocketHealthMonitorFi
 
         var result = sut.IsHealthy();
 
-        result.Should().BeTrue();
+        Assert.True(result);
     }
 
     [Fact]
@@ -44,7 +43,7 @@ public class WebsocketHealthMonitorTest : IClassFixture<WebsocketHealthMonitorFi
 
         var result = sut.IsHealthy();
 
-        result.Should().BeFalse();
+        Assert.False(result);
     }
 
     [Fact]
@@ -58,6 +57,6 @@ public class WebsocketHealthMonitorTest : IClassFixture<WebsocketHealthMonitorFi
 
         var result = sut.IsHealthy();
 
-        result.Should().BeTrue();
+        Assert.True(result);
     }
 }

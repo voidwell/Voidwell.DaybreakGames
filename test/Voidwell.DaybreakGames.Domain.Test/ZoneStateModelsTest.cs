@@ -1,5 +1,4 @@
 using System.Text.Json;
-using FluentAssertions;
 using Voidwell.DaybreakGames.Domain.Models;
 using Xunit;
 
@@ -14,10 +13,10 @@ public class ZoneStateModelsTest
 
         var sut = new ZoneLockState(timestamp, 5, 2);
 
-        sut.State.Should().Be(ZoneLockStateEnum.LOCKED);
-        sut.Timestamp.Should().Be(timestamp);
-        sut.MetagameEventId.Should().Be(5);
-        sut.TriggeringFaction.Should().Be(2);
+        Assert.Equal(ZoneLockStateEnum.LOCKED, sut.State);
+        Assert.Equal(timestamp, sut.Timestamp);
+        Assert.Equal(5, sut.MetagameEventId);
+        Assert.Equal(2, sut.TriggeringFaction);
     }
 
     [Fact]
@@ -25,9 +24,9 @@ public class ZoneStateModelsTest
     {
         var sut = new ZoneLockState(DateTime.UtcNow);
 
-        sut.State.Should().Be(ZoneLockStateEnum.UNLOCKED);
-        sut.MetagameEventId.Should().BeNull();
-        sut.TriggeringFaction.Should().BeNull();
+        Assert.Equal(ZoneLockStateEnum.UNLOCKED, sut.State);
+        Assert.Null(sut.MetagameEventId);
+        Assert.Null(sut.TriggeringFaction);
     }
 
     [Fact]
@@ -35,7 +34,7 @@ public class ZoneStateModelsTest
     {
         var json = JsonSerializer.Serialize(new ZoneLockState(DateTime.UtcNow, 1, 2));
 
-        json.Should().Contain("\"State\":\"LOCKED\"");
+        Assert.Contains("\"State\":\"LOCKED\"", json);
     }
 
     [Fact]
@@ -44,8 +43,8 @@ public class ZoneStateModelsTest
         var running = new ZoneAlertState(DateTime.UtcNow.AddMinutes(-20), 1, new ZoneMetagameEvent { Duration = TimeSpan.FromMinutes(30) });
         var ended = new ZoneAlertState(DateTime.UtcNow.AddMinutes(-40), 1, new ZoneMetagameEvent { Duration = TimeSpan.FromMinutes(30) });
 
-        running.IsEventEnded().Should().BeFalse();
-        ended.IsEventEnded().Should().BeTrue();
+        Assert.False(running.IsEventEnded());
+        Assert.True(ended.IsEventEnded());
     }
 
     [Fact]
@@ -55,9 +54,9 @@ public class ZoneStateModelsTest
         var ended = new ZoneAlertState(DateTime.UtcNow.AddMinutes(-100), 1, new ZoneMetagameEvent());
         var noEvent = new ZoneAlertState(DateTime.UtcNow.AddMinutes(-100), 1, null);
 
-        running.IsEventEnded().Should().BeFalse();
-        ended.IsEventEnded().Should().BeTrue();
-        noEvent.IsEventEnded().Should().BeTrue();
+        Assert.False(running.IsEventEnded());
+        Assert.True(ended.IsEventEnded());
+        Assert.True(noEvent.IsEventEnded());
     }
 
     [Fact]
@@ -79,9 +78,9 @@ public class ZoneStateModelsTest
 
         var sut = new WorldZone(map);
 
-        sut.Regions.Should().HaveCount(2);
-        sut.Warpgates.Should().ContainSingle().Which.RegionId.Should().Be(10);
-        sut.Regions[0].Links.Should().ContainSingle().Which.RegionId.Should().Be(11);
-        sut.Regions[1].Links.Should().ContainSingle().Which.RegionId.Should().Be(10);
+        Assert.Equal(2, sut.Regions.Count());
+        Assert.Equal(10, Assert.Single(sut.Warpgates).RegionId);
+        Assert.Equal(11, Assert.Single(sut.Regions[0].Links).RegionId);
+        Assert.Equal(10, Assert.Single(sut.Regions[1].Links).RegionId);
     }
 }

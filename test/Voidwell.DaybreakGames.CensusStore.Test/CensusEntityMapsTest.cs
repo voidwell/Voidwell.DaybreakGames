@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Census.Models;
 using Xunit;
 
@@ -20,11 +19,11 @@ public class CensusEntityMapsTest
 
         var faction = CensusEntityMaps.Map(model);
 
-        faction.Id.Should().Be(3);
-        faction.Name.Should().Be("Terran Republic");
-        faction.ImageId.Should().Be(12);
-        faction.CodeTag.Should().Be("TR");
-        faction.UserSelectable.Should().BeTrue();
+        Assert.Equal(3, faction.Id);
+        Assert.Equal("Terran Republic", faction.Name);
+        Assert.Equal(12, faction.ImageId);
+        Assert.Equal("TR", faction.CodeTag);
+        Assert.True(faction.UserSelectable);
     }
 
     [Fact]
@@ -37,8 +36,8 @@ public class CensusEntityMapsTest
             Name = new MultiLanguageString { English = "Emerald" }
         });
 
-        world.Id.Should().Be(17);
-        world.Name.Should().Be("Emerald");
+        Assert.Equal(17, world.Id);
+        Assert.Equal("Emerald", world.Name);
     }
 
     [Fact]
@@ -53,9 +52,9 @@ public class CensusEntityMapsTest
             FinishDate = finished
         });
 
-        result.CharacterId.Should().Be("c1");
-        result.AchievementId.Should().Be(5);
-        result.FinishDate.Should().Be(finished);
+        Assert.Equal("c1", result.CharacterId);
+        Assert.Equal(5, result.AchievementId);
+        Assert.Equal(finished, result.FinishDate);
     }
 
     [Fact]
@@ -68,7 +67,7 @@ public class CensusEntityMapsTest
             FinishDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         });
 
-        result.FinishDate.Should().BeNull();
+        Assert.Null(result.FinishDate);
     }
 
     [Fact]
@@ -81,7 +80,7 @@ public class CensusEntityMapsTest
             CompletionTimeDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         });
 
-        result.CompletionTimeDate.Should().BeNull();
+        Assert.Null(result.CompletionTimeDate);
     }
 
     [Fact]
@@ -96,7 +95,7 @@ public class CensusEntityMapsTest
             CompletionTimeDate = completed
         });
 
-        result.CompletionTimeDate.Should().Be(completed);
-        result.DirectiveId.Should().Be(9);
+        Assert.Equal(completed, result.CompletionTimeDate);
+        Assert.Equal(9, result.DirectiveId);
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
 using Xunit;
@@ -24,7 +23,7 @@ public class ZoneStateHistoricalTest
     {
         var sut = new ZoneStateHistorical(Array.Empty<ContinentLock>(), Array.Empty<ContinentUnlock>());
 
-        sut.GetLastLockState(1, 2).Should().BeNull();
+        Assert.Null(sut.GetLastLockState(1, 2));
     }
 
     [Fact]
@@ -34,10 +33,10 @@ public class ZoneStateHistoricalTest
 
         var state = sut.GetLastLockState(1, 2);
 
-        state.State.Should().Be(ZoneLockStateEnum.LOCKED);
-        state.Timestamp.Should().Be(_now);
-        state.MetagameEventId.Should().Be(7);
-        state.TriggeringFaction.Should().Be(3);
+        Assert.Equal(ZoneLockStateEnum.LOCKED, state.State);
+        Assert.Equal(_now, state.Timestamp);
+        Assert.Equal(7, state.MetagameEventId);
+        Assert.Equal(3, state.TriggeringFaction);
     }
 
     [Fact]
@@ -47,8 +46,8 @@ public class ZoneStateHistoricalTest
 
         var state = sut.GetLastLockState(1, 2);
 
-        state.State.Should().Be(ZoneLockStateEnum.UNLOCKED);
-        state.Timestamp.Should().Be(_now);
+        Assert.Equal(ZoneLockStateEnum.UNLOCKED, state.State);
+        Assert.Equal(_now, state.Timestamp);
     }
 
     [Fact]
@@ -56,7 +55,7 @@ public class ZoneStateHistoricalTest
     {
         var sut = new ZoneStateHistorical(new[] { Lock(1, 2, _now) }, new[] { Unlock(1, 2, _now.AddHours(-1)) });
 
-        sut.GetLastLockState(1, 2).State.Should().Be(ZoneLockStateEnum.LOCKED);
+        Assert.Equal(ZoneLockStateEnum.LOCKED, sut.GetLastLockState(1, 2).State);
     }
 
     [Fact]
@@ -66,8 +65,8 @@ public class ZoneStateHistoricalTest
 
         var state = sut.GetLastLockState(1, 2);
 
-        state.State.Should().Be(ZoneLockStateEnum.UNLOCKED);
-        state.Timestamp.Should().Be(_now);
+        Assert.Equal(ZoneLockStateEnum.UNLOCKED, state.State);
+        Assert.Equal(_now, state.Timestamp);
     }
 
     [Fact]
@@ -75,7 +74,7 @@ public class ZoneStateHistoricalTest
     {
         var sut = new ZoneStateHistorical(new[] { Lock(1, 2, _now) }, new[] { Unlock(1, 2, _now) });
 
-        sut.GetLastLockState(1, 2).Should().BeNull();
+        Assert.Null(sut.GetLastLockState(1, 2));
     }
 
     [Fact]
@@ -83,10 +82,10 @@ public class ZoneStateHistoricalTest
     {
         var sut = new ZoneStateHistorical(new[] { Lock(1, 2, _now) }, Array.Empty<ContinentUnlock>());
 
-        sut.GetLastLockState(1, 3).Should().BeNull();
-        sut.GetLastLockState(2, 2).Should().BeNull();
-        sut.GetLastLock(1, 2).Should().NotBeNull();
-        sut.GetLastUnlock(1, 2).Should().BeNull();
+        Assert.Null(sut.GetLastLockState(1, 3));
+        Assert.Null(sut.GetLastLockState(2, 2));
+        Assert.NotNull(sut.GetLastLock(1, 2));
+        Assert.Null(sut.GetLastUnlock(1, 2));
     }
 
     [Fact]
@@ -94,6 +93,6 @@ public class ZoneStateHistoricalTest
     {
         var act = () => new ZoneStateHistorical(new[] { Lock(1, 2, _now), Lock(1, 2, _now.AddMinutes(1)) }, Array.Empty<ContinentUnlock>());
 
-        act.Should().Throw<ArgumentException>();
+        Assert.ThrowsAny<ArgumentException>(act);
     }
 }

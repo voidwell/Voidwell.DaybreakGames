@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
@@ -33,26 +32,26 @@ public class PlayerSessionEventMapperTest
             CharacterOutfitId = "o2"
         };
 
-        var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).Single().Should().BeOfType<PlayerSessionDeathEvent>().Subject;
+        var result = Assert.IsType<PlayerSessionDeathEvent>(PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).Single());
 
-        result.Timestamp.Should().Be(_time);
-        result.ZoneId.Should().Be(2);
-        result.Attacker.Id.Should().Be("attacker");
-        result.Attacker.Name.Should().Be("Attacker");
-        result.Attacker.FactionId.Should().Be(1);
-        result.Victim.Id.Should().Be("victim");
-        result.Victim.Name.Should().Be("Victim");
-        result.Victim.FactionId.Should().Be(2);
-        result.Weapon.Id.Should().Be(80);
-        result.Weapon.Name.Should().Be("Gauss Rifle");
-        result.Weapon.ImageId.Should().Be(7);
-        result.IsHeadshot.Should().BeTrue();
-        result.AttackerFireModeId.Should().Be(3);
-        result.AttackerLoadoutId.Should().Be(4);
-        result.AttackerOutfitId.Should().Be("o1");
-        result.AttackerVehicleId.Should().Be(5);
-        result.CharacterLoadoutId.Should().Be(6);
-        result.CharacterOutfitId.Should().Be("o2");
+        Assert.Equal(_time, result.Timestamp);
+        Assert.Equal(2, result.ZoneId);
+        Assert.Equal("attacker", result.Attacker.Id);
+        Assert.Equal("Attacker", result.Attacker.Name);
+        Assert.Equal(1, result.Attacker.FactionId);
+        Assert.Equal("victim", result.Victim.Id);
+        Assert.Equal("Victim", result.Victim.Name);
+        Assert.Equal(2, result.Victim.FactionId);
+        Assert.Equal(80, result.Weapon.Id);
+        Assert.Equal("Gauss Rifle", result.Weapon.Name);
+        Assert.Equal(7, result.Weapon.ImageId);
+        Assert.True(result.IsHeadshot);
+        Assert.Equal(3, result.AttackerFireModeId);
+        Assert.Equal(4, result.AttackerLoadoutId);
+        Assert.Equal("o1", result.AttackerOutfitId);
+        Assert.Equal(5, result.AttackerVehicleId);
+        Assert.Equal(6, result.CharacterLoadoutId);
+        Assert.Equal("o2", result.CharacterOutfitId);
     }
 
     [Fact]
@@ -62,11 +61,11 @@ public class PlayerSessionEventMapperTest
 
         var result = (PlayerSessionDeathEvent)PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).Single();
 
-        result.Attacker.Name.Should().BeNull();
-        result.Attacker.FactionId.Should().BeNull();
-        result.Victim.Name.Should().BeNull();
-        result.Weapon.Name.Should().BeNull();
-        result.Weapon.ImageId.Should().BeNull();
+        Assert.Null(result.Attacker.Name);
+        Assert.Null(result.Attacker.FactionId);
+        Assert.Null(result.Victim.Name);
+        Assert.Null(result.Weapon.Name);
+        Assert.Null(result.Weapon.ImageId);
     }
 
     [Fact]
@@ -76,7 +75,7 @@ public class PlayerSessionEventMapperTest
 
         var act = () => PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).ToList();
 
-        act.Should().Throw<InvalidOperationException>();
+        Assert.ThrowsAny<InvalidOperationException>(act);
     }
 
     [Fact]
@@ -90,14 +89,14 @@ public class PlayerSessionEventMapperTest
             Facility = new MapRegion { FacilityName = "Peris", FacilityTypeId = 5, FacilityType = "Large Outpost" }
         };
 
-        var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { capture }).Single().Should().BeOfType<PlayerSessionFacilityCaptureEvent>().Subject;
+        var result = Assert.IsType<PlayerSessionFacilityCaptureEvent>(PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { capture }).Single());
 
-        result.Timestamp.Should().Be(_time);
-        result.ZoneId.Should().Be(4);
-        result.Facility.Id.Should().Be(9);
-        result.Facility.Name.Should().Be("Peris");
-        result.Facility.TypeId.Should().Be(5);
-        result.Facility.TypeName.Should().Be("Large Outpost");
+        Assert.Equal(_time, result.Timestamp);
+        Assert.Equal(4, result.ZoneId);
+        Assert.Equal(9, result.Facility.Id);
+        Assert.Equal("Peris", result.Facility.Name);
+        Assert.Equal(5, result.Facility.TypeId);
+        Assert.Equal("Large Outpost", result.Facility.TypeName);
     }
 
     [Fact]
@@ -111,20 +110,19 @@ public class PlayerSessionEventMapperTest
             Facility = new MapRegion { FacilityName = "Peris", FacilityTypeId = 5, FacilityType = "Large Outpost" }
         };
 
-        var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { defend }).Single().Should().BeOfType<PlayerSessionFacilityDefendEvent>().Subject;
+        var result = Assert.IsType<PlayerSessionFacilityDefendEvent>(PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { defend }).Single());
 
-        result.Facility.Id.Should().Be(9);
-        result.Facility.Name.Should().Be("Peris");
+        Assert.Equal(9, result.Facility.Id);
+        Assert.Equal("Peris", result.Facility.Name);
     }
 
     [Fact]
     public void BattleRankUp_MapsRank()
     {
-        var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { new BattlerankUp { Timestamp = _time, ZoneId = 2, BattleRank = 42 } })
-            .Single().Should().BeOfType<PlayerSessionBattleRankUpEvent>().Subject;
+        var result = Assert.IsType<PlayerSessionBattleRankUpEvent>(PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { new BattlerankUp { Timestamp = _time, ZoneId = 2, BattleRank = 42 } }).Single());
 
-        result.BattleRank.Should().Be(42);
-        result.Timestamp.Should().Be(_time);
+        Assert.Equal(42, result.BattleRank);
+        Assert.Equal(_time, result.Timestamp);
     }
 
     [Fact]
@@ -147,16 +145,16 @@ public class PlayerSessionEventMapperTest
             Facility = new MapRegion { FacilityName = "Peris" }
         };
 
-        var result = PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { destroy }).Single().Should().BeOfType<PlayerSessionVehicleDestroyEvent>().Subject;
+        var result = Assert.IsType<PlayerSessionVehicleDestroyEvent>(PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { destroy }).Single());
 
-        result.VictimVehicle.Id.Should().Be(3);
-        result.VictimVehicle.Name.Should().Be("Harasser");
-        result.VictimVehicle.ImageId.Should().Be(11);
-        result.Weapon.Name.Should().Be("Lancer");
-        result.FactionId.Should().Be(2);
-        result.AttackerVehicleId.Should().Be(5);
-        result.Facility.Id.Should().Be(9);
-        result.Facility.Name.Should().Be("Peris");
+        Assert.Equal(3, result.VictimVehicle.Id);
+        Assert.Equal("Harasser", result.VictimVehicle.Name);
+        Assert.Equal(11, result.VictimVehicle.ImageId);
+        Assert.Equal("Lancer", result.Weapon.Name);
+        Assert.Equal(2, result.FactionId);
+        Assert.Equal(5, result.AttackerVehicleId);
+        Assert.Equal(9, result.Facility.Id);
+        Assert.Equal("Peris", result.Facility.Name);
     }
 
     [Theory]
@@ -168,13 +166,13 @@ public class PlayerSessionEventMapperTest
 
         var result = (PlayerSessionVehicleDestroyEvent)PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { destroy }).Single();
 
-        result.Facility.Should().BeNull();
+        Assert.Null(result.Facility);
     }
 
     [Fact]
     public void Mapping_EmptyInput_ReturnsEmpty()
     {
-        PlayerSessionEventMapper.ToPlayerSessionEvent(Array.Empty<Death>()).Should().BeEmpty();
-        PlayerSessionEventMapper.ToPlayerSessionEvent(Array.Empty<VehicleDestroy>()).Should().BeEmpty();
+        Assert.Empty(PlayerSessionEventMapper.ToPlayerSessionEvent(Array.Empty<Death>()));
+        Assert.Empty(PlayerSessionEventMapper.ToPlayerSessionEvent(Array.Empty<VehicleDestroy>()));
     }
 }

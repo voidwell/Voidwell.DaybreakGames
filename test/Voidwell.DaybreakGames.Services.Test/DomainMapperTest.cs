@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Services.Mappers;
 using Xunit;
@@ -22,10 +21,10 @@ public class DomainMapperTest
 
         var details = DomainMapper.MapCharacterDetails(character);
 
-        details.Faction.Should().Be("Vanu Sovereignty");
-        details.FactionImageId.Should().Be(12);
-        details.Title.Should().Be("Ace");
-        details.World.Should().Be("Emerald");
+        Assert.Equal("Vanu Sovereignty", details.Faction);
+        Assert.Equal(12, details.FactionImageId);
+        Assert.Equal("Ace", details.Title);
+        Assert.Equal("Emerald", details.World);
     }
 
     [Fact]
@@ -43,13 +42,13 @@ public class DomainMapperTest
             }
         };
 
-        var result = DomainMapper.MapCharacterDetails(character).VehicleStats.Should().ContainSingle().Subject;
+        var result = Assert.Single(DomainMapper.MapCharacterDetails(character).VehicleStats);
 
-        result.VehicleId.Should().Be(5);
-        result.Kills.Should().Be(7);
-        result.Deaths.Should().Be(3);
-        result.PilotKills.Should().Be(2);
-        result.PilotVehicleKills.Should().Be(1);
+        Assert.Equal(5, result.VehicleId);
+        Assert.Equal(7, result.Kills);
+        Assert.Equal(3, result.Deaths);
+        Assert.Equal(2, result.PilotKills);
+        Assert.Equal(1, result.PilotVehicleKills);
     }
 
     [Fact]
@@ -71,16 +70,16 @@ public class DomainMapperTest
 
         var result = DomainMapper.MapLifetimeStats(stats);
 
-        result.Kills.Should().Be(10);
-        result.Deaths.Should().Be(4);
-        result.Headshots.Should().Be(3);
-        result.PlayTime.Should().Be(600);
-        result.VehicleKills.Should().Be(2);
-        result.Score.Should().Be(99);
-        result.FireCount.Should().Be(500);
-        result.HitCount.Should().Be(250);
-        result.DamageGiven.Should().Be(1000);
-        result.DamageTakenBy.Should().Be(800);
+        Assert.Equal(10, result.Kills);
+        Assert.Equal(4, result.Deaths);
+        Assert.Equal(3, result.Headshots);
+        Assert.Equal(600, result.PlayTime);
+        Assert.Equal(2, result.VehicleKills);
+        Assert.Equal(99, result.Score);
+        Assert.Equal(500, result.FireCount);
+        Assert.Equal(250, result.HitCount);
+        Assert.Equal(1000, result.DamageGiven);
+        Assert.Equal(800, result.DamageTakenBy);
     }
 
     [Fact]
@@ -99,14 +98,14 @@ public class DomainMapperTest
 
         var result = DomainMapper.MapProfileStatByFaction(stat);
 
-        result.ProfileName.Should().Be("Infiltrator");
-        result.ImageId.Should().Be(5);
-        result.Kills.Vs.Should().Be(1);
-        result.Kills.Nc.Should().Be(2);
-        result.Kills.Tr.Should().Be(3);
-        result.KilledBy.Vs.Should().Be(4);
-        result.KilledBy.Nc.Should().Be(5);
-        result.KilledBy.Tr.Should().Be(6);
+        Assert.Equal("Infiltrator", result.ProfileName);
+        Assert.Equal(5, result.ImageId);
+        Assert.Equal(1, result.Kills.Vs);
+        Assert.Equal(2, result.Kills.Nc);
+        Assert.Equal(3, result.Kills.Tr);
+        Assert.Equal(4, result.KilledBy.Vs);
+        Assert.Equal(5, result.KilledBy.Nc);
+        Assert.Equal(6, result.KilledBy.Tr);
     }
 
     [Fact]
@@ -114,8 +113,8 @@ public class DomainMapperTest
     {
         var result = DomainMapper.MapProfileStatByFaction(new CharacterStatByFaction());
 
-        result.Kills.Vs.Should().Be(0);
-        result.KilledBy.Tr.Should().Be(0);
+        Assert.Equal(0, result.Kills.Vs);
+        Assert.Equal(0, result.KilledBy.Tr);
     }
 
     [Fact]
@@ -125,9 +124,9 @@ public class DomainMapperTest
 
         var result = DomainMapper.MapStatsHistory(history);
 
-        result.Day.Should().Equal(1, 2, 3);
-        result.Week.Should().Equal(4, 5);
-        result.Month.Should().Equal(6);
+        Assert.Equal(new[] { 1, 2, 3 }, result.Day);
+        Assert.Equal(new[] { 4, 5 }, result.Week);
+        Assert.Equal(new[] { 6 }, result.Month);
     }
 
     [Fact]
@@ -135,7 +134,7 @@ public class DomainMapperTest
     {
         var history = new CharacterStatHistory { Day = "[\n  1,\n  2\n]", Week = "[]", Month = "[]" };
 
-        DomainMapper.MapStatsHistory(history).Day.Should().Equal(1, 2);
+        Assert.Equal(new[] { 1, 2 }, DomainMapper.MapStatsHistory(history).Day);
     }
 
     [Fact]
@@ -150,11 +149,11 @@ public class DomainMapperTest
 
         var result = DomainMapper.MapOutfit(member);
 
-        result.Id.Should().Be("o1");
-        result.Name.Should().Be("The Outfit");
-        result.Alias.Should().Be("TO");
-        result.CreatedDate.Should().Be(created);
-        result.MemberCount.Should().Be(123);
+        Assert.Equal("o1", result.Id);
+        Assert.Equal("The Outfit", result.Name);
+        Assert.Equal("TO", result.Alias);
+        Assert.Equal(created, result.CreatedDate);
+        Assert.Equal(123, result.MemberCount);
     }
 
     [Fact]
@@ -168,10 +167,10 @@ public class DomainMapperTest
 
         var result = DomainMapper.MapWeaponStat(stat);
 
-        result.Name.Should().Be("Gauss SAW");
-        result.Category.Should().Be("LMG");
-        result.ImageId.Should().Be(77);
-        result.VehicleName.Should().Be("Harasser");
-        result.VehicleImageId.Should().Be(88);
+        Assert.Equal("Gauss SAW", result.Name);
+        Assert.Equal("LMG", result.Category);
+        Assert.Equal(77, result.ImageId);
+        Assert.Equal("Harasser", result.VehicleName);
+        Assert.Equal(88, result.VehicleImageId);
     }
 }

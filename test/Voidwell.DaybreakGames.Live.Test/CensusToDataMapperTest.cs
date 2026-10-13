@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.Mappers;
 using Xunit;
@@ -12,9 +11,9 @@ public class CensusToDataMapperTest
     {
         var result = CensusToDataMapper.Map(new ContinentLock { VsPopulation = 1, NcPopulation = 2, TrPopulation = 3 });
 
-        result.PopulationVs.Should().Be(1);
-        result.PopulationNc.Should().Be(2);
-        result.PopulationTr.Should().Be(3);
+        Assert.Equal(1, result.PopulationVs);
+        Assert.Equal(2, result.PopulationNc);
+        Assert.Equal(3, result.PopulationTr);
     }
 
     [Fact]
@@ -25,9 +24,9 @@ public class CensusToDataMapperTest
         var first = CensusToDataMapper.Map(payload);
         var second = CensusToDataMapper.Map(payload);
 
-        first.Id.Should().NotBeEmpty();
-        first.Id.Should().NotBe(second.Id);
-        first.CharacterId.Should().Be("c1");
+        Assert.NotEqual(Guid.Empty, first.Id);
+        Assert.NotEqual(second.Id, first.Id);
+        Assert.Equal("c1", first.CharacterId);
     }
 
     [Fact]
@@ -35,9 +34,9 @@ public class CensusToDataMapperTest
     {
         var result = CensusToDataMapper.Map(new MetagameEvent { FactionVs = 10, FactionNc = 20, FactionTr = 30 });
 
-        result.ZoneControlVs.Should().Be(10);
-        result.ZoneControlNc.Should().Be(20);
-        result.ZoneControlTr.Should().Be(30);
+        Assert.Equal(10, result.ZoneControlVs);
+        Assert.Equal(20, result.ZoneControlNc);
+        Assert.Equal(30, result.ZoneControlTr);
     }
 
     [Fact]
@@ -54,13 +53,13 @@ public class CensusToDataMapperTest
             FactionTr = 3
         });
 
-        alert.MetagameInstanceId.Should().Be(99);
-        alert.StartDate.Should().Be(timestamp);
-        alert.EndDate.Should().Be(timestamp.AddMinutes(45));
-        alert.StartFactionVs.Should().Be(1);
-        alert.LastFactionNc.Should().Be(2);
-        alert.LastFactionTr.Should().Be(3);
-        alert.MetagameEvent.Should().BeNull();
+        Assert.Equal(99, alert.MetagameInstanceId);
+        Assert.Equal(timestamp, alert.StartDate);
+        Assert.Equal(timestamp.AddMinutes(45), alert.EndDate);
+        Assert.Equal(1, alert.StartFactionVs);
+        Assert.Equal(2, alert.LastFactionNc);
+        Assert.Equal(3, alert.LastFactionTr);
+        Assert.Null(alert.MetagameEvent);
     }
 
     [Theory]
@@ -69,7 +68,7 @@ public class CensusToDataMapperTest
     [InlineData(null, null)]
     public void PlayerFacilityEvents_TreatZeroOutfitIdAsNone(string outfitId, string expected)
     {
-        CensusToDataMapper.Map(new PlayerFacilityCapture { OutfitId = outfitId }).OutfitId.Should().Be(expected);
-        CensusToDataMapper.Map(new PlayerFacilityDefend { OutfitId = outfitId }).OutfitId.Should().Be(expected);
+        Assert.Equal(expected, CensusToDataMapper.Map(new PlayerFacilityCapture { OutfitId = outfitId }).OutfitId);
+        Assert.Equal(expected, CensusToDataMapper.Map(new PlayerFacilityDefend { OutfitId = outfitId }).OutfitId);
     }
 }

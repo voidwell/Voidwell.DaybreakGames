@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
@@ -34,7 +33,7 @@ public class CharacterSessionServiceTest
 
         var result = await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken);
 
-        result.Should().BeEmpty();
+        Assert.Empty(result);
     }
 
     [Fact]
@@ -44,12 +43,12 @@ public class CharacterSessionServiceTest
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
-        summary.Id.Should().Be("10");
-        summary.Duration.Should().Be(3600);
-        summary.LoginDate.Should().Be(LoginFor(10));
-        summary.LogoutDate.Should().Be(LogoutFor(10));
-        summary.Kills.Should().Be(0);
-        summary.Deaths.Should().Be(0);
+        Assert.Equal("10", summary.Id);
+        Assert.Equal(3600, summary.Duration);
+        Assert.Equal(LoginFor(10), summary.LoginDate);
+        Assert.Equal(LogoutFor(10), summary.LogoutDate);
+        Assert.Equal(0, summary.Kills);
+        Assert.Equal(0, summary.Deaths);
     }
 
     [Fact]
@@ -62,8 +61,8 @@ public class CharacterSessionServiceTest
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
-        summary.Kills.Should().Be(2);
-        summary.Deaths.Should().Be(1);
+        Assert.Equal(2, summary.Kills);
+        Assert.Equal(1, summary.Deaths);
     }
 
     [Fact]
@@ -73,8 +72,8 @@ public class CharacterSessionServiceTest
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
-        summary.Kills.Should().Be(0);
-        summary.Deaths.Should().Be(1);
+        Assert.Equal(0, summary.Kills);
+        Assert.Equal(1, summary.Deaths);
     }
 
     [Fact]
@@ -87,8 +86,8 @@ public class CharacterSessionServiceTest
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
-        summary.Kills.Should().Be(0);
-        summary.Deaths.Should().Be(1);
+        Assert.Equal(0, summary.Kills);
+        Assert.Equal(1, summary.Deaths);
     }
 
     [Fact]
@@ -98,8 +97,8 @@ public class CharacterSessionServiceTest
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
-        summary.Kills.Should().Be(0);
-        summary.Deaths.Should().Be(1);
+        Assert.Equal(0, summary.Kills);
+        Assert.Equal(1, summary.Deaths);
     }
 
     [Fact]
@@ -111,8 +110,8 @@ public class CharacterSessionServiceTest
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
-        summary.Kills.Should().Be(1);
-        summary.Deaths.Should().Be(0);
+        Assert.Equal(1, summary.Kills);
+        Assert.Equal(0, summary.Deaths);
     }
 
     [Fact]
@@ -122,8 +121,8 @@ public class CharacterSessionServiceTest
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
-        summary.Kills.Should().Be(0);
-        summary.Deaths.Should().Be(1);
+        Assert.Equal(0, summary.Kills);
+        Assert.Equal(1, summary.Deaths);
     }
 
     [Fact]
@@ -135,11 +134,11 @@ public class CharacterSessionServiceTest
 
         var summaries = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).ToList();
 
-        summaries.Should().HaveCount(2);
-        summaries.Single(a => a.Id == "10").Kills.Should().Be(2);
-        summaries.Single(a => a.Id == "10").Deaths.Should().Be(0);
-        summaries.Single(a => a.Id == "11").Kills.Should().Be(0);
-        summaries.Single(a => a.Id == "11").Deaths.Should().Be(1);
+        Assert.Equal(2, summaries.Count());
+        Assert.Equal(2, summaries.Single(a => a.Id == "10").Kills);
+        Assert.Equal(0, summaries.Single(a => a.Id == "10").Deaths);
+        Assert.Equal(0, summaries.Single(a => a.Id == "11").Kills);
+        Assert.Equal(1, summaries.Single(a => a.Id == "11").Deaths);
     }
 
     [Fact]
@@ -151,7 +150,7 @@ public class CharacterSessionServiceTest
 
         var summaries = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).ToList();
 
-        summaries.Should().ContainSingle().Which.Id.Should().Be("10");
+        Assert.Equal("10", Assert.Single(summaries).Id);
     }
 
     [Fact]

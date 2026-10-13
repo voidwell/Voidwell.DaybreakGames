@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Utils.Test;
@@ -17,8 +16,7 @@ public class EnumerableExtensionsTest
         parents.SetGroupJoin(children, a => a.Id, a => a.ParentId, a => a.Children);
 
         //Assert
-        parents.Should()
-            .BeEquivalentTo(expected);
+        Assert.Equivalent(expected, parents);
     }
 
     [Fact]
@@ -28,7 +26,7 @@ public class EnumerableExtensionsTest
 
         parents.SetGroupJoin(null, a => a.Id, a => a.ParentId, a => a.Children);
 
-        parents.Should().OnlyContain(a => !a.Children.Any());
+        Assert.All(parents, a => Assert.Empty(a.Children));
     }
 
     [Fact]
@@ -38,7 +36,7 @@ public class EnumerableExtensionsTest
 
         parents.SetGroupJoin(GetTestChildren(), a => a.Id, a => a.ParentId, a => a.Children);
 
-        parents[0].Children.Should().BeEmpty();
+        Assert.Empty(parents[0].Children);
     }
 
     [Fact]
@@ -48,13 +46,13 @@ public class EnumerableExtensionsTest
 
         var result = source.SelectManyNotNull(a => a);
 
-        result.Should().Equal(1, 2, 3);
+        Assert.Equal(new[] { 1, 2, 3 }, result);
     }
 
     [Fact]
     public void SelectManyNotNull_EmptySource_ReturnsEmpty()
     {
-        Array.Empty<int[]>().SelectManyNotNull(a => a).Should().BeEmpty();
+        Assert.Empty(Array.Empty<int[]>().SelectManyNotNull(a => a));
     }
 
     private static IEnumerable<SimpleParent> GetTestParents()

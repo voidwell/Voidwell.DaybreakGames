@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -18,7 +17,7 @@ public class MetagameEventServiceTest
         _store.Setup(a => a.GetMetagameCategoryZoneIdAsync(1)).ReturnsAsync((int?)null);
         var sut = new MetagameEventService(_store.Object);
 
-        (await sut.GetMetagameEvent(1)).Should().BeNull();
+        Assert.Null((await sut.GetMetagameEvent(1)));
     }
 
     [Fact]
@@ -30,11 +29,11 @@ public class MetagameEventServiceTest
 
         var result = await sut.GetMetagameEvent(123);
 
-        result.Id.Should().Be(123);
-        result.TypeId.Should().Be(1);
-        result.Name.Should().Be("Indar Alert");
-        result.Description.Should().Be("Capture it");
-        result.ZoneId.Should().Be(2);
+        Assert.Equal(123, result.Id);
+        Assert.Equal(1, result.TypeId);
+        Assert.Equal("Indar Alert", result.Name);
+        Assert.Equal("Capture it", result.Description);
+        Assert.Equal(2, result.ZoneId);
     }
 
     [Theory]
@@ -52,7 +51,7 @@ public class MetagameEventServiceTest
 
         var result = await sut.GetMetagameEvent(1);
 
-        result.Duration.Should().Be(TimeSpan.FromMinutes(expectedMinutes));
+        Assert.Equal(TimeSpan.FromMinutes(expectedMinutes), result.Duration);
     }
 
     [Theory]
@@ -67,7 +66,7 @@ public class MetagameEventServiceTest
 
         var result = await sut.GetMetagameEvent(1);
 
-        result.Duration.Should().Be(TimeSpan.FromMinutes(45));
-        result.TypeId.Should().Be(type.GetValueOrDefault());
+        Assert.Equal(TimeSpan.FromMinutes(45), result.Duration);
+        Assert.Equal(type.GetValueOrDefault(), result.TypeId);
     }
 }

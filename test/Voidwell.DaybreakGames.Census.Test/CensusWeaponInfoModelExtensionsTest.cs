@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Census.Models;
 using Voidwell.DaybreakGames.Census.Models.Extensions;
 using Xunit;
@@ -30,10 +29,10 @@ public class CensusWeaponInfoModelExtensionsTest
             Datasheet = new CensusWeaponInfoModel.WeaponDatasheet { Range = new MultiLanguageString { English = "Medium" } }
         };
 
-        model.GetName().Should().Be("Gauss SAW");
-        model.GetDescription().Should().Be("An LMG");
-        model.GetCategory().Should().Be("LMG");
-        model.GetRange().Should().Be("Medium");
+        Assert.Equal("Gauss SAW", model.GetName());
+        Assert.Equal("An LMG", model.GetDescription());
+        Assert.Equal("LMG", model.GetCategory());
+        Assert.Equal("Medium", model.GetRange());
     }
 
     [Fact]
@@ -41,23 +40,23 @@ public class CensusWeaponInfoModelExtensionsTest
     {
         var model = new CensusWeaponInfoModel();
 
-        model.GetName().Should().BeNull();
-        model.GetDescription().Should().BeNull();
-        model.GetCategory().Should().BeNull();
-        model.GetRange().Should().BeNull();
+        Assert.Null(model.GetName());
+        Assert.Null(model.GetDescription());
+        Assert.Null(model.GetCategory());
+        Assert.Null(model.GetRange());
     }
 
     [Fact]
     public void GetWeaponSpeed_UsesFirstFireMode()
     {
-        Weapon(Mode(m => m.Speed = 500), Mode(m => m.Speed = 900)).GetWeaponSpeed().Should().Be(500);
+        Assert.Equal(500, Weapon(Mode(m => m.Speed = 500), Mode(m => m.Speed = 900)).GetWeaponSpeed());
     }
 
     [Fact]
     public void GetWeaponSpeed_NoFireModes_ReturnsNull()
     {
-        new CensusWeaponInfoModel().GetWeaponSpeed().Should().BeNull();
-        Weapon().GetWeaponSpeed().Should().BeNull();
+        Assert.Null(new CensusWeaponInfoModel().GetWeaponSpeed());
+        Assert.Null(Weapon().GetWeaponSpeed());
     }
 
     [Fact]
@@ -66,7 +65,7 @@ public class CensusWeaponInfoModelExtensionsTest
         var model = Weapon(Mode(m => m.DamageMin = 80), Mode(m => m.DamageMin = 60));
         model.Datasheet = new CensusWeaponInfoModel.WeaponDatasheet { DamageMin = 10 };
 
-        model.GetMinDamage().Should().Be(60);
+        Assert.Equal(60, model.GetMinDamage());
     }
 
     [Fact]
@@ -75,13 +74,13 @@ public class CensusWeaponInfoModelExtensionsTest
         var model = Weapon(Mode(m => m.Damage = 100));
         model.Datasheet = new CensusWeaponInfoModel.WeaponDatasheet { DamageMin = 25 };
 
-        model.GetMinDamage().Should().Be(25);
+        Assert.Equal(25, model.GetMinDamage());
     }
 
     [Fact]
     public void GetMinDamage_NoDatasheet_FallsBackToFireModeDamage()
     {
-        Weapon(Mode(m => m.Damage = 100), Mode(m => m.Damage = 90)).GetMinDamage().Should().Be(90);
+        Assert.Equal(90, Weapon(Mode(m => m.Damage = 100), Mode(m => m.Damage = 90)).GetMinDamage());
     }
 
     [Fact]
@@ -90,7 +89,7 @@ public class CensusWeaponInfoModelExtensionsTest
         var model = Weapon(Mode(m => m.DamageMax = 200), Mode(m => m.DamageMax = 150));
         model.Datasheet = new CensusWeaponInfoModel.WeaponDatasheet { DamageMax = 10 };
 
-        model.GetMaxDamage().Should().Be(200);
+        Assert.Equal(200, model.GetMaxDamage());
     }
 
     [Fact]
@@ -99,13 +98,13 @@ public class CensusWeaponInfoModelExtensionsTest
         var model = Weapon(Mode(m => m.Damage = 100));
         model.Datasheet = new CensusWeaponInfoModel.WeaponDatasheet { DamageMax = 175 };
 
-        model.GetMaxDamage().Should().Be(175);
+        Assert.Equal(175, model.GetMaxDamage());
     }
 
     [Fact]
     public void GetMaxDamage_NoDatasheet_FallsBackToFireModeDamage()
     {
-        Weapon(Mode(m => m.Damage = 100), Mode(m => m.Damage = 90)).GetMaxDamage().Should().Be(100);
+        Assert.Equal(100, Weapon(Mode(m => m.Damage = 100), Mode(m => m.Damage = 90)).GetMaxDamage());
     }
 
     [Fact]
@@ -115,8 +114,8 @@ public class CensusWeaponInfoModelExtensionsTest
             Mode(m => { m.DamageMinRange = 10; m.DamageMaxRange = 50; }),
             Mode(m => { m.DamageMinRange = 5; m.DamageMaxRange = 70; }));
 
-        model.GetMinDamageRange().Should().Be(5);
-        model.GetMaxDamageRange().Should().Be(70);
+        Assert.Equal(5, model.GetMinDamageRange());
+        Assert.Equal(70, model.GetMaxDamageRange());
     }
 
     [Fact]
@@ -124,8 +123,8 @@ public class CensusWeaponInfoModelExtensionsTest
     {
         var model = new CensusWeaponInfoModel();
 
-        model.GetMinDamageRange().Should().BeNull();
-        model.GetMaxDamageRange().Should().BeNull();
+        Assert.Null(model.GetMinDamageRange());
+        Assert.Null(model.GetMaxDamageRange());
     }
 
     [Fact]
@@ -135,8 +134,8 @@ public class CensusWeaponInfoModelExtensionsTest
             Mode(m => { m.ReloadTimeMs = 2000; m.ReloadChamberTimeMs = 500; }),
             Mode(m => { m.ReloadTimeMs = 3000; m.ReloadChamberTimeMs = 1000; }));
 
-        model.GetMinReloadSpeed().Should().Be(2500);
-        model.GetMaxReloadSpeed().Should().Be(4000);
+        Assert.Equal(2500, model.GetMinReloadSpeed());
+        Assert.Equal(4000, model.GetMaxReloadSpeed());
     }
 
     [Fact]
@@ -145,8 +144,8 @@ public class CensusWeaponInfoModelExtensionsTest
         var model = Weapon(Mode(m => m.ReloadTimeMs = 2000));
         model.Datasheet = new CensusWeaponInfoModel.WeaponDatasheet { ReloadMsMin = 1800, ReloadMsMax = 2200 };
 
-        model.GetMinReloadSpeed().Should().Be(1800);
-        model.GetMaxReloadSpeed().Should().Be(2200);
+        Assert.Equal(1800, model.GetMinReloadSpeed());
+        Assert.Equal(2200, model.GetMaxReloadSpeed());
     }
 
     [Fact]
@@ -154,8 +153,8 @@ public class CensusWeaponInfoModelExtensionsTest
     {
         var model = Weapon(Mode(m => m.ReloadTimeMs = 2000), Mode(m => m.ReloadTimeMs = 3000));
 
-        model.GetMinReloadSpeed().Should().Be(2000);
-        model.GetMaxReloadSpeed().Should().Be(3000);
+        Assert.Equal(2000, model.GetMinReloadSpeed());
+        Assert.Equal(3000, model.GetMaxReloadSpeed());
     }
 
     [Fact]
@@ -165,14 +164,14 @@ public class CensusWeaponInfoModelExtensionsTest
         var secondary = Mode(m => m.Type = "secondary");
         var model = Weapon(primary, secondary);
 
-        model.GetFireModesOfType(CensusWeaponInfoModelExtensions.FireModeType.Primary).Should().Equal(primary);
-        model.GetFireModesOfType(CensusWeaponInfoModelExtensions.FireModeType.Secondary).Should().Equal(secondary);
+        Assert.Equal(new[] { primary }, model.GetFireModesOfType(CensusWeaponInfoModelExtensions.FireModeType.Primary));
+        Assert.Equal(new[] { secondary }, model.GetFireModesOfType(CensusWeaponInfoModelExtensions.FireModeType.Secondary));
     }
 
     [Fact]
     public void GetFireModesOfType_NoFireModes_ReturnsNull()
     {
-        new CensusWeaponInfoModel().GetFireModesOfType(CensusWeaponInfoModelExtensions.FireModeType.Primary).Should().BeNull();
+        Assert.Null(new CensusWeaponInfoModel().GetFireModesOfType(CensusWeaponInfoModelExtensions.FireModeType.Primary));
     }
 
     [Fact]
@@ -182,11 +181,11 @@ public class CensusWeaponInfoModelExtensionsTest
             Mode(m => { m.IndirectDamageMin = 10; m.IndirectDamageMax = 100; m.IndirectDamageMinRange = 1.5f; m.IndirectDamageMaxRange = 4f; m.DamageRadius = 3; }),
             Mode(m => { m.IndirectDamageMin = 20; m.IndirectDamageMax = 80; m.IndirectDamageMinRange = 0.5f; m.IndirectDamageMaxRange = 6f; m.DamageRadius = 8; }));
 
-        model.GetIndirectMinDamage().Should().Be(10);
-        model.GetIndirectMaxDamage().Should().Be(100);
-        model.GetIndirectMinDamageRange().Should().Be(0.5f);
-        model.GetIndirectMaxDamageRange().Should().Be(6f);
-        model.GetDamageRadius().Should().Be(8);
+        Assert.Equal(10, model.GetIndirectMinDamage());
+        Assert.Equal(100, model.GetIndirectMaxDamage());
+        Assert.Equal(0.5f, model.GetIndirectMinDamageRange());
+        Assert.Equal(6f, model.GetIndirectMaxDamageRange());
+        Assert.Equal(8, model.GetDamageRadius());
     }
 
     [Fact]
@@ -198,15 +197,15 @@ public class CensusWeaponInfoModelExtensionsTest
             new CensusWeaponInfoModel.WeaponFireModeState { PlayerState = "Crouching", MinConeOfFire = 0.1f }
         });
 
-        mode.GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Standing).Should().Be(0.25f);
-        mode.GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Crouching).Should().Be(0.1f);
-        mode.GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Running).Should().BeNull();
+        Assert.Equal(0.25f, mode.GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Standing));
+        Assert.Equal(0.1f, mode.GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Crouching));
+        Assert.Null(mode.GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Running));
     }
 
     [Fact]
     public void GetFireModeStateCoF_NoStates_ReturnsNull()
     {
-        Mode().GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Standing).Should().BeNull();
+        Assert.Null(Mode().GetFireModeStateCoF(CensusWeaponInfoModelExtensions.FireModeState.Standing));
     }
 
     [Fact]
@@ -214,13 +213,13 @@ public class CensusWeaponInfoModelExtensionsTest
     {
         var modes = new[] { Mode(m => m.DefaultZoom = 4f), Mode(m => m.DefaultZoom = 8f) };
 
-        modes.GetDefaultZoom().Should().Be(4f);
+        Assert.Equal(4f, modes.GetDefaultZoom());
     }
 
     [Fact]
     public void GetDefaultZoom_Empty_ReturnsNull()
     {
-        Array.Empty<CensusWeaponInfoModel.WeaponFireMode>().GetDefaultZoom().Should().BeNull();
+        Assert.Null(Array.Empty<CensusWeaponInfoModel.WeaponFireMode>().GetDefaultZoom());
     }
 
     [Fact]
@@ -233,6 +232,6 @@ public class CensusWeaponInfoModelExtensionsTest
             Mode(m => m.Description = new MultiLanguageString { English = "Burst" })
         };
 
-        modes.GetFireModeNames().Should().Equal("Semi-Auto", "Burst");
+        Assert.Equal(new[] { "Semi-Auto", "Burst" }, modes.GetFireModeNames());
     }
 }

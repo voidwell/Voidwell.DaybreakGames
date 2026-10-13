@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -25,8 +24,8 @@ public class CensusToEntityMapperTest
 
         var worlds = _sut.Map<CensusWorldModel, World>(models).ToList();
 
-        worlds.Select(a => a.Id).Should().Equal(1, 17);
-        worlds.Select(a => a.Name).Should().Equal("Connery", "Emerald");
+        Assert.Equal(new[] { 1, 17 }, worlds.Select(a => a.Id));
+        Assert.Equal(new[] { "Connery", "Emerald" }, worlds.Select(a => a.Name));
     }
 
     [Fact]
@@ -36,7 +35,7 @@ public class CensusToEntityMapperTest
 
         var result = _sut.Map(models, typeof(CensusFactionModel), typeof(Faction));
 
-        result.Should().BeOfType<List<Faction>>().Which.Should().ContainSingle().Which.Name.Should().Be("Terran Republic");
+        Assert.Equal("Terran Republic", Assert.Single(Assert.IsType<List<Faction>>(result)).Name);
     }
 
     [Fact]
@@ -44,7 +43,7 @@ public class CensusToEntityMapperTest
     {
         var act = () => _sut.Map(new List<CensusWorldModel>(), typeof(CensusWorldModel), typeof(Faction));
 
-        act.Should().Throw<InvalidOperationException>();
+        Assert.ThrowsAny<InvalidOperationException>(act);
     }
 
     [Fact]
@@ -55,7 +54,7 @@ public class CensusToEntityMapperTest
         using var provider = services.BuildServiceProvider();
         var collections = provider.GetRequiredService<IOptions<StaticStoreUpdaterConfiguration>>().Value.Collections;
 
-        collections.Should().NotBeEmpty();
+        Assert.NotEmpty(collections);
 
         foreach (var config in collections)
         {
@@ -65,7 +64,7 @@ public class CensusToEntityMapperTest
 
             var act = () => _sut.Map(Array.CreateInstance(modelType, 0), modelType, config.EntityType!);
 
-            act.Should().NotThrow($"{modelType.Name} -> {config.EntityType!.Name} must be mapped");
+            Assert.True(Record.Exception(act) is null, $"{modelType.Name} -> {config.EntityType!.Name} must be mapped");
         }
     }
 
@@ -85,7 +84,7 @@ public class CensusToEntityMapperTest
         {
             var act = () => _sut.Map(Array.CreateInstance(modelType, 0), modelType, entityType);
 
-            act.Should().NotThrow();
+            Assert.Null(Record.Exception(act));
         }
     }
 }

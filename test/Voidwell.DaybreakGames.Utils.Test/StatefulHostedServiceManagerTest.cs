@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Voidwell.Common.Cache;
@@ -33,13 +32,13 @@ public class StatefulHostedServiceManagerTest
     [Fact]
     public void VerifyServiceExists_KnownService_ReturnsTrue()
     {
-        CreateSut().VerifyServiceExists("test-service").Should().BeTrue();
+        Assert.True(CreateSut().VerifyServiceExists("test-service"));
     }
 
     [Fact]
     public void VerifyServiceExists_UnknownService_ReturnsFalse()
     {
-        CreateSut().VerifyServiceExists("other").Should().BeFalse();
+        Assert.False(CreateSut().VerifyServiceExists("other"));
     }
 
     [Fact]
@@ -47,7 +46,7 @@ public class StatefulHostedServiceManagerTest
     {
         var result = await CreateSut().GetServiceStatusAsync("other", TestContext.Current.CancellationToken);
 
-        result.Should().BeNull();
+        Assert.Null(result);
     }
 
     [Fact]
@@ -55,9 +54,9 @@ public class StatefulHostedServiceManagerTest
     {
         var result = await CreateSut().GetServiceStatusAsync("test-service", TestContext.Current.CancellationToken);
 
-        result.Name.Should().Be("test-service");
-        result.IsEnabled.Should().BeFalse();
-        result.Details.Should().Be("details");
+        Assert.Equal("test-service", result.Name);
+        Assert.False(result.IsEnabled);
+        Assert.Equal("details", result.Details);
     }
 
     [Fact]
@@ -69,7 +68,7 @@ public class StatefulHostedServiceManagerTest
 
         _service.Verify(a => a.StartAsync(It.IsAny<CancellationToken>()), Times.Once);
         _cache.Verify(a => a.SetAsync("service-test-service-state", It.Is<object>(o => ((ServiceState)o).IsEnabled)), Times.Once);
-        (await sut.GetServiceStatusAsync("test-service", TestContext.Current.CancellationToken)).IsEnabled.Should().BeTrue();
+        Assert.True((await sut.GetServiceStatusAsync("test-service", TestContext.Current.CancellationToken)).IsEnabled);
     }
 
     [Fact]
@@ -104,7 +103,7 @@ public class StatefulHostedServiceManagerTest
         await sut.StartAsync(TestContext.Current.CancellationToken);
 
         _service.Verify(a => a.StartAsync(It.IsAny<CancellationToken>()), Times.Once);
-        (await sut.GetServiceStatusAsync("test-service", TestContext.Current.CancellationToken)).IsEnabled.Should().BeTrue();
+        Assert.True((await sut.GetServiceStatusAsync("test-service", TestContext.Current.CancellationToken)).IsEnabled);
     }
 
     [Fact]

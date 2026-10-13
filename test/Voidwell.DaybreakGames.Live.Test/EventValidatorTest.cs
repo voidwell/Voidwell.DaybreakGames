@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Xunit;
 
@@ -16,7 +15,7 @@ public class EventValidatorTest
     {
         using var sut = new EventValidator();
 
-        (await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)).Should().BeTrue();
+        Assert.True((await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)));
     }
 
     [Fact]
@@ -27,7 +26,7 @@ public class EventValidatorTest
 
         await sut.Validiate(ev, a => a.CharacterId, _neverExpire);
 
-        (await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)).Should().BeFalse();
+        Assert.False((await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)));
     }
 
     [Fact]
@@ -37,7 +36,7 @@ public class EventValidatorTest
 
         await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire);
 
-        (await sut.Validiate(new LoginEvent("c2", DateTime.UtcNow), a => a.CharacterId, _neverExpire)).Should().BeTrue();
+        Assert.True((await sut.Validiate(new LoginEvent("c2", DateTime.UtcNow), a => a.CharacterId, _neverExpire)));
     }
 
     [Fact]
@@ -47,7 +46,7 @@ public class EventValidatorTest
 
         await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire);
 
-        (await sut.Validiate(new LogoutEvent("c1", DateTime.UtcNow), a => a.CharacterId, _ => false)).Should().BeTrue();
+        Assert.True((await sut.Validiate(new LogoutEvent("c1", DateTime.UtcNow), a => a.CharacterId, _ => false)));
     }
 
     [Fact]
@@ -61,8 +60,8 @@ public class EventValidatorTest
         var duplicate = await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, a => DateTime.UtcNow - a.Timestamp > TimeSpan.FromSeconds(1));
         var afterCleanup = await sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, a => DateTime.UtcNow - a.Timestamp > TimeSpan.FromSeconds(1));
 
-        duplicate.Should().BeFalse();
-        afterCleanup.Should().BeFalse();
+        Assert.False(duplicate);
+        Assert.False(afterCleanup);
     }
 
     [Fact]
@@ -73,6 +72,6 @@ public class EventValidatorTest
         var results = await Task.WhenAll(Enumerable.Range(0, 20)
             .Select(_ => sut.Validiate(new LoginEvent("c1", DateTime.UtcNow), a => a.CharacterId, _neverExpire)));
 
-        results.Count(valid => valid).Should().Be(1);
+        Assert.Equal(1, results.Count(valid => valid));
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Services.Planetside;
 using Xunit;
 
@@ -31,7 +30,7 @@ public class GradeServiceTest
     [InlineData(-3.5, "T*")]
     public void GetGradeByDelta_ReturnsHighestGradeAtOrBelowDelta(double delta, string expected)
     {
-        _sut.GetGradeByDelta(delta).Should().Be(expected);
+        Assert.Equal(expected, _sut.GetGradeByDelta(delta));
     }
 
     [Theory]
@@ -39,13 +38,13 @@ public class GradeServiceTest
     [InlineData(-100)]
     public void GetGradeByDelta_BelowLowestGrade_ReturnsLowestGrade(double delta)
     {
-        _sut.GetGradeByDelta(delta).Should().Be("T*");
+        Assert.Equal("T*", _sut.GetGradeByDelta(delta));
     }
 
     [Fact]
     public void GetGradeByDelta_NullDelta_ReturnsLowestGrade()
     {
-        _sut.GetGradeByDelta(null).Should().Be("T*");
+        Assert.Equal("T*", _sut.GetGradeByDelta(null));
     }
 
     [Fact]
@@ -57,7 +56,7 @@ public class GradeServiceTest
             .ToList();
 
         // Higher delta never maps to a grade listed later (lower) in the table
-        grades.Zip(grades.Skip(1), (previous, next) => next <= previous || previous == -1).Should().OnlyContain(ok => ok);
+        Assert.All(grades.Zip(grades.Skip(1), (previous, next) => next <= previous || previous == -1), ok => Assert.True(ok));
     }
 
     [Fact]
@@ -65,7 +64,7 @@ public class GradeServiceTest
     {
         var deltas = _sut.GetAllGrades().Select(a => a.Delta).ToList();
 
-        deltas.Should().BeInDescendingOrder();
-        deltas.Should().HaveCount(37);
+        Assert.Equal(deltas.OrderByDescending(d => d), deltas);
+        Assert.Equal(37, deltas.Count());
     }
 }

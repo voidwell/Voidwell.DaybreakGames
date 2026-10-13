@@ -1,5 +1,4 @@
 using System.Text.Json;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -93,7 +92,7 @@ public class WebsocketEventHandlerTest
 
         var act = () => sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
 
-        await act.Should().NotThrowAsync();
+        Assert.Null(await Record.ExceptionAsync(act));
     }
 
     [Fact]
@@ -148,7 +147,7 @@ public class WebsocketEventHandlerTest
 
         var act = () => sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"Unknown","world_id":"17","timestamp":"1700000000"}}"""));
 
-        await act.Should().NotThrowAsync();
+        Assert.Null(await Record.ExceptionAsync(act));
     }
 
     [Fact]
@@ -159,6 +158,6 @@ public class WebsocketEventHandlerTest
 
         var act = () => sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"Death","world_id":"17","timestamp":"1700000000"}}"""));
 
-        await act.Should().NotThrowAsync();
+        Assert.Null(await Record.ExceptionAsync(act));
     }
 }

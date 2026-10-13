@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Voidwell.DaybreakGames.Domain.Models;
 using Xunit;
 
@@ -55,9 +54,9 @@ public class WorldZoneStateBehaviorTest
     {
         var sut = new WorldZoneState(10, 2, "Indar");
 
-        sut.IsTracking.Should().BeFalse();
-        sut.Map.Should().BeNull();
-        sut.GetMapOwnership().Should().BeNull();
+        Assert.False(sut.IsTracking);
+        Assert.Null(sut.Map);
+        Assert.Null(sut.GetMapOwnership());
     }
 
     [Fact]
@@ -65,10 +64,10 @@ public class WorldZoneStateBehaviorTest
     {
         var sut = CreateTrackedState();
 
-        sut.IsTracking.Should().BeTrue();
-        sut.Map.Regions.Should().HaveCount(5);
-        sut.Map.Warpgates.Select(a => a.RegionId).Should().Equal(1, 4);
-        sut.GetRegionByFacilityId(3).Links.Select(a => a.RegionId).Should().BeEquivalentTo(new[] { 2, 4, 5 });
+        Assert.True(sut.IsTracking);
+        Assert.Equal(5, sut.Map.Regions.Count());
+        Assert.Equal(new[] { 1, 4 }, sut.Map.Warpgates.Select(a => a.RegionId));
+        Assert.Equivalent(new[] { 2, 4, 5 }, sut.GetRegionByFacilityId(3).Links.Select(a => a.RegionId));
     }
 
     [Fact]
@@ -76,13 +75,13 @@ public class WorldZoneStateBehaviorTest
     {
         var score = CreateTrackedState().MapScore;
 
-        score.Territories.Vs.Value.Should().Be(2);
-        score.Territories.Nc.Value.Should().Be(2);
-        score.Territories.Neutural.Value.Should().Be(1);
-        score.LargeOutposts.Vs.Value.Should().Be(1);
-        score.AmpStations.Nc.Value.Should().Be(1);
-        score.BioLabs.Neutural.Value.Should().Be(1);
-        score.TechPlants.Vs.Value.Should().Be(0);
+        Assert.Equal(2, score.Territories.Vs.Value);
+        Assert.Equal(2, score.Territories.Nc.Value);
+        Assert.Equal(1, score.Territories.Neutural.Value);
+        Assert.Equal(1, score.LargeOutposts.Vs.Value);
+        Assert.Equal(1, score.AmpStations.Nc.Value);
+        Assert.Equal(1, score.BioLabs.Neutural.Value);
+        Assert.Equal(0, score.TechPlants.Vs.Value);
     }
 
     [Fact]
@@ -90,9 +89,9 @@ public class WorldZoneStateBehaviorTest
     {
         var score = CreateTrackedState().MapScore;
 
-        score.ConnectedTerritories.Vs.Value.Should().Be(2);
-        score.ConnectedTerritories.Nc.Value.Should().Be(2);
-        score.ConnectedTerritories.Tr.Value.Should().Be(0);
+        Assert.Equal(2, score.ConnectedTerritories.Vs.Value);
+        Assert.Equal(2, score.ConnectedTerritories.Nc.Value);
+        Assert.Equal(0, score.ConnectedTerritories.Tr.Value);
     }
 
     [Fact]
@@ -102,10 +101,10 @@ public class WorldZoneStateBehaviorTest
 
         await sut.FacilityFactionChangeAsync(facilityId: 3, factionId: _vs);
 
-        sut.GetMapOwnership().Single(a => a.RegionId == 3).FactionId.Should().Be(_vs);
-        sut.MapScore.Territories.Vs.Value.Should().Be(3);
-        sut.MapScore.Territories.Nc.Value.Should().Be(1);
-        sut.MapScore.ConnectedTerritories.Vs.Value.Should().Be(3);
+        Assert.Equal(_vs, sut.GetMapOwnership().Single(a => a.RegionId == 3).FactionId);
+        Assert.Equal(3, sut.MapScore.Territories.Vs.Value);
+        Assert.Equal(1, sut.MapScore.Territories.Nc.Value);
+        Assert.Equal(3, sut.MapScore.ConnectedTerritories.Vs.Value);
     }
 
     [Fact]
@@ -115,7 +114,7 @@ public class WorldZoneStateBehaviorTest
 
         await sut.FacilityFactionChangeAsync(facilityId: 999, factionId: _tr);
 
-        sut.MapScore.Territories.Tr.Value.Should().Be(0);
+        Assert.Equal(0, sut.MapScore.Territories.Tr.Value);
     }
 
     [Fact]
@@ -126,8 +125,8 @@ public class WorldZoneStateBehaviorTest
 
         sut.UpdateLockState(new ZoneLockState(DateTime.UtcNow, 1, _vs));
 
-        sut.GetAlertState().Should().BeNull();
-        sut.LockState.State.Should().Be(ZoneLockStateEnum.LOCKED);
+        Assert.Null(sut.GetAlertState());
+        Assert.Equal(ZoneLockStateEnum.LOCKED, sut.LockState.State);
     }
 
     [Fact]
@@ -139,7 +138,7 @@ public class WorldZoneStateBehaviorTest
 
         sut.UpdateLockState(new ZoneLockState(DateTime.UtcNow));
 
-        sut.GetAlertState().Should().BeSameAs(alert);
+        Assert.Same(alert, sut.GetAlertState());
     }
 
     [Fact]
@@ -148,7 +147,7 @@ public class WorldZoneStateBehaviorTest
         var sut = CreateTrackedState();
         sut.UpdateAlertState(new ZoneAlertState(DateTime.UtcNow.AddHours(-2), 1, new ZoneMetagameEvent { Duration = TimeSpan.FromMinutes(90) }));
 
-        sut.GetAlertState().Should().BeNull();
+        Assert.Null(sut.GetAlertState());
     }
 
     [Fact]
@@ -158,7 +157,7 @@ public class WorldZoneStateBehaviorTest
         var alert = new ZoneAlertState(DateTime.UtcNow.AddMinutes(-10), 1, new ZoneMetagameEvent { Duration = TimeSpan.FromMinutes(90) });
         sut.UpdateAlertState(alert);
 
-        sut.GetAlertState().Should().BeSameAs(alert);
+        Assert.Same(alert, sut.GetAlertState());
     }
 
     [Fact]
@@ -170,9 +169,9 @@ public class WorldZoneStateBehaviorTest
 
         sut.DisableTracking();
 
-        sut.IsTracking.Should().BeFalse();
-        sut.LockState.Should().BeNull();
-        sut.GetAlertState().Should().BeNull();
-        sut.GetMapOwnership().Should().BeNull();
+        Assert.False(sut.IsTracking);
+        Assert.Null(sut.LockState);
+        Assert.Null(sut.GetAlertState());
+        Assert.Null(sut.GetMapOwnership());
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
@@ -34,8 +33,8 @@ public class ProfileServiceTest
     {
         using var sut = CreateSut();
 
-        (await sut.GetProfileFromLoadoutIdAsync(10)).Name.Should().Be("Infiltrator");
-        (await sut.GetProfileFromLoadoutIdAsync(11)).Name.Should().Be("Light Assault");
+        Assert.Equal("Infiltrator", (await sut.GetProfileFromLoadoutIdAsync(10)).Name);
+        Assert.Equal("Light Assault", (await sut.GetProfileFromLoadoutIdAsync(11)).Name);
     }
 
     [Fact]
@@ -43,7 +42,7 @@ public class ProfileServiceTest
     {
         using var sut = CreateSut();
 
-        (await sut.GetProfileFromLoadoutIdAsync(404)).Should().BeNull();
+        Assert.Null((await sut.GetProfileFromLoadoutIdAsync(404)));
     }
 
     [Fact]
@@ -51,7 +50,7 @@ public class ProfileServiceTest
     {
         using var sut = CreateSut();
 
-        (await sut.GetProfileFromLoadoutIdAsync(12)).Should().BeNull();
+        Assert.Null((await sut.GetProfileFromLoadoutIdAsync(12)));
     }
 
     [Fact]
@@ -81,6 +80,6 @@ public class ProfileServiceTest
     {
         using var sut = CreateSut();
 
-        (await sut.GetAllProfiles()).Should().HaveCount(2);
+        Assert.Equal(2, (await sut.GetAllProfiles()).Count());
     }
 }

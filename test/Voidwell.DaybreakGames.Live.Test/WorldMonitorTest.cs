@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
@@ -56,12 +55,9 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
 
         var worldState = await sut.GetWorldState(worldId);
 
-        worldState.Should()
-            .NotBeNull();
-        worldState.Id.Should()
-            .Be(worldId);
-        worldState.IsOnline.Should()
-            .Be(isOnline);
+        Assert.NotNull(worldState);
+        Assert.Equal(worldId, worldState.Id);
+        Assert.Equal(isOnline, worldState.IsOnline);
     }
 
     [Fact]
@@ -104,13 +100,9 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
 
         var worldState = await sut.GetWorldState(worldId);
 
-        worldState.ZoneStates.Should()
-            .NotBeEmpty();
-        worldState.ZoneStates.First().Id.Should()
-            .Be(zoneId);
-        worldState.ZoneStates.First().IsTracking.Should()
-            .BeTrue();
-        worldState.ZoneStates.First().AlertState.Should()
-            .BeEquivalentTo(testZoneAlertState);
+        Assert.NotEmpty(worldState.ZoneStates);
+        Assert.Equal(zoneId, worldState.ZoneStates.First().Id);
+        Assert.True(worldState.ZoneStates.First().IsTracking);
+        Assert.Equivalent(testZoneAlertState, worldState.ZoneStates.First().AlertState);
     }
 }
