@@ -6,8 +6,8 @@ namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class PlayerSession
 {
-    public IEnumerable<PlayerSessionEvent>? Events { get; set; }
-    public PlayerSessionInfo? Session { get; set; }
+    public PlayerSessionInfo Session { get; set; } = null!;
+    public IEnumerable<PlayerSessionEvent> Events { get; set; } = [];
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -95,7 +95,7 @@ public class PlayerSessionInfo
 {
     public string? CharacterId { get; set; }
     public int Duration { get; set; }
-    public string? Id { get; set; }
+    public string Id { get; set; } = null!;
     public DateTime LoginDate { get; set; }
     public DateTime? LogoutDate { get; set; }
 }

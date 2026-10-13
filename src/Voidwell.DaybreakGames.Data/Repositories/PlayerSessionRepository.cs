@@ -13,26 +13,26 @@ public class PlayerSessionRepository : IPlayerSessionRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task AddAsync(PlayerSession entity)
+    public async Task AddAsync(PlayerSession entity, CancellationToken cancellationToken = default)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
-        await dbContext.PlayerSessions.AddAsync(entity);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlayerSessions.AddAsync(entity, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<PlayerSession?> GetPlayerSessionAsync(int sessionId)
+    public async Task<PlayerSession?> GetPlayerSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
-        return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id == sessionId);
+        return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id == sessionId, cancellationToken);
     }
 
-    public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit, int page = 0)
+    public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit, CancellationToken cancellationToken, int page = 0)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.Duration > 300000)
             .OrderByDescending(a => a.LoginDate)
-            .Take(limit)
             .Skip(page * limit)
-            .ToArrayAsync();
+            .Take(limit)
+            .ToArrayAsync(cancellationToken);
     }
 }

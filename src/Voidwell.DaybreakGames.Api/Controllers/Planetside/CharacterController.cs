@@ -36,23 +36,30 @@ public class CharacterController : Controller
     }
 
     [HttpGet("{characterId}/sessions")]
-    public async Task<ActionResult> GetCharacterSessionsByCharacterIdAsync(string characterId, [FromQuery] int page = 0)
+    public async Task<ActionResult> GetCharacterSessionsByCharacterIdAsync(string characterId, CancellationToken cancellationToken, [FromQuery] int page = 0)
     {
-        var result = await _characterSessionService.GetSessions(characterId, page: page);
+        var result = await _characterSessionService.GetCharacterSessionsAsync(characterId, cancellationToken, page: page);
         return Ok(result);
     }
 
     [HttpGet("{characterId}/sessions/{sessionId}")]
-    public async Task<ActionResult> GetCharacterSessionBySessionIdAsync(string characterId, int sessionId)
+    public async Task<ActionResult> GetCharacterSessionBySessionIdAsync(string characterId, int sessionId, CancellationToken cancellationToken)
     {
-        var result = await _characterSessionService.GetSession(characterId, sessionId);
+        var result = await _characterSessionService.GetCharacterSessionAsync(characterId, sessionId, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{characterId}/sessions/live")]
-    public async Task<ActionResult> GetCharacterLiveSessionAsync(string characterId)
+    public async Task<ActionResult> GetCharacterLiveSessionAsync(string characterId, CancellationToken cancellationToken)
     {
-        var result = await _characterSessionService.GetSession(characterId);
+        var result = await _characterSessionService.GetCharacterLiveSessionAsync(characterId, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{characterId}/sessions/latest")]
+    public async Task<ActionResult> GetLatestCharacterSessionsAsync(string characterId, CancellationToken cancellationToken)
+    {
+        var result = await _characterSessionService.GetLatestCharacterSessionsAsync(characterId, limit: 5, cancellationToken);
         return Ok(result);
     }
 

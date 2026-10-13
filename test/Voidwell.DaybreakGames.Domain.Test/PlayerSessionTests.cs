@@ -42,7 +42,7 @@ public class PlayerSessionTests
 
         // Assert
         result.Should()
-            .Be("{\"Events\":[{\"EventType\":\"Login\",\"Timestamp\":\"2023-01-30T02:03:04\",\"ZoneId\":4},{\"EventType\":\"BattleRankUp\",\"BattleRank\":10,\"Timestamp\":\"2023-01-30T03:03:04\",\"ZoneId\":2}],\"Session\":{\"CharacterId\":\"1234\",\"Duration\":10,\"Id\":\"4321\",\"LoginDate\":\"2023-01-30T02:03:04\",\"LogoutDate\":\"2023-01-30T04:03:04\"}}");
+            .Be("{\"Session\":{\"CharacterId\":\"1234\",\"Duration\":10,\"Id\":\"4321\",\"LoginDate\":\"2023-01-30T02:03:04\",\"LogoutDate\":\"2023-01-30T04:03:04\"},\"Events\":[{\"EventType\":\"Login\",\"Timestamp\":\"2023-01-30T02:03:04\",\"ZoneId\":4},{\"EventType\":\"BattleRankUp\",\"BattleRank\":10,\"Timestamp\":\"2023-01-30T03:03:04\",\"ZoneId\":2}]}");
     }
 
     [Fact]
