@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Voidwell.Common.Authentication;
 using Voidwell.Common.Cache;
+using Voidwell.Common.Configuration;
 using Voidwell.Common.Logging;
 using Voidwell.Common.Swagger;
 using Voidwell.DaybreakGames.Api.Authentication;
@@ -31,6 +32,7 @@ services.AddEntityFrameworkContext(configuration);
 services.AddCache(options =>
 {
     options.RedisConfiguration = configuration.GetValue<string>("RedisConfiguration");
+    options.KeyPrefix = configuration.GetApplicationName();
 });
 
 var authOptions = configuration.GetSection("Auth").Get<AuthOptions>() ?? throw new InvalidOperationException("Auth configuration section is missing.");
