@@ -53,6 +53,11 @@ services.AddAuthorizationBuilder()
     {
         policy.RequireAuthenticatedUser();
         policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
+    })
+    .AddPolicy(AuthConstants.Policies.PlanetsideBattlesOrganizer, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireRole(AuthConstants.Roles.Administrator, AuthConstants.Roles.PlanetsideBattlesOrganizer);
     });
 
 var allowedOrigins = configuration.GetValue<string>("OriginAddress");
