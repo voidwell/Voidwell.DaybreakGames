@@ -195,7 +195,7 @@ public class CharacterService : ICharacterService
 
                 if (stat.Stats.HeadshotRatio.HasValue && agg.STDHsr > 0)
                 {
-                    stat.Stats.HsrDelta = (stat.Stats.Accuracy - agg.AVGHsr) / agg.STDHsr;
+                    stat.Stats.HsrDelta = (stat.Stats.HeadshotRatio - agg.AVGHsr) / agg.STDHsr;
                 }
 
                 if (stat.Stats.KillsPerHour.HasValue && agg.STDKph > 0)
