@@ -42,8 +42,12 @@ public static partial class BBCodeConverter
         "list", "olist", "table", "tr"
     };
 
-    [GeneratedRegex(@"\[(/?)([a-zA-Z0-9*]+)(?:=([^\]]*))?\]")]
+    // Groups: 1 = closing slash, 2 = name, 3 = [tag=value], 4 = [tag attr="value"] attributes
+    [GeneratedRegex(@"\[(/?)([a-zA-Z0-9*]+)(?:=([^\]]*)|\s+([^\]]*))?\]")]
     private static partial Regex TagRegex();
+
+    [GeneratedRegex("""\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+))""", RegexOptions.IgnoreCase)]
+    private static partial Regex SrcAttributeRegex();
 
     [GeneratedRegex("^[A-Za-z0-9_-]{6,20}$")]
     private static partial Regex YouTubeIdRegex();
@@ -72,6 +76,7 @@ public static partial class BBCodeConverter
             var isClosing = match.Groups[1].Length > 0;
             var name = match.Groups[2].Value.ToLowerInvariant();
             var value = match.Groups[3].Success ? match.Groups[3].Value : null;
+            var attributes = match.Groups[4].Success ? match.Groups[4].Value : null;
 
             if (!IsKnownTag(name))
             {
@@ -106,6 +111,13 @@ public static partial class BBCodeConverter
 
                 case "noparse":
                     position = AppendRaw(output, text, position, "noparse", encodeOnly: true, out _);
+                    break;
+
+                case "img" when attributes != null:
+                    // [img src="..." width=".."] carries its source in an attribute; a trailing [/img] is ignored
+                    var srcMatch = SrcAttributeRegex().Match(attributes);
+                    var attributeSrc = srcMatch.Groups.Cast<Group>().Skip(1).FirstOrDefault(g => g.Success)?.Value;
+                    output.Append(RenderImage(attributeSrc ?? string.Empty));
                     break;
 
                 case "img":
@@ -213,18 +225,24 @@ public static partial class BBCodeConverter
         return closeIndex < 0 ? text.Length : closeIndex + closeTag.Length;
     }
 
+    private static string RenderImage(string source)
+    {
+        source = source.Trim();
+        if (source.StartsWith(_steamClanImagePlaceholder, StringComparison.OrdinalIgnoreCase))
+        {
+            source = _steamClanImageBase + source[_steamClanImagePlaceholder.Length..].TrimStart('/');
+        }
+
+        var src = SanitizeUrl(source);
+        return src == null ? string.Empty : $"<img src=\"{WebUtility.HtmlEncode(src)}\" loading=\"lazy\" alt=\"\" />";
+    }
+
     private static string RenderBodyTag(string name, string body, string? value)
     {
         switch (name)
         {
             case "img":
-                if (body.StartsWith(_steamClanImagePlaceholder, StringComparison.OrdinalIgnoreCase))
-                {
-                    body = _steamClanImageBase + body[_steamClanImagePlaceholder.Length..].TrimStart('/');
-                }
-
-                var src = SanitizeUrl(body);
-                return src == null ? string.Empty : $"<img src=\"{WebUtility.HtmlEncode(src)}\" loading=\"lazy\" alt=\"\" />";
+                return RenderImage(body);
 
             case "previewyoutube":
                 var id = value?.Split(';')[0] ?? string.Empty;

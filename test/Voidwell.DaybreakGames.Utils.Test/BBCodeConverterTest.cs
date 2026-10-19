@@ -61,6 +61,32 @@ public class BBCodeConverterTest
             BBCodeConverter.ToHtml("[img]{STEAM_CLAN_IMAGE}/123/pic.png[/img]"));
     }
 
+    [Theory]
+    [InlineData("[img src=\"{STEAM_CLAN_IMAGE}/4248891/d51f.png\"][/img]")]
+    [InlineData("[img src=\"{STEAM_CLAN_IMAGE}/4248891/d51f.png\" width=\"300\"]")]
+    [InlineData("[img width=300 src='{STEAM_CLAN_IMAGE}/4248891/d51f.png'][/img]")]
+    public void ToHtml_ImageWithSrcAttribute(string input)
+    {
+        Assert.Equal(
+            "<img src=\"https://clan.fastly.steamstatic.com/images/4248891/d51f.png\" loading=\"lazy\" alt=\"\" />",
+            BBCodeConverter.ToHtml(input));
+    }
+
+    [Fact]
+    public void ToHtml_ImageWithUnsafeSrcAttributeIsDropped()
+    {
+        Assert.Equal("", BBCodeConverter.ToHtml("[img src=\"javascript:alert(1)\"][/img]"));
+    }
+
+    [Fact]
+    public void ToHtml_TableWithAttributesOnTags()
+    {
+        var html = BBCodeConverter.ToHtml(
+            "[table equalcells=\"1\" colwidth=\"201,106\"][tr][td colwidth=\"201\"][p align=\"center\"]Name[/p][/td][td colwidth=\"106\"][p]DBC[/p][/td][/tr][/table]");
+
+        Assert.Equal("<table><tr><td><p>Name</p></td><td><p>DBC</p></td></tr></table>", html);
+    }
+
     [Fact]
     public void ToHtml_YouTubeEmbedValidatesId()
     {
