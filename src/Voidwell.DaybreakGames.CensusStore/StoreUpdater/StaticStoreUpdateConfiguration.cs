@@ -8,4 +8,5 @@ public class StaticStoreUpdateConfiguration
     public string? StoreName { get; set; }
     public TimeSpan Period { get; set; } = TimeSpan.FromDays(7);
     public List<Type> Dependencies { get; set; } = new List<Type>();
+    public Type? UpdateHandlerType { get; set; }
 }

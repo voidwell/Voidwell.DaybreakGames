@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.13")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -1505,7 +1505,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("facility_id");
 
-                    b.Property<int?>("NewFactionId")
+                    b.Property<int>("NewFactionId")
                         .HasColumnType("integer")
                         .HasColumnName("new_faction_id");
 
@@ -1794,11 +1794,11 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("character_id");
 
-                    b.Property<int?>("AttackerVehicleId")
+                    b.Property<int>("AttackerVehicleId")
                         .HasColumnType("integer")
                         .HasColumnName("attacker_vehicle_id");
 
-                    b.Property<int?>("VehicleId")
+                    b.Property<int>("VehicleId")
                         .HasColumnType("integer")
                         .HasColumnName("vehicle_id");
 
@@ -2525,7 +2525,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("item_id");
 
-                    b.Property<int?>("VehicleId")
+                    b.Property<int>("VehicleId")
                         .HasColumnType("integer")
                         .HasColumnName("vehicle_id");
 
@@ -2676,6 +2676,12 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
 
                     b.Property<string>("Name")
                         .HasColumnType("text")

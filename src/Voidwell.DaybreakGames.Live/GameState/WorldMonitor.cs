@@ -40,7 +40,7 @@ public class WorldMonitor : IWorldMonitor
 
         await Task.WhenAll(worldsTask, zonesTask);
 
-        foreach (var world in worldsTask.Result)
+        foreach (var world in worldsTask.Result.Where(a => a.IsActive))
         {
             if (!_worldStates.ContainsKey(world.Id))
             {
@@ -56,6 +56,13 @@ public class WorldMonitor : IWorldMonitor
 
     public async Task SetWorldState(int worldId, string worldName, bool isOnline)
     {
+        // Legacy worlds are not monitored. Worlds not in the database yet (e.g. a newly launched server) are.
+        var worlds = await _worldService.GetAllWorlds();
+        if (worlds.Any(a => a.Id == worldId && !a.IsActive))
+        {
+            return;
+        }
+
         if (!_worldStates.ContainsKey(worldId))
         {
             _worldStates.TryAdd(worldId, new WorldState(worldId, worldName));
@@ -226,7 +233,7 @@ public class WorldMonitor : IWorldMonitor
 
     public async Task<IEnumerable<WorldOnlineState>> GetWorldStates()
     {
-        return (await Task.WhenAll(_worldStates.Select(a => GetWorldState(a.Key)))).OrderBy(a => a!.Name)!;
+        return (await Task.WhenAll(_worldStates.Keys.Select(GetWorldState))).OrderBy(a => a!.Name)!;
     }
 
     public IEnumerable<int> GetOnlineWorldIds()

@@ -135,7 +135,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
 
             var entityValues = MapEntityValues(updateConfig.EntityType!, collectionValues);
 
-            await UpsertAsync(entityValues);
+            await UpdateEntitiesAsync(updateConfig, entityValues);
 
             _logger.LogInformation("Update complete for {StoreName}.", updateConfig.StoreName);
 
@@ -159,6 +159,22 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         }
 
         return true;
+    }
+
+    private async Task UpdateEntitiesAsync(StaticStoreUpdateConfiguration updateConfig, object values)
+    {
+        if (updateConfig.UpdateHandlerType == null)
+        {
+            await UpsertAsync(values);
+            return;
+        }
+
+        var handler = _serviceProvider.GetRequiredService(updateConfig.UpdateHandlerType);
+
+        var methodInfo = updateConfig.UpdateHandlerType.GetMethod(nameof(IStoreUpdateHandler<object>.UpdateAsync));
+        var task = (Task)methodInfo!.Invoke(handler, new[] { values })!;
+
+        await task.WaitAsync(CancellationToken.None);
     }
 
     private readonly MethodInfo _upsertMethod = typeof(DbSetExtensions).GetMethods()
