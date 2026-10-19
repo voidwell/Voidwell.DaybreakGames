@@ -1,6 +1,7 @@
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
+using Voidwell.DaybreakGames.Domain;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Test;
 using Voidwell.DaybreakGames.Test.MapTests;
@@ -104,5 +105,21 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
         Assert.Equal(zoneId, worldState.ZoneStates.First().Id);
         Assert.True(worldState.ZoneStates.First().IsTracking);
         Assert.Equivalent(testZoneAlertState, worldState.ZoneStates.First().AlertState);
+    }
+
+    [Fact]
+    public async Task GetWorldStates_ExcludesLegacyWorlds()
+    {
+        int legacyWorldId = 2;
+
+        var sut = _fixture.CreateSut();
+
+        await sut.SetWorldState(ActiveWorlds.Osprey, "Osprey", false);
+        await sut.SetWorldState(legacyWorldId, "Legacy", false);
+
+        var worldStates = await sut.GetWorldStates();
+
+        Assert.Contains(worldStates, a => a.Id == ActiveWorlds.Osprey);
+        Assert.DoesNotContain(worldStates, a => a.Id == legacyWorldId);
     }
 }

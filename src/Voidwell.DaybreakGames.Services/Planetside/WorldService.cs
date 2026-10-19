@@ -3,6 +3,7 @@ using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
+using Voidwell.DaybreakGames.Domain;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
@@ -36,6 +37,12 @@ public class WorldService : IWorldService
     public Task<IEnumerable<World>> GetAllWorlds()
     {
         return _worldStore.GetAllWorlds()!;
+    }
+
+    public async Task<IEnumerable<World>> GetActiveWorlds()
+    {
+        var worlds = await GetAllWorlds();
+        return worlds.Where(a => ActiveWorlds.Contains(a.Id));
     }
 
     public async Task<World?> GetWorld(int worldId)

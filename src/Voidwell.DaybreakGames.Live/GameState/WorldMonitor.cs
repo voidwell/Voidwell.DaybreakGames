@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
+using Voidwell.DaybreakGames.Domain;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
@@ -226,7 +227,8 @@ public class WorldMonitor : IWorldMonitor
 
     public async Task<IEnumerable<WorldOnlineState>> GetWorldStates()
     {
-        return (await Task.WhenAll(_worldStates.Select(a => GetWorldState(a.Key)))).OrderBy(a => a!.Name)!;
+        var activeWorldIds = _worldStates.Keys.Where(ActiveWorlds.Contains);
+        return (await Task.WhenAll(activeWorldIds.Select(GetWorldState))).OrderBy(a => a!.Name)!;
     }
 
     public IEnumerable<int> GetOnlineWorldIds()

@@ -21,6 +21,13 @@ public class WorldController : Controller
         return Ok(result);
     }
 
+    [HttpGet("active")]
+    public async Task<ActionResult> GetActiveWorldsAsync()
+    {
+        var result = await _worldService.GetActiveWorlds();
+        return Ok(result);
+    }
+
     [HttpGet("activity")]
     public async Task<ActionResult> GetWorldActivityAsync([FromQuery(Name = "worldId")] int? worldId, [FromQuery(Name = "period")] int? hours)
     {
