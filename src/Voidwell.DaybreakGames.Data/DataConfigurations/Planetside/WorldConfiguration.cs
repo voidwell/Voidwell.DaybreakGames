@@ -13,5 +13,6 @@ public class WorldConfiguration : IEntityTypeConfiguration<World>
         builder.HasKey(a => a.Id);
 
         builder.Property(a => a.Id).ValueGeneratedNever();
+        builder.Property(a => a.IsActive).HasDefaultValue(true).HasSentinel(true);
     }
 }

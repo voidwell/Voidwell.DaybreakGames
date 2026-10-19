@@ -71,6 +71,8 @@ public static class CensusStoreExtensions
         services.AddUpdaterStaticStore<RewardGroupToRewardCollection, RewardGroupToReward>()
             .WithUpdateDependency<RewardSetToRewardGroupCollection>();
         services.AddUpdaterStaticStore<RewardSetToRewardGroupCollection, RewardSetToRewardGroup>();
+        services.AddUpdaterStaticStore<WorldCollection, World>()
+            .WithUpdateHandler<WorldStoreUpdateHandler>();
 
         return services;
     }

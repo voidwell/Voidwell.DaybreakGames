@@ -38,6 +38,12 @@ public class WorldService : IWorldService
         return _worldStore.GetAllWorlds()!;
     }
 
+    public async Task<IEnumerable<World>> GetWorlds(bool includeInactive = false)
+    {
+        var worlds = await GetAllWorlds();
+        return includeInactive ? worlds : worlds.Where(a => a.IsActive);
+    }
+
     public async Task<World?> GetWorld(int worldId)
     {
         var worlds = await GetAllWorlds();
