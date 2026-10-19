@@ -41,7 +41,7 @@ public class WorldMonitor : IWorldMonitor
 
         await Task.WhenAll(worldsTask, zonesTask);
 
-        foreach (var world in worldsTask.Result)
+        foreach (var world in worldsTask.Result.Where(a => ActiveWorlds.Contains(a.Id)))
         {
             if (!_worldStates.ContainsKey(world.Id))
             {
