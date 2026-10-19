@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="DaybreakGames.Census" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
 </Project>
