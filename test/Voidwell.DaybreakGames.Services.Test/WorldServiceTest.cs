@@ -32,16 +32,16 @@ public class WorldServiceTest
 
         var world = Assert.Single(result);
         Assert.Equal(_activeWorldId, world.Id);
-        Assert.False(world.IsInactive);
+        Assert.True(world.IsActive);
     }
 
     [Fact]
-    public async Task GetWorlds_IncludeInactive_FlagsLegacyWorlds()
+    public async Task GetWorlds_IncludeInactive_ReturnsLegacyWorlds()
     {
         var result = (await CreateSut().GetWorlds(includeInactive: true)).ToList();
 
         Assert.Equal(2, result.Count);
-        Assert.False(result.Single(a => a.Id == _activeWorldId).IsInactive);
-        Assert.True(result.Single(a => a.Id == _legacyWorldId).IsInactive);
+        Assert.True(result.Single(a => a.Id == _activeWorldId).IsActive);
+        Assert.False(result.Single(a => a.Id == _legacyWorldId).IsActive);
     }
 }
