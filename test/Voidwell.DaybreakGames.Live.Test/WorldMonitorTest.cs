@@ -107,10 +107,10 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
     }
 
     [Fact]
-    public async Task GetWorldStates_ExcludesInactiveWorlds()
+    public async Task SetWorldState_IgnoresInactiveWorlds()
     {
         int activeWorldId = 1;
-        int legacyWorldId = 2;
+        int legacyWorldId = 25;
         int newWorldId = 3000;
 
         _fixture.WorldService.AsMock()
@@ -118,19 +118,17 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
             .ReturnsAsync(new[]
             {
                 new World { Id = activeWorldId, Name = "Osprey" },
-                new World { Id = legacyWorldId, Name = "Legacy", IsActive = false }
+                new World { Id = legacyWorldId, Name = "Briggs", IsActive = false }
             });
 
         var sut = _fixture.CreateSut();
 
         await sut.SetWorldState(activeWorldId, "Osprey", false);
-        await sut.SetWorldState(legacyWorldId, "Legacy", false);
+        await sut.SetWorldState(legacyWorldId, "Briggs", true);
         await sut.SetWorldState(newWorldId, "New", false);
 
-        var worldStates = await sut.GetWorldStates();
-
-        Assert.Contains(worldStates, a => a.Id == activeWorldId);
-        Assert.Contains(worldStates, a => a.Id == newWorldId);
-        Assert.DoesNotContain(worldStates, a => a.Id == legacyWorldId);
+        Assert.NotNull(await sut.GetWorldState(activeWorldId));
+        Assert.NotNull(await sut.GetWorldState(newWorldId));
+        Assert.Null(await sut.GetWorldState(legacyWorldId));
     }
 }
