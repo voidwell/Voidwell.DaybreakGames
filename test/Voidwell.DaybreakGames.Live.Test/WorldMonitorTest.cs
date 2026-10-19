@@ -131,4 +131,36 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
         Assert.NotNull(await sut.GetWorldState(newWorldId));
         Assert.Null(await sut.GetWorldState(legacyWorldId));
     }
+
+    [Fact]
+    public async Task GetWorldStates_ExcludesWorldDeactivatedAfterTracking()
+    {
+        int activeWorldId = 10;
+        int deactivatedWorldId = 13;
+        int newWorldId = 3001;
+
+        var worlds = new List<World>
+        {
+            new World { Id = activeWorldId, Name = "Wainwright" },
+            new World { Id = deactivatedWorldId, Name = "Cobalt" }
+        };
+
+        _fixture.WorldService.AsMock()
+            .Setup(a => a.GetAllWorlds())
+            .ReturnsAsync(() => worlds);
+
+        var sut = _fixture.CreateSut();
+
+        await sut.SetWorldState(activeWorldId, "Wainwright", false);
+        await sut.SetWorldState(deactivatedWorldId, "Cobalt", false);
+        await sut.SetWorldState(newWorldId, "New", false);
+
+        worlds[1].IsActive = false;
+
+        var worldStates = await sut.GetWorldStates();
+
+        Assert.Contains(worldStates, a => a.Id == activeWorldId);
+        Assert.Contains(worldStates, a => a.Id == newWorldId);
+        Assert.DoesNotContain(worldStates, a => a.Id == deactivatedWorldId);
+    }
 }

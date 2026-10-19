@@ -233,7 +233,11 @@ public class WorldMonitor : IWorldMonitor
 
     public async Task<IEnumerable<WorldOnlineState>> GetWorldStates()
     {
-        return (await Task.WhenAll(_worldStates.Keys.Select(GetWorldState))).OrderBy(a => a!.Name)!;
+        // A world deactivated while the service is running keeps its state until restart, so hide it here.
+        var inactiveWorldIds = (await _worldService.GetAllWorlds()).Where(a => !a.IsActive).Select(a => a.Id).ToHashSet();
+        var worldIds = _worldStates.Keys.Where(a => !inactiveWorldIds.Contains(a));
+
+        return (await Task.WhenAll(worldIds.Select(GetWorldState))).OrderBy(a => a!.Name)!;
     }
 
     public IEnumerable<int> GetOnlineWorldIds()
