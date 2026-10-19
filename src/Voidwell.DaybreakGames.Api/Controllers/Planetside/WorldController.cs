@@ -15,7 +15,7 @@ public class WorldController : Controller
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetAllWorldsAsync([FromQuery(Name = "includeInactive")] bool includeInactive = false)
+    public async Task<ActionResult> GetAllWorldsAsync(bool includeInactive = false)
     {
         var result = await _worldService.GetWorlds(includeInactive);
         return Ok(result);
