@@ -10,7 +10,7 @@ namespace Voidwell.DaybreakGames.Services.Test;
 
 public class WorldServiceTest
 {
-    private const int LegacyWorldId = 17;
+    private const int _legacyWorldId = 17;
 
     private readonly Mock<IWorldStore> _worldStore = new();
 
@@ -19,7 +19,7 @@ public class WorldServiceTest
         _worldStore.Setup(a => a.GetAllWorlds()).ReturnsAsync(new[]
         {
             new World { Id = ActiveWorlds.Osprey, Name = "Osprey" },
-            new World { Id = LegacyWorldId, Name = "Emerald" }
+            new World { Id = _legacyWorldId, Name = "Emerald" }
         });
 
         return new WorldService(_worldStore.Object, null!, null!, null!, TestCache.Create());
@@ -42,6 +42,6 @@ public class WorldServiceTest
 
         Assert.Equal(2, result.Count);
         Assert.False(result.Single(a => a.Id == ActiveWorlds.Osprey).IsInactive);
-        Assert.True(result.Single(a => a.Id == LegacyWorldId).IsInactive);
+        Assert.True(result.Single(a => a.Id == _legacyWorldId).IsInactive);
     }
 }
