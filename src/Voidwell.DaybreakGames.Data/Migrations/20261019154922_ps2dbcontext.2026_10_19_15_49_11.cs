@@ -16,9 +16,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                 type: "boolean",
                 nullable: false,
                 defaultValue: true);
-
-            // Every world other than the current live servers is legacy.
-            migrationBuilder.Sql("UPDATE world SET is_active = false WHERE id NOT IN (1, 10, 19, 40, 1000, 2000);");
         }
 
         /// <inheritdoc />
