@@ -28,14 +28,9 @@ public partial class ps2dbcontext2023_02_18_15_40_18 : Migration
             .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
             .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
-        migrationBuilder.AlterColumn<int>(
-            name: "id",
-            table: "experience",
-            type: "integer",
-            nullable: false,
-            oldClrType: typeof(int),
-            oldType: "integer")
-            .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
+        // experience.id was created without a sequence (release.22), so only databases whose column was
+        // later made serial have one to drop. AlterColumn here would fail on a fresh database.
+        migrationBuilder.Sql("DROP SEQUENCE IF EXISTS experience_id_seq CASCADE;");
 
         migrationBuilder.AlterColumn<int>(
             name: "metagame_id",
