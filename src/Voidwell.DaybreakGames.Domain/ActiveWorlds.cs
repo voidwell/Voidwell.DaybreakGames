@@ -10,8 +10,10 @@ public static class ActiveWorlds
     public const int Wainwright = 10;
     public const int Jaeger = 19;
     public const int Soltech = 40;
+    public const int Genudine = 1000;
+    public const int Ceres = 2000;
 
-    public static readonly IReadOnlySet<int> Ids = new HashSet<int> { Osprey, Wainwright, Jaeger, Soltech };
+    public static readonly IReadOnlySet<int> Ids = new HashSet<int> { Osprey, Wainwright, Jaeger, Soltech, Genudine, Ceres };
 
     public static bool Contains(int worldId) => Ids.Contains(worldId);
 }
