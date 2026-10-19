@@ -17,6 +17,11 @@ public class StaticStoreUpdateBuilderTest
     private class BetaEntity { }
     private class GammaEntity { }
 
+    private class AlphaUpdateHandler : IStoreUpdateHandler<AlphaEntity>
+    {
+        public Task UpdateAsync(IEnumerable<AlphaEntity> entities) => Task.CompletedTask;
+    }
+
     private static StaticStoreUpdaterConfiguration Resolve(IServiceCollection services)
     {
         using var provider = services.BuildServiceProvider();
@@ -161,5 +166,39 @@ public class StaticStoreUpdateBuilderTest
 
         var ex = Assert.ThrowsAny<ArgumentException>(act);
         Assert.Matches("(?s).*Cyclical\\ update\\ dependency.*\\->.*", ex.Message);
+    }
+
+    [Fact]
+    public void WithUpdateHandler_SetsHandlerAndRegistersIt()
+    {
+        var services = new ServiceCollection();
+        new StaticStoreUpdateBuilder<AlphaCollection, AlphaEntity>(services)
+            .WithUpdateHandler<AlphaUpdateHandler>();
+
+        var config = Resolve(services).Collections.Single();
+
+        Assert.Equal(typeof(AlphaUpdateHandler), config.UpdateHandlerType);
+        Assert.Contains(services, a => a.ServiceType == typeof(AlphaUpdateHandler));
+    }
+
+    [Fact]
+    public void WithUpdateHandler_HandlerForOtherEntity_Throws()
+    {
+        var services = new ServiceCollection();
+        var builder = new StaticStoreUpdateBuilder<BetaCollection, BetaEntity>(services);
+
+        var act = () => builder.WithUpdateHandler<AlphaUpdateHandler>();
+
+        var ex = Assert.ThrowsAny<ArgumentException>(act);
+        Assert.Matches("(?s).*AlphaUpdateHandler.*BetaCollection.*", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_WithoutUpdateHandler_HasNoHandler()
+    {
+        var services = new ServiceCollection();
+        new StaticStoreUpdateBuilder<AlphaCollection, AlphaEntity>(services);
+
+        Assert.Null(Resolve(services).Collections.Single().UpdateHandlerType);
     }
 }

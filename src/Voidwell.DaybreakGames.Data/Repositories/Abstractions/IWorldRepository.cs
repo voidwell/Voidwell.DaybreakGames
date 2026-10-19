@@ -5,6 +5,7 @@ namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 public interface IWorldRepository
 {
     Task UpsertRangeAsync(IEnumerable<World> entities);
+    Task SyncWorldsAsync(IEnumerable<World> entities);
     Task<IEnumerable<World>> GetAllWorldsAsync();
     Task<IEnumerable<DailyPopulation>> GetDailyPopulationsByWorldIdAsync(int worldId);
 }

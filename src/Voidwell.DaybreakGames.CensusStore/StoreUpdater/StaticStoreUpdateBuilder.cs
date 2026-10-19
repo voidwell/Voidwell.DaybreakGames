@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 
 namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;
@@ -57,6 +58,24 @@ public class StaticStoreUpdateBuilder<TCollection, TEntity> : IStaticStoreUpdate
             CyclicalDependencyCheck(updaterConfig.Collections, typeof(TDependency));
 
             updaterConfig.Collections.First(a => a.CollectionType == typeof(TCollection)).Dependencies.Add(typeof(TDependency));
+        });
+
+        return this;
+    }
+
+    public IStaticStoreUpdateBuilder<TCollection> WithUpdateHandler<THandler>()
+        where THandler : class
+    {
+        if (!typeof(IStoreUpdateHandler<TEntity>).IsAssignableFrom(typeof(THandler)))
+        {
+            throw new ArgumentException($"Store update handler '{typeof(THandler).Name}' for collection '{typeof(TCollection).Name}' does not implement {nameof(IStoreUpdateHandler<TEntity>)}<{typeof(TEntity).Name}>.");
+        }
+
+        _serviceCollection.TryAddTransient<THandler>();
+
+        _serviceCollection.PostConfigure<StaticStoreUpdaterConfiguration>(updaterConfig =>
+        {
+            updaterConfig.Collections.First(a => a.CollectionType == typeof(TCollection)).UpdateHandlerType = typeof(THandler);
         });
 
         return this;

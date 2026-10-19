@@ -33,4 +33,34 @@ public class WorldRepository : IWorldRepository
         using var dbContext = _dbContextFactory.CreateDbContext();
         await dbContext.UpsertAsync(entities);
     }
+
+    /// <summary>
+    /// Upserts the given worlds and marks every other world inactive. Existing worlds keep their
+    /// active state, so a world deactivated by hand stays inactive; new worlds are added as active.
+    /// </summary>
+    public async Task SyncWorldsAsync(IEnumerable<World> entities)
+    {
+        var worlds = entities.ToList();
+        if (!worlds.Any())
+        {
+            // An empty response is more likely a census problem than every world being retired.
+            return;
+        }
+
+        var worldIds = worlds.Select(a => a.Id).ToList();
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        using var transaction = await dbContext.Database.BeginTransactionAsync();
+
+        await dbContext.UpsertRange<World>(worlds)
+            .On(a => a.Id)
+            .WhenMatched((existing, incoming) => new World { Name = incoming.Name })
+            .RunAsync();
+
+        await dbContext.Worlds
+            .Where(a => a.IsActive && !worldIds.Contains(a.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(a => a.IsActive, false));
+
+        await transaction.CommitAsync();
+    }
 }
