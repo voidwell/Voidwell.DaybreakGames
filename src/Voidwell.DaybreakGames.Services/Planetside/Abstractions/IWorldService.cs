@@ -6,7 +6,7 @@ namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 public interface IWorldService
 {
     Task<IEnumerable<World>> GetAllWorlds();
-    Task<IEnumerable<World>> GetActiveWorlds();
+    Task<IEnumerable<WorldInfo>> GetWorlds(bool includeInactive = false);
     Task<World?> GetWorld(int worldId);
     Task<Dictionary<int, IEnumerable<DailyPopulation>>> GetWorldPopulationHistory(IEnumerable<int> worldIds, DateTime start, DateTime end);
     Task<WorldActivity> GetWorldActivity(int worldId, int periodHours);
