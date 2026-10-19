@@ -105,4 +105,30 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
         Assert.True(worldState.ZoneStates.First().IsTracking);
         Assert.Equivalent(testZoneAlertState, worldState.ZoneStates.First().AlertState);
     }
+
+    [Fact]
+    public async Task SetWorldState_IgnoresInactiveWorlds()
+    {
+        int activeWorldId = 1;
+        int legacyWorldId = 25;
+        int newWorldId = 3000;
+
+        _fixture.WorldService.AsMock()
+            .Setup(a => a.GetAllWorlds())
+            .ReturnsAsync(new[]
+            {
+                new World { Id = activeWorldId, Name = "Osprey" },
+                new World { Id = legacyWorldId, Name = "Briggs", IsActive = false }
+            });
+
+        var sut = _fixture.CreateSut();
+
+        await sut.SetWorldState(activeWorldId, "Osprey", false);
+        await sut.SetWorldState(legacyWorldId, "Briggs", true);
+        await sut.SetWorldState(newWorldId, "New", false);
+
+        Assert.NotNull(await sut.GetWorldState(activeWorldId));
+        Assert.NotNull(await sut.GetWorldState(newWorldId));
+        Assert.Null(await sut.GetWorldState(legacyWorldId));
+    }
 }

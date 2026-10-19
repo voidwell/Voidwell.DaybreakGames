@@ -60,10 +60,8 @@ public class CharacterService : ICharacterService
         var characterTask = _characterStore.GetCharacterDetailsAsync(characterId);
         var sanctionedWeaponsTask = _weaponService.GetAllSanctionedWeaponIds();
 
-        await Task.WhenAll(characterTask, sanctionedWeaponsTask);
-
-        var character = characterTask.Result;
-        var sanctionedWeaponIds = sanctionedWeaponsTask.Result;
+        var character = await characterTask;
+        var sanctionedWeaponIds = await sanctionedWeaponsTask;
 
         if (character == null)
         {
@@ -73,7 +71,7 @@ public class CharacterService : ICharacterService
         var weaponIds = character.WeaponStats!.Where(a => a.ItemId != 0).Select(a => a.ItemId);
         var aggregates = await _weaponAggregateService.GetAggregates(weaponIds);
 
-        details = await CreateCharacterDetailsAsync(character, aggregates, sanctionedWeaponIds);
+        details = CreateCharacterDetails(character, aggregates, sanctionedWeaponIds);
 
         await SaveCharacterDetailsInCacheAsync(details);
 
@@ -97,30 +95,27 @@ public class CharacterService : ICharacterService
 
     private async Task<IEnumerable<CharacterDetails>?> GetCharacterDetailsAsync(IEnumerable<string> characterIds)
     {
-        var cachedDetails = (await Task.WhenAll(characterIds.Select(GetCharacterDetailsFromCacheAsync))).Where(a => a != null);
+        var cachedDetails = (await Task.WhenAll(characterIds.Select(GetCharacterDetailsFromCacheAsync))).Where(a => a != null).ToList();
 
-        var remainingCharacterIds = characterIds.Where(a => cachedDetails.All(b => b.Id != a));
+        var cachedIds = cachedDetails.Select(a => a.Id).ToHashSet();
+        var remainingCharacterIds = characterIds.Where(a => !cachedIds.Contains(a)).ToList();
         if (!remainingCharacterIds.Any())
         {
             return cachedDetails;
         }
 
-        var details = new List<CharacterDetails>();
-        details.AddRange(cachedDetails);
+        var details = new List<CharacterDetails>(cachedDetails);
 
         var charactersTask = _characterStore.GetCharacterDetailsAsync(remainingCharacterIds);
         var sanctionedWeaponsTask = _weaponService.GetAllSanctionedWeaponIds();
 
-        await Task.WhenAll(charactersTask, sanctionedWeaponsTask);
-
-        var characters = charactersTask.Result;
-        var sanctionedWeaponIds = sanctionedWeaponsTask.Result;
+        var characters = await charactersTask;
+        var sanctionedWeaponIds = await sanctionedWeaponsTask;
 
         var weaponIds = characters.SelectMany(a => a.WeaponStats!).Where(a => a.ItemId != 0).Select(a => a.ItemId).Distinct().ToList();
         var aggregates = await _weaponAggregateService.GetAggregates(weaponIds);
 
-        var characterDetailMappingTasks = characters.Select(character => CreateCharacterDetailsAsync(character, aggregates, sanctionedWeaponIds));
-        var charactersDetails = await Task.WhenAll(characterDetailMappingTasks);
+        var charactersDetails = characters.Select(character => CreateCharacterDetails(character, aggregates, sanctionedWeaponIds)).ToList();
 
         await Task.WhenAll(charactersDetails.Select(SaveCharacterDetailsInCacheAsync));
 
@@ -141,77 +136,52 @@ public class CharacterService : ICharacterService
         return _cache.SetAsync(cacheKey, details, _cacheCharacterDetailsExpiration);
     }
 
-    private static Task<CharacterDetails> CreateCharacterDetailsAsync(Character character, Dictionary<string, WeaponAggregate> aggregates, IEnumerable<int> sanctionedWeaponIds)
+    private static CharacterDetails CreateCharacterDetails(Character character, Dictionary<string, WeaponAggregate> aggregates, IEnumerable<int> sanctionedWeaponIds)
     {
         var details = DomainMapper.MapCharacterDetails(character);
 
-        details.WeaponStats = CalculateCharacterWeaponStats(character.WeaponStats!, aggregates);
+        details.WeaponStats = CalculateCharacterWeaponStats(character.WeaponStats!, aggregates).ToList();
         details.InfantryStats = CalculateInfantryStats(details.WeaponStats, details.LifetimeStats!, sanctionedWeaponIds);
 
-        return Task.FromResult(details);
+        return details;
     }
+
+    private static double? Ratio(double? numerator, double? denominator)
+        => denominator > 0 ? numerator / denominator : null;
+
+    private static double? ZScore(double? value, double? average, double? standardDeviation)
+        => standardDeviation > 0 ? (value - average) / standardDeviation : null;
 
     private static IEnumerable<CharacterDetailsWeaponStat> CalculateCharacterWeaponStats(IEnumerable<CharacterWeaponStat> weaponStats, Dictionary<string, WeaponAggregate> aggregates)
     {
-        foreach (var s in weaponStats?.Where(a => a.ItemId != 0)!)
+        foreach (var s in weaponStats.Where(a => a.ItemId != 0))
         {
             var stat = DomainMapper.MapWeaponStat(s);
+            var st = stat.Stats!;
 
-            if (s.FireCount!.Value > 0)
-            {
-                stat.Stats!.Accuracy = (double)s.HitCount!.Value / s.FireCount.Value;
-            }
+            var kills = s.Kills!.Value;
+            var playTime = s.PlayTime!.Value;
 
-            if (s.Kills!.Value > 0)
-            {
-                stat.Stats!.HeadshotRatio = (double)s.Headshots!.Value / s.Kills.Value;
-                stat.Stats.LandedPerKill = (double)s.HitCount!.Value / s.Kills.Value;
-                stat.Stats.ShotsPerKill = (double)s.FireCount.Value / s.Kills.Value;
-            }
-
-            if (s.Deaths!.Value > 0)
-            {
-                stat.Stats!.KillDeathRatio = (double)s.Kills.Value / s.Deaths.Value;
-            }
-
-            if (s.PlayTime!.Value > 0)
-            {
-                stat.Stats!.KillsPerHour = s.Kills.Value / (s.PlayTime.Value / 3600.0);
-                stat.Stats.ScorePerMinute = s.Score!.Value / (s.PlayTime.Value / 60.0);
-                stat.Stats.VehicleKillsPerHour = s.VehicleKills!.Value / (s.PlayTime.Value / 3600.0);
-            }
+            st.Accuracy = Ratio(s.HitCount!.Value, s.FireCount!.Value);
+            st.HeadshotRatio = Ratio(s.Headshots!.Value, kills);
+            st.LandedPerKill = Ratio(s.HitCount.Value, kills);
+            st.ShotsPerKill = Ratio(s.FireCount.Value, kills);
+            st.KillDeathRatio = Ratio(kills, s.Deaths!.Value);
+            st.KillsPerHour = Ratio(kills, playTime / 3600.0);
+            st.ScorePerMinute = Ratio(s.Score!.Value, playTime / 60.0);
+            st.VehicleKillsPerHour = Ratio(s.VehicleKills!.Value, playTime / 3600.0);
 
             if (aggregates != null && aggregates.TryGetValue($"{s.ItemId}-{s.VehicleId}", out var agg))
             {
-                if (stat.Stats!.KillDeathRatio.HasValue && agg.STDKdr > 0)
-                {
-                    stat.Stats.KillDeathRatioDelta = (stat.Stats.KillDeathRatio - agg.AVGKdr) / agg.STDKdr;
-                }
-
-                if (stat.Stats.Accuracy.HasValue && agg.STDAccuracy > 0)
-                {
-                    stat.Stats.AccuracyDelta = (stat.Stats.Accuracy - agg.AVGAccuracy) / agg.STDAccuracy;
-                }
-
-                if (stat.Stats.HeadshotRatio.HasValue && agg.STDHsr > 0)
-                {
-                    stat.Stats.HsrDelta = (stat.Stats.Accuracy - agg.AVGHsr) / agg.STDHsr;
-                }
-
-                if (stat.Stats.KillsPerHour.HasValue && agg.STDKph > 0)
-                {
-                    stat.Stats.KphDelta = (stat.Stats.KillsPerHour - agg.AVGKph) / agg.STDKph;
-                }
-
-                if (stat.Stats.VehicleKillsPerHour.HasValue && agg.STDVkph > 0)
-                {
-                    stat.Stats.VehicleKphDelta = (stat.Stats.VehicleKillsPerHour - agg.AVGVkph) / agg.STDVkph;
-                }
+                st.KillDeathRatioDelta = ZScore(st.KillDeathRatio, agg.AVGKdr, agg.STDKdr);
+                st.AccuracyDelta = ZScore(st.Accuracy, agg.AVGAccuracy, agg.STDAccuracy);
+                st.HsrDelta = ZScore(st.HeadshotRatio, agg.AVGHsr, agg.STDHsr);
+                st.KphDelta = ZScore(st.KillsPerHour, agg.AVGKph, agg.STDKph);
+                st.VehicleKphDelta = ZScore(st.VehicleKillsPerHour, agg.AVGVkph, agg.STDVkph);
             }
 
             yield return stat;
         }
-        ;
     }
 
     private static InfantryStats? CalculateInfantryStats(IEnumerable<CharacterDetailsWeaponStat> weaponStats, CharacterDetailsLifetimeStats lifetimeStats, IEnumerable<int> sanctionedWeaponIds)
@@ -221,11 +191,12 @@ public class CharacterService : ICharacterService
             return null;
         }
 
-        var allSanctionedWeapons = weaponStats.Where(a => sanctionedWeaponIds.Contains(a.ItemId)).ToList();
-        var allSanctionedWeaponsDeathsSum = allSanctionedWeapons.Sum(a => a.Stats!.Deaths);
+        var sanctionedIds = sanctionedWeaponIds.ToHashSet();
+        var weaponStatList = weaponStats.ToList();
 
-        var sanctionedWeapons = weaponStats.Where(a => a.Stats?.Kills >= 50).Where(a => sanctionedWeaponIds.Contains(a.ItemId)).ToList();
-        var unSanctionedWeapons = weaponStats.Where(a => !sanctionedWeapons.Contains(a)).ToList();
+        var allSanctionedWeaponsDeathsSum = weaponStatList.Where(a => sanctionedIds.Contains(a.ItemId)).Sum(a => a.Stats!.Deaths);
+
+        var sanctionedWeapons = weaponStatList.Where(a => a.Stats?.Kills >= 50 && sanctionedIds.Contains(a.ItemId)).ToList();
 
         var sumHitCount = sanctionedWeapons.Sum(a => a.Stats!.HitCount);
         var sumFireCount = sanctionedWeapons.Sum(a => a.Stats!.FireCount);
@@ -236,37 +207,21 @@ public class CharacterService : ICharacterService
         var infantryStats = new InfantryStats
         {
             Weapons = sanctionedWeapons.Count,
-            UnsanctionedWeapons = unSanctionedWeapons.Count,
+            UnsanctionedWeapons = weaponStatList.Count - sanctionedWeapons.Count,
             Kills = sumKills,
+            Accuracy = Ratio(sumHitCount, sumFireCount),
+            HeadshotRatio = Ratio(sumHeadshots, sumKills),
+            KillDeathRatio = Ratio(sumKills, allSanctionedWeaponsDeathsSum),
+            KillsPerMinute = Ratio(sumKills, sumPlayTime / 60.0),
             AccuracyDelta = sanctionedWeapons.Average(a => a.Stats!.AccuracyDelta),
             HeadshotRatioDelta = sanctionedWeapons.Average(a => a.Stats!.HsrDelta),
             KillDeathRatioDelta = sanctionedWeapons.Average(a => a.Stats!.KillDeathRatioDelta),
             KillsPerMinuteDelta = sanctionedWeapons.Average(a => a.Stats!.KphDelta)
         };
 
-        if (sumFireCount > 0)
-        {
-            infantryStats.Accuracy = sumHitCount / (double)sumFireCount;
-        }
+        infantryStats.IVIScore = (int)Math.Round(infantryStats.HeadshotRatio.GetValueOrDefault() * infantryStats.Accuracy.GetValueOrDefault() * 10000, 0);
 
-        if (sumKills > 0)
-        {
-            infantryStats.HeadshotRatio = sumHeadshots / (double)sumKills;
-        }
-
-        if (allSanctionedWeaponsDeathsSum > 0)
-        {
-            infantryStats.KillDeathRatio = sanctionedWeapons.Sum(a => a.Stats!.Kills) / (double)allSanctionedWeaponsDeathsSum;
-        }
-
-        if (sumPlayTime > 0)
-        {
-            infantryStats.KillsPerMinute = sumKills / ((double)sumPlayTime / 60);
-        }
-
-        infantryStats.IVIScore = (int)Math.Round(infantryStats.HeadshotRatio.GetValueOrDefault() * 100 * (infantryStats.Accuracy.GetValueOrDefault() * 100), 0);
-
-        if (lifetimeStats.Deaths > 0 && infantryStats != null)
+        if (lifetimeStats.Deaths > 0)
         {
             infantryStats.KDRPadding = lifetimeStats.Kills / (double)lifetimeStats.Deaths - infantryStats.KillDeathRatio.GetValueOrDefault();
         }
@@ -291,7 +246,7 @@ public class CharacterService : ICharacterService
                 return null;
             }
 
-            return await MapToSimpleCharacterDetailsAsync(character);
+            return MapToSimpleCharacterDetails(character);
         }
         finally
         {
@@ -306,10 +261,10 @@ public class CharacterService : ICharacterService
         {
             return null;
         }
-        return await Task.WhenAll(characters.Select(MapToSimpleCharacterDetailsAsync));
+        return characters.Select(MapToSimpleCharacterDetails).ToList();
     }
 
-    private Task<SimpleCharacterDetails> MapToSimpleCharacterDetailsAsync(CharacterDetails character)
+    private static SimpleCharacterDetails MapToSimpleCharacterDetails(CharacterDetails character)
     {
         var mostPlayedWeapon = character.WeaponStats!.OrderByDescending(a => a.Stats!.Kills)
                 .FirstOrDefault();
@@ -331,7 +286,7 @@ public class CharacterService : ICharacterService
         details.TotalKillsPerHour = details.Kills / (details.TotalPlayTimeMinutes / 60.0);
         details.SiegeLevel = (double)character.LifetimeStats.FacilityCaptureCount / character.LifetimeStats.FacilityDefendedCount * 100;
 
-        return Task.FromResult(details);
+        return details;
     }
 
     public async Task<CharacterWeaponDetails?> GetCharacterWeaponByName(string characterName, string weaponName)

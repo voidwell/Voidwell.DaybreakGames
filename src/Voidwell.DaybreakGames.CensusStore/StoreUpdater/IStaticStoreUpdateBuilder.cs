@@ -6,4 +6,5 @@ public interface IStaticStoreUpdateBuilder<TCollection>
     where TCollection : class, ICensusStaticCollection
 {
     IStaticStoreUpdateBuilder<TCollection> WithUpdateDependency<TDependency>() where TDependency : class, ICensusStaticCollection;
+    IStaticStoreUpdateBuilder<TCollection> WithUpdateHandler<THandler>() where THandler : class;
 }

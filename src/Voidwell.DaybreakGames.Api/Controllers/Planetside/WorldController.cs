@@ -15,9 +15,9 @@ public class WorldController : Controller
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetAllWorldsAsync()
+    public async Task<ActionResult> GetAllWorldsAsync(bool includeInactive = false)
     {
-        var result = await _worldService.GetAllWorlds();
+        var result = await _worldService.GetWorlds(includeInactive);
         return Ok(result);
     }
 

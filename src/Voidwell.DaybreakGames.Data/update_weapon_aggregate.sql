@@ -42,7 +42,7 @@ BEGIN
                          CAST(AVG(t.vehicle_kills/( CAST(t.play_time AS float) / 3600)) AS float) AS avg_vkph,
                          CAST(STDDEV(t.vehicle_kills/( CAST(t.play_time AS float) / 3600)) AS float) AS std_vkph
                 FROM character_weapon_stat AS t
-                WHERE t."kills" > 250 AND t."deaths" > 0 AND t."fire_count" > 0 AND t."play_time" > 0 AND (t."kills" / CAST(t."deaths" AS float)) <= 100
+                WHERE t."kills" > 250 AND t."deaths" > 0 AND t."fire_count" > 0 AND t."play_time" >= 3600 AND (t."kills" / CAST(t."deaths" AS float)) <= 100
                 GROUP BY t."item_id", t."vehicle_id"
         ON CONFLICT ("item_id", "vehicle_id") DO UPDATE
                 SET ("avg_kills", "std_kills", "sum_kills", "avg_deaths", "std_deaths", "sum_deaths", "avg_fire_count", "std_fire_count", "sum_fire_count", "avg_hit_count", "std_hit_count", "sum_hit_count", "avg_headshots", "std_headshots", "sum_headshots", "avg_play_time", "std_play_time", "sum_play_time", "avg_score", "std_score", "sum_score", "avg_vehicle_kills", "std_vehicle_kills", "sum_vehicle_kills", "avg_kdr", "std_kdr", "avg_accuracy", "std_accuracy", "avg_hsr", "std_hsr", "avg_kph", "std_kph", "avg_vkph", "std_vkph") =
