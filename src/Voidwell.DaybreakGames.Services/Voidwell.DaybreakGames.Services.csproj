@@ -3,7 +3,6 @@
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" />
         <PackageReference Include="Riok.Mapperly" />
-        <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" />
     </ItemGroup>
 
   <ItemGroup>
