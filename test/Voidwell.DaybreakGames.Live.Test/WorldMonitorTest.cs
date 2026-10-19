@@ -1,7 +1,6 @@
 using Moq;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
-using Voidwell.DaybreakGames.Domain;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Test;
 using Voidwell.DaybreakGames.Test.MapTests;
@@ -108,18 +107,30 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
     }
 
     [Fact]
-    public async Task GetWorldStates_ExcludesLegacyWorlds()
+    public async Task GetWorldStates_ExcludesInactiveWorlds()
     {
+        int activeWorldId = 1;
         int legacyWorldId = 2;
+        int newWorldId = 3000;
+
+        _fixture.WorldService.AsMock()
+            .Setup(a => a.GetAllWorlds())
+            .ReturnsAsync(new[]
+            {
+                new World { Id = activeWorldId, Name = "Osprey" },
+                new World { Id = legacyWorldId, Name = "Legacy", IsActive = false }
+            });
 
         var sut = _fixture.CreateSut();
 
-        await sut.SetWorldState(ActiveWorlds.Osprey, "Osprey", false);
+        await sut.SetWorldState(activeWorldId, "Osprey", false);
         await sut.SetWorldState(legacyWorldId, "Legacy", false);
+        await sut.SetWorldState(newWorldId, "New", false);
 
         var worldStates = await sut.GetWorldStates();
 
-        Assert.Contains(worldStates, a => a.Id == ActiveWorlds.Osprey);
+        Assert.Contains(worldStates, a => a.Id == activeWorldId);
+        Assert.Contains(worldStates, a => a.Id == newWorldId);
         Assert.DoesNotContain(worldStates, a => a.Id == legacyWorldId);
     }
 }

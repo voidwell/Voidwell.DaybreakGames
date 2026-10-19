@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Domain;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
@@ -41,7 +40,7 @@ public class WorldMonitor : IWorldMonitor
 
         await Task.WhenAll(worldsTask, zonesTask);
 
-        foreach (var world in worldsTask.Result.Where(a => ActiveWorlds.Contains(a.Id)))
+        foreach (var world in worldsTask.Result.Where(a => a.IsActive))
         {
             if (!_worldStates.ContainsKey(world.Id))
             {
@@ -227,7 +226,9 @@ public class WorldMonitor : IWorldMonitor
 
     public async Task<IEnumerable<WorldOnlineState>> GetWorldStates()
     {
-        var activeWorldIds = _worldStates.Keys.Where(ActiveWorlds.Contains);
+        // Worlds not in the database yet (e.g. a newly launched server) are shown.
+        var inactiveWorldIds = (await _worldService.GetAllWorlds()).Where(a => !a.IsActive).Select(a => a.Id).ToHashSet();
+        var activeWorldIds = _worldStates.Keys.Where(a => !inactiveWorldIds.Contains(a));
         return (await Task.WhenAll(activeWorldIds.Select(GetWorldState))).OrderBy(a => a!.Name)!;
     }
 

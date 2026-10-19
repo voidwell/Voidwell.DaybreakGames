@@ -3,7 +3,6 @@ using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
-using Voidwell.DaybreakGames.Domain;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
@@ -46,7 +45,7 @@ public class WorldService : IWorldService
             {
                 Id = a.Id,
                 Name = a.Name,
-                IsInactive = !ActiveWorlds.Contains(a.Id)
+                IsInactive = !a.IsActive
             });
 
         return includeInactive ? worlds : worlds.Where(a => !a.IsInactive);
