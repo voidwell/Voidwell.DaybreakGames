@@ -11,6 +11,9 @@ public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHost
 
     private readonly Func<string, string> _cacheKey = (serviceName) => $"service-{serviceName}-state";
 
+    // Service state must outlive restarts, so it can't use the cache's short default expiry
+    private static readonly TimeSpan _stateExpiration = TimeSpan.FromDays(365);
+
     public StatefulHostedServiceManager(IServiceProvider serviceProvider, ICache cache)
     {
         _cache = cache;
@@ -72,7 +75,7 @@ public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHost
         serviceState.IsRunning = isEnabled;
 
         var state = await GetServiceStatusAsync(serviceState, CancellationToken.None);
-        await _cache.SetAsync(_cacheKey(serviceState.ServiceName), state);
+        await _cache.SetAsync(_cacheKey(serviceState.ServiceName), state, _stateExpiration);
     }
 
     private async Task InitializeServiceAsync(HostedServiceState serviceState)
@@ -80,6 +83,9 @@ public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHost
         var state = await _cache.GetAsync<ServiceState>(_cacheKey(serviceState.ServiceName));
         if (state != null && state.IsEnabled)
         {
+            // Refresh the expiry so a long-running enabled service doesn't lose its state
+            await _cache.SetAsync(_cacheKey(serviceState.ServiceName), state, _stateExpiration);
+
             serviceState.IsRunning = true;
             await serviceState.Service.StartAsync(CancellationToken.None);
         }

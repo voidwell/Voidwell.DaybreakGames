@@ -67,7 +67,7 @@ public class StatefulHostedServiceManagerTest
         await sut.StartServiceAsync("test-service", TestContext.Current.CancellationToken);
 
         _service.Verify(a => a.StartAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cache.Verify(a => a.SetAsync("service-test-service-state", It.Is<object>(o => ((ServiceState)o).IsEnabled)), Times.Once);
+        _cache.Verify(a => a.SetAsync("service-test-service-state", It.Is<object>(o => ((ServiceState)o).IsEnabled), It.Is<TimeSpan>(e => e >= TimeSpan.FromDays(30))), Times.Once);
         Assert.True((await sut.GetServiceStatusAsync("test-service", TestContext.Current.CancellationToken)).IsEnabled);
     }
 
@@ -80,7 +80,7 @@ public class StatefulHostedServiceManagerTest
         await sut.StopServiceAsync("test-service", TestContext.Current.CancellationToken);
 
         _service.Verify(a => a.StopAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cache.Verify(a => a.SetAsync("service-test-service-state", It.Is<object>(o => !((ServiceState)o).IsEnabled)), Times.Once);
+        _cache.Verify(a => a.SetAsync("service-test-service-state", It.Is<object>(o => !((ServiceState)o).IsEnabled), It.Is<TimeSpan>(e => e >= TimeSpan.FromDays(30))), Times.Once);
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class StatefulHostedServiceManagerTest
         await sut.StartServiceAsync("other", TestContext.Current.CancellationToken);
 
         _service.Verify(a => a.StartAsync(It.IsAny<CancellationToken>()), Times.Never);
-        _cache.Verify(a => a.SetAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+        _cache.Verify(a => a.SetAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<TimeSpan>()), Times.Never);
     }
 
     [Fact]
@@ -103,6 +103,7 @@ public class StatefulHostedServiceManagerTest
         await sut.StartAsync(TestContext.Current.CancellationToken);
 
         _service.Verify(a => a.StartAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _cache.Verify(a => a.SetAsync("service-test-service-state", It.IsAny<object>(), It.Is<TimeSpan>(e => e >= TimeSpan.FromDays(30))), Times.Once);
         Assert.True((await sut.GetServiceStatusAsync("test-service", TestContext.Current.CancellationToken)).IsEnabled);
     }
 
