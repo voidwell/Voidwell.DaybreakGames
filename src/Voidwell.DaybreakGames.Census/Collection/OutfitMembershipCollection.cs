@@ -1,4 +1,3 @@
-using System.Globalization;
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
@@ -20,7 +19,7 @@ public class OutfitMembershipCollection : ICensusCollection<CensusOutfitMemberMo
     {
         return await _client.CreateQuery(CollectionName)
             .ShowFields("character_id", "outfit_id", "member_since_date", "rank", "rank_ordinal")
-            .Where("character_id", a => a.Equals(characterId.ToString(CultureInfo.InvariantCulture)))
+            .Where("character_id", a => a.Equals(characterId))
             .GetAsync<CensusOutfitMemberModel>();
     }
 }

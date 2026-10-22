@@ -158,6 +158,5 @@ public class PlayerMonitor : IPlayerMonitor
             _cache.RemoveAsync(_getPlayerCacheKey(character.Id)));
     }
 
-    // Online lists are stored in the cache as string sets
     private static string ToListValue(long characterId) => characterId.ToString(CultureInfo.InvariantCulture);
 }

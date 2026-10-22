@@ -1,4 +1,3 @@
-using System.Globalization;
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
@@ -21,7 +20,7 @@ public class CharactersStatByFactionCollection : ICensusCollection<CensusCharact
         var query = _client.CreateQuery(CollectionName)
             .SetLimit(500)
             .ShowFields("character_id", "stat_name", "profile_id", "value_forever_vs", "value_forever_nc", "value_forever_tr")
-            .Where("character_id", a => a.Equals(characterId.ToString(CultureInfo.InvariantCulture)));
+            .Where("character_id", a => a.Equals(characterId));
 
         if (lastLogin != null)
         {

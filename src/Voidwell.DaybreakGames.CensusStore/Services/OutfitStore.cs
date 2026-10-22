@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
-using Voidwell.DaybreakGames.Census.Models.Extensions;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -116,9 +115,7 @@ public class OutfitStore : IOutfitStore
                 return null;
             }
 
-            var outfitId = membership.OutfitId.ToCensusId();
-
-            var outfit = await GetLatestOutfitAsync(outfitId, character);
+            var outfit = await GetLatestOutfitAsync(membership.OutfitId, character);
             if (outfit == null)
             {
                 _logger.LogError(84624, "Unable to resolve outfit {OutfitId} for character {CharacterId}", membership.OutfitId, character.Id);
@@ -128,8 +125,8 @@ public class OutfitStore : IOutfitStore
 
             outfitMember = new OutfitMember
             {
-                OutfitId = outfitId,
-                CharacterId = membership.CharacterId.ToCensusId(),
+                OutfitId = membership.OutfitId,
+                CharacterId = membership.CharacterId,
                 MemberSinceDate = membership.MemberSinceDate,
                 Rank = membership.Rank,
                 RankOrdinal = membership.RankOrdinal
@@ -201,10 +198,10 @@ public class OutfitStore : IOutfitStore
 
         return new Outfit
         {
-            Id = censusOutfit.OutfitId.ToCensusId(),
+            Id = censusOutfit.OutfitId,
             Alias = censusOutfit.Alias,
             Name = censusOutfit.Name,
-            LeaderCharacterId = censusOutfit.LeaderCharacterId.ToOptionalCensusId(),
+            LeaderCharacterId = censusOutfit.LeaderCharacterId,
             CreatedDate = censusOutfit.TimeCreated,
             MemberCount = censusOutfit.MemberCount
         };
