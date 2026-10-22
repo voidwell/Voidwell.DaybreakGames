@@ -1,6 +1,5 @@
 using Riok.Mapperly.Abstractions;
 using Voidwell.DaybreakGames.Census.Models;
-using Voidwell.DaybreakGames.Census.Models.Extensions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 
 namespace Voidwell.DaybreakGames.CensusStore;
@@ -128,9 +127,4 @@ public static partial class CensusEntityMaps
     private static DateTime? NullIfEpoch(DateTime? date) => date?.Year == 1970 ? null : date;
 
     private static DateTime? NullIfEpochRequired(DateTime date) => date.Year == 1970 ? null : date;
-
-    // Census character and outfit ids arrive as strings but are stored as bigint
-    private static long ToCensusId(string? value) => value.ToCensusId();
-
-    private static long? ToOptionalCensusId(string? value) => value.ToOptionalCensusId();
 }
