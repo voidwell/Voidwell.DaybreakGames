@@ -1,17 +1,14 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 public class VehicleDestroy
 {
     [Required]
-    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
     public long CharacterId { get; set; }
     [Required]
     public int? VehicleId { get; set; }
     [Required]
-    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
     public long AttackerCharacterId { get; set; }
     [Required]
     public int? AttackerVehicleId { get; set; }

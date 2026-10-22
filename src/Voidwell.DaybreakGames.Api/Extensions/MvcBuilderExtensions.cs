@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Voidwell.DaybreakGames.Utils.JsonConverters;
 
 namespace Voidwell.DaybreakGames.Api.Extensions;
 
@@ -13,19 +14,7 @@ internal static class MvcBuilderExtensions
             options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             options.JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
+            options.JsonSerializerOptions.Converters.Add(new LongJsonConverter());
         });
-    }
-}
-
-internal sealed class DateTimeJsonConverter : JsonConverter<DateTime>
-{
-    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        return DateTime.Parse(reader.GetString()!);
-    }
-
-    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-    {
-        writer.WriteStringValue(value.ToUniversalTime());
     }
 }

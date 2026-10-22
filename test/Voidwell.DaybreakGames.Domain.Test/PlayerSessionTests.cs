@@ -1,11 +1,17 @@
 using System.Text.Json;
 using Voidwell.DaybreakGames.Domain.Models;
+using Voidwell.DaybreakGames.Utils.JsonConverters;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Domain.Test;
 
 public class PlayerSessionTests
 {
+    private readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        Converters = { new LongJsonConverter() }
+    };
+
     [Fact]
     public void Serialize_ObjectToJson()
     {
@@ -37,7 +43,7 @@ public class PlayerSessionTests
         };
 
         // Act
-        var result = JsonSerializer.Serialize(playerSession);
+        var result = JsonSerializer.Serialize(playerSession, _serializerOptions);
 
         // Assert
         Assert.Equal("{\"Session\":{\"CharacterId\":\"1234\",\"Duration\":10,\"Id\":\"4321\",\"LoginDate\":\"2023-01-30T02:03:04\",\"LogoutDate\":\"2023-01-30T04:03:04\"},\"Events\":[{\"EventType\":\"Login\",\"Timestamp\":\"2023-01-30T02:03:04\",\"ZoneId\":4},{\"EventType\":\"BattleRankUp\",\"BattleRank\":10,\"Timestamp\":\"2023-01-30T03:03:04\",\"ZoneId\":2}]}", result);
@@ -75,7 +81,7 @@ public class PlayerSessionTests
         var json = "{\"Events\":[{\"EventType\":\"Login\",\"Timestamp\":\"2023-01-30T02:03:04\",\"ZoneId\":4},{\"EventType\":\"BattleRankUp\",\"BattleRank\":10,\"Timestamp\":\"2023-01-30T03:03:04\",\"ZoneId\":2}],\"Session\":{\"CharacterId\":\"1234\",\"Duration\":10,\"Id\":\"4321\",\"LoginDate\":\"2023-01-30T02:03:04\",\"LogoutDate\":\"2023-01-30T04:03:04\"}}";
 
         // Act
-        var result = JsonSerializer.Deserialize<PlayerSession>(json);
+        var result = JsonSerializer.Deserialize<PlayerSession>(json, _serializerOptions);
 
         // Assert
         Assert.Equivalent(playerSession, result);

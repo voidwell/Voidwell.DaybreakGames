@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class OnlineCharacter
@@ -20,7 +18,6 @@ public class OnlineCharacter
 
 public class OnlineCharacterProfile
 {
-    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
     public long? CharacterId { get; set; }
     public int FactionId { get; set; }
     public string? Name { get; set; }
