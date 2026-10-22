@@ -1,7 +1,6 @@
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
-using Voidwell.DaybreakGames.Census.Models.Extensions;
 
 namespace Voidwell.DaybreakGames.Census.Collection;
 
@@ -22,6 +21,6 @@ public class CharacterNameCollection : ICensusCollection<CensusCharacterNameMode
             .Where("name.first_lower", a => a.Equals(characterName.ToLower()))
             .GetAsync<CensusCharacterNameModel>();
 
-        return nameModel?.CharacterId.ToOptionalCensusId();
+        return nameModel?.CharacterId;
     }
 }

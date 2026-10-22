@@ -1,10 +1,8 @@
-using System.Globalization;
 using System.Text.Json;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
-using Voidwell.DaybreakGames.Census.Models.Extensions;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -77,7 +75,7 @@ public class CharacterStore : ICharacterStore
 
             return [.. characters.Select(a => new CensusCharacterModel
             {
-                CharacterId = a.Id.ToString(CultureInfo.InvariantCulture),
+                CharacterId = a.Id,
                 Name = new CensusCharacterName { First = a.Name, FirstLower = a.Name?.ToLower() },
                 FactionId = a.FactionId,
                 WorldId = a.WorldId,
@@ -244,7 +242,7 @@ public class CharacterStore : ICharacterStore
 
         var model = new Character
         {
-            Id = character.CharacterId.ToCensusId(),
+            Id = character.CharacterId,
             Name = character.Name!.First,
             FactionId = character.FactionId,
             WorldId = character.WorldId,
@@ -479,7 +477,7 @@ public class CharacterStore : ICharacterStore
 
             return new CharacterStatHistory
             {
-                CharacterId = a.CharacterId.ToCensusId(),
+                CharacterId = a.CharacterId,
                 StatName = a.StatName,
                 AllTime = a.AllTime,
                 OneLifeMax = a.OneLifeMax,

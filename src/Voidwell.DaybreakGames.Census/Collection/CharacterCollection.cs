@@ -1,4 +1,3 @@
-using System.Globalization;
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
@@ -21,7 +20,7 @@ public class CharacterCollection : ICensusCollection<CensusCharacterModel>
         return await _client.CreateQuery(CollectionName)
             .AddResolve("world")
             .ShowFields("character_id", "name.first", "faction_id", "world_id", "battle_rank.value", "battle_rank.percent_to_next", "certs.earned_points", "title_id", "prestige_level")
-            .Where("character_id", a => a.Equals(characterId.ToString(CultureInfo.InvariantCulture)))
+            .Where("character_id", a => a.Equals(characterId))
             .GetAsync<CensusCharacterModel>();
     }
 
@@ -29,7 +28,7 @@ public class CharacterCollection : ICensusCollection<CensusCharacterModel>
     {
         var result = await _client.CreateQuery(CollectionName)
             .ShowFields("character_id", "times.creation_date", "times.last_save_date", "times.last_login_date", "times.minutes_played")
-            .Where("character_id", a => a.Equals(characterId.ToString(CultureInfo.InvariantCulture)))
+            .Where("character_id", a => a.Equals(characterId))
             .GetAsync<CensusCharacterModel>();
 
         return result?.Times;
