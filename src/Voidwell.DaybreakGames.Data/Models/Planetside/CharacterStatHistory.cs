@@ -1,12 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 
 public class CharacterStatHistory
 {
     [Required]
-    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
     public long CharacterId { get; set; }
     public string? StatName { get; set; }
     public int AllTime { get; set; }
