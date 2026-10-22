@@ -1,6 +1,7 @@
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
+using Voidwell.DaybreakGames.Census.Models.Extensions;
 
 namespace Voidwell.DaybreakGames.Census.Collection;
 
@@ -15,12 +16,12 @@ public class CharacterNameCollection : ICensusCollection<CensusCharacterNameMode
         _client = censusClient;
     }
 
-    public async Task<string?> GetCharacterIdByNameAsync(string characterName)
+    public async Task<long?> GetCharacterIdByNameAsync(string characterName)
     {
         var nameModel = await _client.CreateQuery(CollectionName)
             .Where("name.first_lower", a => a.Equals(characterName.ToLower()))
             .GetAsync<CensusCharacterNameModel>();
 
-        return nameModel?.CharacterId;
+        return nameModel?.CharacterId.ToOptionalCensusId();
     }
 }

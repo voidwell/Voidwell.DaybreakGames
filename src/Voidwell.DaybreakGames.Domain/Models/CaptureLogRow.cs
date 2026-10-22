@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class CaptureLogRow
@@ -19,7 +21,8 @@ public class CaptureLogRow
 
 public class CaptureLogRowOutfit
 {
-    public string? Id { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long? Id { get; set; }
     public string? Name { get; set; }
     public string? Alias { get; set; }
 }

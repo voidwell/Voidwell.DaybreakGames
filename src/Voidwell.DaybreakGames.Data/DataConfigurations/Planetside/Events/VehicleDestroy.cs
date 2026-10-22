@@ -11,8 +11,6 @@ public class EventVehicleDestroyConfiguration : IEntityTypeConfiguration<Models.
 
         builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId, a.AttackerVehicleId, a.VehicleId });
 
-        builder.HasIndex(a => new { a.AttackerWeaponId, a.Timestamp });
-
         builder
             .Ignore(a => a.Character)
             .Ignore(a => a.AttackerCharacter)

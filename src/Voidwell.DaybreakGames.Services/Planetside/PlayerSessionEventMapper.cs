@@ -1,3 +1,4 @@
+using System.Globalization;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
 
@@ -13,13 +14,13 @@ public static class PlayerSessionEventMapper
             ZoneId = e.ZoneId,
             Attacker = new CombatReportItemDetail
             {
-                Id = e.AttackerCharacterId,
+                Id = e.AttackerCharacterId.ToString(CultureInfo.InvariantCulture),
                 Name = e.AttackerCharacter?.Name,
                 FactionId = e.AttackerCharacter?.FactionId
             },
             Victim = new CombatReportItemDetail
             {
-                Id = e.CharacterId,
+                Id = e.CharacterId.ToString(CultureInfo.InvariantCulture),
                 Name = e.Character?.Name,
                 FactionId = e.Character?.FactionId
             },
@@ -91,13 +92,13 @@ public static class PlayerSessionEventMapper
                 ZoneId = e.ZoneId,
                 Attacker = new CombatReportItemDetail
                 {
-                    Id = e.AttackerCharacterId,
+                    Id = e.AttackerCharacterId.ToString(CultureInfo.InvariantCulture),
                     Name = e.AttackerCharacter?.Name,
                     FactionId = e.AttackerCharacter?.FactionId
                 },
                 Victim = new CombatReportItemDetail
                 {
-                    Id = e.CharacterId,
+                    Id = e.CharacterId.ToString(CultureInfo.InvariantCulture),
                     Name = e.Character?.Name,
                     FactionId = e.Character?.FactionId
                 },

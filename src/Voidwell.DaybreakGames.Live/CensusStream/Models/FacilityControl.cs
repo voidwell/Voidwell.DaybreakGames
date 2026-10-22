@@ -6,5 +6,5 @@ public class FacilityControl : PayloadBase
     public int NewFactionId { get; set; }
     public int OldFactionId { get; set; }
     public int DurationHeld { get; set; }
-    public string? OutfitId { get; set; }
+    public long? OutfitId { get; set; }
 }

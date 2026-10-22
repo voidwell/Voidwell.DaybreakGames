@@ -49,12 +49,6 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
             eventNames.AddRange(_options.CensusWebsocketServices);
         }
 
-        if (_options.CensusWebsocketExperienceIds != null && _options.CensusWebsocketExperienceIds.Any())
-        {
-            //var experienceEvents = _options.CensusWebsocketExperienceIds.Select(id => $"GainExperience_experience_id_{id}");
-            //eventNames.AddRange(experienceEvents);
-        }
-
         return new CensusStreamSubscription
         {
             Characters = _options.CensusWebsocketCharacters,

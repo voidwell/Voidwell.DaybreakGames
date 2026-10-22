@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
@@ -15,7 +16,8 @@ public class FacilityControl
     public int? NewFactionId { get; set; }
     public int? OldFactionId { get; set; }
     public int DurationHeld { get; set; }
-    public string? OutfitId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long? OutfitId { get; set; }
     public float? ZoneControlVs { get; set; }
     public float? ZoneControlNc { get; set; }
     public float? ZoneControlTr { get; set; }

@@ -128,8 +128,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Character", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
                     b.Property<int>("BattleRank")
@@ -178,8 +178,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterAchievement", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("AchievementId")
@@ -206,8 +206,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterDirective", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("DirectiveId")
@@ -230,8 +230,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterDirectiveObjective", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("DirectiveId")
@@ -262,8 +262,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterDirectiveTier", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("DirectiveTreeId")
@@ -286,8 +286,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterDirectiveTree", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("DirectiveTreeId")
@@ -314,8 +314,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterLifetimeStat", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int?>("AchievementCount")
@@ -434,8 +434,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterLifetimeStatByFaction", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int?>("DominationCountNC")
@@ -608,8 +608,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterRating", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<double>("Deviation")
@@ -635,8 +635,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterStat", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("ProfileId")
@@ -693,8 +693,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterStatByFaction", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("ProfileId")
@@ -745,8 +745,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterStatHistory", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<string>("StatName")
@@ -781,8 +781,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterTime", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<DateTime>("CreatedDate")
@@ -809,8 +809,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterUpdateQueue", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<DateTime>("Timestamp")
@@ -825,8 +825,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterWeaponStat", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("ItemId")
@@ -914,8 +914,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterWeaponStatByFaction", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("ItemId")
@@ -1306,8 +1306,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Events.AchievementEarned", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<DateTime>("Timestamp")
@@ -1334,8 +1334,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Events.BattlerankUp", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<DateTime>("Timestamp")
@@ -1434,12 +1434,12 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("timestamp");
 
-                    b.Property<string>("AttackerCharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("AttackerCharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("attacker_character_id");
 
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int?>("AttackerFireModeId")
@@ -1450,8 +1450,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("attacker_loadout_id");
 
-                    b.Property<string>("AttackerOutfitId")
-                        .HasColumnType("text")
+                    b.Property<long?>("AttackerOutfitId")
+                        .HasColumnType("bigint")
                         .HasColumnName("attacker_outfit_id");
 
                     b.Property<int?>("AttackerVehicleId")
@@ -1466,8 +1466,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("character_loadout_id");
 
-                    b.Property<string>("CharacterOutfitId")
-                        .HasColumnType("text")
+                    b.Property<long?>("CharacterOutfitId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_outfit_id");
 
                     b.Property<bool>("IsHeadshot")
@@ -1484,9 +1484,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId")
                         .HasName("p_k_event_death");
-
-                    b.HasIndex("AttackerWeaponId", "Timestamp")
-                        .HasDatabaseName("i_x_event_death_attacker_weapon_id_timestamp");
 
                     b.ToTable("event_death", (string)null);
                 });
@@ -1517,8 +1514,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("old_faction_id");
 
-                    b.Property<string>("OutfitId")
-                        .HasColumnType("text")
+                    b.Property<long?>("OutfitId")
+                        .HasColumnType("bigint")
                         .HasColumnName("outfit_id");
 
                     b.Property<float?>("ZoneControlNc")
@@ -1561,58 +1558,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasName("p_k_event_facility_control");
 
                     b.ToTable("event_facility_control", (string)null);
-                });
-
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Events.GainExperience", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer")
-                        .HasColumnName("amount");
-
-                    b.Property<string>("CharacterId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("character_id");
-
-                    b.Property<int>("ExperienceId")
-                        .HasColumnType("integer")
-                        .HasColumnName("experience_id");
-
-                    b.Property<int?>("LoadoutId")
-                        .HasColumnType("integer")
-                        .HasColumnName("loadout_id");
-
-                    b.Property<string>("OtherId")
-                        .HasColumnType("text")
-                        .HasColumnName("other_id");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("timestamp");
-
-                    b.Property<int>("WorldId")
-                        .HasColumnType("integer")
-                        .HasColumnName("world_id");
-
-                    b.Property<int>("ZoneId")
-                        .HasColumnType("integer")
-                        .HasColumnName("zone_id");
-
-                    b.HasKey("Id")
-                        .HasName("p_k_event_gain_experience");
-
-                    b.HasIndex("Timestamp", "CharacterId", "ExperienceId")
-                        .HasDatabaseName("i_x_event_gain_experience_timestamp_character_id_experience_id");
-
-                    b.HasIndex("Timestamp", "WorldId", "ExperienceId", "ZoneId")
-                        .HasDatabaseName("i_x_event_gain_experience_timestamp_world_id_experience_id_zone");
-
-                    b.ToTable("event_gain_experience", (string)null);
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Events.MetagameEvent", b =>
@@ -1676,16 +1621,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("timestamp");
 
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("FacilityId")
                         .HasColumnType("integer")
                         .HasColumnName("facility_id");
 
-                    b.Property<string>("OutfitId")
-                        .HasColumnType("text")
+                    b.Property<long?>("OutfitId")
+                        .HasColumnType("bigint")
                         .HasColumnName("outfit_id");
 
                     b.Property<int>("WorldId")
@@ -1708,16 +1653,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("timestamp");
 
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("FacilityId")
                         .HasColumnType("integer")
                         .HasColumnName("facility_id");
 
-                    b.Property<string>("OutfitId")
-                        .HasColumnType("text")
+                    b.Property<long?>("OutfitId")
+                        .HasColumnType("bigint")
                         .HasColumnName("outfit_id");
 
                     b.Property<int>("WorldId")
@@ -1740,8 +1685,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("timestamp");
 
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("WorldId")
@@ -1763,8 +1708,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("timestamp");
 
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("WorldId")
@@ -1786,12 +1731,12 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("timestamp");
 
-                    b.Property<string>("AttackerCharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("AttackerCharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("attacker_character_id");
 
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("AttackerVehicleId")
@@ -1829,30 +1774,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId", "AttackerVehicleId", "VehicleId")
                         .HasName("p_k_event_vehicle_destroy");
 
-                    b.HasIndex("AttackerWeaponId", "Timestamp")
-                        .HasDatabaseName("i_x_event_vehicle_destroy_attacker_weapon_id_timestamp");
-
                     b.ToTable("event_vehicle_destroy", (string)null);
-                });
-
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Experience", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<float>("Xp")
-                        .HasColumnType("real")
-                        .HasColumnName("xp");
-
-                    b.HasKey("Id")
-                        .HasName("p_k_experience");
-
-                    b.ToTable("experience", (string)null);
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.FacilityLink", b =>
@@ -2229,8 +2151,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Outfit", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
                     b.Property<string>("Alias")
@@ -2245,8 +2167,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("faction_id");
 
-                    b.Property<string>("LeaderCharacterId")
-                        .HasColumnType("text")
+                    b.Property<long?>("LeaderCharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("leader_character_id");
 
                     b.Property<int>("MemberCount")
@@ -2269,17 +2191,16 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.OutfitMember", b =>
                 {
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<DateTime?>("MemberSinceDate")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("member_since_date");
 
-                    b.Property<string>("OutfitId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<long>("OutfitId")
+                        .HasColumnType("bigint")
                         .HasColumnName("outfit_id");
 
                     b.Property<string>("Rank")
@@ -2305,9 +2226,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CharacterId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<long>("CharacterId")
+                        .HasColumnType("bigint")
                         .HasColumnName("character_id");
 
                     b.Property<int>("Duration")

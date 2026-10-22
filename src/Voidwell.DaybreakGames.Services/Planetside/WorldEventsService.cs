@@ -27,7 +27,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetAllLatestZoneUnlocks();
     }
 
-    public Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetBattleRankUpEventsForCharacterIdByDateAsync(characterId, start, end);
     }
@@ -42,12 +42,12 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetDeathEventsByDateAsync(worldId, startDate, endDate, zoneId);
     }
 
-    public Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime? end)
+    public Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime? end)
     {
         return _eventRepository.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
     }
 
-    public Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
     }
@@ -60,7 +60,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         }
     }
 
-    public Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetFacilityDefendEventsForCharacterIdByDateAsync(characterId, start, end);
     }
@@ -80,12 +80,12 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetPlayerLogoutEventsAsync(worldId, startDate, endDate);
     }
 
-    public Task<PlayerLogin> GetLastPlayerLoginEventAsync(string characterId)
+    public Task<PlayerLogin> GetLastPlayerLoginEventAsync(long characterId)
     {
         return _eventRepository.GetLastPlayerLoginEventAsync(characterId)!;
     }
 
-    public Task<PlayerLogout> GetLastPlayerLogoutEventAsync(string characterId)
+    public Task<PlayerLogout> GetLastPlayerLogoutEventAsync(long characterId)
     {
         return _eventRepository.GetLastPlayerLogoutEventAsync(characterId)!;
     }
@@ -95,41 +95,13 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, startDate, endDate, zoneId);
     }
 
-    public Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetVehicleDestroyEventsForCharacterIdByDateAsync(characterId, start, end);
-    }
-
-    public Task<IEnumerable<GainExperience>> GetHealExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.Heal, worldId, startDate, endDate, zoneId);
-    }
-
-    public Task<IEnumerable<GainExperience>> GetReviveExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.Revive, worldId, startDate, endDate, zoneId);
-    }
-
-    public Task<IEnumerable<GainExperience>> GetRoadkillExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.Roadkill, worldId, startDate, endDate, zoneId);
-    }
-
-    public Task<IEnumerable<GainExperience>> GetSquadBeaconKillExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.SquadBeaconKill, worldId, startDate, endDate, zoneId);
     }
 
     public void Dispose()
     {
         _facilityControlsByDateLock.Dispose();
-    }
-
-    private static class Experience
-    {
-        public const int Heal = 4;
-        public const int Revive = 7;
-        public const int Roadkill = 26;
-        public const int SquadBeaconKill = 270;
     }
 }

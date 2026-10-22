@@ -14,7 +14,7 @@ public class CharacterRepository : ICharacterRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<string?> GetCharacterIdByName(string characterName)
+    public async Task<long?> GetCharacterIdByName(string characterName)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var character = await dbContext.Characters
@@ -39,7 +39,7 @@ public class CharacterRepository : ICharacterRepository
             .ToListAsync();
     }
 
-    public async Task<Character?> GetCharacterAsync(string characterId)
+    public async Task<Character?> GetCharacterAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.Characters
@@ -47,7 +47,7 @@ public class CharacterRepository : ICharacterRepository
             .FirstOrDefaultAsync(a => a.Id == characterId);
     }
 
-    public async Task<IEnumerable<Character>> GetCharactersByIdsAsync(IEnumerable<string> characterIds)
+    public async Task<IEnumerable<Character>> GetCharactersByIdsAsync(IEnumerable<long> characterIds)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.Characters.Where(a => characterIds.Contains(a.Id))
@@ -65,13 +65,13 @@ public class CharacterRepository : ICharacterRepository
             .ToListAsync();
     }
 
-    public async Task<Character?> GetCharacterWithDetailsAsync(string characterId)
+    public async Task<Character?> GetCharacterWithDetailsAsync(long characterId)
     {
         var results = await GetCharacterWithDetailsAsync(new[] { characterId });
         return results.FirstOrDefault();
     }
 
-    public async Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params string[] characterIds)
+    public async Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params long[] characterIds)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from c in dbContext.Characters
@@ -237,13 +237,13 @@ public class CharacterRepository : ICharacterRepository
         return details;
     }
 
-    public async Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(string characterId)
+    public async Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.CharacterWeaponStats.Where(a => a.CharacterId == characterId).ToListAsync();
     }
 
-    public async Task<CharacterRating?> GetCharacterRatingAsync(string characterId)
+    public async Task<CharacterRating?> GetCharacterRatingAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.CharacterRating.FirstOrDefaultAsync(a => a.CharacterId == characterId);
@@ -259,7 +259,7 @@ public class CharacterRepository : ICharacterRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
+    public async Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from characterAch in dbContext.CharacterAchievements

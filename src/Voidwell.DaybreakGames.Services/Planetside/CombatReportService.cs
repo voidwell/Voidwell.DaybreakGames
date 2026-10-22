@@ -1,3 +1,4 @@
+using System.Globalization;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
@@ -14,6 +15,9 @@ public class CombatReportService : ICombatReportService
     private readonly IVehicleService _vehicleService;
     private readonly IMapService _mapService;
     private readonly IProfileService _profileService;
+
+    // Census reports characters without an outfit as outfit 0
+    private const long _noOutfitId = 0;
 
     public CombatReportService(IWorldEventsService worldEventsService, ICharacterService characterService,
         IOutfitService outfitService, IItemService itemService, IVehicleService vehicleService, IMapService mapService,
@@ -56,8 +60,8 @@ public class CombatReportService : ICombatReportService
         var vehicleDeaths = vehicleDeathsTask.Result.ToList();
         var facilityControls = facilityControlsTask.Result.ToList();
 
-        var participantHash = new Dictionary<string, CombatReportParticipantStats>();
-        var outfitHash = new Dictionary<string, CombatReportOutfitStats>();
+        var participantHash = new Dictionary<long, CombatReportParticipantStats>();
+        var outfitHash = new Dictionary<long, CombatReportOutfitStats>();
         var vehicleHash = new Dictionary<int, CombatReportVehicleStats>();
         var weaponHash = new Dictionary<int, CombatReportWeaponStats>();
         var loadoutHash = new Dictionary<int, CombatReportClassStats>();
@@ -80,30 +84,30 @@ public class CombatReportService : ICombatReportService
         };
     }
 
-    private static void PreLoadCombatStatTrackers(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths, Dictionary<string, CombatReportParticipantStats> participantHash,
-        Dictionary<string, CombatReportOutfitStats> outfitHash, Dictionary<int, CombatReportVehicleStats> vehicleHash, Dictionary<int, CombatReportWeaponStats> weaponHash,
+    private static void PreLoadCombatStatTrackers(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths, Dictionary<long, CombatReportParticipantStats> participantHash,
+        Dictionary<long, CombatReportOutfitStats> outfitHash, Dictionary<int, CombatReportVehicleStats> vehicleHash, Dictionary<int, CombatReportWeaponStats> weaponHash,
         Dictionary<int, CombatReportClassStats> loadoutHash)
     {
         foreach (var death in deaths)
         {
-            if (!participantHash.ContainsKey(death.AttackerCharacterId!))
+            if (!participantHash.ContainsKey(death.AttackerCharacterId))
             {
-                participantHash.Add(death.AttackerCharacterId!, new CombatReportParticipantStats(death.AttackerCharacterId!, death.AttackerOutfitId));
+                participantHash.Add(death.AttackerCharacterId, new CombatReportParticipantStats(death.AttackerCharacterId, death.AttackerOutfitId));
             }
 
-            if (!participantHash.ContainsKey(death.CharacterId!))
+            if (!participantHash.ContainsKey(death.CharacterId))
             {
-                participantHash.Add(death.CharacterId!, new CombatReportParticipantStats(death.CharacterId!, death.CharacterOutfitId));
+                participantHash.Add(death.CharacterId, new CombatReportParticipantStats(death.CharacterId, death.CharacterOutfitId));
             }
 
-            if (death.AttackerOutfitId != null && !outfitHash.ContainsKey(death.AttackerOutfitId))
+            if (death.AttackerOutfitId != null && !outfitHash.ContainsKey(death.AttackerOutfitId.Value))
             {
-                outfitHash.Add(death.AttackerOutfitId, new CombatReportOutfitStats(death.AttackerOutfitId));
+                outfitHash.Add(death.AttackerOutfitId.Value, new CombatReportOutfitStats(death.AttackerOutfitId.Value));
             }
 
-            if (death.CharacterOutfitId != null && !outfitHash.ContainsKey(death.CharacterOutfitId))
+            if (death.CharacterOutfitId != null && !outfitHash.ContainsKey(death.CharacterOutfitId.Value))
             {
-                outfitHash.Add(death.CharacterOutfitId, new CombatReportOutfitStats(death.CharacterOutfitId));
+                outfitHash.Add(death.CharacterOutfitId.Value, new CombatReportOutfitStats(death.CharacterOutfitId.Value));
             }
 
             if (death.AttackerWeaponId != null && death.AttackerWeaponId != 0 && !weaponHash.ContainsKey(death.AttackerWeaponId.Value))
@@ -129,9 +133,9 @@ public class CombatReportService : ICombatReportService
 
         foreach (var death in vehicleDeaths)
         {
-            if (!participantHash.ContainsKey(death.AttackerCharacterId!))
+            if (!participantHash.ContainsKey(death.AttackerCharacterId))
             {
-                participantHash.Add(death.AttackerCharacterId!, new CombatReportParticipantStats(death.AttackerCharacterId!));
+                participantHash.Add(death.AttackerCharacterId, new CombatReportParticipantStats(death.AttackerCharacterId));
             }
 
             if (death.VehicleId != null && death.VehicleId != 0 && !vehicleHash.ContainsKey(death.VehicleId.Value))
@@ -141,8 +145,8 @@ public class CombatReportService : ICombatReportService
         }
     }
 
-    private async Task LoadCombatStatDetailsAsync(Dictionary<string, CombatReportParticipantStats> participantHash,
-        Dictionary<string, CombatReportOutfitStats> outfitHash,
+    private async Task LoadCombatStatDetailsAsync(Dictionary<long, CombatReportParticipantStats> participantHash,
+        Dictionary<long, CombatReportOutfitStats> outfitHash,
         Dictionary<int, CombatReportVehicleStats> vehicleHash,
         Dictionary<int, CombatReportWeaponStats> weaponHash,
         Dictionary<int, CombatReportClassStats> loadoutHash)
@@ -156,19 +160,19 @@ public class CombatReportService : ICombatReportService
 
         foreach (var outfit in outfitsTask.Result)
         {
-            outfitHash[outfit.Id!].Outfit!.Name = outfit.Name;
-            outfitHash[outfit.Id!].Outfit!.FactionId = outfit.FactionId ?? 0;
-            outfitHash[outfit.Id!].Outfit!.Alias = outfit.Alias;
+            outfitHash[outfit.Id].Outfit!.Name = outfit.Name;
+            outfitHash[outfit.Id].Outfit!.FactionId = outfit.FactionId ?? 0;
+            outfitHash[outfit.Id].Outfit!.Alias = outfit.Alias;
         }
 
-        if (outfitHash.ContainsKey(""))
+        if (outfitHash.ContainsKey(_noOutfitId))
         {
-            outfitHash[""].Outfit!.Name = "No Outfit";
+            outfitHash[_noOutfitId].Outfit!.Name = "No Outfit";
         }
 
         foreach (var character in charactersTask.Result)
         {
-            var hashCharacter = participantHash[character.Id!];
+            var hashCharacter = participantHash[character.Id];
 
             hashCharacter.Character!.Name = character.Name;
             hashCharacter.Character.FactionId = character.FactionId;
@@ -176,9 +180,10 @@ public class CombatReportService : ICombatReportService
             hashCharacter.Character.PrestigeLevel = character.PrestigeLevel;
             hashCharacter.Character.WorldId = character.WorldId;
 
-            if (hashCharacter.Outfit != null)
+            var outfitId = GetOutfitId(hashCharacter);
+            if (outfitId != null)
             {
-                hashCharacter.Outfit = outfitHash[hashCharacter.Outfit.Id!].Outfit;
+                hashCharacter.Outfit = outfitHash[outfitId.Value].Outfit;
             }
         }
 
@@ -218,8 +223,8 @@ public class CombatReportService : ICombatReportService
 
     private static void CalculateCombatStats(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths,
         IEnumerable<FacilityControl> facilityControls,
-        Dictionary<string, CombatReportParticipantStats> participantHash,
-        Dictionary<string, CombatReportOutfitStats> outfitHash,
+        Dictionary<long, CombatReportParticipantStats> participantHash,
+        Dictionary<long, CombatReportOutfitStats> outfitHash,
         Dictionary<int, CombatReportVehicleStats> vehicleHash,
         Dictionary<int, CombatReportWeaponStats> weaponHash,
         Dictionary<int, CombatReportClassStats> loadoutHash)
@@ -235,12 +240,12 @@ public class CombatReportService : ICombatReportService
 
             if (death.AttackerOutfitId != null)
             {
-                outfitHash.TryGetValue(death.AttackerOutfitId, out attackerOutfit!);
+                outfitHash.TryGetValue(death.AttackerOutfitId.Value, out attackerOutfit!);
             }
 
             if (death.CharacterOutfitId != null)
             {
-                outfitHash.TryGetValue(death.CharacterOutfitId, out victimOutfit!);
+                outfitHash.TryGetValue(death.CharacterOutfitId.Value, out victimOutfit!);
             }
 
             if (death.AttackerWeaponId.HasValue && weaponHash.ContainsKey(death.AttackerWeaponId.Value))
@@ -263,9 +268,9 @@ public class CombatReportService : ICombatReportService
                 loadoutHash.TryGetValue(death.CharacterLoadoutId.Value, out victimClass!);
             }
 
-            if (participantHash.TryGetValue(death.CharacterId!, out var victim))
+            if (participantHash.TryGetValue(death.CharacterId, out var victim))
             {
-                if (death.AttackerCharacterId == death.CharacterId || death.AttackerCharacterId == "0")
+                if (death.AttackerCharacterId == death.CharacterId || death.AttackerCharacterId == 0)
                 {
                     victim.Suicides++;
 
@@ -274,7 +279,7 @@ public class CombatReportService : ICombatReportService
                     if (victimClass != null)
                     { victimClass.Suicides++; }
                 }
-                else if (participantHash.TryGetValue(death.AttackerCharacterId!, out var attacker))
+                else if (participantHash.TryGetValue(death.AttackerCharacterId, out var attacker))
                 {
                     if (attacker.Character!.FactionId == victim.Character!.FactionId)
                     {
@@ -327,13 +332,14 @@ public class CombatReportService : ICombatReportService
 
         foreach (var death in vehicleDeaths)
         {
-            if (participantHash.TryGetValue(death.AttackerCharacterId!, out var attacker))
+            if (participantHash.TryGetValue(death.AttackerCharacterId, out var attacker))
             {
                 attacker.VehicleKills++;
 
-                if (attacker.Outfit?.Id != null && outfitHash.ContainsKey(attacker.Outfit.Id))
+                var attackerOutfitId = GetOutfitId(attacker);
+                if (attackerOutfitId != null && outfitHash.ContainsKey(attackerOutfitId.Value))
                 {
-                    outfitHash[attacker.Outfit.Id].VehicleKills++;
+                    outfitHash[attackerOutfitId.Value].VehicleKills++;
                 }
             }
 
@@ -349,24 +355,24 @@ public class CombatReportService : ICombatReportService
         }
 
         var outfitFacilityCaptures = facilityControls.Where(a => a.NewFactionId != a.OldFactionId)
-            .GroupBy(a => a.OutfitId ?? "")
+            .GroupBy(a => a.OutfitId ?? _noOutfitId)
             .ToDictionary(a => a.Key, a => a.Count());
 
         foreach (var outfit in outfitHash)
         {
             outfitHash[outfit.Key].FacilityCaptures = outfitFacilityCaptures.GetValueOrDefault(outfit.Key, 0);
-            outfitHash[outfit.Key].ParticipantCount = participantHash.Values.Count(a => a.Outfit?.Id == outfit.Key);
+            outfitHash[outfit.Key].ParticipantCount = participantHash.Values.Count(a => GetOutfitId(a) == outfit.Key);
         }
     }
 
     private static void SetCombatStatTopItems(List<Death> deaths,
-        Dictionary<string, CombatReportParticipantStats> participantHash,
+        Dictionary<long, CombatReportParticipantStats> participantHash,
         Dictionary<int, CombatReportWeaponStats> weaponHash,
         Dictionary<int, CombatReportClassStats> loadoutHash)
     {
         var attackerKillGroups = deaths.Where(a =>
-                !string.IsNullOrEmpty(a.AttackerCharacterId) &&
-                !string.IsNullOrEmpty(a.CharacterId) &&
+                a.AttackerCharacterId != 0 &&
+                a.CharacterId != 0 &&
                 a.AttackerCharacterId != a.CharacterId &&
                 participantHash.ContainsKey(a.AttackerCharacterId))
             .GroupBy(a => a.AttackerCharacterId)
@@ -382,21 +388,27 @@ public class CombatReportService : ICombatReportService
             var topLoadoutId = attackerKills.GroupBy(b => b.AttackerLoadoutId).OrderByDescending(b => b.Count())
                 .FirstOrDefault()?.Key;
 
-            participantHash[characterId!].TopWeaponId = topWeaponId;
-            participantHash[characterId!].TopProfileId = topLoadoutId;
+            participantHash[characterId].TopWeaponId = topWeaponId;
+            participantHash[characterId].TopProfileId = topLoadoutId;
 
             if (topWeaponId != null && weaponHash.TryGetValue(topWeaponId.Value, out var weapon))
             {
-                participantHash[characterId!].TopWeaponName = weapon.Item?.Name;
+                participantHash[characterId].TopWeaponName = weapon.Item?.Name;
             }
 
             if (topLoadoutId != null && loadoutHash.TryGetValue(topLoadoutId.Value, out var loadout))
             {
-                participantHash[characterId!].TopProfileId = loadout.Profile?.ProfileId;
-                participantHash[characterId!].TopProfileImageId = loadout.Profile?.ProfileImageId;
-                participantHash[characterId!].TopProfileName = loadout.Profile?.Name;
+                participantHash[characterId].TopProfileId = loadout.Profile?.ProfileId;
+                participantHash[characterId].TopProfileImageId = loadout.Profile?.ProfileImageId;
+                participantHash[characterId].TopProfileName = loadout.Profile?.Name;
             }
         }
+    }
+
+    // Participant outfit details carry their id as the API's string id
+    private static long? GetOutfitId(CombatReportParticipantStats participant)
+    {
+        return participant.Outfit?.Id != null ? long.Parse(participant.Outfit.Id, CultureInfo.InvariantCulture) : null;
     }
 
     private Task<IEnumerable<Death>> GetCharacterDeaths(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
@@ -416,7 +428,7 @@ public class CombatReportService : ICombatReportService
         var facilityIds = facilityControls.Select(c => c.FacilityId).Distinct().ToArray();
         var mapRegions = await _mapService.FindRegionsAsync(facilityIds);
 
-        var controlOutfitIds = facilityControls.Select(a => a.OutfitId!).Distinct().ToList();
+        var controlOutfitIds = facilityControls.Where(a => a.OutfitId != null).Select(a => a.OutfitId!.Value).Distinct().ToList();
         var outfits = controlOutfitIds.Any() ? await _outfitService.FindOutfits(controlOutfitIds) : Enumerable.Empty<Outfit>();
 
         return facilityControls.Select(control =>

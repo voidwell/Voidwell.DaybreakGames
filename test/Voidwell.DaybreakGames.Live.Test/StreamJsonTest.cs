@@ -89,7 +89,7 @@ public class StreamJsonTest
 
         var payload = JsonSerializer.Deserialize<PlayerLogin>(json, StreamConstants.SerializerOptions);
 
-        Assert.Equal("5428", payload.CharacterId);
+        Assert.Equal(5428, payload.CharacterId);
         Assert.Equal("PlayerLogin", payload.EventName);
         Assert.Equal(17, payload.WorldId);
         Assert.Equal(2, payload.ZoneId);

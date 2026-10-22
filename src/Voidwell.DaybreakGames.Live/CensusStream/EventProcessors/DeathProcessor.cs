@@ -25,8 +25,8 @@ public class DeathProcessor : IEventProcessor<Death>
 
     public async Task Process(Death payload)
     {
-        var attackerOutfitIdTask = GetCharacterOutfitIdAsync(payload.AttackerCharacterId!);
-        var victimOutfitIdTask = GetCharacterOutfitIdAsync(payload.CharacterId!);
+        var attackerOutfitIdTask = GetCharacterOutfitIdAsync(payload.AttackerCharacterId);
+        var victimOutfitIdTask = GetCharacterOutfitIdAsync(payload.CharacterId);
 
         await Task.WhenAll(
             SetLastSeenAsync(payload),
@@ -45,16 +45,17 @@ public class DeathProcessor : IEventProcessor<Death>
     private Task SetLastSeenAsync(Death payload)
     {
         return Task.WhenAll(
-            _playerMonitor.SetLastSeenAsync(payload.AttackerCharacterId!, payload.ZoneId!.Value, payload.Timestamp),
-            _playerMonitor.SetLastSeenAsync(payload.CharacterId!, payload.ZoneId.Value, payload.Timestamp));
+            _playerMonitor.SetLastSeenAsync(payload.AttackerCharacterId, payload.ZoneId!.Value, payload.Timestamp),
+            _playerMonitor.SetLastSeenAsync(payload.CharacterId, payload.ZoneId.Value, payload.Timestamp));
     }
 
-    private static bool IsValidCharacterId(string characterId)
+    // Player character ids are 19 digits; shorter ids (such as 0) are not players
+    private static bool IsValidCharacterId(long characterId)
     {
-        return !string.IsNullOrWhiteSpace(characterId) && characterId.Length > 18;
+        return characterId >= 1_000_000_000_000_000_000;
     }
 
-    private async Task<string?> GetCharacterOutfitIdAsync(string characterId)
+    private async Task<long?> GetCharacterOutfitIdAsync(long characterId)
     {
         if (!IsValidCharacterId(characterId))
         {

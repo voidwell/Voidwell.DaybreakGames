@@ -1,9 +1,0 @@
-using Voidwell.DaybreakGames.Data.Models.Planetside;
-
-namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-
-public interface IExperienceRepository
-{
-    Task<Experience?> GetExperienceById(int experienceId);
-    Task UpsertRangeAsync(IEnumerable<Experience> entities);
-}

@@ -47,7 +47,7 @@ public class EventRepository : IEventRepository
         return await query.ToListAsync();
     }
 
-    public async Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime startDate, DateTime? endDate)
+    public async Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(long characterId, DateTime startDate, DateTime? endDate)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         if (endDate == null)
@@ -92,7 +92,7 @@ public class EventRepository : IEventRepository
         return await Task.FromResult(result);
     }
 
-    public async Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+    public async Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(long characterId, DateTime lower, DateTime upper)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from e in dbContext.PlayerFacilityCaptureEvents
@@ -117,7 +117,7 @@ public class EventRepository : IEventRepository
         return await Task.FromResult(result);
     }
 
-    public async Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+    public async Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(long characterId, DateTime lower, DateTime upper)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from e in dbContext.PlayerFacilityDefendEvents
@@ -142,7 +142,7 @@ public class EventRepository : IEventRepository
         return await Task.FromResult(result);
     }
 
-    public async Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+    public async Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(long characterId, DateTime lower, DateTime upper)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from e in dbContext.BattleRankUpEvents
@@ -161,7 +161,7 @@ public class EventRepository : IEventRepository
         return await Task.FromResult(result);
     }
 
-    public async Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(string characterId, DateTime lower, DateTime upper)
+    public async Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(long characterId, DateTime lower, DateTime upper)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from e in dbContext.EventVehicleDestroys
@@ -281,23 +281,6 @@ public class EventRepository : IEventRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<GainExperience>> GetExperienceByDateAsync(int experienceId, int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
-    {
-        using var dbContext = _dbContextFactory.CreateDbContext();
-        if (endDate == null)
-        {
-            endDate = DateTime.UtcNow;
-        }
-
-        var query = dbContext.GainExperienceEvents.Where(e => e.ExperienceId == experienceId && e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate);
-        if (zoneId.HasValue)
-        {
-            query = query.Where(e => e.ZoneId == zoneId);
-        }
-
-        return await query.ToListAsync();
-    }
-
     public async Task<IEnumerable<PlayerLogin>> GetPlayerLoginEventsAsync(int worldId, DateTime startDate, DateTime? endDate)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
@@ -322,7 +305,7 @@ public class EventRepository : IEventRepository
             .ToListAsync();
     }
 
-    public async Task<PlayerLogin?> GetLastPlayerLoginEventAsync(string characterId)
+    public async Task<PlayerLogin?> GetLastPlayerLoginEventAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.PlayerLoginEvents
@@ -330,7 +313,7 @@ public class EventRepository : IEventRepository
             .FirstOrDefaultAsync(a => a.CharacterId == characterId);
     }
 
-    public async Task<PlayerLogout?> GetLastPlayerLogoutEventAsync(string characterId)
+    public async Task<PlayerLogout?> GetLastPlayerLogoutEventAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.PlayerLogoutEvents

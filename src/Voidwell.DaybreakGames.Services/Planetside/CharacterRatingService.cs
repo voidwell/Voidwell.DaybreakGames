@@ -17,12 +17,12 @@ public class CharacterRatingService : ICharacterRatingService
     private const double _defaultDeviation = 100;
     private const double _defaultVolatility = 0.02;
 
-    private static Func<string, string> GetCacheKey => characterId => $"ps2.characterRating_{characterId}";
+    private static Func<long, string> GetCacheKey => characterId => $"ps2.characterRating_{characterId}";
     private const string _leaderboardCacheKey = "ps2.characterRatingLeaderboard";
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
     private readonly TimeSpan _leaderboardCacheExpiration = TimeSpan.FromMinutes(5);
 
-    private readonly AsyncKeyedLocker<string> _calculatingLock = new();
+    private readonly AsyncKeyedLocker<long> _calculatingLock = new();
 
     public CharacterRatingService(ICharacterRepository characterRepository, ICache cache)
     {
@@ -30,7 +30,7 @@ public class CharacterRatingService : ICharacterRatingService
         _cache = cache;
     }
 
-    public async Task CalculateRatingAsync(string winnerCharacterId, string loserCharacterId)
+    public async Task CalculateRatingAsync(long winnerCharacterId, long loserCharacterId)
     {
         var locks = await Task.WhenAll(_calculatingLock.LockAsync(winnerCharacterId).AsTask(), _calculatingLock.LockAsync(loserCharacterId).AsTask());
 
@@ -56,7 +56,7 @@ public class CharacterRatingService : ICharacterRatingService
         }
     }
 
-    public async Task<CharacterRating> GetRatingAsync(string characterId)
+    public async Task<CharacterRating> GetRatingAsync(long characterId)
     {
         var cacheKey = GetCacheKey(characterId);
 
@@ -66,7 +66,7 @@ public class CharacterRatingService : ICharacterRatingService
             _cacheExpiration);
     }
 
-    public async Task SaveCachedRatingAsync(string characterId)
+    public async Task SaveCachedRatingAsync(long characterId)
     {
         using (await _calculatingLock.LockAsync(characterId))
         {

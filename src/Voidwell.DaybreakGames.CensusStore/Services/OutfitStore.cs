@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
+using Voidwell.DaybreakGames.Census.Models.Extensions;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -20,8 +21,8 @@ public class OutfitStore : IOutfitStore
     private readonly ILogger<OutfitStore> _logger;
 
     private const string _cacheKey = "ps2.outfitstore";
-    private readonly Func<string, string> _getOutfitCacheKey = outfitId => $"{_cacheKey}_outfit_{outfitId}";
-    private readonly Func<string, string> _getMemberCacheKey = outfitId => $"{_cacheKey}_member_{outfitId}";
+    private readonly Func<long, string> _getOutfitCacheKey = outfitId => $"{_cacheKey}_outfit_{outfitId}";
+    private readonly Func<long, string> _getMemberCacheKey = outfitId => $"{_cacheKey}_member_{outfitId}";
     private readonly Func<string, string> _getAliasIdCacheKey = outfitAlias => $"{_cacheKey}_name_{outfitAlias}";
 
     private readonly TimeSpan _cacheOutfitExpiration = TimeSpan.FromMinutes(15);
@@ -29,8 +30,8 @@ public class OutfitStore : IOutfitStore
     private readonly TimeSpan _cacheOutfitMemberExpiration = TimeSpan.FromMinutes(10);
     private readonly TimeSpan _cacheOutfitMemberDetailsExpiration = TimeSpan.FromMinutes(30);
 
-    private readonly AsyncKeyedLocker<string> _outfitLock = new();
-    private readonly AsyncKeyedLocker<string> _outfitMembershipLock = new();
+    private readonly AsyncKeyedLocker<long> _outfitLock = new();
+    private readonly AsyncKeyedLocker<long> _outfitMembershipLock = new();
 
     public OutfitStore(IOutfitRepository outfitRepository, OutfitCollection outfitCollection,
         OutfitMembershipCollection outfitMembershipCollection, CharacterCollection characterCollection, ICache cache,
@@ -44,12 +45,12 @@ public class OutfitStore : IOutfitStore
         _logger = logger;
     }
 
-    public Task<IEnumerable<Outfit>> GetOutfitsByIdsAsync(IEnumerable<string> outfitIds)
+    public Task<IEnumerable<Outfit>> GetOutfitsByIdsAsync(IEnumerable<long> outfitIds)
     {
         return _outfitRepository.GetOutfitsByIdsAsync(outfitIds);
     }
 
-    public async Task<Outfit?> GetOutfitDetailsAsync(string outfitId)
+    public async Task<Outfit?> GetOutfitDetailsAsync(long outfitId)
     {
         var outfit = await _outfitRepository.GetOutfitDetailsAsync(outfitId);
 
@@ -63,12 +64,12 @@ public class OutfitStore : IOutfitStore
         return await _outfitRepository.GetOutfitDetailsAsync(outfitId);
     }
 
-    public async Task<string?> GetOutfitIdByAliasAsync(string outfitAlias)
+    public async Task<long?> GetOutfitIdByAliasAsync(string outfitAlias)
     {
-        return await _cache.GetOrSetIfNotNullAsync<string>(_getAliasIdCacheKey(outfitAlias), ct => _outfitRepository.GetOutfitIdByAlias(outfitAlias), _cacheOutfitNameExpiration);
+        return await _cache.GetOrSetIfNotNullAsync<long?>(_getAliasIdCacheKey(outfitAlias), ct => _outfitRepository.GetOutfitIdByAlias(outfitAlias), _cacheOutfitNameExpiration);
     }
 
-    public async Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(string outfitId)
+    public async Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(long outfitId)
     {
         return await _cache.GetOrSetAsync<IEnumerable<OutfitMember>>(_getMemberCacheKey(outfitId), ct => _outfitRepository.GetOutfitMembersAsync(outfitId), _cacheOutfitMemberDetailsExpiration);
     }
@@ -87,21 +88,21 @@ public class OutfitStore : IOutfitStore
     {
         OutfitMember outfitMember;
 
-        using (await _outfitMembershipLock.LockAsync(character.Id!))
+        using (await _outfitMembershipLock.LockAsync(character.Id))
         {
             var cacheKey = $"{_cacheKey}_member_{character.Id}";
 
             outfitMember = await _cache.GetAsync<OutfitMember>(cacheKey);
             if (outfitMember != null)
             {
-                return outfitMember.OutfitId != null ? outfitMember : null;
+                return outfitMember.OutfitId != 0 ? outfitMember : null;
             }
 
             CensusOutfitMemberModel membership;
 
             try
             {
-                membership = (await _outfitMembershipCollection.GetCharacterOutfitMembershipAsync(character.Id!))!;
+                membership = (await _outfitMembershipCollection.GetCharacterOutfitMembershipAsync(character.Id))!;
             }
             catch (CensusConnectionException)
             {
@@ -110,12 +111,14 @@ public class OutfitStore : IOutfitStore
 
             if (membership == null)
             {
-                await _outfitRepository.RemoveOutfitMemberAsync(character.Id!);
+                await _outfitRepository.RemoveOutfitMemberAsync(character.Id);
                 await _cache.SetAsync(cacheKey, new OutfitMember(), _cacheOutfitMemberExpiration);
                 return null;
             }
 
-            var outfit = await GetLatestOutfitAsync(membership.OutfitId!, character);
+            var outfitId = membership.OutfitId.ToCensusId();
+
+            var outfit = await GetLatestOutfitAsync(outfitId, character);
             if (outfit == null)
             {
                 _logger.LogError(84624, "Unable to resolve outfit {OutfitId} for character {CharacterId}", membership.OutfitId, character.Id);
@@ -125,8 +128,8 @@ public class OutfitStore : IOutfitStore
 
             outfitMember = new OutfitMember
             {
-                OutfitId = membership.OutfitId,
-                CharacterId = membership.CharacterId,
+                OutfitId = outfitId,
+                CharacterId = membership.CharacterId.ToCensusId(),
                 MemberSinceDate = membership.MemberSinceDate,
                 Rank = membership.Rank,
                 RankOrdinal = membership.RankOrdinal
@@ -139,7 +142,7 @@ public class OutfitStore : IOutfitStore
         return outfitMember;
     }
 
-    public async Task<Outfit?> GetOutfitAsync(string outfitId, Character? member = null)
+    public async Task<Outfit?> GetOutfitAsync(long outfitId, Character? member = null)
     {
         Outfit outfit;
 
@@ -163,7 +166,7 @@ public class OutfitStore : IOutfitStore
         return outfit;
     }
 
-    private async Task<Outfit?> GetKnownOutfitAsync(string outfitId)
+    private async Task<Outfit?> GetKnownOutfitAsync(long outfitId)
     {
 
         var outfit = await _cache.GetAsync<Outfit>(_getOutfitCacheKey(outfitId));
@@ -188,7 +191,7 @@ public class OutfitStore : IOutfitStore
         return outfit;
     }
 
-    private async Task<Outfit?> GetCensusOutfitAsync(string outfitId)
+    private async Task<Outfit?> GetCensusOutfitAsync(long outfitId)
     {
         var censusOutfit = await _outfitCollection.GetOutfitAsync(outfitId);
         if (censusOutfit == null)
@@ -198,16 +201,16 @@ public class OutfitStore : IOutfitStore
 
         return new Outfit
         {
-            Id = censusOutfit.OutfitId,
+            Id = censusOutfit.OutfitId.ToCensusId(),
             Alias = censusOutfit.Alias,
             Name = censusOutfit.Name,
-            LeaderCharacterId = censusOutfit.LeaderCharacterId,
+            LeaderCharacterId = censusOutfit.LeaderCharacterId.ToOptionalCensusId(),
             CreatedDate = censusOutfit.TimeCreated,
             MemberCount = censusOutfit.MemberCount
         };
     }
 
-    private async Task<Outfit?> GetLatestOutfitAsync(string outfitId, Character character)
+    private async Task<Outfit?> GetLatestOutfitAsync(long outfitId, Character character)
     {
         Outfit outfit;
 
@@ -241,9 +244,9 @@ public class OutfitStore : IOutfitStore
             outfit.WorldId = member.WorldId;
             outfit.FactionId = member.FactionId;
         }
-        else
+        else if (outfit.LeaderCharacterId != null)
         {
-            var leader = await _characterCollection.GetCharacterAsync(member!.Id!);
+            var leader = await _characterCollection.GetCharacterAsync(outfit.LeaderCharacterId.Value);
             outfit.WorldId = leader!.WorldId;
             outfit.FactionId = leader.FactionId;
         }
