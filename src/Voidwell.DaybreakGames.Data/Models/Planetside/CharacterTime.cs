@@ -1,12 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 
 public class CharacterTime
 {
     [Required]
-    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
     public long CharacterId { get; set; }
     public DateTime CreatedDate { get; set; }
     public DateTime LastSaveDate { get; set; }

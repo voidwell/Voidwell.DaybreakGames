@@ -1,10 +1,7 @@
-using System.Text.Json.Serialization;
-
 namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class CharacterWeaponDetails
 {
-    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
     public long? CharacterId { get; set; }
     public string? CharacterName { get; set; }
     public int ItemId { get; set; }
