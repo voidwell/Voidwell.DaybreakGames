@@ -26,7 +26,7 @@ public class PlayerSessionRepository : IPlayerSessionRepository
         return await dbContext.PlayerSessions.FirstOrDefaultAsync(a => a.Id == sessionId, cancellationToken);
     }
 
-    public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(string characterId, int limit, CancellationToken cancellationToken, int page = 0)
+    public async Task<IEnumerable<PlayerSession>> GetPlayerSessionsByCharacterIdAsync(long characterId, int limit, CancellationToken cancellationToken, int page = 0)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.PlayerSessions.Where(a => a.CharacterId == characterId && a.Duration > 300000)

@@ -1,3 +1,4 @@
+using System.Globalization;
 using AsyncKeyedLock;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
@@ -90,14 +91,15 @@ public class WorldService : IWorldService
 
                 var topPlayers = combatStats.Participants!.OrderByDescending(a => a.Kills).Take(25).ToList();
 
-                var sessionsDic = playerSessions.GroupBy(a => a.CharacterId!)
+                var sessionsDic = playerSessions.GroupBy(a => a.CharacterId)
                     .ToDictionary(a => a.Key, a => a.FirstOrDefault());
 
                 var sessionKillsTasks = topPlayers.Select(a =>
                 {
-                    if (sessionsDic.TryGetValue(a.Character!.Id!, out var session) && session!.LoginDate.HasValue)
+                    var characterId = GetCharacterId(a);
+                    if (sessionsDic.TryGetValue(characterId, out var session) && session!.LoginDate.HasValue)
                     {
-                        return GetKillCountByCharacterIdAsync(a.Character.Id!, session.LoginDate.Value,
+                        return GetKillCountByCharacterIdAsync(characterId, session.LoginDate.Value,
                             session.LogoutDate);
                     }
 
@@ -112,7 +114,7 @@ public class WorldService : IWorldService
 
                     player.SessionKills = sessionKillsResults[i];
 
-                    if (sessionsDic.TryGetValue(player.Character!.Id!, out var session))
+                    if (sessionsDic.TryGetValue(GetCharacterId(player), out var session))
                     {
                         player.LoginDate = session!.LoginDate;
                         player.LogoutDate = session.LogoutDate;
@@ -216,8 +218,8 @@ public class WorldService : IWorldService
             .Where(a => a.LogoutDate == null || a.LogoutDate >= startDate)
             .ToList();
 
-        var distinctCharacterIds = periodSessions.Select(a => a.CharacterId!).Distinct();
-        var characterFactions = (await _characterService.FindCharacters(distinctCharacterIds))?.ToDictionary(a => a.Id!, a => a.FactionId);
+        var distinctCharacterIds = periodSessions.Select(a => a.CharacterId).Distinct();
+        var characterFactions = (await _characterService.FindCharacters(distinctCharacterIds))?.ToDictionary(a => a.Id, a => a.FactionId);
 
         if (characterFactions != null)
         {
@@ -249,7 +251,13 @@ public class WorldService : IWorldService
         return populationPeriods.OrderByDescending(a => a.Timestamp).ToList();
     }
 
-    private async Task<int> GetKillCountByCharacterIdAsync(string characterId, DateTime startDate, DateTime? endDate)
+    // Combat report participants carry their character id as the API's string id
+    private static long GetCharacterId(CombatReportParticipantStats participant)
+    {
+        return long.Parse(participant.Character!.Id!, CultureInfo.InvariantCulture);
+    }
+
+    private async Task<int> GetKillCountByCharacterIdAsync(long characterId, DateTime startDate, DateTime? endDate)
     {
         var characterDeathEvents = await _worldEventsService.GetDeathEventsForCharacterIdByDateAsync(characterId, startDate, endDate);
 

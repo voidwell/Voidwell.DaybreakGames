@@ -14,7 +14,7 @@ public class OutfitRepository : IOutfitRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<string?> GetOutfitIdByAlias(string outfitAlias)
+    public async Task<long?> GetOutfitIdByAlias(string outfitAlias)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var outfit = await dbContext.Outfits
@@ -25,13 +25,13 @@ public class OutfitRepository : IOutfitRepository
         return outfit?.Id;
     }
 
-    public async Task<Outfit?> GetOutfitAsync(string outfitId)
+    public async Task<Outfit?> GetOutfitAsync(long outfitId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.Outfits.FirstOrDefaultAsync(a => a.Id == outfitId);
     }
 
-    public async Task<Outfit?> GetOutfitDetailsAsync(string outfitId)
+    public async Task<Outfit?> GetOutfitDetailsAsync(long outfitId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from outfit in dbContext.Outfits
@@ -60,7 +60,7 @@ public class OutfitRepository : IOutfitRepository
         }).FirstOrDefault();
     }
 
-    public async Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(string outfitId)
+    public async Task<IEnumerable<OutfitMember>> GetOutfitMembersAsync(long outfitId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.OutfitMembers.Where(a => a.OutfitId == outfitId)
@@ -71,7 +71,7 @@ public class OutfitRepository : IOutfitRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Outfit>> GetOutfitsByIdsAsync(IEnumerable<string> outfitIds)
+    public async Task<IEnumerable<Outfit>> GetOutfitsByIdsAsync(IEnumerable<long> outfitIds)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.Outfits.Where(a => outfitIds.Contains(a.Id))
@@ -96,7 +96,7 @@ public class OutfitRepository : IOutfitRepository
             .ToListAsync();
     }
 
-    public async Task RemoveOutfitMemberAsync(string characterId)
+    public async Task RemoveOutfitMemberAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var dbMembership = await dbContext.OutfitMembers.FindAsync(characterId);

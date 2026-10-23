@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Voidwell.DaybreakGames.Data.Repositories.Models;
 
 public class CharacterLastSession
 {
-    public string? CharacterId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long CharacterId { get; set; }
     public string? Name { get; set; }
     public int? SessionId { get; set; }
     public DateTime? LoginDate { get; set; }

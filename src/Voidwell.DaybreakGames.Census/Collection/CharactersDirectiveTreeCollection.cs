@@ -1,3 +1,4 @@
+using System.Globalization;
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
@@ -15,10 +16,10 @@ public class CharactersDirectiveTreeCollection : ICensusCollection<CensusCharact
         _client = censusClient;
     }
 
-    public async Task<IEnumerable<CensusCharacterDirectiveTreeModel>> GetCharacterDirectiveTreesAsync(string characterId)
+    public async Task<IEnumerable<CensusCharacterDirectiveTreeModel>> GetCharacterDirectiveTreesAsync(long characterId)
     {
         return await _client.CreateQuery(CollectionName)
-            .Where("character_id", a => a.Equals(characterId))
+            .Where("character_id", a => a.Equals(characterId.ToString(CultureInfo.InvariantCulture)))
             .GetBatchAsync<CensusCharacterDirectiveTreeModel>();
     }
 }

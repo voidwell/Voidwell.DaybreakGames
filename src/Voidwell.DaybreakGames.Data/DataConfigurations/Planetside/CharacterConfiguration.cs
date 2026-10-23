@@ -12,6 +12,8 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
 
         builder.HasKey(a => a.Id);
 
+        builder.Property(a => a.Id).ValueGeneratedNever();
+
         builder.HasIndex(a => a.Name);
 
         builder.Property(a => a.PrestigeLevel).HasDefaultValue(0);

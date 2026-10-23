@@ -15,7 +15,7 @@ public class PlayerSessionTests
             Session = new PlayerSessionInfo
             {
                 Id = "4321",
-                CharacterId = "1234",
+                CharacterId = 1234,
                 Duration = 10,
                 LoginDate = new DateTime(2023, 1, 30, 2, 3, 4),
                 LogoutDate = new DateTime(2023, 1, 30, 4, 3, 4)
@@ -52,7 +52,7 @@ public class PlayerSessionTests
             Session = new PlayerSessionInfo
             {
                 Id = "4321",
-                CharacterId = "1234",
+                CharacterId = 1234,
                 Duration = 10,
                 LoginDate = new DateTime(2023, 1, 30, 2, 3, 4),
                 LogoutDate = new DateTime(2023, 1, 30, 4, 3, 4)

@@ -5,8 +5,8 @@ namespace Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 public interface ICharacterRatingService
 {
-    Task<CharacterRating> GetRatingAsync(string characterId);
-    Task SaveCachedRatingAsync(string characterId);
-    Task CalculateRatingAsync(string winnerCharacterId, string loserCharacterId);
+    Task<CharacterRating> GetRatingAsync(long characterId);
+    Task SaveCachedRatingAsync(long characterId);
+    Task CalculateRatingAsync(long winnerCharacterId, long loserCharacterId);
     Task<IEnumerable<RatingCharacterModel>> GetRatingsLeaderboardAsync(int limit);
 }

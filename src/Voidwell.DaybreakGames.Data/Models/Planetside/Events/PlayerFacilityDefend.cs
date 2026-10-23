@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 public class PlayerFacilityDefend
 {
     [Required]
-    public string? CharacterId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long CharacterId { get; set; }
     [Required]
     public int FacilityId { get; set; }
     [Required]
@@ -13,7 +15,8 @@ public class PlayerFacilityDefend
 
     public int WorldId { get; set; }
     public int ZoneId { get; set; }
-    public string? OutfitId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long? OutfitId { get; set; }
 
     public MapRegion? Facility { get; set; }
 }

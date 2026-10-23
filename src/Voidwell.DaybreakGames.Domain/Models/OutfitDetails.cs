@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class OutfitDetails
 {
-    public string? OutfitId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long? OutfitId { get; set; }
     public string? Name { get; set; }
     public string? Alias { get; set; }
     public int? FactionId { get; set; }
@@ -11,7 +14,8 @@ public class OutfitDetails
     public int? WorldId { get; set; }
     public string? WorldName { get; set; }
     public DateTime CreatedDate { get; set; }
-    public string? LeaderCharacterId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long? LeaderCharacterId { get; set; }
     public string? LeaderName { get; set; }
     public int MemberCount { get; set; }
     public int TrackedMemberCount { get; set; }

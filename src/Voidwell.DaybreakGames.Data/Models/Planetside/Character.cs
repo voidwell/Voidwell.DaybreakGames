@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 
 public class Character
 {
     [Required]
-    public string? Id { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long Id { get; set; }
     [Required]
     public string? Name { get; set; }
 

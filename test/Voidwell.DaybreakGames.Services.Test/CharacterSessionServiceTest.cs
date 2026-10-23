@@ -11,7 +11,7 @@ namespace Voidwell.DaybreakGames.Services.Test;
 
 public class CharacterSessionServiceTest
 {
-    private const string _characterId = "12345";
+    private const long _characterId = 12345;
     private const int _myFaction = 1;
     private const int _enemyFaction = 2;
 
@@ -55,9 +55,9 @@ public class CharacterSessionServiceTest
     public async Task GetLatestCharacterSessions_CountsKillsAndDeaths()
     {
         SetupSession(10,
-            Kill(victimId: "e1"),
-            Kill(victimId: "e2"),
-            Death(attackerId: "e1"));
+            Kill(victimId: 1),
+            Kill(victimId: 2),
+            Death(attackerId: 1));
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
@@ -93,7 +93,7 @@ public class CharacterSessionServiceTest
     [Fact]
     public async Task GetLatestCharacterSessions_EnvironmentalDeath_CountsAsDeath()
     {
-        SetupSession(10, Death(attackerId: "0", attackerFaction: null));
+        SetupSession(10, Death(attackerId: 0, attackerFaction: null));
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
@@ -105,8 +105,8 @@ public class CharacterSessionServiceTest
     public async Task GetLatestCharacterSessions_Teamkill_DoesNotCountAsKill()
     {
         SetupSession(10,
-            Kill(victimId: "friend", victimFaction: _myFaction),
-            Kill(victimId: "enemy"));
+            Kill(victimId: 4, victimFaction: _myFaction),
+            Kill(victimId: 3));
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
@@ -117,7 +117,7 @@ public class CharacterSessionServiceTest
     [Fact]
     public async Task GetLatestCharacterSessions_KilledByTeammate_CountsAsDeath()
     {
-        SetupSession(10, Death(attackerId: "friend", attackerFaction: _myFaction));
+        SetupSession(10, Death(attackerId: 4, attackerFaction: _myFaction));
 
         var summary = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).Single();
 
@@ -129,8 +129,8 @@ public class CharacterSessionServiceTest
     public async Task GetLatestCharacterSessions_CountsEachSessionSeparately()
     {
         SetupSessionList(10, 11);
-        SetupSessionDetails(10, Kill(victimId: "e1"), Kill(victimId: "e2"));
-        SetupSessionDetails(11, Death(attackerId: "e1"));
+        SetupSessionDetails(10, Kill(victimId: 1), Kill(victimId: 2));
+        SetupSessionDetails(11, Death(attackerId: 1));
 
         var summaries = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).ToList();
 
@@ -145,7 +145,7 @@ public class CharacterSessionServiceTest
     public async Task GetLatestCharacterSessions_SessionNotFound_IsSkipped()
     {
         SetupSessionList(10, 11);
-        SetupSessionDetails(10, Kill(victimId: "e1"));
+        SetupSessionDetails(10, Kill(victimId: 1));
         _repository.Setup(a => a.GetPlayerSessionAsync(11, It.IsAny<CancellationToken>())).ReturnsAsync((PlayerSession)null);
 
         var summaries = (await _sut.GetLatestCharacterSessionsAsync(_characterId, limit: 5, TestContext.Current.CancellationToken)).ToList();
@@ -212,7 +212,7 @@ public class CharacterSessionServiceTest
     private static DateTime LogoutFor(int sessionId) => LoginFor(sessionId).AddHours(1);
 
     /// <summary>The character kills <paramref name="victimId"/>; defaults to an enemy-faction victim.</summary>
-    private static Death Kill(string victimId, int victimFaction = _enemyFaction)
+    private static Death Kill(long victimId, int victimFaction = _enemyFaction)
     {
         return new Death
         {
@@ -226,7 +226,7 @@ public class CharacterSessionServiceTest
     }
 
     /// <summary>The character is killed by <paramref name="attackerId"/>; defaults to an enemy-faction attacker.</summary>
-    private static Death Death(string attackerId, int? attackerFaction = _enemyFaction)
+    private static Death Death(long attackerId, int? attackerFaction = _enemyFaction)
     {
         return new Death
         {

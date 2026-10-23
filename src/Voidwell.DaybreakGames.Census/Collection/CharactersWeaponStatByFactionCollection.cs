@@ -1,3 +1,4 @@
+using System.Globalization;
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
@@ -15,12 +16,12 @@ public class CharactersWeaponStatByFactionCollection : ICensusCollection<CensusC
         _client = censusClient;
     }
 
-    public async Task<IEnumerable<CensusCharacterWeaponFactionStatModel>> GetCharacterWeaponStatsByFactionAsync(string characterId, DateTime? lastLogin = null)
+    public async Task<IEnumerable<CensusCharacterWeaponFactionStatModel>> GetCharacterWeaponStatsByFactionAsync(long characterId, DateTime? lastLogin = null)
     {
         var query = _client.CreateQuery(CollectionName)
             .SetLimit(5000)
             .ShowFields("character_id", "stat_name", "item_id", "vehicle_id", "value_vs", "value_nc", "value_tr")
-            .Where("character_id", a => a.Equals(characterId));
+            .Where("character_id", a => a.Equals(characterId.ToString(CultureInfo.InvariantCulture)));
 
         if (lastLogin != null)
         {
