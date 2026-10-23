@@ -49,10 +49,10 @@ public class PlayerSessionDeathEvent : PlayerSessionEvent
     public PlayerSessionWeapon? Weapon { get; set; }
     public int? AttackerFireModeId { get; set; }
     public int? AttackerLoadoutId { get; set; }
-    public string? AttackerOutfitId { get; set; }
+    public long? AttackerOutfitId { get; set; }
     public int? AttackerVehicleId { get; set; }
     public int? CharacterLoadoutId { get; set; }
-    public string? CharacterOutfitId { get; set; }
+    public long? CharacterOutfitId { get; set; }
     public bool IsHeadshot { get; set; }
 }
 
@@ -93,7 +93,7 @@ public class PlayerSessionVehicleDestroyEvent : PlayerSessionEvent
 
 public class PlayerSessionInfo
 {
-    public string? CharacterId { get; set; }
+    public long? CharacterId { get; set; }
     public int Duration { get; set; }
     public string Id { get; set; } = null!;
     public DateTime LoginDate { get; set; }

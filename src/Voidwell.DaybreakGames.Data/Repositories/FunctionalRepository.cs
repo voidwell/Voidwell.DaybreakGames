@@ -29,7 +29,8 @@ public class FunctionalRepository : IFunctionalRepository
                 {
                     var row = new CharacterLastSession
                     {
-                        CharacterId = reader.GetString(0),
+                        // Read through Convert so this works whether psb_last_online() returns the id as text or bigint
+                        CharacterId = Convert.ToInt64(reader.GetValue(0)),
                         Name = reader.GetString(1),
                         SessionId = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2),
                         LoginDate = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),

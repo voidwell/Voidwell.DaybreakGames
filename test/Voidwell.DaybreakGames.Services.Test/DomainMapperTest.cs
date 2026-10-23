@@ -11,7 +11,7 @@ public class DomainMapperTest
     {
         var character = new Character
         {
-            Id = "c1",
+            Id = 1,
             Name = "Bob",
             Faction = new Faction { Name = "Vanu Sovereignty", ImageId = 12 },
             Title = new Title { Name = "Ace" },
@@ -32,7 +32,7 @@ public class DomainMapperTest
     {
         var character = new Character
         {
-            Id = "c1",
+            Id = 1,
             WeaponStats = new List<CharacterWeaponStat>
             {
                 new() { VehicleId = 5, ItemId = 100, Kills = 3, Deaths = 1 },
@@ -143,13 +143,13 @@ public class DomainMapperTest
         var created = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         var member = new OutfitMember
         {
-            OutfitId = "o1",
+            OutfitId = 101,
             Outfit = new Outfit { Name = "The Outfit", Alias = "TO", CreatedDate = created, MemberCount = 123 }
         };
 
         var result = DomainMapper.MapOutfit(member);
 
-        Assert.Equal("o1", result.Id);
+        Assert.Equal(101, result.Id);
         Assert.Equal("The Outfit", result.Name);
         Assert.Equal("TO", result.Alias);
         Assert.Equal(created, result.CreatedDate);

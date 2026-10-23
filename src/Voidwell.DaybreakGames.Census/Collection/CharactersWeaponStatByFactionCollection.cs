@@ -15,7 +15,7 @@ public class CharactersWeaponStatByFactionCollection : ICensusCollection<CensusC
         _client = censusClient;
     }
 
-    public async Task<IEnumerable<CensusCharacterWeaponFactionStatModel>> GetCharacterWeaponStatsByFactionAsync(string characterId, DateTime? lastLogin = null)
+    public async Task<IEnumerable<CensusCharacterWeaponFactionStatModel>> GetCharacterWeaponStatsByFactionAsync(long characterId, DateTime? lastLogin = null)
     {
         var query = _client.CreateQuery(CollectionName)
             .SetLimit(5000)

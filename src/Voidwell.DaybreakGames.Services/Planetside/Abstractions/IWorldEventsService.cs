@@ -12,13 +12,13 @@ public interface IWorldEventsService
     Task<IEnumerable<DailyWeaponStats>> GetDailyWeaponAggregatesByWeaponIdAsync(int weaponId, DateTime start, DateTime end);
     Task<IEnumerable<ContinentLock>> GetAllLatestZoneLocks();
     Task<IEnumerable<ContinentUnlock>> GetAllLatestZoneUnlocks();
-    Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime? end);
-    Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end);
-    Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end);
-    Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end);
+    Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime? end);
+    Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end);
+    Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end);
+    Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end);
     Task<IEnumerable<PlayerLogin>> GetPlayerLoginEventsAsync(int worldId, DateTime startDate, DateTime? endDate);
     Task<IEnumerable<PlayerLogout>> GetPlayerLogoutEventsAsync(int worldId, DateTime startDate, DateTime? endDate);
-    Task<PlayerLogin> GetLastPlayerLoginEventAsync(string characterId);
-    Task<PlayerLogout> GetLastPlayerLogoutEventAsync(string characterId);
-    Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end);
+    Task<PlayerLogin> GetLastPlayerLoginEventAsync(long characterId);
+    Task<PlayerLogout> GetLastPlayerLogoutEventAsync(long characterId);
+    Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end);
 }

@@ -15,7 +15,7 @@ public class CharactersAchievementCollection : ICensusCollection<CensusCharacter
         _client = censusClient;
     }
 
-    public async Task<IEnumerable<CensusCharacterAchievementModel>> GetCharacterAchievementsAsync(string characterId, DateTime? lastLogin = null)
+    public async Task<IEnumerable<CensusCharacterAchievementModel>> GetCharacterAchievementsAsync(long characterId, DateTime? lastLogin = null)
     {
         var query = _client.CreateQuery(CollectionName)
             .SetLimit(5000)

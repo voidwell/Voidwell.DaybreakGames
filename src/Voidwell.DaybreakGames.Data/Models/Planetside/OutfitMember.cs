@@ -5,9 +5,9 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 public class OutfitMember
 {
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
     [Required]
-    public string? OutfitId { get; set; }
+    public long OutfitId { get; set; }
 
     public DateTime? MemberSinceDate { get; set; }
     public string? Rank { get; set; }

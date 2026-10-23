@@ -25,8 +25,8 @@ public class CharacterStore : ICharacterStore
     private readonly ICensusToEntityMapper _mapper;
 
     private const string _cacheKey = "ps2.characterstore";
-    private readonly Func<string, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
-    private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
+    private readonly Func<long, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
+    private readonly Func<long, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
     private readonly Func<string, string> _getCharacterIdCacheKey = characterName => $"{_cacheKey}_name_{characterName.ToLower()}";
     private readonly Func<int, string> _getLeaderboardDataCacheKey = weaponId => $"{_cacheKey}_leaderboard_{weaponId}";
 
@@ -84,12 +84,12 @@ public class CharacterStore : ICharacterStore
         }
     }
 
-    public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)
+    public Task<IEnumerable<Character>> FindCharacters(IEnumerable<long> characterIds)
     {
         return _characterRepository.GetCharactersByIdsAsync(characterIds);
     }
 
-    public async Task<Character?> GetCharacter(string characterId)
+    public async Task<Character?> GetCharacter(long characterId)
     {
         try
         {
@@ -104,7 +104,7 @@ public class CharacterStore : ICharacterStore
         }
     }
 
-    public async Task UpdateAllCharacterInfo(string characterId, DateTime? lastLoginDate = null)
+    public async Task UpdateAllCharacterInfo(long characterId, DateTime? lastLoginDate = null)
     {
         var character = await UpdateCharacterAsync(characterId);
         if (character == null)
@@ -124,7 +124,7 @@ public class CharacterStore : ICharacterStore
         await Task.WhenAll(_cache.RemoveAsync(characterCacheKey), _cache.RemoveAsync(detailsCacheKey));
     }
 
-    public async Task<Character?> GetCharacterDetailsAsync(string characterId)
+    public async Task<Character?> GetCharacterDetailsAsync(long characterId)
     {
         var character = await _characterRepository.GetCharacterWithDetailsAsync(characterId);
 
@@ -147,7 +147,7 @@ public class CharacterStore : ICharacterStore
         return await _characterRepository.GetCharacterWithDetailsAsync(characterId);
     }
 
-    public async Task<IEnumerable<Character>> GetCharacterDetailsAsync(IEnumerable<string> characterIds)
+    public async Task<IEnumerable<Character>> GetCharacterDetailsAsync(IEnumerable<long> characterIds)
     {
         var characters = await _characterRepository.GetCharacterWithDetailsAsync(characterIds.ToArray());
 
@@ -202,7 +202,7 @@ public class CharacterStore : ICharacterStore
         return data?.Skip(page * limit).Take(limit);
     }
 
-    public async Task<string?> GetCharacterIdByName(string characterName)
+    public async Task<long?> GetCharacterIdByName(string characterName)
     {
         return await _cache.GetOrSetIfNotNullAsync(
             _getCharacterIdCacheKey(characterName),
@@ -210,7 +210,7 @@ public class CharacterStore : ICharacterStore
             _cacheCharacterIdExpiration);
     }
 
-    public async Task<OutfitMember?> GetCharactersOutfitAsync(string characterId)
+    public async Task<OutfitMember?> GetCharactersOutfitAsync(long characterId)
     {
         var character = await GetCharacter(characterId);
         if (character == null)
@@ -221,17 +221,17 @@ public class CharacterStore : ICharacterStore
         return await _outfitStore.UpdateCharacterOutfitMembershipAsync(character);
     }
 
-    public Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
+    public Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(long characterId)
     {
         return _characterRepository.GetCharacterAchievementsAsync(characterId);
     }
 
-    public Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(string characterId)
+    public Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(long characterId)
     {
         return _characterRepository.GetWeaponStatsAsync(characterId);
     }
 
-    private async Task<Character?> UpdateCharacterAsync(string characterId)
+    private async Task<Character?> UpdateCharacterAsync(long characterId)
     {
         var character = await _characterCollection.GetCharacterAsync(characterId);
 
@@ -260,7 +260,7 @@ public class CharacterStore : ICharacterStore
         return model;
     }
 
-    private async Task UpdateCharacterTimesAsync(string characterId)
+    private async Task UpdateCharacterTimesAsync(long characterId)
     {
         var times = await _characterCollection.GetCharacterTimesAsync(characterId);
 
@@ -281,7 +281,7 @@ public class CharacterStore : ICharacterStore
         await _characterRepository.UpsertAsync(dataModel);
     }
 
-    private async Task UpdateCharacterStatsAsync(string characterId, DateTime? LastLoginDate)
+    private async Task UpdateCharacterStatsAsync(long characterId, DateTime? LastLoginDate)
     {
         var statsTask = _charactersStatCollection.GetCharacterStatsAsync(characterId, LastLoginDate);
         var statsByFactionTask = _charactersStatByFactionCollection.GetCharacterFactionStatsAsync(characterId, LastLoginDate);
@@ -379,7 +379,7 @@ public class CharacterStore : ICharacterStore
         await _characterRepository.UpsertRangeAsync(statByFactionModels);
     }
 
-    private async Task UpdateCharacterWeaponStatsAsync(string characterId, DateTime? LastLoginDate)
+    private async Task UpdateCharacterWeaponStatsAsync(long characterId, DateTime? LastLoginDate)
     {
         var characterWepStatsTask = _charactersWeaponStatCollection.GetCharacterWeaponStatsAsync(characterId, LastLoginDate);
         var characterWepStatsByFactionTask = _charactersWeaponStatByFactionCollection.GetCharacterWeaponStatsByFactionAsync(characterId, LastLoginDate);
@@ -451,7 +451,7 @@ public class CharacterStore : ICharacterStore
         await _characterRepository.UpsertRangeAsync(statByFactionModels);
     }
 
-    private async Task UpdateCharacterStatsHistoryAsync(string characterId, DateTime? lastLoginDate)
+    private async Task UpdateCharacterStatsHistoryAsync(long characterId, DateTime? lastLoginDate)
     {
         var statsHistory = await _charactersStatHistoryCollection.GetCharacterStatsHistoryAsync(characterId, lastLoginDate);
         if (statsHistory == null)
@@ -490,7 +490,7 @@ public class CharacterStore : ICharacterStore
         await _characterRepository.UpsertRangeAsync(dataModels);
     }
 
-    public async Task UpdateCharacterAchievementsAsync(string characterId, DateTime? lastLoginDate = null)
+    public async Task UpdateCharacterAchievementsAsync(long characterId, DateTime? lastLoginDate = null)
     {
         var achievements = await _charactersAchievementCollection.GetCharacterAchievementsAsync(characterId, lastLoginDate);
         if (achievements == null)

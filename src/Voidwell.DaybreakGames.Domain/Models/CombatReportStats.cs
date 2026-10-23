@@ -13,13 +13,14 @@ public class CombatReportParticipantStats
 {
     public CombatReportParticipantStats() { }
 
-    public CombatReportParticipantStats(string characterId, string? outfitId = null)
+    public CombatReportParticipantStats(long characterId, long? outfitId = null)
     {
-        Character = new CombatReportCharacterDetail(characterId) { Name = characterId };
+        Character = new CombatReportCharacterDetail(characterId);
+        Character.Name = Character.Id;
 
-        if (!string.IsNullOrEmpty(outfitId))
+        if (outfitId != null)
         {
-            Outfit = new CombatReportOutfitDetail(outfitId);
+            Outfit = new CombatReportOutfitDetail(outfitId.Value);
         }
     }
 
@@ -45,7 +46,7 @@ public class CombatReportOutfitStats
 {
     public CombatReportOutfitStats() { }
 
-    public CombatReportOutfitStats(string outfitId)
+    public CombatReportOutfitStats(long outfitId)
     {
         Outfit = new CombatReportOutfitDetail(outfitId);
     }
@@ -113,7 +114,7 @@ public class CombatReportCharacterDetail : CombatReportItemDetail
 {
     public CombatReportCharacterDetail() { }
 
-    public CombatReportCharacterDetail(string characterId) : base(characterId)
+    public CombatReportCharacterDetail(long characterId) : base(characterId)
     { }
 
     public int? BattleRank { get; set; }
@@ -125,7 +126,7 @@ public class CombatReportOutfitDetail : CombatReportItemDetail
 {
     public CombatReportOutfitDetail() { }
 
-    public CombatReportOutfitDetail(string outfitId) : base(outfitId)
+    public CombatReportOutfitDetail(long outfitId) : base(outfitId)
     { }
 
     public string? Alias { get; set; }

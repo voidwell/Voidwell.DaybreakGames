@@ -15,7 +15,7 @@ public class CharactersStatHistoryCollection : ICensusCollection<CensusCharacter
         _client = censusClient;
     }
 
-    public async Task<IEnumerable<CensusCharacterStatsHistoryModel>> GetCharacterStatsHistoryAsync(string characterId, DateTime? lastLogin = null)
+    public async Task<IEnumerable<CensusCharacterStatsHistoryModel>> GetCharacterStatsHistoryAsync(long characterId, DateTime? lastLogin = null)
     {
         var query = _client.CreateQuery(CollectionName)
             .SetLimit(5000)

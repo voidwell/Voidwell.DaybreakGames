@@ -12,6 +12,8 @@ public class OutfitConfiguration : IEntityTypeConfiguration<Outfit>
 
         builder.HasKey(a => a.Id);
 
+        builder.Property(a => a.Id).ValueGeneratedNever();
+
         builder.Ignore(a => a.LeaderCharacter)
                .Ignore(a => a.Faction)
                .Ignore(a => a.World);

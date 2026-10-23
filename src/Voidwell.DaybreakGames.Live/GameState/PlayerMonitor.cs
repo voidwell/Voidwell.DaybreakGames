@@ -1,3 +1,4 @@
+using System.Globalization;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -15,7 +16,7 @@ public class PlayerMonitor : IPlayerMonitor
     private readonly ICache _cache;
 
     private static readonly Func<int, string> _getListCacheKey = worldId => $"ps2.online-players_world_{worldId}";
-    private static readonly Func<string, string> _getPlayerCacheKey = characterId => $"ps2.online-players_character_{characterId}";
+    private static readonly Func<long, string> _getPlayerCacheKey = characterId => $"ps2.online-players_character_{characterId}";
     private static readonly TimeSpan _cacheIdleDuration = TimeSpan.FromHours(3);
     private static readonly TimeSpan _maximumIdleDuration = TimeSpan.FromMinutes(10);
 
@@ -30,7 +31,7 @@ public class PlayerMonitor : IPlayerMonitor
         _cache = cache;
     }
 
-    public async Task<OnlineCharacter?> SetOnlineAsync(string characterId, DateTime timestamp)
+    public async Task<OnlineCharacter?> SetOnlineAsync(long characterId, DateTime timestamp)
     {
         var character = await _characterService.GetCharacter(characterId);
         if (character == null)
@@ -51,13 +52,13 @@ public class PlayerMonitor : IPlayerMonitor
         };
 
         await Task.WhenAll(
-            _cache.AddToListAsync(_getListCacheKey(character.WorldId), character.Id!),
-            _cache.SetAsync(_getPlayerCacheKey(character.Id!), onlineCharacter, _cacheIdleDuration));
+            _cache.AddToListAsync(_getListCacheKey(character.WorldId), ToListValue(character.Id)),
+            _cache.SetAsync(_getPlayerCacheKey(character.Id), onlineCharacter, _cacheIdleDuration));
 
         return onlineCharacter;
     }
 
-    public async Task<OnlineCharacter?> SetOfflineAsync(string characterId, DateTime timestamp)
+    public async Task<OnlineCharacter?> SetOfflineAsync(long characterId, DateTime timestamp)
     {
         var character = await _characterService.GetCharacter(characterId);
         if (character == null)
@@ -93,7 +94,7 @@ public class PlayerMonitor : IPlayerMonitor
         return onlineCharacter;
     }
 
-    public async Task<OnlineCharacter?> SetLastSeenAsync(string characterId, int zoneId, DateTime timestamp)
+    public async Task<OnlineCharacter?> SetLastSeenAsync(long characterId, int zoneId, DateTime timestamp)
     {
         var onlineCharacter = await GetAsync(characterId);
         if (onlineCharacter == null)
@@ -113,7 +114,9 @@ public class PlayerMonitor : IPlayerMonitor
 
     public async Task<IEnumerable<OnlineCharacter>?> GetAllAsync(int worldId, int? zoneId = null)
     {
-        var idList = await _cache.GetListAsync(_getListCacheKey(worldId));
+        var idList = (await _cache.GetListAsync(_getListCacheKey(worldId)))
+            .Select(a => long.Parse(a, CultureInfo.InvariantCulture))
+            .ToList();
 
         var taskList = idList.Select(characterId => _cache.GetAsync<OnlineCharacter>(_getPlayerCacheKey(characterId))).ToList();
 
@@ -122,7 +125,7 @@ public class PlayerMonitor : IPlayerMonitor
         var timedOutCharacters = idList.Where(characterId => !characters!.Any(a => a.Character!.CharacterId == characterId)).ToList();
         if (timedOutCharacters.Any())
         {
-            var clearTimedOutTasks = timedOutCharacters.Select(characterId => _cache.RemoveFromListAsync(_getListCacheKey(worldId), characterId));
+            var clearTimedOutTasks = timedOutCharacters.Select(characterId => _cache.RemoveFromListAsync(_getListCacheKey(worldId), ToListValue(characterId)));
             await Task.WhenAll(clearTimedOutTasks);
         }
 
@@ -139,7 +142,7 @@ public class PlayerMonitor : IPlayerMonitor
         return _cache.GetListLengthAsync(_getListCacheKey(worldId));
     }
 
-    public Task<OnlineCharacter> GetAsync(string characterId)
+    public Task<OnlineCharacter> GetAsync(long characterId)
     {
         return _cache.GetAsync<OnlineCharacter>(_getPlayerCacheKey(characterId));
     }
@@ -151,7 +154,9 @@ public class PlayerMonitor : IPlayerMonitor
 
     private Task RemoveFromCacheList(Character character)
     {
-        return Task.WhenAll(_cache.RemoveFromListAsync(_getListCacheKey(character.WorldId), character.Id!),
-            _cache.RemoveAsync(_getPlayerCacheKey(character.Id!)));
+        return Task.WhenAll(_cache.RemoveFromListAsync(_getListCacheKey(character.WorldId), ToListValue(character.Id)),
+            _cache.RemoveAsync(_getPlayerCacheKey(character.Id)));
     }
+
+    private static string ToListValue(long characterId) => characterId.ToString(CultureInfo.InvariantCulture);
 }

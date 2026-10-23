@@ -15,7 +15,7 @@ public class CharacterCollection : ICensusCollection<CensusCharacterModel>
         _client = censusClient;
     }
 
-    public async Task<CensusCharacterModel?> GetCharacterAsync(string characterId)
+    public async Task<CensusCharacterModel?> GetCharacterAsync(long characterId)
     {
         return await _client.CreateQuery(CollectionName)
             .AddResolve("world")
@@ -24,7 +24,7 @@ public class CharacterCollection : ICensusCollection<CensusCharacterModel>
             .GetAsync<CensusCharacterModel>();
     }
 
-    public async Task<CensusCharacterModel.CharacterTimes?> GetCharacterTimesAsync(string characterId)
+    public async Task<CensusCharacterModel.CharacterTimes?> GetCharacterTimesAsync(long characterId)
     {
         var result = await _client.CreateQuery(CollectionName)
             .ShowFields("character_id", "times.creation_date", "times.last_save_date", "times.last_login_date", "times.minutes_played")

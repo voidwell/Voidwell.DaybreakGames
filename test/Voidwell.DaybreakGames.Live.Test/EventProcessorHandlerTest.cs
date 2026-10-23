@@ -20,7 +20,7 @@ public class EventProcessorHandlerTest
     private PlayerLoginProcessor CreateProcessor()
     {
         _eventRepository.Setup(a => a.AddAsync(It.IsAny<DataPlayerLogin>())).Returns(Task.CompletedTask);
-        _playerMonitor.Setup(a => a.SetOnlineAsync(It.IsAny<string>(), It.IsAny<DateTime>())).ReturnsAsync((Domain.Models.OnlineCharacter)null);
+        _playerMonitor.Setup(a => a.SetOnlineAsync(It.IsAny<long>(), It.IsAny<DateTime>())).ReturnsAsync((Domain.Models.OnlineCharacter)null);
 
         return new PlayerLoginProcessor(_eventRepository.Object, _playerMonitor.Object, _validator.Object);
     }
@@ -38,13 +38,13 @@ public class EventProcessorHandlerTest
     {
         _validator.Setup(a => a.Validiate(It.IsAny<PlayerLogin>(), It.IsAny<Func<PlayerLogin, string>>(), It.IsAny<Func<PlayerLogin, bool>>())).ReturnsAsync(true);
         var sut = CreateSut(CreateProcessor());
-        var payload = JsonDocument.Parse("""{"character_id":"c1","event_name":"PlayerLogin","timestamp":"1700000000","world_id":"17"}""").RootElement;
+        var payload = JsonDocument.Parse("""{"character_id":"1","event_name":"PlayerLogin","timestamp":"1700000000","world_id":"17"}""").RootElement;
 
         var handled = await sut.TryProcessAsync("PlayerLogin", payload);
 
         Assert.True(handled);
-        _eventRepository.Verify(a => a.AddAsync(It.Is<DataPlayerLogin>(e => e.CharacterId == "c1" && e.WorldId == 17)), Times.Once);
-        _playerMonitor.Verify(a => a.SetOnlineAsync("c1", new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc)), Times.Once);
+        _eventRepository.Verify(a => a.AddAsync(It.Is<DataPlayerLogin>(e => e.CharacterId == 1 && e.WorldId == 17)), Times.Once);
+        _playerMonitor.Verify(a => a.SetOnlineAsync(1, new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc)), Times.Once);
     }
 
     [Fact]
@@ -62,10 +62,10 @@ public class EventProcessorHandlerTest
         _validator.Setup(a => a.Validiate(It.IsAny<PlayerLogin>(), It.IsAny<Func<PlayerLogin, string>>(), It.IsAny<Func<PlayerLogin, bool>>())).ReturnsAsync(false);
         var processor = CreateProcessor();
 
-        await processor.Process(new PlayerLogin { CharacterId = "c1", Timestamp = DateTime.UtcNow, WorldId = 17 });
+        await processor.Process(new PlayerLogin { CharacterId = 1, Timestamp = DateTime.UtcNow, WorldId = 17 });
 
         _eventRepository.Verify(a => a.AddAsync(It.IsAny<DataPlayerLogin>()), Times.Never);
-        _playerMonitor.Verify(a => a.SetOnlineAsync(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Never);
+        _playerMonitor.Verify(a => a.SetOnlineAsync(It.IsAny<long>(), It.IsAny<DateTime>()), Times.Never);
     }
 
     [Fact]
@@ -77,8 +77,8 @@ public class EventProcessorHandlerTest
             .ReturnsAsync(false);
         var processor = CreateProcessor();
 
-        await processor.Process(new PlayerLogin { CharacterId = "c1", Timestamp = DateTime.UtcNow, WorldId = 17 });
+        await processor.Process(new PlayerLogin { CharacterId = 1, Timestamp = DateTime.UtcNow, WorldId = 17 });
 
-        Assert.Equal("c1", capturedKey);
+        Assert.Equal("1", capturedKey);
     }
 }

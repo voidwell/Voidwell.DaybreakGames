@@ -47,12 +47,12 @@ public class CensusEntityMapsTest
 
         var result = CensusEntityMaps.Map(new CensusCharacterAchievementModel
         {
-            CharacterId = "c1",
+            CharacterId = "1",
             AchievementId = 5,
             FinishDate = finished
         });
 
-        Assert.Equal("c1", result.CharacterId);
+        Assert.Equal(1, result.CharacterId);
         Assert.Equal(5, result.AchievementId);
         Assert.Equal(finished, result.FinishDate);
     }
@@ -62,7 +62,7 @@ public class CensusEntityMapsTest
     {
         var result = CensusEntityMaps.Map(new CensusCharacterAchievementModel
         {
-            CharacterId = "c1",
+            CharacterId = "1",
             AchievementId = 5,
             FinishDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         });
@@ -75,7 +75,7 @@ public class CensusEntityMapsTest
     {
         var result = CensusEntityMaps.Map(new CensusCharacterDirectiveModel
         {
-            CharacterId = "c1",
+            CharacterId = "1",
             DirectiveId = 9,
             CompletionTimeDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         });
@@ -90,7 +90,7 @@ public class CensusEntityMapsTest
 
         var result = CensusEntityMaps.Map(new CensusCharacterDirectiveModel
         {
-            CharacterId = "c1",
+            CharacterId = "1",
             DirectiveId = 9,
             CompletionTimeDate = completed
         });

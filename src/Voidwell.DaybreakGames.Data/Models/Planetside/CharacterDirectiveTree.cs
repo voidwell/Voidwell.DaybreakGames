@@ -5,7 +5,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 public class CharacterDirectiveTree
 {
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
     [Required]
     public int DirectiveTreeId { get; set; }
     public int CurrentDirectiveTierId { get; set; }

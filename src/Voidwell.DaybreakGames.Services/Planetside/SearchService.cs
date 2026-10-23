@@ -1,3 +1,4 @@
+using System.Globalization;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
@@ -43,7 +44,7 @@ public class SearchService : ISearchService
                             {
                                 Type = category,
                                 Name = character.Name,
-                                Id = character.Id,
+                                Id = character.Id?.ToString(CultureInfo.InvariantCulture),
                                 FactionId = character.FactionId,
                                 WorldId = character.WorldId,
                                 BattleRank = character.BattleRank
@@ -72,7 +73,7 @@ public class SearchService : ISearchService
                         {
                             Type = category,
                             Name = outfit.Name,
-                            Id = outfit.Id,
+                            Id = outfit.Id.ToString(CultureInfo.InvariantCulture),
                             FactionId = outfit.FactionId,
                             WorldId = outfit.WorldId,
                             Alias = outfit.Alias,

@@ -4,7 +4,7 @@ public class CharacterSearchResult
 {
     public string? Name { get; set; }
     public int BattleRank { get; set; }
-    public string? Id { get; set; }
+    public long? Id { get; set; }
     public int FactionId { get; set; }
     public DateTime LastLogin { get; set; }
     public int WorldId { get; set; }

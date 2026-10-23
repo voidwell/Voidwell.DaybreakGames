@@ -12,7 +12,7 @@ public class OutfitService : IOutfitService
     private readonly ICache _cache;
 
     private const string _cacheKey = "ps2.outfit";
-    private readonly Func<string, string> _getDetailsCacheKey = outfitId => $"{_cacheKey}_details_{outfitId}";
+    private readonly Func<long, string> _getDetailsCacheKey = outfitId => $"{_cacheKey}_details_{outfitId}";
 
     private readonly TimeSpan _cacheOutfitDetailsExpiration = TimeSpan.FromMinutes(30);
 
@@ -22,12 +22,12 @@ public class OutfitService : IOutfitService
         _cache = cache;
     }
 
-    public Task<IEnumerable<Outfit>> FindOutfits(IEnumerable<string> outfitIds)
+    public Task<IEnumerable<Outfit>> FindOutfits(IEnumerable<long> outfitIds)
     {
         return _outfitStore.GetOutfitsByIdsAsync(outfitIds);
     }
 
-    public async Task<OutfitDetails?> GetOutfitDetails(string outfitId)
+    public async Task<OutfitDetails?> GetOutfitDetails(long outfitId)
     {
         return await _cache.GetOrSetIfNotNullAsync<OutfitDetails>(_getDetailsCacheKey(outfitId), async ct =>
         {
@@ -71,10 +71,10 @@ public class OutfitService : IOutfitService
             return null;
         }
 
-        return await GetOutfitDetails(outfitId);
+        return await GetOutfitDetails(outfitId.Value);
     }
 
-    public async Task<IEnumerable<OutfitMemberDetails>> GetOutfitMembers(string outfitId)
+    public async Task<IEnumerable<OutfitMemberDetails>> GetOutfitMembers(long outfitId)
     {
         var members = await _outfitStore.GetOutfitMembersAsync(outfitId);
 
