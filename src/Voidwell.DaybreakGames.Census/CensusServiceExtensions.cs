@@ -28,7 +28,6 @@ public static class CensusServiceExtensions
         services.TryAddTransient<DirectiveTierCollection>();
         services.TryAddTransient<DirectiveTreeCategoryCollection>();
         services.TryAddTransient<DirectiveTreeCollection>();
-        services.TryAddTransient<ExperienceCollection>();
         services.TryAddTransient<FacilityLinkCollection>();
         services.TryAddTransient<FactionCollection>();
         services.TryAddTransient<ImageSetCollection>();

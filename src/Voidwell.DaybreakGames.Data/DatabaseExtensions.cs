@@ -36,7 +36,6 @@ public static class DatabaseExtensions
         services.AddSingleton<ICharacterUpdaterRepository, CharacterUpdaterRepository>();
         services.AddSingleton<IFunctionalRepository, FunctionalRepository>();
         services.AddSingleton<ISanctionedWeaponsRepository, SanctionedWeaponsRepository>();
-        services.AddSingleton<IExperienceRepository, ExperienceRepository>();
         services.AddSingleton<IWeaponAggregateRepository, WeaponAggregateRepository>();
         services.AddSingleton<IDirectiveRepository, DirectiveRepository>();
         services.AddSingleton<IObjectiveRepository, ObjectiveRepository>();

@@ -25,9 +25,6 @@ public static partial class CensusToDataMapper
 
     public static partial DataModels.Events.FacilityControl Map(CensusModels.FacilityControl source);
 
-    [MapValue(nameof(DataModels.Events.GainExperience.Id), Use = nameof(NewGuid))]
-    public static partial DataModels.Events.GainExperience Map(CensusModels.GainExperience source);
-
     [MapProperty(nameof(CensusModels.MetagameEvent.FactionVs), nameof(DataModels.Events.MetagameEvent.ZoneControlVs))]
     [MapProperty(nameof(CensusModels.MetagameEvent.FactionNc), nameof(DataModels.Events.MetagameEvent.ZoneControlNc))]
     [MapProperty(nameof(CensusModels.MetagameEvent.FactionTr), nameof(DataModels.Events.MetagameEvent.ZoneControlTr))]
@@ -56,8 +53,6 @@ public static partial class CensusToDataMapper
     public static partial DataModels.Events.PlayerLogout Map(CensusModels.PlayerLogout source);
 
     public static partial DataModels.Events.VehicleDestroy Map(CensusModels.VehicleDestroy source);
-
-    private static Guid NewGuid() => Guid.NewGuid();
 
     private static DateTime? GetAlertEndDate(CensusModels.MetagameEvent source) => source.Timestamp + _alertDuration;
 

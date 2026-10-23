@@ -48,9 +48,6 @@ public static partial class CensusEntityMaps
     [MapProperty("Name.English", nameof(DirectiveTreeCategory.Name))]
     public static partial DirectiveTreeCategory Map(CensusDirectiveTreeCategoryModel source);
 
-    [MapProperty(nameof(CensusExperienceModel.ExperienceId), nameof(Experience.Id))]
-    public static partial Experience Map(CensusExperienceModel source);
-
     [MapProperty(nameof(CensusFactionModel.FactionId), nameof(Faction.Id))]
     [MapProperty("Name.English", nameof(Faction.Name))]
     public static partial Faction Map(CensusFactionModel source);

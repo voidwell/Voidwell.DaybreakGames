@@ -18,14 +18,8 @@ public static class ServiceCollectionExtensions
         services.Configure<LiveOptions>(options =>
         {
             var eventNames = configuration.GetValue<string>("CensusWebsocketServices");
-            var experienceIds = configuration.GetValue<string>("CensusWebsocketExperienceIds");
 
             options.CensusWebsocketServices = eventNames?.Replace(" ", "").Split(",");
-
-            if (experienceIds != null)
-            {
-                options.CensusWebsocketExperienceIds = experienceIds.Replace(" ", "").Split(",");
-            }
         });
 
         services.AddEventProcessors();

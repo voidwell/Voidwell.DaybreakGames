@@ -37,7 +37,6 @@ Settings are read from `appsettings.json`, then `appsettings.{Environment}.json`
 | `RedisConfiguration` | No | StackExchange.Redis connection string. Empty keeps the cache in memory only |
 | `OriginAddress` | No | Extra allowed CORS origin (`http://localhost:4200` is always allowed) |
 | `CensusWebsocketServices` | No | Comma-separated event names to subscribe to (e.g. `Death, FacilityControl, PlayerLogin`). Defaults are in `appsettings.json`. Empty disables event processing |
-| `CensusWebsocketExperienceIds` | No | Experience IDs to subscribe to |
 | `CensusWebsocketWorlds` / `CensusWebsocketCharacters` | No | Worlds and characters to stream; `all` by default |
 | `DisableUpdater` | No | `true` disables the scheduled Census store updater |
 | `DisableCharacterUpdater` | No | `true` disables the background character updater |

@@ -51,7 +51,6 @@ public static class CensusStoreExtensions
             .WithUpdateDependency<DirectiveTreeCategoryCollection>();
         services.AddUpdaterStaticStore<DirectiveTierCollection, DirectiveTier>()
             .WithUpdateDependency<DirectiveTreeCollection>();
-        services.AddUpdaterStaticStore<ExperienceCollection, Experience>();
         services.AddUpdaterStaticStore<FacilityLinkCollection, FacilityLink>();
         services.AddUpdaterStaticStore<FactionCollection, Faction>();
         services.AddUpdaterStaticStore<ImageSetCollection, ImageSet>();

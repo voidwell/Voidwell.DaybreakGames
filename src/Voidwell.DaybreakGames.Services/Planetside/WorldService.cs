@@ -2,7 +2,6 @@ using AsyncKeyedLock;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
@@ -82,10 +81,9 @@ public class WorldService : IWorldService
                 };
 
                 var combatStatsTask = _combatReportService.GetCombatStats(worldId, startDate, endDate);
-                var experienceTask = GetWorldActivityExperienceAsync(worldId, startDate, endDate);
                 var playerSessionsTask = GetPlayerSessionsAsync(worldId, startDate, endDate);
 
-                await Task.WhenAll(combatStatsTask, experienceTask, playerSessionsTask);
+                await Task.WhenAll(combatStatsTask, playerSessionsTask);
 
                 var combatStats = combatStatsTask.Result;
                 var playerSessions = playerSessionsTask.Result;
@@ -128,7 +126,6 @@ public class WorldService : IWorldService
                 activity.TopOutfits = combatStats.Outfits!.Where(a => a.ParticipantCount > 4).OrderByDescending(a => a.Kills / a.ParticipantCount).Take(10);
                 activity.TopWeapons = combatStats.Weapons!.OrderByDescending(a => a.Kills).Take(20);
                 activity.HistoricalPopulations = GetPopulationPeriods(playerSessions, startDate, endDate);
-                activity.TopExperience = experienceTask.Result;
 
                 return activity;
             }, _activityCacheExpiration);
@@ -187,88 +184,6 @@ public class WorldService : IWorldService
         stats.HSR.NS = stats.Headshots.NS / (stats.Kills.NS > 0 ? stats.Kills.NS : 1);
 
         return stats;
-    }
-
-    private async Task<WorldActivityExperience> GetWorldActivityExperienceAsync(int worldId, DateTime start, DateTime end)
-    {
-        var reviveEventsTask = _worldEventsService.GetReviveExperienceEventsByDateAsync(worldId, start, end);
-        var healEventsTask = _worldEventsService.GetHealExperienceEventsByDateAsync(worldId, start, end);
-        var roadkillEventsTask = _worldEventsService.GetRoadkillExperienceEventsByDateAsync(worldId, start, end);
-        var squadBeaconKillEventsTask = _worldEventsService.GetSquadBeaconKillExperienceEventsByDateAsync(worldId, start, end);
-
-        await Task.WhenAll(reviveEventsTask, healEventsTask, roadkillEventsTask, squadBeaconKillEventsTask);
-
-        var reviveEvents = ConvertToWorldActivityExperienceItem(reviveEventsTask.Result);
-        var healEvents = ConvertToWorldActivityExperienceItem(healEventsTask.Result);
-        var roadkillEvents = ConvertToWorldActivityExperienceItem(roadkillEventsTask.Result);
-        var squadBeaconKillEvents = ConvertToWorldActivityExperienceItem(squadBeaconKillEventsTask.Result);
-
-        var characterIds = reviveEvents.Select(a => a.CharacterId).ToList();
-        characterIds.AddRange(healEvents.Select(a => a.CharacterId));
-        characterIds.AddRange(roadkillEvents.Select(a => a.CharacterId));
-        characterIds.AddRange(squadBeaconKillEvents.Select(a => a.CharacterId));
-
-        var distinctCharacterIds = characterIds.Distinct();
-
-        var characters = await _characterService.FindCharacters(distinctCharacterIds);
-
-        foreach (var character in characters)
-        {
-            reviveEvents.Where(a => a.CharacterId == character.Id).ToList().ForEach(a => SetCharacterOnExperienceItem(character, a));
-            healEvents.Where(a => a.CharacterId == character.Id).ToList().ForEach(a => SetCharacterOnExperienceItem(character, a));
-            roadkillEvents.Where(a => a.CharacterId == character.Id).ToList().ForEach(a => SetCharacterOnExperienceItem(character, a));
-            squadBeaconKillEvents.Where(a => a.CharacterId == character.Id).ToList().ForEach(a => SetCharacterOnExperienceItem(character, a));
-        }
-
-        return new WorldActivityExperience
-        {
-            Revives = ConvertToWorldActivityExperienceFactions(reviveEvents),
-            Heals = ConvertToWorldActivityExperienceFactions(healEvents),
-            Roadkills = ConvertToWorldActivityExperienceFactions(roadkillEvents),
-            SquadBeaconKills = ConvertToWorldActivityExperienceFactions(squadBeaconKillEvents)
-        };
-    }
-
-    private static void SetCharacterOnExperienceItem(Character character, WorldActivityExperienceItem item)
-    {
-        item.CharacterName = character.Name;
-        item.CharacterBattleRank = character.BattleRank;
-        item.CharacterFactionId = character.FactionId;
-        item.CharacterPrestigeLevel = character.PrestigeLevel;
-        item.CharacterOutfitAlias = character.OutfitMembership?.Outfit?.Alias;
-    }
-
-    private static List<WorldActivityExperienceItem> ConvertToWorldActivityExperienceItem(IEnumerable<GainExperience> events)
-    {
-        return events
-            .GroupBy(a => a.CharacterId)
-            .Select(a => new WorldActivityExperienceItem(a.Key!, a.Count()))
-            .OrderByDescending(a => a.Ticks)
-            .ToList();
-    }
-
-    private static WorldActivityExperienceFactions ConvertToWorldActivityExperienceFactions(IEnumerable<WorldActivityExperienceItem> items)
-    {
-        var result = new WorldActivityExperienceFactions();
-
-        foreach (var item in items.GroupBy(a => a.CharacterFactionId))
-        {
-            var topStats = item.Take(5);
-
-            switch (item.Key)
-            {
-                case 1:
-                    { result.VS = topStats; break; }
-                case 2:
-                    { result.NC = topStats; break; }
-                case 3:
-                    { result.TR = topStats; break; }
-                case 4:
-                    { result.NS = topStats; break; }
-            }
-        }
-
-        return result;
     }
 
     private async Task<IEnumerable<PlayerActivitySession>> GetPlayerSessionsAsync(int worldId, DateTime startDate, DateTime endDate)

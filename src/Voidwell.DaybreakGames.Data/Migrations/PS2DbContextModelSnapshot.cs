@@ -1485,9 +1485,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId")
                         .HasName("p_k_event_death");
 
-                    b.HasIndex("AttackerWeaponId", "Timestamp")
-                        .HasDatabaseName("i_x_event_death_attacker_weapon_id_timestamp");
-
                     b.ToTable("event_death", (string)null);
                 });
 
@@ -1561,58 +1558,6 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasName("p_k_event_facility_control");
 
                     b.ToTable("event_facility_control", (string)null);
-                });
-
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Events.GainExperience", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer")
-                        .HasColumnName("amount");
-
-                    b.Property<string>("CharacterId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("character_id");
-
-                    b.Property<int>("ExperienceId")
-                        .HasColumnType("integer")
-                        .HasColumnName("experience_id");
-
-                    b.Property<int?>("LoadoutId")
-                        .HasColumnType("integer")
-                        .HasColumnName("loadout_id");
-
-                    b.Property<string>("OtherId")
-                        .HasColumnType("text")
-                        .HasColumnName("other_id");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("timestamp");
-
-                    b.Property<int>("WorldId")
-                        .HasColumnType("integer")
-                        .HasColumnName("world_id");
-
-                    b.Property<int>("ZoneId")
-                        .HasColumnType("integer")
-                        .HasColumnName("zone_id");
-
-                    b.HasKey("Id")
-                        .HasName("p_k_event_gain_experience");
-
-                    b.HasIndex("Timestamp", "CharacterId", "ExperienceId")
-                        .HasDatabaseName("i_x_event_gain_experience_timestamp_character_id_experience_id");
-
-                    b.HasIndex("Timestamp", "WorldId", "ExperienceId", "ZoneId")
-                        .HasDatabaseName("i_x_event_gain_experience_timestamp_world_id_experience_id_zone");
-
-                    b.ToTable("event_gain_experience", (string)null);
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Events.MetagameEvent", b =>
@@ -1829,30 +1774,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId", "AttackerVehicleId", "VehicleId")
                         .HasName("p_k_event_vehicle_destroy");
 
-                    b.HasIndex("AttackerWeaponId", "Timestamp")
-                        .HasDatabaseName("i_x_event_vehicle_destroy_attacker_weapon_id_timestamp");
-
                     b.ToTable("event_vehicle_destroy", (string)null);
-                });
-
-            modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.Experience", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<float>("Xp")
-                        .HasColumnType("real")
-                        .HasColumnName("xp");
-
-                    b.HasKey("Id")
-                        .HasName("p_k_experience");
-
-                    b.ToTable("experience", (string)null);
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.FacilityLink", b =>

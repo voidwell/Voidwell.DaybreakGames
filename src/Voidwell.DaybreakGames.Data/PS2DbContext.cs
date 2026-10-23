@@ -53,7 +53,6 @@ public class PS2DbContext : DbContext
     public DbSet<SanctionedWeapon> SanctionedWeapons => Set<SanctionedWeapon>();
     public DbSet<ZoneOwnershipSnapshot> ZoneOwnershipSnapshots => Set<ZoneOwnershipSnapshot>();
     public DbSet<DailyWeaponStats> DailyWeaponStats => Set<DailyWeaponStats>();
-    public DbSet<Experience> Experience => Set<Experience>();
     public DbSet<WeaponAggregate> WeaponAggregates => Set<WeaponAggregate>();
     public DbSet<DailyPopulation> DailyPopulations => Set<DailyPopulation>();
     public DbSet<Directive> Directives => Set<Directive>();
@@ -79,7 +78,6 @@ public class PS2DbContext : DbContext
     public DbSet<ContinentUnlock> ContinentUnlockEvents => Set<ContinentUnlock>();
     public DbSet<Death> EventDeaths => Set<Death>();
     public DbSet<FacilityControl> EventFacilityControls => Set<FacilityControl>();
-    public DbSet<GainExperience> GainExperienceEvents => Set<GainExperience>();
     public DbSet<MetagameEvent> MetagameEventEvents => Set<MetagameEvent>();
     public DbSet<PlayerFacilityCapture> PlayerFacilityCaptureEvents => Set<PlayerFacilityCapture>();
     public DbSet<PlayerFacilityDefend> PlayerFacilityDefendEvents => Set<PlayerFacilityDefend>();
