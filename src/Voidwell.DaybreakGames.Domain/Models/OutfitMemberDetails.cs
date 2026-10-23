@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class OutfitMemberDetails
 {
-    public string? CharacterId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long? CharacterId { get; set; }
     public string? Name { get; set; }
     public DateTime MemberSinceDate { get; set; }
     public int RankOrdinal { get; set; }

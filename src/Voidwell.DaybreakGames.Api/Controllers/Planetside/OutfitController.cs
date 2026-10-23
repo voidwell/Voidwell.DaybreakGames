@@ -16,7 +16,7 @@ public class OutfitController : Controller
     }
 
     [HttpGet("{outfitId}")]
-    public async Task<ActionResult> GetOutfitAsync(string outfitId)
+    public async Task<ActionResult> GetOutfitAsync(long outfitId)
     {
         var details = await _outfitService.GetOutfitDetails(outfitId);
         if (details == null)
@@ -28,7 +28,7 @@ public class OutfitController : Controller
     }
 
     [HttpGet("{outfitId}/members")]
-    public async Task<ActionResult> GetOutfitMembersAsync(string outfitId)
+    public async Task<ActionResult> GetOutfitMembersAsync(long outfitId)
     {
         var result = await _outfitService.GetOutfitMembers(outfitId);
         return Ok(result);

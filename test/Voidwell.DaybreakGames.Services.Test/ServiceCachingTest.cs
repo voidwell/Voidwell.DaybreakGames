@@ -99,46 +99,46 @@ public class ServiceCachingTest
     public async Task CharacterRatingService_GetRating_UnknownCharacter_ReturnsDefaultRatingAndCachesIt()
     {
         var repository = new Mock<ICharacterRepository>();
-        repository.Setup(a => a.GetCharacterRatingAsync("c1")).ReturnsAsync((CharacterRating)null);
+        repository.Setup(a => a.GetCharacterRatingAsync(1)).ReturnsAsync((CharacterRating)null);
         var sut = new CharacterRatingService(repository.Object, TestCache.Create());
 
-        var rating = await sut.GetRatingAsync("c1");
-        var again = await sut.GetRatingAsync("c1");
+        var rating = await sut.GetRatingAsync(1);
+        var again = await sut.GetRatingAsync(1);
 
-        Assert.Equal("c1", rating.CharacterId);
+        Assert.Equal(1, rating.CharacterId);
         Assert.Equal(1500, rating.Rating);
         Assert.Equal(100, rating.Deviation);
         Assert.Equal(0.02, rating.Volatility);
         Assert.Same(rating, again);
-        repository.Verify(a => a.GetCharacterRatingAsync("c1"), Times.Once);
+        repository.Verify(a => a.GetCharacterRatingAsync(1), Times.Once);
     }
 
     [Fact]
     public async Task CharacterRatingService_GetRating_UsesStoredRating()
     {
         var repository = new Mock<ICharacterRepository>();
-        repository.Setup(a => a.GetCharacterRatingAsync("c1")).ReturnsAsync(new CharacterRating { CharacterId = "c1", Rating = 1710 });
+        repository.Setup(a => a.GetCharacterRatingAsync(1)).ReturnsAsync(new CharacterRating { CharacterId = 1, Rating = 1710 });
         var sut = new CharacterRatingService(repository.Object, TestCache.Create());
 
-        Assert.Equal(1710, (await sut.GetRatingAsync("c1")).Rating);
+        Assert.Equal(1710, (await sut.GetRatingAsync(1)).Rating);
     }
 
     [Fact]
     public async Task CharacterRatingService_SaveCachedRating_PersistsAndEvictsCachedRating()
     {
         var repository = new Mock<ICharacterRepository>();
-        repository.Setup(a => a.GetCharacterRatingAsync("c1")).ReturnsAsync((CharacterRating)null);
+        repository.Setup(a => a.GetCharacterRatingAsync(1)).ReturnsAsync((CharacterRating)null);
         repository.Setup(a => a.UpsertAsync(It.IsAny<CharacterRating>())).ReturnsAsync((CharacterRating r) => r);
         var sut = new CharacterRatingService(repository.Object, TestCache.Create());
-        await sut.GetRatingAsync("c1");
+        await sut.GetRatingAsync(1);
 
-        await sut.SaveCachedRatingAsync("c1");
+        await sut.SaveCachedRatingAsync(1);
 
-        repository.Verify(a => a.UpsertAsync(It.Is<CharacterRating>(r => r.CharacterId == "c1")), Times.Once);
+        repository.Verify(a => a.UpsertAsync(It.Is<CharacterRating>(r => r.CharacterId == 1)), Times.Once);
 
         // evicted: the next read goes back to the repository
-        await sut.GetRatingAsync("c1");
-        repository.Verify(a => a.GetCharacterRatingAsync("c1"), Times.Exactly(2));
+        await sut.GetRatingAsync(1);
+        repository.Verify(a => a.GetCharacterRatingAsync(1), Times.Exactly(2));
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public class ServiceCachingTest
         var repository = new Mock<ICharacterRepository>();
         var sut = new CharacterRatingService(repository.Object, TestCache.Create());
 
-        await sut.SaveCachedRatingAsync("c1");
+        await sut.SaveCachedRatingAsync(1);
 
         repository.Verify(a => a.UpsertAsync(It.IsAny<CharacterRating>()), Times.Never);
     }
@@ -158,8 +158,8 @@ public class ServiceCachingTest
         var repository = new Mock<ICharacterRepository>();
         repository.Setup(a => a.GetCharacterRatingLeaderboardAsync(10)).ReturnsAsync(new[]
         {
-            new CharacterRating { CharacterId = "c1", Rating = 1800, Deviation = 50, Character = new Character { Name = "Bob", FactionId = 2, WorldId = 17, BattleRank = 100 } },
-            new CharacterRating { CharacterId = "c2", Rating = 1700, Deviation = 60 }
+            new CharacterRating { CharacterId = 1, Rating = 1800, Deviation = 50, Character = new Character { Name = "Bob", FactionId = 2, WorldId = 17, BattleRank = 100 } },
+            new CharacterRating { CharacterId = 2, Rating = 1700, Deviation = 60 }
         });
         var sut = new CharacterRatingService(repository.Object, TestCache.Create());
 

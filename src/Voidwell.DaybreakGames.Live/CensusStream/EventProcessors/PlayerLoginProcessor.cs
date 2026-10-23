@@ -1,3 +1,4 @@
+using System.Globalization;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
@@ -34,6 +35,6 @@ public class PlayerLoginProcessor : IEventProcessor<PlayerLogin>
 
     private Task<bool> ValidateEvent(PlayerLogin payload)
     {
-        return _eventValidator.Validiate(payload, a => a.CharacterId, a => DateTime.UtcNow - a.Timestamp > TimeSpan.FromSeconds(1));
+        return _eventValidator.Validiate(payload, a => a.CharacterId.ToString(CultureInfo.InvariantCulture), a => DateTime.UtcNow - a.Timestamp > TimeSpan.FromSeconds(1));
     }
 }

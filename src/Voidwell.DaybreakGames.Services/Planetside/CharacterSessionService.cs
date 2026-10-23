@@ -1,3 +1,4 @@
+using System.Globalization;
 using AsyncKeyedLock;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -14,16 +15,16 @@ public class CharacterSessionService : ICharacterSessionService
 
     private const string _cacheKey = "ps2.sessions";
 
-    private readonly Func<string, int, int, string> _getSessionsListCacheKey = (characterId, page, limit) => $"{_cacheKey}_sessions_{characterId}_{page}_{limit}";
-    private readonly Func<string, string> _getLiveSessionCacheKey = characterId => $"{_cacheKey}_livesession_{characterId}";
-    private readonly Func<string, int, string> _getSessionCacheKey = (characterId, sessionId) => $"{_cacheKey}_session_{characterId}_{sessionId}";
+    private readonly Func<long, int, int, string> _getSessionsListCacheKey = (characterId, page, limit) => $"{_cacheKey}_sessions_{characterId}_{page}_{limit}";
+    private readonly Func<long, string> _getLiveSessionCacheKey = characterId => $"{_cacheKey}_livesession_{characterId}";
+    private readonly Func<long, int, string> _getSessionCacheKey = (characterId, sessionId) => $"{_cacheKey}_session_{characterId}_{sessionId}";
 
     private readonly TimeSpan _cacheCharacterSessionsListExpiration = TimeSpan.FromSeconds(10);
     private readonly TimeSpan _cacheCharacterSessionExpiration = TimeSpan.FromMinutes(10);
     private readonly TimeSpan _cacheCharacterLiveSessionExpiration = TimeSpan.FromSeconds(10);
 
     private readonly AsyncKeyedLocker<string> _characterSessionLock = new();
-    private readonly AsyncKeyedLocker<string> _characterLiveSessionLock = new();
+    private readonly AsyncKeyedLocker<long> _characterLiveSessionLock = new();
 
     public CharacterSessionService(IPlayerSessionRepository playerSessionRepository, IWorldEventsService worldEventService, ICache cache)
     {
@@ -32,7 +33,7 @@ public class CharacterSessionService : ICharacterSessionService
         _cache = cache;
     }
 
-    public async Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetCharacterSessionsAsync(string characterId, CancellationToken cancellationToken, int limit = 25, int page = 0)
+    public async Task<IEnumerable<Data.Models.Planetside.PlayerSession>> GetCharacterSessionsAsync(long characterId, CancellationToken cancellationToken, int limit = 25, int page = 0)
     {
         return await _cache.GetOrSetAsync(
             _getSessionsListCacheKey(characterId, page, limit),
@@ -41,7 +42,7 @@ public class CharacterSessionService : ICharacterSessionService
             cancellationToken);
     }
 
-    public async Task<PlayerSession?> GetCharacterSessionAsync(string characterId, int sessionId, CancellationToken cancellationToken)
+    public async Task<PlayerSession?> GetCharacterSessionAsync(long characterId, int sessionId, CancellationToken cancellationToken)
     {
         using var _ = await _characterSessionLock.LockAsync($"{characterId}_{sessionId}");
 
@@ -52,7 +53,7 @@ public class CharacterSessionService : ICharacterSessionService
             cancellationToken);
     }
 
-    private async Task<PlayerSession?> GetCharacterSessionDataAsync(string characterId, int sessionId, CancellationToken cancellationToken)
+    private async Task<PlayerSession?> GetCharacterSessionDataAsync(long characterId, int sessionId, CancellationToken cancellationToken)
     {
         var playerSession = await _playerSessionRepository.GetPlayerSessionAsync(sessionId, cancellationToken);
         if (playerSession == null)
@@ -81,7 +82,7 @@ public class CharacterSessionService : ICharacterSessionService
         return sessionInfo;
     }
 
-    public async Task<PlayerSession?> GetCharacterLiveSessionAsync(string characterId, CancellationToken cancellationToken)
+    public async Task<PlayerSession?> GetCharacterLiveSessionAsync(long characterId, CancellationToken cancellationToken)
     {
         using var _ = await _characterLiveSessionLock.LockAsync(characterId);
 
@@ -121,7 +122,7 @@ public class CharacterSessionService : ICharacterSessionService
         }, _cacheCharacterLiveSessionExpiration);
     }
 
-    private async Task<List<PlayerSessionEvent>> GetSessionEventsForCharacterAsync(string characterId, DateTime start, DateTime end, CancellationToken cancellationToken)
+    private async Task<List<PlayerSessionEvent>> GetSessionEventsForCharacterAsync(long characterId, DateTime start, DateTime end, CancellationToken cancellationToken)
     {
         var sessionDeathsTask = _worldEventService.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
         var sessionFacilityCapturesTask = _worldEventService.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
@@ -142,10 +143,12 @@ public class CharacterSessionService : ICharacterSessionService
         return [.. sessionEvents.OrderBy(a => a.Timestamp)];
     }
 
-    public async Task<IEnumerable<PlayerSessionSummary>> GetLatestCharacterSessionsAsync(string characterId, int limit, CancellationToken cancellationToken)
+    public async Task<IEnumerable<PlayerSessionSummary>> GetLatestCharacterSessionsAsync(long characterId, int limit, CancellationToken cancellationToken)
     {
         var sessions = await GetCharacterSessionsAsync(characterId, cancellationToken, limit, page: 0);
         var details = await Task.WhenAll(sessions.Select(session => GetCharacterSessionAsync(characterId, session.Id, cancellationToken)));
+
+        var sessionCharacterId = characterId.ToString(CultureInfo.InvariantCulture);
 
         return [.. details.OfType<PlayerSession>().Select(detail =>
         {
@@ -157,8 +160,8 @@ public class CharacterSessionService : ICharacterSessionService
                 Duration = detail.Session.Duration,
                 LoginDate = detail.Session.LoginDate,
                 LogoutDate = detail.Session.LogoutDate,
-                Kills = deathEvents.Count(e => e.Attacker?.Id == characterId && e.Victim?.Id != characterId && e.Attacker?.FactionId != e.Victim?.FactionId),
-                Deaths = deathEvents.Count(e => e.Victim?.Id == characterId)
+                Kills = deathEvents.Count(e => e.Attacker?.Id == sessionCharacterId && e.Victim?.Id != sessionCharacterId && e.Attacker?.FactionId != e.Victim?.FactionId),
+                Deaths = deathEvents.Count(e => e.Victim?.Id == sessionCharacterId)
             };
         })];
     }

@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 
 public class CharacterLifetimeStat
 {
     [Required]
-    public string? CharacterId { get; set; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+    public long CharacterId { get; set; }
 
     public int? AchievementCount { get; set; }
     public int? AssistCount { get; set; }

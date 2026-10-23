@@ -24,7 +24,7 @@ public class CharacterController : Controller
     }
 
     [HttpGet("{characterId}")]
-    public async Task<ActionResult> GetCharacterByIdAsync(string characterId)
+    public async Task<ActionResult> GetCharacterByIdAsync(long characterId)
     {
         var details = await _characterService.GetCharacterDetails(characterId);
         if (details == null)
@@ -36,35 +36,35 @@ public class CharacterController : Controller
     }
 
     [HttpGet("{characterId}/sessions")]
-    public async Task<ActionResult> GetCharacterSessionsByCharacterIdAsync(string characterId, CancellationToken cancellationToken, [FromQuery] int page = 0)
+    public async Task<ActionResult> GetCharacterSessionsByCharacterIdAsync(long characterId, CancellationToken cancellationToken, [FromQuery] int page = 0)
     {
         var result = await _characterSessionService.GetCharacterSessionsAsync(characterId, cancellationToken, page: page);
         return Ok(result);
     }
 
     [HttpGet("{characterId}/sessions/{sessionId}")]
-    public async Task<ActionResult> GetCharacterSessionBySessionIdAsync(string characterId, int sessionId, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetCharacterSessionBySessionIdAsync(long characterId, int sessionId, CancellationToken cancellationToken)
     {
         var result = await _characterSessionService.GetCharacterSessionAsync(characterId, sessionId, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{characterId}/sessions/live")]
-    public async Task<ActionResult> GetCharacterLiveSessionAsync(string characterId, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetCharacterLiveSessionAsync(long characterId, CancellationToken cancellationToken)
     {
         var result = await _characterSessionService.GetCharacterLiveSessionAsync(characterId, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{characterId}/sessions/latest")]
-    public async Task<ActionResult> GetLatestCharacterSessionsAsync(string characterId, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetLatestCharacterSessionsAsync(long characterId, CancellationToken cancellationToken)
     {
         var result = await _characterSessionService.GetLatestCharacterSessionsAsync(characterId, limit: 5, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{characterId}/state")]
-    public async Task<ActionResult> GetCharacterOnlineStateAsync(string characterId)
+    public async Task<ActionResult> GetCharacterOnlineStateAsync(long characterId)
     {
         var result = await _playerMonitor.GetAsync(characterId);
         return Ok(result);
@@ -105,7 +105,7 @@ public class CharacterController : Controller
     }
 
     [HttpGet("{characterId}/directives")]
-    public async Task<ActionResult> GetDirectivesByCharacterIdAsync(string characterId)
+    public async Task<ActionResult> GetDirectivesByCharacterIdAsync(long characterId)
     {
         var data = await _characterDirectiveService.GetCharacterDirectivesAsync(characterId);
         if (data == null)

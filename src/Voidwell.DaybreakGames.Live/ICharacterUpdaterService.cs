@@ -4,5 +4,5 @@ namespace Voidwell.DaybreakGames.Live;
 
 public interface ICharacterUpdaterService : IStatefulHostedService
 {
-    Task AddToQueue(string characterId);
+    Task AddToQueue(long characterId);
 }

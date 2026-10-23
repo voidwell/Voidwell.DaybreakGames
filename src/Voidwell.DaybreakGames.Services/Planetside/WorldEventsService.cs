@@ -27,7 +27,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetAllLatestZoneUnlocks();
     }
 
-    public Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<BattlerankUp>> GetBattleRankUpEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetBattleRankUpEventsForCharacterIdByDateAsync(characterId, start, end);
     }
@@ -42,12 +42,12 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetDeathEventsByDateAsync(worldId, startDate, endDate, zoneId);
     }
 
-    public Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime? end)
+    public Task<IEnumerable<Death>> GetDeathEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime? end)
     {
         return _eventRepository.GetDeathEventsForCharacterIdByDateAsync(characterId, start, end);
     }
 
-    public Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<PlayerFacilityCapture>> GetFacilityCaptureEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetFacilityCaptureEventsForCharacterIdByDateAsync(characterId, start, end);
     }
@@ -60,7 +60,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         }
     }
 
-    public Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<PlayerFacilityDefend>> GetFacilityDefendEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetFacilityDefendEventsForCharacterIdByDateAsync(characterId, start, end);
     }
@@ -80,12 +80,12 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetPlayerLogoutEventsAsync(worldId, startDate, endDate);
     }
 
-    public Task<PlayerLogin> GetLastPlayerLoginEventAsync(string characterId)
+    public Task<PlayerLogin> GetLastPlayerLoginEventAsync(long characterId)
     {
         return _eventRepository.GetLastPlayerLoginEventAsync(characterId)!;
     }
 
-    public Task<PlayerLogout> GetLastPlayerLogoutEventAsync(string characterId)
+    public Task<PlayerLogout> GetLastPlayerLogoutEventAsync(long characterId)
     {
         return _eventRepository.GetLastPlayerLogoutEventAsync(characterId)!;
     }
@@ -95,7 +95,7 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetVehicleDeathEventsByDateAsync(worldId, startDate, endDate, zoneId);
     }
 
-    public Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(string characterId, DateTime start, DateTime end)
+    public Task<IEnumerable<VehicleDestroy>> GetVehicleDestroyEventsForCharacterIdByDateAsync(long characterId, DateTime start, DateTime end)
     {
         return _eventRepository.GetVehicleDestroyEventsForCharacterIdByDateAsync(characterId, start, end);
     }

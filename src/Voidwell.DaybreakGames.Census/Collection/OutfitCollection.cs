@@ -1,3 +1,4 @@
+using System.Globalization;
 using DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Census.Models;
@@ -15,11 +16,11 @@ public class OutfitCollection : ICensusCollection<CensusOutfitModel>
         _client = censusClient;
     }
 
-    public async Task<CensusOutfitModel?> GetOutfitAsync(string outfitId)
+    public async Task<CensusOutfitModel?> GetOutfitAsync(long outfitId)
     {
         return await _client.CreateQuery(CollectionName)
             .ShowFields("outfit_id", "name", "alias", "time_created", "leader_character_id", "member_count")
-            .Where("outfit_id", a => a.Equals(outfitId))
+            .Where("outfit_id", a => a.Equals(outfitId.ToString(CultureInfo.InvariantCulture)))
             .GetAsync<CensusOutfitModel>();
     }
 }

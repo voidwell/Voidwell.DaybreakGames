@@ -13,19 +13,19 @@ public class CharacterDirectiveRepository : ICharacterDirectiveRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<IEnumerable<CharacterDirectiveTree>> GetDirectiveTreesAsync(string characterId)
+    public async Task<IEnumerable<CharacterDirectiveTree>> GetDirectiveTreesAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.CharacterDirectiveTrees.Where(a => a.CharacterId == characterId).ToListAsync();
     }
 
-    public async Task<IEnumerable<CharacterDirectiveTier>> GetDirectiveTiersAsync(string characterId)
+    public async Task<IEnumerable<CharacterDirectiveTier>> GetDirectiveTiersAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.CharacterDirectiveTiers.Where(a => a.CharacterId == characterId).ToListAsync();
     }
 
-    public async Task<IEnumerable<CharacterDirective>> GetDirectivesAsync(string characterId)
+    public async Task<IEnumerable<CharacterDirective>> GetDirectivesAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var query = from charDirective in dbContext.CharacterDirectives
@@ -42,7 +42,7 @@ public class CharacterDirectiveRepository : ICharacterDirectiveRepository
         return await query.ToListAsync();
     }
 
-    public async Task<IEnumerable<CharacterDirectiveObjective>> GetDirectiveObjectivesAsync(string characterId)
+    public async Task<IEnumerable<CharacterDirectiveObjective>> GetDirectiveObjectivesAsync(long characterId)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.CharacterDirectiveObjectives.Where(a => a.CharacterId == characterId).ToListAsync();
