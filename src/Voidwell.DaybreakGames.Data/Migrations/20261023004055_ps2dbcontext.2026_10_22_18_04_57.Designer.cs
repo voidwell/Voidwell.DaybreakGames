@@ -12,7 +12,7 @@ using Voidwell.DaybreakGames.Data;
 namespace Voidwell.DaybreakGames.Data.Migrations
 {
     [DbContext(typeof(PS2DbContext))]
-    [Migration("20261022180512_ps2dbcontext.2026_10_22_18_04_57")]
+    [Migration("20261023004055_ps2dbcontext.2026_10_22_18_04_57")]
     partial class ps2dbcontext2026_10_22_18_04_57
     {
         /// <inheritdoc />
