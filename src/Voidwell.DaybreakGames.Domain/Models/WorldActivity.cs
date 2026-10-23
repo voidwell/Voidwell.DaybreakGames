@@ -11,7 +11,6 @@ public class WorldActivity
     public IEnumerable<CombatReportParticipantStats>? TopPlayers { get; set; }
     public IEnumerable<CombatReportOutfitStats>? TopOutfits { get; set; }
     public IEnumerable<CombatReportWeaponStats>? TopWeapons { get; set; }
-    public WorldActivityExperience? TopExperience { get; set; }
 }
 
 public class WorldActivityStats
@@ -24,37 +23,4 @@ public class WorldActivityStats
     public FactionValues VehicleKills { get; set; } = new FactionValues();
     public FactionValues KDR { get; set; } = new FactionValues();
     public FactionValues HSR { get; set; } = new FactionValues();
-}
-
-public class WorldActivityExperience
-{
-    public WorldActivityExperienceFactions? Heals { get; set; }
-    public WorldActivityExperienceFactions? Revives { get; set; }
-    public WorldActivityExperienceFactions? Roadkills { get; set; }
-    public WorldActivityExperienceFactions? SquadBeaconKills { get; set; }
-}
-
-public class WorldActivityExperienceFactions
-{
-    public IEnumerable<WorldActivityExperienceItem>? VS { get; set; }
-    public IEnumerable<WorldActivityExperienceItem>? NC { get; set; }
-    public IEnumerable<WorldActivityExperienceItem>? TR { get; set; }
-    public IEnumerable<WorldActivityExperienceItem>? NS { get; set; }
-}
-
-public class WorldActivityExperienceItem
-{
-    public WorldActivityExperienceItem(string characterId, int ticks)
-    {
-        CharacterId = characterId;
-        Ticks = ticks;
-    }
-
-    public string CharacterId { get; set; }
-    public string? CharacterName { get; set; }
-    public int? CharacterBattleRank { get; set; }
-    public int? CharacterFactionId { get; set; }
-    public int? CharacterPrestigeLevel { get; set; }
-    public string? CharacterOutfitAlias { get; set; }
-    public int Ticks { get; set; }
 }

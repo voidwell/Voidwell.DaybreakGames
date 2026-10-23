@@ -11,8 +11,6 @@ public class EventDeathConfiguration : IEntityTypeConfiguration<Models.Planetsid
 
         builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId });
 
-        builder.HasIndex(a => new { a.AttackerWeaponId, a.Timestamp });
-
         builder
             .Ignore(a => a.Character)
             .Ignore(a => a.AttackerCharacter)

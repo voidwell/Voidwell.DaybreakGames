@@ -17,19 +17,6 @@ public class CensusToDataMapperTest
     }
 
     [Fact]
-    public void GainExperience_AssignsAFreshIdPerMapping()
-    {
-        var payload = new GainExperience { CharacterId = "c1", ExperienceId = 5 };
-
-        var first = CensusToDataMapper.Map(payload);
-        var second = CensusToDataMapper.Map(payload);
-
-        Assert.NotEqual(Guid.Empty, first.Id);
-        Assert.NotEqual(second.Id, first.Id);
-        Assert.Equal("c1", first.CharacterId);
-    }
-
-    [Fact]
     public void MetagameEvent_MapsZoneControlFromFactionValues()
     {
         var result = CensusToDataMapper.Map(new MetagameEvent { FactionVs = 10, FactionNc = 20, FactionTr = 30 });

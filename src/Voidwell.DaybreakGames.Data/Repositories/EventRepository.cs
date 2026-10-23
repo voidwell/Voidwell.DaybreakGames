@@ -281,23 +281,6 @@ public class EventRepository : IEventRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<GainExperience>> GetExperienceByDateAsync(int experienceId, int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
-    {
-        using var dbContext = _dbContextFactory.CreateDbContext();
-        if (endDate == null)
-        {
-            endDate = DateTime.UtcNow;
-        }
-
-        var query = dbContext.GainExperienceEvents.Where(e => e.ExperienceId == experienceId && e.WorldId == worldId && e.Timestamp < endDate && e.Timestamp > startDate);
-        if (zoneId.HasValue)
-        {
-            query = query.Where(e => e.ZoneId == zoneId);
-        }
-
-        return await query.ToListAsync();
-    }
-
     public async Task<IEnumerable<PlayerLogin>> GetPlayerLoginEventsAsync(int worldId, DateTime startDate, DateTime? endDate)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();

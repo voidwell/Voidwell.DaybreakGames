@@ -100,36 +100,8 @@ public class WorldEventsService : IWorldEventsService, IDisposable
         return _eventRepository.GetVehicleDestroyEventsForCharacterIdByDateAsync(characterId, start, end);
     }
 
-    public Task<IEnumerable<GainExperience>> GetHealExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.Heal, worldId, startDate, endDate, zoneId);
-    }
-
-    public Task<IEnumerable<GainExperience>> GetReviveExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.Revive, worldId, startDate, endDate, zoneId);
-    }
-
-    public Task<IEnumerable<GainExperience>> GetRoadkillExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.Roadkill, worldId, startDate, endDate, zoneId);
-    }
-
-    public Task<IEnumerable<GainExperience>> GetSquadBeaconKillExperienceEventsByDateAsync(int worldId, DateTime startDate, DateTime? endDate, int? zoneId = null)
-    {
-        return _eventRepository.GetExperienceByDateAsync(Experience.SquadBeaconKill, worldId, startDate, endDate, zoneId);
-    }
-
     public void Dispose()
     {
         _facilityControlsByDateLock.Dispose();
-    }
-
-    private static class Experience
-    {
-        public const int Heal = 4;
-        public const int Revive = 7;
-        public const int Roadkill = 26;
-        public const int SquadBeaconKill = 270;
     }
 }
