@@ -17,6 +17,8 @@ namespace Voidwell.DaybreakGames.Data.Migrations
             migrationBuilder.DropTable(
                 name: "experience");
 
+            migrationBuilder.Sql("DELETE FROM updater_scheduler WHERE id = 'ExperienceStore';");
+
             migrationBuilder.DropIndex(
                 name: "i_x_event_vehicle_destroy_attacker_weapon_id_timestamp",
                 table: "event_vehicle_destroy");
