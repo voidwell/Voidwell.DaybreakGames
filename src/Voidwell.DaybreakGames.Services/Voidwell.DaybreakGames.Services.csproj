@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" />
+    <PackageReference Include="DaybreakGames.Census" />
         <PackageReference Include="Riok.Mapperly" />
     </ItemGroup>
 
