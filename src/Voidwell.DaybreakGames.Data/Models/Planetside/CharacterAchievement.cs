@@ -5,7 +5,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 public class CharacterAchievement
 {
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
     [Required]
     public int AchievementId { get; set; }
     public int? EarnedCount { get; set; }

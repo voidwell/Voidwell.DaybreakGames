@@ -17,29 +17,29 @@ public class PlayerSessionEventMapperTest
         {
             Timestamp = _time,
             ZoneId = 2,
-            CharacterId = "victim",
+            CharacterId = 1001,
             Character = new Character { Name = "Victim", FactionId = 2 },
-            AttackerCharacterId = "attacker",
+            AttackerCharacterId = 1002,
             AttackerCharacter = new Character { Name = "Attacker", FactionId = 1 },
             AttackerWeaponId = 80,
             AttackerWeapon = new Item { Name = "Gauss Rifle", ImageId = 7 },
             IsHeadshot = true,
             AttackerFireModeId = 3,
             AttackerLoadoutId = 4,
-            AttackerOutfitId = "o1",
+            AttackerOutfitId = 101,
             AttackerVehicleId = 5,
             CharacterLoadoutId = 6,
-            CharacterOutfitId = "o2"
+            CharacterOutfitId = 102
         };
 
         var result = Assert.IsType<PlayerSessionDeathEvent>(PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).Single());
 
         Assert.Equal(_time, result.Timestamp);
         Assert.Equal(2, result.ZoneId);
-        Assert.Equal("attacker", result.Attacker.Id);
+        Assert.Equal("1002", result.Attacker.Id);
         Assert.Equal("Attacker", result.Attacker.Name);
         Assert.Equal(1, result.Attacker.FactionId);
-        Assert.Equal("victim", result.Victim.Id);
+        Assert.Equal("1001", result.Victim.Id);
         Assert.Equal("Victim", result.Victim.Name);
         Assert.Equal(2, result.Victim.FactionId);
         Assert.Equal(80, result.Weapon.Id);
@@ -48,16 +48,16 @@ public class PlayerSessionEventMapperTest
         Assert.True(result.IsHeadshot);
         Assert.Equal(3, result.AttackerFireModeId);
         Assert.Equal(4, result.AttackerLoadoutId);
-        Assert.Equal("o1", result.AttackerOutfitId);
+        Assert.Equal(101, result.AttackerOutfitId);
         Assert.Equal(5, result.AttackerVehicleId);
         Assert.Equal(6, result.CharacterLoadoutId);
-        Assert.Equal("o2", result.CharacterOutfitId);
+        Assert.Equal(102, result.CharacterOutfitId);
     }
 
     [Fact]
     public void Death_MissingNavigationData_ProducesNullNames()
     {
-        var death = new Death { CharacterId = "victim", AttackerCharacterId = "attacker", AttackerWeaponId = 80 };
+        var death = new Death { CharacterId = 1001, AttackerCharacterId = 1002, AttackerWeaponId = 80 };
 
         var result = (PlayerSessionDeathEvent)PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).Single();
 
@@ -71,7 +71,7 @@ public class PlayerSessionEventMapperTest
     [Fact]
     public void Death_WithoutAttackerWeapon_Throws()
     {
-        var death = new Death { CharacterId = "victim", AttackerWeaponId = null };
+        var death = new Death { CharacterId = 1001, AttackerWeaponId = null };
 
         var act = () => PlayerSessionEventMapper.ToPlayerSessionEvent(new[] { death }).ToList();
 
@@ -132,8 +132,8 @@ public class PlayerSessionEventMapperTest
         {
             Timestamp = _time,
             ZoneId = 2,
-            CharacterId = "victim",
-            AttackerCharacterId = "attacker",
+            CharacterId = 1001,
+            AttackerCharacterId = 1002,
             AttackerWeaponId = 80,
             AttackerWeapon = new Item { Name = "Lancer" },
             VehicleId = 3,

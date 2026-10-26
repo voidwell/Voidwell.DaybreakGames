@@ -50,10 +50,10 @@ public class CensusToDataMapperTest
     }
 
     [Theory]
-    [InlineData("0", null)]
-    [InlineData("123", "123")]
+    [InlineData(0L, null)]
+    [InlineData(123L, 123L)]
     [InlineData(null, null)]
-    public void PlayerFacilityEvents_TreatZeroOutfitIdAsNone(string outfitId, string expected)
+    public void PlayerFacilityEvents_TreatZeroOutfitIdAsNone(long? outfitId, long? expected)
     {
         Assert.Equal(expected, CensusToDataMapper.Map(new PlayerFacilityCapture { OutfitId = outfitId }).OutfitId);
         Assert.Equal(expected, CensusToDataMapper.Map(new PlayerFacilityDefend { OutfitId = outfitId }).OutfitId);

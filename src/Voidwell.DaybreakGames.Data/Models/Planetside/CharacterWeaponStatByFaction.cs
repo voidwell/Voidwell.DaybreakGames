@@ -5,7 +5,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 public class CharacterWeaponStatByFaction
 {
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
     [Required]
     public int ItemId { get; set; }
     [Required]

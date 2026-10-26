@@ -56,5 +56,5 @@ public static partial class CensusToDataMapper
 
     private static DateTime? GetAlertEndDate(CensusModels.MetagameEvent source) => source.Timestamp + _alertDuration;
 
-    private static string? NullIfZero(string? outfitId) => outfitId == "0" ? null : outfitId;
+    private static long? NullIfZero(long? outfitId) => outfitId == 0 ? null : outfitId;
 }

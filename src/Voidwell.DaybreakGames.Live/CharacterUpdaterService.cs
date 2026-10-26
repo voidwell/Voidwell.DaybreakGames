@@ -39,7 +39,7 @@ public class CharacterUpdaterService : ICharacterUpdaterService
         _isWorking = false;
     }
 
-    public async Task AddToQueue(string characterId)
+    public async Task AddToQueue(long characterId)
     {
         try
         {

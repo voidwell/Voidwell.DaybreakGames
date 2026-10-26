@@ -5,7 +5,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 public class CharacterLifetimeStatByFaction
 {
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
 
     public int? DominationCountVS { get; set; }
     public int? DominationCountNC { get; set; }

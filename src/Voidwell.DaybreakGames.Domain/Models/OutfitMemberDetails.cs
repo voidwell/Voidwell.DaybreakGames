@@ -2,7 +2,7 @@ namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class OutfitMemberDetails
 {
-    public string? CharacterId { get; set; }
+    public long? CharacterId { get; set; }
     public string? Name { get; set; }
     public DateTime MemberSinceDate { get; set; }
     public int RankOrdinal { get; set; }

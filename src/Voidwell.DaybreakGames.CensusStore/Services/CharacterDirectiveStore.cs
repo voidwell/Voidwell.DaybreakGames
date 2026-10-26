@@ -19,7 +19,7 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
     private readonly ICharacterStore _characterStore;
     private readonly IStoreUpdaterHelper _storeUpdaterHelper;
 
-    private readonly AsyncKeyedLocker<string> _characterLock = new();
+    private readonly AsyncKeyedLocker<long> _characterLock = new();
 
     public CharacterDirectiveStore(
         ICharacterDirectiveRepository repository,
@@ -39,7 +39,7 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
         _storeUpdaterHelper = storeUpdaterHelper;
     }
 
-    public async Task<IEnumerable<CharacterDirectiveTree>?> GetCharacterDirectivesAsync(string characterId)
+    public async Task<IEnumerable<CharacterDirectiveTree>?> GetCharacterDirectivesAsync(long characterId)
     {
         using (await _characterLock.LockAsync(characterId))
         {
@@ -61,7 +61,7 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
         }
     }
 
-    private async Task<IEnumerable<CharacterDirectiveTree>?> GetCharacterDirectiveStoreDataAsync(string characterId)
+    private async Task<IEnumerable<CharacterDirectiveTree>?> GetCharacterDirectiveStoreDataAsync(long characterId)
     {
         var directiveTreesTask = _repository.GetDirectiveTreesAsync(characterId);
         var directiveTiersTask = _repository.GetDirectiveTiersAsync(characterId);
@@ -87,7 +87,7 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
         return directiveTrees;
     }
 
-    public async Task UpdateCharacterDirectiveDataAsync(string characterId)
+    public async Task UpdateCharacterDirectiveDataAsync(long characterId)
     {
         await Task.WhenAll(
             _storeUpdaterHelper.UpdateAsync<CensusCharacterDirectiveModel, CharacterDirective>(

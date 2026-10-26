@@ -5,7 +5,7 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 public class CharacterLifetimeStat
 {
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
 
     public int? AchievementCount { get; set; }
     public int? AssistCount { get; set; }

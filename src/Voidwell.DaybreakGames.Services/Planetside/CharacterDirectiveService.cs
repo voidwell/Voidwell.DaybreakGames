@@ -16,7 +16,7 @@ public class CharacterDirectiveService : ICharacterDirectiveService
     private readonly ICache _cache;
 
     private const string _cacheKey = "ps2.characterDirective";
-    private readonly Func<string, string> _getDirectivesCacheKey = (characterId) => $"{_cacheKey}_character_{characterId}";
+    private readonly Func<long, string> _getDirectivesCacheKey = (characterId) => $"{_cacheKey}_character_{characterId}";
 
     private readonly TimeSpan _cacheDirectivesCharacterExpiration = TimeSpan.FromMinutes(10);
 
@@ -29,7 +29,7 @@ public class CharacterDirectiveService : ICharacterDirectiveService
         _cache = cache;
     }
 
-    public async Task<CharacterDirectivesOutline?> GetCharacterDirectivesAsync(string characterId)
+    public async Task<CharacterDirectivesOutline?> GetCharacterDirectivesAsync(long characterId)
     {
         var cacheKey = _getDirectivesCacheKey(characterId);
 
@@ -149,7 +149,7 @@ public class CharacterDirectiveService : ICharacterDirectiveService
         }, _cacheDirectivesCharacterExpiration);
     }
 
-    public Task UpdateCharacterDirectivesAsync(string characterId)
+    public Task UpdateCharacterDirectivesAsync(long characterId)
     {
         return _characterDirectiveStore.UpdateCharacterDirectiveDataAsync(characterId);
     }

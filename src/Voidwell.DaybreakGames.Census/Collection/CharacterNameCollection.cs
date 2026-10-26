@@ -15,7 +15,7 @@ public class CharacterNameCollection : ICensusCollection<CensusCharacterNameMode
         _client = censusClient;
     }
 
-    public async Task<string?> GetCharacterIdByNameAsync(string characterName)
+    public async Task<long?> GetCharacterIdByNameAsync(string characterName)
     {
         var nameModel = await _client.CreateQuery(CollectionName)
             .Where("name.first_lower", a => a.Equals(characterName.ToLower()))

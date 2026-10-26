@@ -7,7 +7,7 @@ public class PlayerSession
     public int Id { get; set; }
 
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
 
     public DateTime LoginDate { get; set; }
     public DateTime LogoutDate { get; set; }

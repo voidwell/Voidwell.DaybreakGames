@@ -15,7 +15,7 @@ public class OutfitMembershipCollection : ICensusCollection<CensusOutfitMemberMo
         _client = censusClient;
     }
 
-    public async Task<CensusOutfitMemberModel?> GetCharacterOutfitMembershipAsync(string characterId)
+    public async Task<CensusOutfitMemberModel?> GetCharacterOutfitMembershipAsync(long characterId)
     {
         return await _client.CreateQuery(CollectionName)
             .ShowFields("character_id", "outfit_id", "member_since_date", "rank", "rank_ordinal")

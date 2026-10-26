@@ -8,7 +8,8 @@ public class CharacterUpdateQueue
 {
     [Key]
     [Required]
-    public string? CharacterId { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public long CharacterId { get; set; }
 
     public DateTime Timestamp { get; set; }
 }

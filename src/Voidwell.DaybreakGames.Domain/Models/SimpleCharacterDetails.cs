@@ -2,7 +2,7 @@ namespace Voidwell.DaybreakGames.Domain.Models;
 
 public class SimpleCharacterDetails
 {
-    public string? Id { get; set; }
+    public long? Id { get; set; }
     public string? Name { get; set; }
     public string? World { get; set; }
     public int FactionId { get; set; }

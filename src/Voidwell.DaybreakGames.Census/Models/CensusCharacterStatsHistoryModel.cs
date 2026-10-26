@@ -4,7 +4,7 @@ namespace Voidwell.DaybreakGames.Census.Models;
 
 public class CensusCharacterStatsHistoryModel
 {
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
     public string? StatName { get; set; }
     public int AllTime { get; set; }
     public int OneLifeMax { get; set; }

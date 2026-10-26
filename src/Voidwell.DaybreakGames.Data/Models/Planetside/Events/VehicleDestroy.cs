@@ -5,11 +5,11 @@ namespace Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 public class VehicleDestroy
 {
     [Required]
-    public string? CharacterId { get; set; }
+    public long CharacterId { get; set; }
     [Required]
     public int? VehicleId { get; set; }
     [Required]
-    public string? AttackerCharacterId { get; set; }
+    public long AttackerCharacterId { get; set; }
     [Required]
     public int? AttackerVehicleId { get; set; }
     [Required]

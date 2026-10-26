@@ -16,7 +16,7 @@ public class CharacterService : ICharacterService
     private readonly IWeaponService _weaponService;
 
     private const string _cacheKey = "ps2.character";
-    private readonly Func<string, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
+    private readonly Func<long, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
 
     private readonly TimeSpan _cacheCharacterDetailsExpiration = TimeSpan.FromMinutes(30);
 
@@ -32,7 +32,7 @@ public class CharacterService : ICharacterService
         _weaponService = weaponService;
     }
 
-    public Task<Character> GetCharacter(string characterId)
+    public Task<Character> GetCharacter(long characterId)
     {
         return _characterStore.GetCharacter(characterId)!;
     }
@@ -43,12 +43,12 @@ public class CharacterService : ICharacterService
         return characterList.Select(DomainMapper.MapSearchResult);
     }
 
-    public Task<IEnumerable<Character>> FindCharacters(IEnumerable<string> characterIds)
+    public Task<IEnumerable<Character>> FindCharacters(IEnumerable<long> characterIds)
     {
         return _characterStore.FindCharacters(characterIds);
     }
 
-    public async Task<CharacterDetails?> GetCharacterDetails(string characterId)
+    public async Task<CharacterDetails?> GetCharacterDetails(long characterId)
     {
         var details = await GetCharacterDetailsFromCacheAsync(characterId);
 
@@ -78,22 +78,22 @@ public class CharacterService : ICharacterService
         return details;
     }
 
-    public Task UpdateAllCharacterInfo(string characterId, DateTime? lastLoginDate = null)
+    public Task UpdateAllCharacterInfo(long characterId, DateTime? lastLoginDate = null)
     {
         return _characterStore.UpdateAllCharacterInfo(characterId, lastLoginDate);
     }
 
-    public Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(string characterId)
+    public Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(long characterId)
     {
         return _characterStore.GetCharacterAchievementsAsync(characterId);
     }
 
-    public Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(string characterId)
+    public Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(long characterId)
     {
         return _characterStore.GetWeaponStatsAsync(characterId);
     }
 
-    private async Task<IEnumerable<CharacterDetails>?> GetCharacterDetailsAsync(IEnumerable<string> characterIds)
+    private async Task<IEnumerable<CharacterDetails>?> GetCharacterDetailsAsync(IEnumerable<long> characterIds)
     {
         var cachedDetails = (await Task.WhenAll(characterIds.Select(GetCharacterDetailsFromCacheAsync))).Where(a => a != null).ToList();
 
@@ -124,7 +124,7 @@ public class CharacterService : ICharacterService
         return details;
     }
 
-    private Task<CharacterDetails> GetCharacterDetailsFromCacheAsync(string characterId)
+    private Task<CharacterDetails> GetCharacterDetailsFromCacheAsync(long characterId)
     {
         var cacheKey = _getDetailsCacheKey(characterId);
         return _cache.GetAsync<CharacterDetails>(cacheKey);
@@ -132,7 +132,7 @@ public class CharacterService : ICharacterService
 
     private Task SaveCharacterDetailsInCacheAsync(CharacterDetails details)
     {
-        var cacheKey = _getDetailsCacheKey(details.Id!);
+        var cacheKey = _getDetailsCacheKey(details.Id!.Value);
         return _cache.SetAsync(cacheKey, details, _cacheCharacterDetailsExpiration);
     }
 
@@ -229,7 +229,7 @@ public class CharacterService : ICharacterService
         return infantryStats;
     }
 
-    public Task<OutfitMember> GetCharactersOutfit(string characterId)
+    public Task<OutfitMember> GetCharactersOutfit(long characterId)
     {
         return _characterStore.GetCharactersOutfitAsync(characterId)!;
     }
@@ -332,14 +332,14 @@ public class CharacterService : ICharacterService
     private async Task<IEnumerable<CharacterDetails>?> GetCharacterDetailsByNameAsync(IEnumerable<string> characterNames)
     {
         var characterIdResults = await Task.WhenAll(characterNames.Select(_characterStore.GetCharacterIdByName));
-        var characterIds = characterIdResults.Where(a => !string.IsNullOrWhiteSpace(a));
+        var characterIds = characterIdResults.OfType<long>();
 
         if (!characterIds.Any())
         {
             return null;
         }
 
-        return await GetCharacterDetailsAsync(characterIds!);
+        return await GetCharacterDetailsAsync(characterIds);
     }
 
     private async Task<CharacterDetails?> GetCharacterDetailsByNameAsync(string characterName)
@@ -350,7 +350,7 @@ public class CharacterService : ICharacterService
             return null;
         }
 
-        return await GetCharacterDetails(characterId);
+        return await GetCharacterDetails(characterId.Value);
     }
 
     private static CharacterDetailsWeaponStat? FindCharacterWeaponStatsByNameOrId(IEnumerable<CharacterDetailsWeaponStat> stats, string weaponSearch)
