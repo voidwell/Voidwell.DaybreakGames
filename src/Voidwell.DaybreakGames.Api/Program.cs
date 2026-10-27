@@ -8,6 +8,7 @@ using Voidwell.Common.Logging;
 using Voidwell.Common.Swagger;
 using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Api.Extensions;
+using Voidwell.DaybreakGames.Api.Middleware;
 using Voidwell.DaybreakGames.Api.Options;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Platforms;
@@ -100,6 +101,8 @@ app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<CensusPlatformMiddleware>();
 
 app.MapControllers();
 

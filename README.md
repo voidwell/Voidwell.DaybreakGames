@@ -6,6 +6,8 @@
 
 Backend API for Voidwell's PlanetSide 2 data. It ingests Daybreak Games' Census REST and event-stream APIs, stores the results in PostgreSQL, caches in Redis, and serves them over an ASP.NET Core HTTP API.
 
+One instance serves every platform: PC (`ps2`), PS4 US (`ps2ps4us`) and PS4 EU (`ps2ps4eu`). See [Platforms](#platforms).
+
 ## Requirements
 
 | Dependency | Version | Purpose |
@@ -28,7 +30,7 @@ Settings are read from `appsettings.json`, then `appsettings.{Environment}.json`
 | `ConnectionString` | Yes | Npgsql connection string, e.g. `Server=localhost;Database=voidwell.daybreakgames;Username=...;Password=...` |
 | `PoolSize` | No | DbContext pool size (default `100`) |
 | `CensusServiceKey` | Yes | Census service ID (without the `s:` prefix) |
-| `CensusServiceNamespace` | Yes | Census namespace, normally `ps2` |
+| `CensusPlatforms` | No | Comma-separated platforms to track: `PC`, `PS4US`, `PS4EU`. Each gets its own event stream, world updates and search results. Empty enables all three (the default in `appsettings.json`) |
 | `Auth:Authority` | Yes | Base URL of the token authority used to validate JWTs and introspect reference tokens. The app fails at startup if the `Auth` section is missing |
 | `Auth:ClientId` | Yes | Client (API resource) id used for token introspection |
 | `Auth:ClientSecret` | Yes | Secret for that client |
@@ -37,7 +39,7 @@ Settings are read from `appsettings.json`, then `appsettings.{Environment}.json`
 | `RedisConfiguration` | No | StackExchange.Redis connection string. Empty keeps the cache in memory only |
 | `OriginAddress` | No | Extra allowed CORS origin (`http://localhost:4200` is always allowed) |
 | `CensusWebsocketServices` | No | Comma-separated event names to subscribe to (e.g. `Death, FacilityControl, PlayerLogin`). Defaults are in `appsettings.json`. Empty disables event processing |
-| `CensusWebsocketWorlds` / `CensusWebsocketCharacters` | No | Worlds and characters to stream; `all` by default |
+| `CensusWebsocketWorlds` / `CensusWebsocketCharacters` | No | Worlds and characters to stream on every platform; `all` by default |
 | `DisableUpdater` | No | `true` disables the scheduled Census store updater |
 | `DisableCharacterUpdater` | No | `true` disables the background character updater |
 | `DisableCensusMonitor` | No | `true` disables the Census websocket monitor |
@@ -49,7 +51,7 @@ Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Ap
 {
   "ConnectionString": "Server=localhost;Database=voidwell.daybreakgames;Username=postgres;Password=postgres",
   "CensusServiceKey": "your-service-id",
-  "CensusServiceNamespace": "ps2",
+  "CensusPlatforms": "PC",
   "Auth": {
     "Authority": "https://auth.example.com",
     "ClientId": "voidwell-daybreakgames",
@@ -67,6 +69,26 @@ The EF design-time factory reads `ConnectionString` from `appsettings.json` and 
 
 Logging, caching, authentication and Swagger come from the shared `Voidwell.Common.*` packages (Logging, Cache, Authentication, Swagger). Logging uses Serilog configured from the `Serilog` section. In Development it writes readable text to the console; otherwise it writes compact JSON (each event carries an `Application` property from `ApplicationName`).
 
+## Platforms
+
+Every platform has its own Census namespace, and ids never collide between them. Static collections (items, zones, directives and the rest) are identical across platforms, so they are only fetched from PC. Worlds are fetched from every enabled platform and stored with their `platform`.
+
+- **Census calls:** `ICensusClient` is a `PlatformCensusClient` that sends each call to the named DaybreakGames.Census client of the platform set on `ICensusContext` for the current async flow, or to PC when none is set. Code that needs another platform wraps its calls in `censusContext.Use(platform)`.
+- **Entities:** stores look up the platform of a character or outfit from its stored world, then the platform set on the context, and otherwise ask each enabled platform in turn. The result is cached.
+- **Event streams:** each enabled platform has its own websocket monitor, listed by the services API as `WebsocketMonitor` (PC), `WebsocketMonitor-PS4US` and `WebsocketMonitor-PS4EU`, each enabled and disabled separately. Events are processed with their stream's platform set.
+- **HTTP requests:** a request can be scoped to one platform with the `platform` query parameter or the `X-Platform` header (`PC`, `PS4US` or `PS4EU`; anything else is a 400). A scoped request only lists that platform's worlds and world states, and its searches, name and alias lookups and weapon leaderboards only cover that platform. Unscoped requests cover every platform. Lookups by id work either way.
+
+### Merging a former PS4 instance
+
+Before this change each platform ran as its own instance with its own database. To move a PS4 instance's data into the merged database:
+
+1. Deploy this release against the PC database, which becomes the merged one. Its existing worlds are tagged `PC` by the migration.
+2. Stop the PS4 instance and back up the merged database.
+3. Run `scripts/merge-platform-database.sh PS4US` (or `PS4EU`) with `TARGET_DATABASE_URL` and the `SOURCE_*` variables described in the script. It copies worlds (tagged with the platform), characters and their stats, outfits, sessions, alerts, snapshots, populations and events in one transaction, keeps the merged database's row on any conflict, and refuses to merge the same platform twice.
+4. Restart the API and clear its Redis keys so cached worlds and lookups are rebuilt.
+
+Static data, weapon aggregates, daily weapon stats, sanctioned weapons and updater history are kept from the merged database.
+
 ## Running
 
 ```bash
@@ -80,6 +102,7 @@ The API listens on `http://0.0.0.0:5000`. Pending EF migrations are applied on s
 Migrations are applied automatically when the API starts. To add one, use the helper script (it wraps `dotnet ef` and uses the `Development` environment):
 
 - `scripts/init-migrate.sh [name]`: add a new migration (timestamped unless a name is given)
+- `scripts/merge-platform-database.sh <PS4US|PS4EU>`: merge a former single-platform database into this one (see [Merging a former PS4 instance](#merging-a-former-ps4-instance))
 
 ## Tests
 
@@ -106,7 +129,7 @@ docker run -p 5000:5000 -e ConnectionString=... -e CensusServiceKey=... voidwell
 | `Voidwell.DaybreakGames.Services` | Application services and mapping |
 | `Voidwell.DaybreakGames.Live` | Census event-stream processing and live game state |
 | `Voidwell.DaybreakGames.CensusStore` | Census-to-database stores and scheduled updater |
-| `Voidwell.DaybreakGames.Census` | Census API collections and models |
+| `Voidwell.DaybreakGames.Census` | Census API collections and models, platform context and routing client |
 | `Voidwell.DaybreakGames.Data` | EF Core context, repositories, migrations |
 | `Voidwell.DaybreakGames.Domain` | Domain models |
 | `Voidwell.DaybreakGames.Utils` | Shared helpers and hosted-service management |

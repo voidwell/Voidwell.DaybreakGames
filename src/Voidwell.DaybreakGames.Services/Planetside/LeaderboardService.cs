@@ -1,8 +1,10 @@
 using Voidwell.Common.Cache;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Services.Planetside;
 
@@ -11,21 +13,23 @@ public class LeaderboardService : ILeaderboardService
     private readonly ICharacterStore _characterStore;
     private readonly IWeaponAggregateService _weaponAggregateService;
     private readonly ICache _cache;
+    private readonly ICensusContext _censusContext;
 
     private const string _cacheKey = "ps2.leaderboard";
-    private readonly Func<int, int, string, string, string> _getCharacterLeaderboardCacheKey = (weaponId, page, sort, sortDir) => $"{_cacheKey}_leaderboard_{weaponId}_{page}_{sort}_{sortDir}";
+    private readonly Func<int, int, string, string, Platform?, string> _getCharacterLeaderboardCacheKey = (weaponId, page, sort, sortDir, platform) => $"{_cacheKey}_leaderboard_{platform}_{weaponId}_{page}_{sort}_{sortDir}";
     private readonly TimeSpan _cacheCharacterLeaderboardExpiration = TimeSpan.FromMinutes(1);
 
-    public LeaderboardService(ICharacterStore characterStore, IWeaponAggregateService weaponAggregateService, ICache cache)
+    public LeaderboardService(ICharacterStore characterStore, IWeaponAggregateService weaponAggregateService, ICache cache, ICensusContext censusContext)
     {
         _characterStore = characterStore;
         _weaponAggregateService = weaponAggregateService;
         _cache = cache;
+        _censusContext = censusContext;
     }
 
     public async Task<IEnumerable<WeaponLeaderboardRow>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50, string sort = "kills", string sortDir = "desc")
     {
-        var cacheKey = _getCharacterLeaderboardCacheKey(weaponItemId, page, sort, sortDir);
+        var cacheKey = _getCharacterLeaderboardCacheKey(weaponItemId, page, sort, sortDir, _censusContext.Platform);
 
         return await _cache.GetOrSetAsync<IEnumerable<WeaponLeaderboardRow>>(cacheKey, async ct =>
         {

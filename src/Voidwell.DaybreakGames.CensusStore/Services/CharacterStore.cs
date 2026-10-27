@@ -33,7 +33,7 @@ public class CharacterStore : ICharacterStore
     private readonly Func<long, string> _getCharacterCacheKey = characterId => $"{_cacheKey}_character_{characterId}";
     private readonly Func<long, string> _getDetailsCacheKey = characterId => $"{_cacheKey}_details_{characterId}";
     private readonly Func<string, Platform?, string> _getCharacterIdCacheKey = (characterName, platform) => $"{_cacheKey}_name_{platform}_{characterName.ToLower()}";
-    private readonly Func<int, string> _getLeaderboardDataCacheKey = weaponId => $"{_cacheKey}_leaderboard_{weaponId}";
+    private readonly Func<int, Platform?, string> _getLeaderboardDataCacheKey = (weaponId, platform) => $"{_cacheKey}_leaderboard_{platform}_{weaponId}";
 
     private readonly TimeSpan _cacheCharacterExpiration = TimeSpan.FromMinutes(15);
     private readonly TimeSpan _cacheCharacterIdExpiration = TimeSpan.FromMinutes(30);
@@ -74,23 +74,13 @@ public class CharacterStore : ICharacterStore
 
     public async Task<IEnumerable<CensusCharacterModel>> LookupCharactersByName(string query, int limit = 12)
     {
-        var platforms = _platformResolver.GetSearchPlatforms().ToList();
+        var platformResults = (await Task.WhenAll(_platformResolver.GetSearchPlatforms()
+                .Select(platform => TryLookupCensusCharactersByNameAsync(platform, query, limit))))
+            .OfType<IEnumerable<CensusCharacterModel>>()
+            .ToList();
 
-        try
-        {
-            var platformResults = await Task.WhenAll(platforms.Select(platform => LookupCensusCharactersByNameAsync(platform, query, limit)));
-            if (platformResults.Length == 1)
-            {
-                return platformResults[0];
-            }
-
-            var lowerQuery = query.ToLower();
-            return [.. platformResults.SelectMany(a => a)
-                .OrderByDescending(a => a.Name?.FirstLower == lowerQuery)
-                .ThenBy(a => a.Name?.FirstLower)
-                .Take(limit)];
-        }
-        catch (Exception)
+        // A platform that fails is left out; stored characters are only used when every platform failed
+        if (platformResults.Count == 0)
         {
             var worldIds = await _platformResolver.GetContextWorldIdsAsync();
             var characters = await _characterRepository.LookupCharactersByNameAsync(query, limit, worldIds);
@@ -104,13 +94,31 @@ public class CharacterStore : ICharacterStore
                 BattleRank = new CensusCharacterModel.CharacterBattleRank { Value = a.BattleRank, PercentToNext = a.BattleRankPercentToNext }
             })];
         }
+
+        if (platformResults.Count == 1)
+        {
+            return platformResults[0];
+        }
+
+        var lowerQuery = query.ToLower();
+        return [.. platformResults.SelectMany(a => a)
+            .OrderByDescending(a => a.Name?.FirstLower == lowerQuery)
+            .ThenBy(a => a.Name?.FirstLower)
+            .Take(limit)];
     }
 
-    private async Task<IEnumerable<CensusCharacterModel>> LookupCensusCharactersByNameAsync(Platform platform, string query, int limit)
+    private async Task<IEnumerable<CensusCharacterModel>?> TryLookupCensusCharactersByNameAsync(Platform platform, string query, int limit)
     {
-        using (_censusContext.Use(platform))
+        try
         {
-            return await _characterCollection.LookupCharactersByNameAsync(query, limit);
+            using (_censusContext.Use(platform))
+            {
+                return await _characterCollection.LookupCharactersByNameAsync(query, limit);
+            }
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 
@@ -208,8 +216,8 @@ public class CharacterStore : ICharacterStore
     public async Task<IEnumerable<CharacterWeaponStat>?> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page = 0, int limit = 50, string? sort = null, string? sortDir = null)
     {
         var data = await _cache.GetOrSetAsync(
-            _getLeaderboardDataCacheKey(weaponItemId),
-            ct => _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, 0, 1000),
+            _getLeaderboardDataCacheKey(weaponItemId, _censusContext.Platform),
+            async ct => await _characterRepository.GetCharacterWeaponLeaderboardAsync(weaponItemId, 0, 1000, await _platformResolver.GetContextWorldIdsAsync()),
             _cacheWeaponLeaderboardDataExpiration);
 
         if (sort != null)
