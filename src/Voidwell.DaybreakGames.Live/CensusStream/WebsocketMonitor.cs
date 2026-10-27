@@ -5,28 +5,34 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
+using Voidwell.DaybreakGames.Utils;
 using Voidwell.DaybreakGames.Utils.HostedService;
 using Websocket.Client;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream;
 
+/// <summary>
+/// Streams the events of one platform. One monitor runs per enabled platform.
+/// </summary>
 public class WebsocketMonitor : IStatefulHostedService, IDisposable
 {
+    private readonly Platform _platform;
     private readonly ICensusStreamClient _client;
     private readonly IWebsocketEventHandler _handler;
     private readonly IWorldMonitor _worldMonitor;
     private readonly IWebsocketHealthMonitor _healthMonitor;
     private readonly LiveOptions _options;
-    private readonly HostedServiceState<WebsocketMonitor> _state;
+    private readonly HostedServiceState _state;
     private readonly ILogger<WebsocketMonitor> _logger;
 
     private CensusState? _lastStateChange;
     private Timer? _timer;
 
-    public WebsocketMonitor(ICensusStreamClient streamClient, IWebsocketEventHandler handler,
+    public WebsocketMonitor(Platform platform, ICensusStreamClient streamClient, IWebsocketEventHandler handler,
         IWorldMonitor worldMonitor, IWebsocketHealthMonitor healthMonitor, IOptions<LiveOptions> options,
-        HostedServiceState<WebsocketMonitor> state, ILogger<WebsocketMonitor> logger)
+        HostedServiceState state, ILogger<WebsocketMonitor> logger)
     {
+        _platform = platform;
         _client = streamClient;
         _handler = handler;
         _worldMonitor = worldMonitor;
@@ -61,11 +67,11 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     {
         if (_options.DisableCensusMonitor)
         {
-            _logger.LogInformation("Census monitor is disabled");
+            _logger.LogInformation("Census monitor is disabled for {Platform}", _platform);
             return;
         }
 
-        _logger.LogInformation("Starting census stream monitor");
+        _logger.LogInformation("Starting census stream monitor for {Platform}", _platform);
 
         await _client.ConnectAsync();
 
@@ -74,7 +80,7 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Stopping census stream monitor");
+        _logger.LogInformation("Stopping census stream monitor for {Platform}", _platform);
 
         if (_client == null)
         {
@@ -83,7 +89,7 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
 
         _timer?.Dispose();
         await _client?.DisconnectAsync()!;
-        _healthMonitor.ClearAllWorlds();
+        _healthMonitor.ClearAllWorlds(_platform);
     }
 
     public Task OnApplicationStartup(CancellationToken cancellationToken)
@@ -135,7 +141,7 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
 #pragma warning disable CS4014
         Task.Run(() =>
         {
-            _handler.Process(msg);
+            _handler.Process(_platform, msg);
         });
 #pragma warning restore CS4014
 
@@ -145,8 +151,8 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     private async Task OnDisconnectAsync(DisconnectionInfo info)
     {
         UpdateStateDetails(info.Exception?.Message ?? info.Type.ToString());
-        await _worldMonitor.ClearAllWorldStates();
-        _healthMonitor.ClearAllWorlds();
+        await _worldMonitor.ClearAllWorldStates(_platform);
+        _healthMonitor.ClearAllWorlds(_platform);
     }
 
     private void UpdateStateDetails(object contents)
@@ -162,14 +168,14 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     {
         if (!_state.IsRunning)
         {
-            _healthMonitor.ClearAllWorlds();
+            _healthMonitor.ClearAllWorlds(_platform);
             _timer?.Dispose();
             return;
         }
 
-        if (!_healthMonitor.IsHealthy())
+        if (!_healthMonitor.IsHealthy(_platform))
         {
-            _logger.LogError(45234, "Census stream has failed health checks. Attempting resetting connection.");
+            _logger.LogError(45234, "Census stream for {Platform} has failed health checks. Attempting resetting connection.", _platform);
 
             try
             {
@@ -179,7 +185,7 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
             {
                 UpdateStateDetails(ex.Message);
 
-                _logger.LogError(45235, ex, "Failed to reestablish connection to Census");
+                _logger.LogError(45235, ex, "Failed to reestablish connection to Census for {Platform}", _platform);
             }
         }
     }

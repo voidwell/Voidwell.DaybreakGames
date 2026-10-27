@@ -1,5 +1,6 @@
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Live.GameState;
 
@@ -16,7 +17,7 @@ public interface IWorldMonitor
     Task<WorldOnlineState?> GetWorldState(int worldId);
     IEnumerable<ZoneRegionOwnership>? GetZoneOwnership(int worldId, int zoneId);
     Task<IEnumerable<ZoneRegionOwnership>?> RefreshZoneOwnership(int worldId, int zoneId);
-    Task ClearAllWorldStates();
+    Task ClearAllWorldStates(Platform platform);
     Task SetupWorldZones(int worldId);
     Task<bool> SetupWorldZone(int worldId, int zoneId, bool retryAsync = false);
     Task<PopulationPeriod?> GetZonePopulation(int worldId, int zoneId);

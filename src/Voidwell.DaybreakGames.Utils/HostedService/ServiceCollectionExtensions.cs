@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Voidwell.DaybreakGames.Utils.HostedService;
 
@@ -47,6 +48,38 @@ public static class ServiceCollectionExtensions
         services.AddHostedService(sp =>
         {
             return new StatefulHostedServiceWrapper<TImplementation>((TImplementation)sp.GetRequiredService<TService>());
+        });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers one named instance of a service type that can run several times side by side.
+    /// Each instance is resolved as a keyed service under <paramref name="serviceName"/> and gets its own state.
+    /// </summary>
+    public static IServiceCollection AddStatefulHostedService<TImplementation>(this IServiceCollection services, string serviceName,
+        Func<IServiceProvider, HostedServiceState, TImplementation> implementationFactory)
+        where TImplementation : class, IStatefulHostedService
+    {
+        services.AddKeyedSingleton<HostedServiceState>(serviceName, (sp, _) =>
+        {
+            return new NamedHostedServiceState(serviceName, () => sp.GetRequiredKeyedService<TImplementation>(serviceName));
+        });
+
+        services.AddKeyedSingleton(serviceName, (sp, _) =>
+        {
+            return implementationFactory(sp, sp.GetRequiredKeyedService<HostedServiceState>(serviceName));
+        });
+
+        services.AddSingleton(sp =>
+        {
+            return sp.GetRequiredKeyedService<HostedServiceState>(serviceName);
+        });
+
+        // Not AddHostedService: it de-duplicates factory registrations by type, which would drop every instance but the first.
+        services.AddSingleton<IHostedService>(sp =>
+        {
+            return new StatefulHostedServiceWrapper<TImplementation>(sp.GetRequiredKeyedService<TImplementation>(serviceName));
         });
 
         return services;

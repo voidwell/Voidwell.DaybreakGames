@@ -4,6 +4,7 @@ using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Test;
 using Voidwell.DaybreakGames.Test.MapTests;
+using Voidwell.DaybreakGames.Utils;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Live.Test;
@@ -162,5 +163,59 @@ public class WorldMonitorTest : IClassFixture<WorldMonitorFixture>
         Assert.Contains(worldStates, a => a.Id == activeWorldId);
         Assert.Contains(worldStates, a => a.Id == newWorldId);
         Assert.DoesNotContain(worldStates, a => a.Id == deactivatedWorldId);
+    }
+
+    [Fact]
+    public async Task GetWorldStates_PlatformSet_ReturnsOnlyThatPlatform()
+    {
+        int pcWorldId = 3010;
+        int ps4WorldId = 3011;
+
+        _fixture.WorldService.AsMock()
+            .Setup(a => a.GetAllWorlds())
+            .ReturnsAsync(new[]
+            {
+                new World { Id = pcWorldId, Name = "PC world", Platform = Platform.PC },
+                new World { Id = ps4WorldId, Name = "PS4 world", Platform = Platform.PS4US }
+            });
+
+        var sut = _fixture.CreateSut();
+
+        await sut.SetWorldState(pcWorldId, "PC world", false);
+        await sut.SetWorldState(ps4WorldId, "PS4 world", false);
+
+        IEnumerable<WorldOnlineState> worldStates;
+        using (_fixture.CensusContext.Use(Platform.PS4US))
+        {
+            worldStates = await sut.GetWorldStates();
+        }
+
+        Assert.Contains(worldStates, a => a.Id == ps4WorldId);
+        Assert.DoesNotContain(worldStates, a => a.Id == pcWorldId);
+    }
+
+    [Fact]
+    public async Task ClearAllWorldStates_OnlyClearsThatPlatform()
+    {
+        int pcWorldId = 3020;
+        int unstoredPs4WorldId = 3021;
+
+        _fixture.WorldService.AsMock()
+            .Setup(a => a.GetAllWorlds())
+            .ReturnsAsync(new[] { new World { Id = pcWorldId, Name = "PC world", Platform = Platform.PC } });
+
+        var sut = _fixture.CreateSut();
+
+        await sut.SetWorldState(pcWorldId, "PC world", true);
+        using (_fixture.CensusContext.Use(Platform.PS4EU))
+        {
+            // Not stored yet, so it takes the platform of the stream that reported it
+            await sut.SetWorldState(unstoredPs4WorldId, "PS4 world", true);
+        }
+
+        await sut.ClearAllWorldStates(Platform.PS4EU);
+
+        Assert.True((await sut.GetWorldState(pcWorldId))!.IsOnline);
+        Assert.False((await sut.GetWorldState(unstoredPs4WorldId))!.IsOnline);
     }
 }

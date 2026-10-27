@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Moq;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
@@ -13,11 +14,12 @@ public class WorldMonitorFixture
     public IWorldService WorldService { get; set; }
     public IMapService MapService { get; set; }
     public IPlayerMonitor PlayerMonitor { get; set; }
+    public CensusContext CensusContext { get; set; }
     private ILogger<WorldMonitor> Logger { get; set; }
 
     public WorldMonitor CreateSut()
     {
-        return new WorldMonitor(WorldEventService, ZoneStore, WorldService, MapService, PlayerMonitor, Logger);
+        return new WorldMonitor(WorldEventService, ZoneStore, WorldService, MapService, PlayerMonitor, CensusContext, Logger);
     }
 
     public void ResetFixture()
@@ -27,6 +29,7 @@ public class WorldMonitorFixture
         WorldService = Mock.Of<IWorldService>();
         MapService = Mock.Of<IMapService>();
         PlayerMonitor = Mock.Of<IPlayerMonitor>();
+        CensusContext = new CensusContext();
         Logger = Mock.Of<ILogger<WorldMonitor>>();
     }
 }

@@ -1,10 +1,12 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Live.GameState;
 
@@ -15,19 +17,22 @@ public class WorldMonitor : IWorldMonitor
     private readonly IWorldEventsService _worldEventService;
     private readonly IMapService _mapService;
     private readonly IPlayerMonitor _playerMonitor;
+    private readonly ICensusContext _censusContext;
     private readonly ILogger<WorldMonitor> _logger;
 
     private static readonly ConcurrentDictionary<int, WorldState> _worldStates = new ConcurrentDictionary<int, WorldState>();
     private static readonly ConcurrentDictionary<int, Dictionary<int, Zone>> _retryingWorlds = new ConcurrentDictionary<int, Dictionary<int, Zone>>();
+    private static readonly ConcurrentDictionary<int, Platform> _worldPlatforms = new ConcurrentDictionary<int, Platform>();
 
     public WorldMonitor(IWorldEventsService worldEventService, IZoneStore zoneStore, IWorldService worldService, IMapService mapService,
-        IPlayerMonitor playerMonitor, ILogger<WorldMonitor> logger)
+        IPlayerMonitor playerMonitor, ICensusContext censusContext, ILogger<WorldMonitor> logger)
     {
         _zoneStore = zoneStore;
         _worldService = worldService;
         _worldEventService = worldEventService;
         _mapService = mapService;
         _playerMonitor = playerMonitor;
+        _censusContext = censusContext;
         _logger = logger;
 
         Task.Run(InitializeWorldsAsync);
@@ -42,6 +47,8 @@ public class WorldMonitor : IWorldMonitor
 
         foreach (var world in worldsTask.Result.Where(a => a.IsActive))
         {
+            _worldPlatforms.TryAdd(world.Id, world.Platform);
+
             if (!_worldStates.ContainsKey(world.Id))
             {
                 var worldState = new WorldState(world.Id, world.Name!);
@@ -61,6 +68,13 @@ public class WorldMonitor : IWorldMonitor
         if (worlds.Any(a => a.Id == worldId && !a.IsActive))
         {
             return;
+        }
+
+        // A world census reports before the world updater stores it takes the platform of the stream reporting it
+        var platform = worlds.FirstOrDefault(a => a.Id == worldId)?.Platform ?? _censusContext.Platform;
+        if (platform != null)
+        {
+            _worldPlatforms[worldId] = platform.Value;
         }
 
         if (!_worldStates.ContainsKey(worldId))
@@ -134,9 +148,9 @@ public class WorldMonitor : IWorldMonitor
         return await SetupWorldZoneAsync(worldId, zone, retryAsync);
     }
 
-    public Task ClearAllWorldStates()
+    public Task ClearAllWorldStates(Platform platform)
     {
-        foreach (var worldId in _worldStates.Keys)
+        foreach (var worldId in _worldStates.Keys.Where(a => _worldPlatforms.TryGetValue(a, out var worldPlatform) && worldPlatform == platform))
         {
             SetWorldOffline(worldId, true);
         }
@@ -236,6 +250,12 @@ public class WorldMonitor : IWorldMonitor
         // A world deactivated while the service is running keeps its state until restart, so hide it here.
         var inactiveWorldIds = (await _worldService.GetAllWorlds()).Where(a => !a.IsActive).Select(a => a.Id).ToHashSet();
         var worldIds = _worldStates.Keys.Where(a => !inactiveWorldIds.Contains(a));
+
+        var platform = _censusContext.Platform;
+        if (platform != null)
+        {
+            worldIds = worldIds.Where(a => _worldPlatforms.TryGetValue(a, out var worldPlatform) && worldPlatform == platform);
+        }
 
         return (await Task.WhenAll(worldIds.Select(GetWorldState))).OrderBy(a => a!.Name)!;
     }

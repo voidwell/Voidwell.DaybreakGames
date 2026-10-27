@@ -14,25 +14,27 @@ public class CharacterRepository : ICharacterRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<long?> GetCharacterIdByName(string characterName)
+    public async Task<long?> GetCharacterIdByName(string characterName, IEnumerable<int>? worldIds = null)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var character = await dbContext.Characters
             .Include(a => a.Time)
             .Where(a => a.Time != null && a.Name != null)
+            .WhereWorldIn(worldIds)
             .OrderByDescending(a => a.Time!.LastLoginDate)
             .FirstOrDefaultAsync(a => a.Name!.ToLower() == characterName.ToLower());
 
         return character?.Id;
     }
 
-    public async Task<IEnumerable<Character>> LookupCharactersByNameAsync(string query, int limit)
+    public async Task<IEnumerable<Character>> LookupCharactersByNameAsync(string query, int limit, IEnumerable<int>? worldIds = null)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var lowerQuery = query.ToLower();
 
         return await dbContext.Characters
             .Where(a => a.Name != null && a.Name.ToLower().StartsWith(lowerQuery) && a.BattleRank > 0)
+            .WhereWorldIn(worldIds)
             .OrderByDescending(a => a.Name!.ToLower() == lowerQuery)
             .ThenBy(a => a.Name)
             .Take(limit)

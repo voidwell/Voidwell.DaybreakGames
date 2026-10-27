@@ -1,6 +1,8 @@
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
+using Voidwell.DaybreakGames.Census.Platforms;
+using Voidwell.DaybreakGames.CensusStore.Platforms;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -13,24 +15,32 @@ public class MapStore : IMapStore
     private readonly MapCollection _mapCollection;
     private readonly WorldEventCollection _worldEventCollection;
     private readonly ICache _cache;
+    private readonly IPlatformResolver _platformResolver;
+    private readonly ICensusContext _censusContext;
 
     private const string _cacheKey = "ps2.mapstore";
     private readonly Func<int, string> _getFacilityWorldEventsCacheKey = worldId => $"{_cacheKey}-facility_world_events-{worldId}";
 
     private readonly TimeSpan _facilityWorldEventCacheExpiration = TimeSpan.FromSeconds(10);
 
-    public MapStore(IMapRepository mapRepository, MapCollection mapCollection, WorldEventCollection worldEventCollection, ICache cache)
+    public MapStore(IMapRepository mapRepository, MapCollection mapCollection, WorldEventCollection worldEventCollection, ICache cache,
+        IPlatformResolver platformResolver, ICensusContext censusContext)
     {
         _mapRepository = mapRepository;
         _mapCollection = mapCollection;
         _worldEventCollection = worldEventCollection;
         _cache = cache;
+        _platformResolver = platformResolver;
+        _censusContext = censusContext;
     }
 
     public async Task<Dictionary<int, int>?> GetMapOwnershipAsync(int worldId, int zoneId)
     {
         try
         {
+            var platform = await _platformResolver.GetWorldPlatformAsync(worldId);
+            using var platformScope = _censusContext.Use(platform);
+
             var map = await _mapCollection.GetMapOwnershipAsync(worldId, zoneId);
             return map?.Regions!.Row!.ToDictionary(a => a.RowData!.RegionId, a => a.RowData!.FactionId);
         }
@@ -87,6 +97,9 @@ public class MapStore : IMapStore
 
     private async Task<IEnumerable<CensusFacilityWorldEventModel>?> GetAllCensusFacilityWorldEventsAsync(int worldId)
     {
+        var platform = await _platformResolver.GetWorldPlatformAsync(worldId);
+        using var platformScope = _censusContext.Use(platform);
+
         var events = (await _worldEventCollection.GetFacilityWorldEventsByWorldIdAsync(worldId))?.ToList();
 
         if (events != null && events.Any())

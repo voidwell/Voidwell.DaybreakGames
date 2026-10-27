@@ -1,11 +1,13 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.Utils;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.Live.Test;
@@ -18,13 +20,14 @@ public class WebsocketEventHandlerTest
     private readonly Mock<IMetagameEventService> _metagameEventService = new();
     private readonly Mock<IWebsocketHealthMonitor> _healthMonitor = new();
     private readonly Mock<ILogger<WebsocketEventHandler>> _logger = new();
+    private readonly CensusContext _censusContext = new();
 
     private WebsocketEventHandler CreateSut()
     {
         _worldMonitor.Setup(a => a.SetWorldState(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
 
         return new WebsocketEventHandler(_processorHandler.Object, _worldMonitor.Object, _alertService.Object,
-            _metagameEventService.Object, _healthMonitor.Object, _logger.Object);
+            _metagameEventService.Object, _healthMonitor.Object, _censusContext, _logger.Object);
     }
 
     private static JsonElement Json(string json)
@@ -38,7 +41,7 @@ public class WebsocketEventHandlerTest
         _alertService.Setup(a => a.GetActiveAlertsByWorldId(17)).ReturnsAsync(Array.Empty<Alert>());
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
 
         _worldMonitor.Verify(a => a.SetWorldState(17, "Emerald", true), Times.Once);
         _healthMonitor.Verify(a => a.ClearWorld(It.IsAny<int>()), Times.Never);
@@ -55,7 +58,7 @@ public class WebsocketEventHandlerTest
         _metagameEventService.Setup(a => a.GetMetagameEvent(123)).ReturnsAsync(new ZoneMetagameEvent { Id = 123, Duration = TimeSpan.FromMinutes(45) });
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
 
         _worldMonitor.Verify(a => a.UpdateZoneAlert(17, 2, It.Is<ZoneAlertState>(s =>
             s.Timestamp == start && s.InstanceId == 55 && s.MetagameEvent.Id == 123)), Times.Once);
@@ -66,7 +69,7 @@ public class WebsocketEventHandlerTest
     {
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"false"}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"false"}"""));
 
         _worldMonitor.Verify(a => a.SetWorldState(17, "Emerald", false), Times.Once);
         _healthMonitor.Verify(a => a.ClearWorld(17), Times.Once);
@@ -78,7 +81,7 @@ public class WebsocketEventHandlerTest
     {
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_notanumber","online":"true"}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_notanumber","online":"true"}"""));
 
         _worldMonitor.Verify(a => a.SetWorldState(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
@@ -88,9 +91,9 @@ public class WebsocketEventHandlerTest
     {
         _worldMonitor.Setup(a => a.SetWorldState(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>())).ThrowsAsync(new InvalidOperationException());
         var sut = new WebsocketEventHandler(_processorHandler.Object, _worldMonitor.Object, _alertService.Object,
-            _metagameEventService.Object, _healthMonitor.Object, _logger.Object);
+            _metagameEventService.Object, _healthMonitor.Object, _censusContext, _logger.Object);
 
-        var act = () => sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
+        var act = () => sut.Process(Platform.PC, Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
 
         Assert.Null(await Record.ExceptionAsync(act));
     }
@@ -101,9 +104,9 @@ public class WebsocketEventHandlerTest
         _processorHandler.Setup(a => a.TryProcessAsync("PlayerLogin", It.IsAny<JsonElement>())).ReturnsAsync(true);
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"PlayerLogin","world_id":"17","zone_id":"2","timestamp":"1700000000","character_id":"c1"}}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceMessage","payload":{"event_name":"PlayerLogin","world_id":"17","zone_id":"2","timestamp":"1700000000","character_id":"c1"}}"""));
 
-        _healthMonitor.Verify(a => a.ReceivedEvent(17, "PlayerLogin", null), Times.Once);
+        _healthMonitor.Verify(a => a.ReceivedEvent(Platform.PC, 17, "PlayerLogin", null), Times.Once);
         _processorHandler.Verify(a => a.TryProcessAsync("PlayerLogin", It.Is<JsonElement>(p => p.GetProperty("character_id").GetString() == "c1")), Times.Once);
     }
 
@@ -112,9 +115,9 @@ public class WebsocketEventHandlerTest
     {
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"Death","world_id":"17","zone_id":"1001","timestamp":"1700000000"}}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceMessage","payload":{"event_name":"Death","world_id":"17","zone_id":"1001","timestamp":"1700000000"}}"""));
 
-        _healthMonitor.Verify(a => a.ReceivedEvent(17, "Death", null), Times.Once);
+        _healthMonitor.Verify(a => a.ReceivedEvent(Platform.PC, 17, "Death", null), Times.Once);
         _processorHandler.Verify(a => a.TryProcessAsync(It.IsAny<string>(), It.IsAny<JsonElement>()), Times.Never);
     }
 
@@ -124,7 +127,7 @@ public class WebsocketEventHandlerTest
         _processorHandler.Setup(a => a.TryProcessAsync("PlayerLogout", It.IsAny<JsonElement>())).ReturnsAsync(true);
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"PlayerLogout","world_id":"17","timestamp":"1700000000"}}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceMessage","payload":{"event_name":"PlayerLogout","world_id":"17","timestamp":"1700000000"}}"""));
 
         _processorHandler.Verify(a => a.TryProcessAsync("PlayerLogout", It.IsAny<JsonElement>()), Times.Once);
     }
@@ -134,7 +137,7 @@ public class WebsocketEventHandlerTest
     {
         var sut = CreateSut();
 
-        await sut.Process(Json("""{"type":"serviceMessage","payload":{"world_id":"17","timestamp":"1700000000"}}"""));
+        await sut.Process(Platform.PC, Json("""{"type":"serviceMessage","payload":{"world_id":"17","timestamp":"1700000000"}}"""));
 
         _processorHandler.Verify(a => a.TryProcessAsync(It.IsAny<string>(), It.IsAny<JsonElement>()), Times.Never);
     }
@@ -145,7 +148,7 @@ public class WebsocketEventHandlerTest
         _processorHandler.Setup(a => a.TryProcessAsync("Unknown", It.IsAny<JsonElement>())).ReturnsAsync(false);
         var sut = CreateSut();
 
-        var act = () => sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"Unknown","world_id":"17","timestamp":"1700000000"}}"""));
+        var act = () => sut.Process(Platform.PC, Json("""{"type":"serviceMessage","payload":{"event_name":"Unknown","world_id":"17","timestamp":"1700000000"}}"""));
 
         Assert.Null(await Record.ExceptionAsync(act));
     }
@@ -156,8 +159,24 @@ public class WebsocketEventHandlerTest
         _processorHandler.Setup(a => a.TryProcessAsync("Death", It.IsAny<JsonElement>())).ThrowsAsync(new InvalidOperationException());
         var sut = CreateSut();
 
-        var act = () => sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"Death","world_id":"17","timestamp":"1700000000"}}"""));
+        var act = () => sut.Process(Platform.PC, Json("""{"type":"serviceMessage","payload":{"event_name":"Death","world_id":"17","timestamp":"1700000000"}}"""));
 
         Assert.Null(await Record.ExceptionAsync(act));
+    }
+
+    [Fact]
+    public async Task Process_ServiceEvent_ProcessesUnderStreamPlatform()
+    {
+        Platform? processedPlatform = null;
+        _processorHandler.Setup(a => a.TryProcessAsync("PlayerLogin", It.IsAny<JsonElement>()))
+            .Callback(() => processedPlatform = _censusContext.Platform)
+            .ReturnsAsync(true);
+        var sut = CreateSut();
+
+        await sut.Process(Platform.PS4EU, Json("""{"type":"serviceMessage","payload":{"event_name":"PlayerLogin","world_id":"2000","zone_id":"2","timestamp":"1700000000","character_id":"c1"}}"""));
+
+        Assert.Equal(Platform.PS4EU, processedPlatform);
+        Assert.Null(_censusContext.Platform);
+        _healthMonitor.Verify(a => a.ReceivedEvent(Platform.PS4EU, 2000, "PlayerLogin", null), Times.Once);
     }
 }
