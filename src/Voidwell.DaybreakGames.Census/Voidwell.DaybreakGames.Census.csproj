@@ -5,4 +5,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Voidwell.DaybreakGames.Utils\Voidwell.DaybreakGames.Utils.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -5,8 +5,8 @@ namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 public interface ICharacterRepository
 {
     Task<IEnumerable<Character>> GetCharactersByIdsAsync(IEnumerable<long> characterIds);
-    Task<long?> GetCharacterIdByName(string characterName);
-    Task<IEnumerable<Character>> LookupCharactersByNameAsync(string query, int limit);
+    Task<long?> GetCharacterIdByName(string characterName, IEnumerable<int>? worldIds = null);
+    Task<IEnumerable<Character>> LookupCharactersByNameAsync(string query, int limit, IEnumerable<int>? worldIds = null);
     Task<Character?> GetCharacterAsync(long characterId);
     Task<Character?> GetCharacterWithDetailsAsync(long characterId);
     Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params long[] characterIds);

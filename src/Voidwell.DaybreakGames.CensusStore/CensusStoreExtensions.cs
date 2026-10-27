@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection;
+using Voidwell.DaybreakGames.CensusStore.Platforms;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
@@ -22,6 +23,7 @@ public static class CensusStoreExtensions
         services.AddSingleton<ICensusToEntityMapper, CensusToEntityMapper>();
 
         services.AddSingleton<IStoreUpdaterHelper, StoreUpdaterHelper>();
+        services.AddSingleton<IPlatformResolver, PlatformResolver>();
 
         services.AddSingleton<ICharacterStore, CharacterStore>();
         services.AddSingleton<ICharacterDirectiveStore, CharacterDirectiveStore>();

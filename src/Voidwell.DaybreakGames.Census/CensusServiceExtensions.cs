@@ -1,12 +1,42 @@
+using DaybreakGames.Census;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Patcher;
+using Voidwell.DaybreakGames.Census.Platforms;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Census;
 
 public static class CensusServiceExtensions
 {
+    /// <summary>
+    /// Registers a Census client for every platform and an <see cref="ICensusClient"/> that routes each call
+    /// to the platform set on <see cref="ICensusContext"/>.
+    /// </summary>
+    public static IServiceCollection AddCensusPlatforms(this IServiceCollection services, Action<CensusPlatformOptions> setupAction)
+    {
+        var options = new CensusPlatformOptions();
+        setupAction(options);
+
+        services.Configure(setupAction);
+
+        foreach (var platform in Enum.GetValues<Platform>())
+        {
+            services.AddCensusServices(platform.GetCensusServiceKey(), censusOptions =>
+            {
+                censusOptions.CensusServiceId = options.CensusServiceId;
+                censusOptions.CensusServiceNamespace = platform.GetCensusNamespace();
+                censusOptions.UserAgent = options.UserAgent;
+            });
+        }
+
+        services.TryAddSingleton<ICensusContext, CensusContext>();
+        services.TryAddSingleton<ICensusClient, PlatformCensusClient>();
+
+        return services;
+    }
+
     public static IServiceCollection AddCensusCollections(this IServiceCollection services)
     {
         services.TryAddSingleton<ICensusPatchClient, SanctuaryCensusClient>();
