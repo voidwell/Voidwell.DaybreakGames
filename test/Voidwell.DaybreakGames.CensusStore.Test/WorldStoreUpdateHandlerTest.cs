@@ -2,6 +2,7 @@ using Moq;
 using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
+using Voidwell.DaybreakGames.Utils;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.CensusStore.Test;
@@ -74,5 +75,21 @@ public class WorldStoreUpdateHandlerTest
         await sut.UpdateAsync(Array.Empty<World>());
 
         _worldRepository.Verify(a => a.UpsertRangeAsync(It.IsAny<IEnumerable<World>>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PlatformMissingFromCensus_KeepsItsWorlds()
+    {
+        var sut = CreateSut(
+            new World { Id = 1, Name = "Osprey", IsActive = true, Platform = Platform.PC },
+            new World { Id = 10, Name = "Miller", IsActive = true, Platform = Platform.PC },
+            new World { Id = 1000, Name = "Genudine", IsActive = true, Platform = Platform.PS4US });
+
+        // PS4 US returned nothing (disabled or failed), PC dropped Miller
+        await sut.UpdateAsync(new[] { new World { Id = 1, Name = "Osprey", Platform = Platform.PC } });
+
+        Assert.Equal(new[] { 1, 10 }, _upserted.Select(a => a.Id).Order());
+        Assert.False(_upserted.Single(a => a.Id == 10).IsActive);
+        Assert.DoesNotContain(_upserted, a => a.Id == 1000);
     }
 }

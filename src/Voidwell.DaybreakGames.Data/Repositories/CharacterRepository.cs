@@ -56,10 +56,18 @@ public class CharacterRepository : ICharacterRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page, int limit)
+    public async Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page, int limit, IEnumerable<int>? worldIds = null)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
-        return await dbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId && s.Kills > 1)
+        var query = dbContext.CharacterWeaponStats.Where(s => s.ItemId == weaponItemId && s.Kills > 1);
+
+        if (worldIds != null)
+        {
+            var ids = worldIds.ToList();
+            query = query.Where(s => ids.Contains(s.Character!.WorldId));
+        }
+
+        return await query
             .Include(i => i.Character)
             .OrderByDescending(a => a.Kills)
             .Skip(page * limit)

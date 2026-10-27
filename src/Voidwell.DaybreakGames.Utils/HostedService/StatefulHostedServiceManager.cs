@@ -52,7 +52,7 @@ public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHost
         var state = GetState(serviceName);
         if (state != null)
         {
-            await Task.WhenAll(UpdateStateAsync(state, true), state.Service.StartAsync(cancellationToken));
+            await Task.WhenAll(UpdateStateAsync(state, true), RunDetachedAsync(() => state.Service.StartAsync(cancellationToken)));
         }
     }
 
@@ -61,7 +61,7 @@ public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHost
         var state = GetState(serviceName);
         if (state != null)
         {
-            await Task.WhenAll(UpdateStateAsync(state, false), state.Service.StopAsync(cancellationToken));
+            await Task.WhenAll(UpdateStateAsync(state, false), RunDetachedAsync(() => state.Service.StopAsync(cancellationToken)));
         }
     }
 
@@ -101,6 +101,18 @@ public class StatefulHostedServiceManager : IStatefulHostedServiceManager, IHost
             IsEnabled = serviceState.IsRunning,
             Details = details
         };
+    }
+
+    /// <summary>
+    /// Runs a service call without the caller's execution context, so timers and loops the service starts
+    /// don't inherit async-local state (such as a request's Census platform) from the request that started it.
+    /// </summary>
+    private static Task RunDetachedAsync(Func<Task> action)
+    {
+        using (ExecutionContext.SuppressFlow())
+        {
+            return Task.Run(action);
+        }
     }
 
     private HostedServiceState? GetState(string serviceName)

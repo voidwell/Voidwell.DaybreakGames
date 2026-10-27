@@ -11,7 +11,7 @@ public interface ICharacterRepository
     Task<Character?> GetCharacterWithDetailsAsync(long characterId);
     Task<IEnumerable<Character>> GetCharacterWithDetailsAsync(params long[] characterIds);
     Task<CharacterRating?> GetCharacterRatingAsync(long characterId);
-    Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page, int limit);
+    Task<IEnumerable<CharacterWeaponStat>> GetCharacterWeaponLeaderboardAsync(int weaponItemId, int page, int limit, IEnumerable<int>? worldIds = null);
     Task<IEnumerable<CharacterRating>> GetCharacterRatingLeaderboardAsync(int limit);
     Task<IEnumerable<CharacterAchievement>> GetCharacterAchievementsAsync(long characterId);
     Task<IEnumerable<CharacterWeaponStat>> GetWeaponStatsAsync(long characterId);
