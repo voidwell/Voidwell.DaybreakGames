@@ -1,6 +1,7 @@
 using System.Globalization;
 using AsyncKeyedLock;
 using Voidwell.Common.Cache;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Domain.Models;
@@ -15,6 +16,7 @@ public class WorldService : IWorldService
     private readonly IWorldEventsService _worldEventsService;
     private readonly ICharacterService _characterService;
     private readonly ICache _cache;
+    private readonly ICensusContext _censusContext;
 
     private const string _cacheKeyPrefix = "ps2.worldService";
     private readonly TimeSpan _activityCacheExpiration = TimeSpan.FromSeconds(15);
@@ -24,13 +26,15 @@ public class WorldService : IWorldService
 
     private readonly AsyncKeyedLocker<string> _activityPopulationLock = new();
 
-    public WorldService(IWorldStore worldStore, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, ICache cache)
+    public WorldService(IWorldStore worldStore, ICombatReportService combatReportService, IWorldEventsService worldEventsService, ICharacterService characterService, ICache cache,
+        ICensusContext censusContext)
     {
         _worldStore = worldStore;
         _combatReportService = combatReportService;
         _worldEventsService = worldEventsService;
         _characterService = characterService;
         _cache = cache;
+        _censusContext = censusContext;
     }
 
     public Task<IEnumerable<World>> GetAllWorlds()
@@ -41,6 +45,13 @@ public class WorldService : IWorldService
     public async Task<IEnumerable<World>> GetWorlds(bool includeInactive = false)
     {
         var worlds = await GetAllWorlds();
+
+        var platform = _censusContext.Platform;
+        if (platform != null)
+        {
+            worlds = worlds.Where(a => a.Platform == platform);
+        }
+
         return includeInactive ? worlds : worlds.Where(a => a.IsActive);
     }
 

@@ -1,4 +1,5 @@
 using Voidwell.DaybreakGames.Census.Models;
+using Voidwell.DaybreakGames.Utils;
 using Xunit;
 
 namespace Voidwell.DaybreakGames.CensusStore.Test;
@@ -27,17 +28,19 @@ public class CensusEntityMapsTest
     }
 
     [Fact]
-    public void World_MapsIdAndEnglishName()
+    public void World_MapsIdEnglishNameAndPlatform()
     {
         var world = CensusEntityMaps.Map(new CensusWorldModel
         {
             WorldId = 17,
             State = "online",
-            Name = new MultiLanguageString { English = "Emerald" }
+            Name = new MultiLanguageString { English = "Emerald" },
+            Platform = Platform.PS4EU
         });
 
         Assert.Equal(17, world.Id);
         Assert.Equal("Emerald", world.Name);
+        Assert.Equal(Platform.PS4EU, world.Platform);
     }
 
     [Fact]

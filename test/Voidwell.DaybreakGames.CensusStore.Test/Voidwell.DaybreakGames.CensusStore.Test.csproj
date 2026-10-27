@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\Caching\TestCache.cs" Link="Shared\Caching\TestCache.cs" />
+    <Compile Include="..\Shared\Census\FakeCensus.cs" Link="Shared\Census\FakeCensus.cs" />
   </ItemGroup>
 
 </Project>

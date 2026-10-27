@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream;
 
@@ -7,7 +8,8 @@ public class WebsocketHealthMonitor : IWebsocketHealthMonitor
 {
     private readonly ILogger<WebsocketHealthMonitor> _logger;
 
-    private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>> _worldsLastSeenEvents = new ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>>();
+    // Each platform has its own stream, so health is tracked and cleared per platform
+    private readonly ConcurrentDictionary<Platform, ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>>> _platformWorldsLastSeenEvents = new();
 
     private readonly List<int> _ignorableWorlds = new List<int> { 19, 25 };
     private readonly Dictionary<string, TimeSpan> _unhealthyEventIntervals = new Dictionary<string, TimeSpan>
@@ -20,7 +22,7 @@ public class WebsocketHealthMonitor : IWebsocketHealthMonitor
         _logger = logger;
     }
 
-    public void ReceivedEvent(int worldId, string eventName, DateTime? timestamp = null)
+    public void ReceivedEvent(Platform platform, int worldId, string eventName, DateTime? timestamp = null)
     {
         if (timestamp == null)
         {
@@ -29,12 +31,13 @@ public class WebsocketHealthMonitor : IWebsocketHealthMonitor
 
         try
         {
-            if (!_worldsLastSeenEvents.ContainsKey(worldId))
+            var worldsLastSeenEvents = _platformWorldsLastSeenEvents.GetOrAdd(platform, _ => new());
+            if (!worldsLastSeenEvents.ContainsKey(worldId))
             {
-                _worldsLastSeenEvents.TryAdd(worldId, new ConcurrentDictionary<string, DateTime>());
+                worldsLastSeenEvents.TryAdd(worldId, new ConcurrentDictionary<string, DateTime>());
             }
 
-            _worldsLastSeenEvents[worldId].AddOrUpdate(eventName, timestamp.Value, (k, v) => timestamp.Value);
+            worldsLastSeenEvents[worldId].AddOrUpdate(eventName, timestamp.Value, (k, v) => timestamp.Value);
         }
         catch (Exception)
         { }
@@ -42,24 +45,32 @@ public class WebsocketHealthMonitor : IWebsocketHealthMonitor
 
     public void ClearWorld(int worldId)
     {
-        _worldsLastSeenEvents.TryRemove(worldId, out var _);
+        foreach (var worldsLastSeenEvents in _platformWorldsLastSeenEvents.Values)
+        {
+            worldsLastSeenEvents.TryRemove(worldId, out var _);
+        }
     }
 
-    public void ClearAllWorlds()
+    public void ClearAllWorlds(Platform platform)
     {
-        _worldsLastSeenEvents.Clear();
+        _platformWorldsLastSeenEvents.TryRemove(platform, out var _);
     }
 
-    public bool IsHealthy()
+    public bool IsHealthy(Platform platform)
     {
-        var worldIds = _worldsLastSeenEvents.Keys.Where(a => !_ignorableWorlds.Contains(a)).ToList();
+        if (!_platformWorldsLastSeenEvents.TryGetValue(platform, out var worldsLastSeenEvents))
+        {
+            return true;
+        }
 
-        return !worldIds.Where(a => !TryEvaluateWorldHealth(a)).Any();
+        var worldIds = worldsLastSeenEvents.Keys.Where(a => !_ignorableWorlds.Contains(a)).ToList();
+
+        return !worldIds.Where(a => !TryEvaluateWorldHealth(worldsLastSeenEvents, a)).Any();
     }
 
-    private bool TryEvaluateWorldHealth(int worldId)
+    private bool TryEvaluateWorldHealth(ConcurrentDictionary<int, ConcurrentDictionary<string, DateTime>> worldsLastSeenEvents, int worldId)
     {
-        if (_worldsLastSeenEvents.TryGetValue(worldId, out var eventList))
+        if (worldsLastSeenEvents.TryGetValue(worldId, out var eventList))
         {
             if (!EvaluateWorldHealth(eventList))
             {

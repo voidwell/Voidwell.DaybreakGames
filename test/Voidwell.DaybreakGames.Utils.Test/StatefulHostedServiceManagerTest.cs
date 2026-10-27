@@ -127,4 +127,20 @@ public class StatefulHostedServiceManagerTest
 
         _service.Verify(a => a.StartAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    public async Task StartServiceAsync_DoesNotPassCallerAsyncLocalsToService()
+    {
+        var callerValue = new AsyncLocal<string>();
+        string observed = "not called";
+        var sut = CreateSut();
+        _service.Setup(a => a.StartAsync(It.IsAny<CancellationToken>()))
+            .Callback(() => observed = callerValue.Value)
+            .Returns(Task.CompletedTask);
+
+        callerValue.Value = "request scoped";
+        await sut.StartServiceAsync("test-service", TestContext.Current.CancellationToken);
+
+        Assert.Null(observed);
+    }
 }

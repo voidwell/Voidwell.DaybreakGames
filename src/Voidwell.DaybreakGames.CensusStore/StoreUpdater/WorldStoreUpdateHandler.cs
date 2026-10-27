@@ -5,6 +5,7 @@ namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 
 /// <summary>
 /// Upserts the worlds census returns and marks any world it no longer returns as inactive.
+/// Only platforms census returned worlds for are checked, so a platform that failed or is disabled keeps its worlds.
 /// </summary>
 public class WorldStoreUpdateHandler : IStoreUpdateHandler<World>
 {
@@ -26,6 +27,7 @@ public class WorldStoreUpdateHandler : IStoreUpdateHandler<World>
 
         var storedWorlds = (await _worldRepository.GetAllWorldsAsync()).ToDictionary(a => a.Id);
         var censusWorldIds = censusWorlds.Select(a => a.Id).ToHashSet();
+        var censusPlatforms = censusWorlds.Select(a => a.Platform).ToHashSet();
 
         // New worlds are active; existing worlds keep their state so a world deactivated by hand stays inactive.
         foreach (var world in censusWorlds)
@@ -34,7 +36,7 @@ public class WorldStoreUpdateHandler : IStoreUpdateHandler<World>
         }
 
         var missingWorlds = storedWorlds.Values
-            .Where(a => a.IsActive && !censusWorldIds.Contains(a.Id))
+            .Where(a => a.IsActive && censusPlatforms.Contains(a.Platform) && !censusWorldIds.Contains(a.Id))
             .ToList();
         missingWorlds.ForEach(a => a.IsActive = false);
 
