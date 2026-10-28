@@ -8,7 +8,7 @@ public class ImageSetConfiguration : IEntityTypeConfiguration<ImageSet>
 {
     public void Configure(EntityTypeBuilder<ImageSet> builder)
     {
-        builder.ToTable("ImageSet");
+        builder.ToTable("image_set");
 
         builder.HasKey(a => new { a.Id, a.TypeId });
 

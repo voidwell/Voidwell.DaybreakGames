@@ -8,7 +8,7 @@ public class DirectiveTreeCategoryConfiguration : IEntityTypeConfiguration<Direc
 {
     public void Configure(EntityTypeBuilder<DirectiveTreeCategory> builder)
     {
-        builder.ToTable("DirectiveTreeCategory");
+        builder.ToTable("directive_tree_category");
 
         builder.HasKey(a => a.Id);
 

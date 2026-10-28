@@ -8,7 +8,7 @@ public class WorldConfiguration : IEntityTypeConfiguration<World>
 {
     public void Configure(EntityTypeBuilder<World> builder)
     {
-        builder.ToTable("World");
+        builder.ToTable("world");
 
         builder.HasKey(a => a.Id);
 

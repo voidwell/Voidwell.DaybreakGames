@@ -8,7 +8,7 @@ public class DirectiveConfiguration : IEntityTypeConfiguration<Directive>
 {
     public void Configure(EntityTypeBuilder<Directive> builder)
     {
-        builder.ToTable("Directive");
+        builder.ToTable("directive");
 
         builder.HasKey(a => a.Id);
 

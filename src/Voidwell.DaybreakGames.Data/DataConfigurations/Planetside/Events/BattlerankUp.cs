@@ -7,7 +7,7 @@ public class BattlerankUp : IEntityTypeConfiguration<Models.Planetside.Events.Ba
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.BattlerankUp> builder)
     {
-        builder.ToTable("EventBattlerankUp");
+        builder.ToTable("event_battlerank_up");
 
         builder.HasKey(a => new { a.CharacterId, a.Timestamp, a.BattleRank });
     }

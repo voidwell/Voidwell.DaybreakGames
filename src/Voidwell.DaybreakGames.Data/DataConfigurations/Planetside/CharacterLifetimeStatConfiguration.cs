@@ -8,7 +8,7 @@ public class CharacterLifetimeStatConfiguration : IEntityTypeConfiguration<Chara
 {
     public void Configure(EntityTypeBuilder<CharacterLifetimeStat> builder)
     {
-        builder.ToTable("CharacterLifetimeStat");
+        builder.ToTable("character_lifetime_stat");
 
         builder.HasKey(a => a.CharacterId);
 

@@ -8,7 +8,7 @@ public class ZoneOwnershipSnapshotConfiguration : IEntityTypeConfiguration<ZoneO
 {
     public void Configure(EntityTypeBuilder<ZoneOwnershipSnapshot> builder)
     {
-        builder.ToTable("ZoneOwnershipSnapshot");
+        builder.ToTable("zone_ownership_snapshot");
 
         builder.HasKey(a => new { a.Timestamp, a.WorldId, a.ZoneId, a.RegionId });
 

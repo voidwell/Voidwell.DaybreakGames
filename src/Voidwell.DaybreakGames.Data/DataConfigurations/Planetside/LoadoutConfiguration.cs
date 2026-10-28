@@ -8,7 +8,7 @@ public class LoadoutConfiguration : IEntityTypeConfiguration<Loadout>
 {
     public void Configure(EntityTypeBuilder<Loadout> builder)
     {
-        builder.ToTable("Loadout");
+        builder.ToTable("loadout");
 
         builder.HasKey(a => a.Id);
 

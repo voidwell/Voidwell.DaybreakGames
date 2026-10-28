@@ -8,7 +8,7 @@ public class DailyPopulationConfiguration : IEntityTypeConfiguration<DailyPopula
 {
     public void Configure(EntityTypeBuilder<DailyPopulation> builder)
     {
-        builder.ToTable("DailyPopulation");
+        builder.ToTable("daily_population");
 
         builder.HasKey(a => new { a.Date, a.WorldId });
     }

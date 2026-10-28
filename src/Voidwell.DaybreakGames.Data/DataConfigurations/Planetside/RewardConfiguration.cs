@@ -8,7 +8,7 @@ public class RewardConfiguration : IEntityTypeConfiguration<Reward>
 {
     public void Configure(EntityTypeBuilder<Reward> builder)
     {
-        builder.ToTable("Reward");
+        builder.ToTable("reward");
 
         builder.HasKey(a => a.Id);
 

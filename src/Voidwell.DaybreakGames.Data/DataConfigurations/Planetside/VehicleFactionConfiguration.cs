@@ -8,7 +8,7 @@ public class VehicleFactionConfiguration : IEntityTypeConfiguration<VehicleFacti
 {
     public void Configure(EntityTypeBuilder<VehicleFaction> builder)
     {
-        builder.ToTable("VehicleFaction");
+        builder.ToTable("vehicle_faction");
 
         builder.HasKey(a => new { a.VehicleId, a.FactionId });
 

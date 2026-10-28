@@ -7,7 +7,7 @@ public class EventVehicleDestroyConfiguration : IEntityTypeConfiguration<Models.
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.VehicleDestroy> builder)
     {
-        builder.ToTable("EventVehicleDestroy");
+        builder.ToTable("event_vehicle_destroy");
 
         builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId, a.AttackerVehicleId, a.VehicleId });
 

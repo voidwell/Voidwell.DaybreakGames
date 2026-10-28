@@ -8,7 +8,7 @@ public class AlertConfiguration : IEntityTypeConfiguration<Alert>
 {
     public void Configure(EntityTypeBuilder<Alert> builder)
     {
-        builder.ToTable("Alert");
+        builder.ToTable("alert");
 
         builder.HasKey(a => new { a.WorldId, a.MetagameInstanceId });
 

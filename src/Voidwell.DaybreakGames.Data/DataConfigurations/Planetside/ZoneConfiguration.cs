@@ -8,7 +8,7 @@ public class ZoneConfiguration : IEntityTypeConfiguration<Zone>
 {
     public void Configure(EntityTypeBuilder<Zone> builder)
     {
-        builder.ToTable("Zone");
+        builder.ToTable("zone");
 
         builder.HasKey(a => a.Id);
 

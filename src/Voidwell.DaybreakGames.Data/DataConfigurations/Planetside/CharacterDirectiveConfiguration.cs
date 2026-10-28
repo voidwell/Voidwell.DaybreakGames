@@ -8,7 +8,7 @@ public class CharacterDirectiveConfiguration : IEntityTypeConfiguration<Characte
 {
     public void Configure(EntityTypeBuilder<CharacterDirective> builder)
     {
-        builder.ToTable("CharacterDirective");
+        builder.ToTable("character_directive");
 
         builder.HasKey(a => new { a.CharacterId, a.DirectiveId });
 

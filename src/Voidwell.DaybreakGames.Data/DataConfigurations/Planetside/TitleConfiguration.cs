@@ -8,7 +8,7 @@ public class TitleConfiguration : IEntityTypeConfiguration<Title>
 {
     public void Configure(EntityTypeBuilder<Title> builder)
     {
-        builder.ToTable("Title");
+        builder.ToTable("title");
 
         builder.HasKey(a => a.Id);
 

@@ -8,7 +8,7 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
 {
     public void Configure(EntityTypeBuilder<Vehicle> builder)
     {
-        builder.ToTable("Vehicle");
+        builder.ToTable("vehicle");
 
         builder.HasKey(a => a.Id);
 

@@ -8,7 +8,7 @@ public class MapRegionConfiguration : IEntityTypeConfiguration<MapRegion>
 {
     public void Configure(EntityTypeBuilder<MapRegion> builder)
     {
-        builder.ToTable("MapRegion");
+        builder.ToTable("map_region");
 
         builder.HasKey(a => new { a.Id });
 

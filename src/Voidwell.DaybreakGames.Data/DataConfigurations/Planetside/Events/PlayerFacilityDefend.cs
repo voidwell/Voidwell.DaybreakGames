@@ -7,7 +7,7 @@ public class PlayerFacilityDefend : IEntityTypeConfiguration<Models.Planetside.E
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityDefend> builder)
     {
-        builder.ToTable("EventPlayerFacilityDefend");
+        builder.ToTable("event_player_facility_defend");
 
         builder.HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
 

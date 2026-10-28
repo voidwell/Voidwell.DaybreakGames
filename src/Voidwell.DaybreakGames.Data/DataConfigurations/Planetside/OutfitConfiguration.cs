@@ -8,7 +8,7 @@ public class OutfitConfiguration : IEntityTypeConfiguration<Outfit>
 {
     public void Configure(EntityTypeBuilder<Outfit> builder)
     {
-        builder.ToTable("Outfit");
+        builder.ToTable("outfit");
 
         builder.HasKey(a => a.Id);
 

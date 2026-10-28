@@ -8,7 +8,7 @@ public class MetagameEventCategoryConfiguration : IEntityTypeConfiguration<Metag
 {
     public void Configure(EntityTypeBuilder<MetagameEventCategory> builder)
     {
-        builder.ToTable("MetagameEventCategory");
+        builder.ToTable("metagame_event_category");
 
         builder.HasKey(a => a.Id);
 

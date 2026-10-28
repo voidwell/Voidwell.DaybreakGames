@@ -7,7 +7,7 @@ public class PlayerLogin : IEntityTypeConfiguration<Models.Planetside.Events.Pla
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerLogin> builder)
     {
-        builder.ToTable("EventPlayerLogin");
+        builder.ToTable("event_player_login");
 
         builder.HasKey(a => new { a.Timestamp, a.CharacterId });
 

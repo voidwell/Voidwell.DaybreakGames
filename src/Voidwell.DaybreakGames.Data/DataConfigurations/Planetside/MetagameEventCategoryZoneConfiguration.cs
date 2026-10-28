@@ -8,7 +8,7 @@ public class MetagameEventCategoryZoneConfiguration : IEntityTypeConfiguration<M
 {
     public void Configure(EntityTypeBuilder<MetagameEventCategoryZone> builder)
     {
-        builder.ToTable("MetagameEventCategoryZone");
+        builder.ToTable("metagame_event_category_zone");
 
         builder.HasKey(a => a.MetagameEventCategoryId);
 

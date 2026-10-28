@@ -8,7 +8,7 @@ public class PlayerSessionConfiguration : IEntityTypeConfiguration<PlayerSession
 {
     public void Configure(EntityTypeBuilder<PlayerSession> builder)
     {
-        builder.ToTable("PlayerSession");
+        builder.ToTable("player_session");
 
         builder.HasKey(a => a.Id);
 

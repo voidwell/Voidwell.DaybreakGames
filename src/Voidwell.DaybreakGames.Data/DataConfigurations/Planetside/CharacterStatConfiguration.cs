@@ -8,7 +8,7 @@ public class CharacterStatConfiguration : IEntityTypeConfiguration<CharacterStat
 {
     public void Configure(EntityTypeBuilder<CharacterStat> builder)
     {
-        builder.ToTable("CharacterStat");
+        builder.ToTable("character_stat");
 
         builder.HasKey(a => new { a.CharacterId, a.ProfileId });
 
