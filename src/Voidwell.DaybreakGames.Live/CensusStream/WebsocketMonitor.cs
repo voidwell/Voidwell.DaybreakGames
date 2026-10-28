@@ -1,6 +1,5 @@
 using System.Text.Json;
 using DaybreakGames.Census.Stream;
-using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
@@ -126,18 +125,16 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
             return Task.CompletedTask;
         }
 
-        if (msg.TryGetString("type") == "heartbeat")
+        if (msg.TryGetPropertyString("type") == "heartbeat")
         {
             UpdateStateDetails(msg.Deserialize<object>()!);
             return Task.CompletedTask;
         }
 
-#pragma warning disable CS4014
         Task.Run(() =>
         {
             _handler.Process(msg);
         });
-#pragma warning restore CS4014
 
         return Task.CompletedTask;
     }
@@ -188,5 +185,6 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     {
         _client?.Dispose();
         _timer?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
