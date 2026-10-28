@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" />
-    <PackageReference Include="IdentityModel" />
     <PackageReference Include="Riok.Mapperly" />
   </ItemGroup>
 
