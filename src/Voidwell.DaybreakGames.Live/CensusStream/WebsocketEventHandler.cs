@@ -15,20 +15,17 @@ public class WebsocketEventHandler : IWebsocketEventHandler
     private readonly IWorldMonitor _worldMonitor;
     private readonly IAlertService _alertService;
     private readonly IMetagameEventService _metagameEventService;
-    private readonly IWebsocketHealthMonitor _healthMonitor;
     private readonly ILogger<WebsocketEventHandler> _logger;
 
     private const string _regServer = @"EventServerEndpoint_(.*)_(.*)";
 
     public WebsocketEventHandler(IEventProcessorHandler processorHandler, IWorldMonitor worldMonitor,
-        IAlertService alertService, IMetagameEventService metagameEventService, IWebsocketHealthMonitor healthMonitor,
-        ILogger<WebsocketEventHandler> logger)
+        IAlertService alertService, IMetagameEventService metagameEventService, ILogger<WebsocketEventHandler> logger)
     {
         _processorHandler = processorHandler;
         _worldMonitor = worldMonitor;
         _alertService = alertService;
         _metagameEventService = metagameEventService;
-        _healthMonitor = healthMonitor;
         _logger = logger;
     }
 
@@ -79,10 +76,6 @@ public class WebsocketEventHandler : IWebsocketEventHandler
                     }
                 }
             }
-            else
-            {
-                _healthMonitor.ClearWorld(worldId);
-            }
         }
     }
 
@@ -94,9 +87,7 @@ public class WebsocketEventHandler : IWebsocketEventHandler
 
         var eventName = payload?.EventName;
 
-        _healthMonitor.ReceivedEvent(payload!.WorldId, eventName!);
-
-        if (eventName == null)
+        if (payload == null || eventName == null)
         {
             return;
         }

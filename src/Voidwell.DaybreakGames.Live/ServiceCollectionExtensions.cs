@@ -28,7 +28,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IWorldMonitor, WorldMonitor>();
 
         services.AddSingleton<IWebsocketEventHandler, WebsocketEventHandler>();
-        services.AddSingleton<IWebsocketHealthMonitor, WebsocketHealthMonitor>();
         services.AddSingleton<IEventValidator, EventValidator>();
         services.AddSingleton<IEventProcessorHandler, EventProcessorHandler>();
 

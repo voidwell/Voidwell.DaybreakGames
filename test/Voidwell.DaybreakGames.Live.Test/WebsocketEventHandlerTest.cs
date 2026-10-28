@@ -16,7 +16,6 @@ public class WebsocketEventHandlerTest
     private readonly Mock<IWorldMonitor> _worldMonitor = new();
     private readonly Mock<IAlertService> _alertService = new();
     private readonly Mock<IMetagameEventService> _metagameEventService = new();
-    private readonly Mock<IWebsocketHealthMonitor> _healthMonitor = new();
     private readonly Mock<ILogger<WebsocketEventHandler>> _logger = new();
 
     private WebsocketEventHandler CreateSut()
@@ -24,7 +23,7 @@ public class WebsocketEventHandlerTest
         _worldMonitor.Setup(a => a.SetWorldState(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
 
         return new WebsocketEventHandler(_processorHandler.Object, _worldMonitor.Object, _alertService.Object,
-            _metagameEventService.Object, _healthMonitor.Object, _logger.Object);
+            _metagameEventService.Object, _logger.Object);
     }
 
     private static JsonElement Json(string json)
@@ -41,7 +40,6 @@ public class WebsocketEventHandlerTest
         await sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
 
         _worldMonitor.Verify(a => a.SetWorldState(17, "Emerald", true), Times.Once);
-        _healthMonitor.Verify(a => a.ClearWorld(It.IsAny<int>()), Times.Never);
     }
 
     [Fact]
@@ -62,14 +60,13 @@ public class WebsocketEventHandlerTest
     }
 
     [Fact]
-    public async Task Process_ServiceStateChangedOffline_SetsWorldOfflineAndClearsHealthTracking()
+    public async Task Process_ServiceStateChangedOffline_SetsWorldOffline()
     {
         var sut = CreateSut();
 
         await sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"false"}"""));
 
         _worldMonitor.Verify(a => a.SetWorldState(17, "Emerald", false), Times.Once);
-        _healthMonitor.Verify(a => a.ClearWorld(17), Times.Once);
         _alertService.Verify(a => a.GetActiveAlertsByWorldId(It.IsAny<int>()), Times.Never);
     }
 
@@ -88,7 +85,7 @@ public class WebsocketEventHandlerTest
     {
         _worldMonitor.Setup(a => a.SetWorldState(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>())).ThrowsAsync(new InvalidOperationException());
         var sut = new WebsocketEventHandler(_processorHandler.Object, _worldMonitor.Object, _alertService.Object,
-            _metagameEventService.Object, _healthMonitor.Object, _logger.Object);
+            _metagameEventService.Object, _logger.Object);
 
         var act = () => sut.Process(Json("""{"type":"serviceStateChanged","detail":"EventServerEndpoint_Emerald_17","online":"true"}"""));
 
@@ -96,25 +93,23 @@ public class WebsocketEventHandlerTest
     }
 
     [Fact]
-    public async Task Process_ServiceEvent_RecordsHealthAndDispatchesToProcessor()
+    public async Task Process_ServiceEvent_DispatchesToProcessor()
     {
         _processorHandler.Setup(a => a.TryProcessAsync("PlayerLogin", It.IsAny<JsonElement>())).ReturnsAsync(true);
         var sut = CreateSut();
 
         await sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"PlayerLogin","world_id":"17","zone_id":"2","timestamp":"1700000000","character_id":"c1"}}"""));
 
-        _healthMonitor.Verify(a => a.ReceivedEvent(17, "PlayerLogin", null), Times.Once);
         _processorHandler.Verify(a => a.TryProcessAsync("PlayerLogin", It.Is<JsonElement>(p => p.GetProperty("character_id").GetString() == "c1")), Times.Once);
     }
 
     [Fact]
-    public async Task Process_ServiceEventInInstancedZone_IsRecordedButNotProcessed()
+    public async Task Process_ServiceEventInInstancedZone_IsNotProcessed()
     {
         var sut = CreateSut();
 
         await sut.Process(Json("""{"type":"serviceMessage","payload":{"event_name":"Death","world_id":"17","zone_id":"1001","timestamp":"1700000000"}}"""));
 
-        _healthMonitor.Verify(a => a.ReceivedEvent(17, "Death", null), Times.Once);
         _processorHandler.Verify(a => a.TryProcessAsync(It.IsAny<string>(), It.IsAny<JsonElement>()), Times.Never);
     }
 
