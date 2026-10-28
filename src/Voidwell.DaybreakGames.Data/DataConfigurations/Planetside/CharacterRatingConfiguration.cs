@@ -8,7 +8,7 @@ public class CharacterRatingConfiguration : IEntityTypeConfiguration<CharacterRa
 {
     public void Configure(EntityTypeBuilder<CharacterRating> builder)
     {
-        builder.ToTable("CharacterRating");
+        builder.ToTable("character_rating");
 
         builder.HasKey(a => a.CharacterId);
 

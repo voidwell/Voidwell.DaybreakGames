@@ -7,7 +7,7 @@ public class ContinentUnlock : IEntityTypeConfiguration<Models.Planetside.Events
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.ContinentUnlock> builder)
     {
-        builder.ToTable("EventContinentUnlock");
+        builder.ToTable("event_continent_unlock");
 
         builder.HasKey(a => new { a.Timestamp, a.WorldId, a.ZoneId });
     }

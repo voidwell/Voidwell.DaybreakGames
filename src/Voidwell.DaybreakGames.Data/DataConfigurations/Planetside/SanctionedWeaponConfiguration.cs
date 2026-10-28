@@ -8,7 +8,7 @@ public class SanctionedWeaponConfiguration : IEntityTypeConfiguration<Sanctioned
 {
     public void Configure(EntityTypeBuilder<SanctionedWeapon> builder)
     {
-        builder.ToTable("SanctionedWeapon");
+        builder.ToTable("sanctioned_weapon");
 
         builder.HasKey(a => a.Id);
 

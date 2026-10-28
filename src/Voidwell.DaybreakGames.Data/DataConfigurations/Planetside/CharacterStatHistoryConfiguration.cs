@@ -8,7 +8,7 @@ public class CharacterStatHistoryConfiguration : IEntityTypeConfiguration<Charac
 {
     public void Configure(EntityTypeBuilder<CharacterStatHistory> builder)
     {
-        builder.ToTable("CharacterStatHistory");
+        builder.ToTable("character_stat_history");
 
         builder.HasKey(a => new { a.CharacterId, a.StatName });
 

@@ -8,7 +8,7 @@ public class CharacterWeaponStatConfiguration : IEntityTypeConfiguration<Charact
 {
     public void Configure(EntityTypeBuilder<CharacterWeaponStat> builder)
     {
-        builder.ToTable("CharacterWeaponStat");
+        builder.ToTable("character_weapon_stat");
 
         builder.HasKey(a => new { a.CharacterId, a.ItemId, a.VehicleId });
 

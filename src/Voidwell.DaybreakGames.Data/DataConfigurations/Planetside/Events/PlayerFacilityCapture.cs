@@ -7,7 +7,7 @@ public class PlayerFacilityCapture : IEntityTypeConfiguration<Models.Planetside.
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerFacilityCapture> builder)
     {
-        builder.ToTable("EventPlayerFacilityCapture");
+        builder.ToTable("event_player_facility_capture");
 
         builder.HasKey(a => new { a.Timestamp, a.CharacterId, a.FacilityId });
 

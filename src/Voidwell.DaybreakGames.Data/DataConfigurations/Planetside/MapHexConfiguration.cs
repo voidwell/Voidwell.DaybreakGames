@@ -8,7 +8,7 @@ public class MapHexConfiguration : IEntityTypeConfiguration<MapHex>
 {
     public void Configure(EntityTypeBuilder<MapHex> builder)
     {
-        builder.ToTable("MapHex");
+        builder.ToTable("map_hex");
 
         builder.HasKey(a => new { a.MapRegionId, a.XPos, a.YPos, a.ZoneId });
     }

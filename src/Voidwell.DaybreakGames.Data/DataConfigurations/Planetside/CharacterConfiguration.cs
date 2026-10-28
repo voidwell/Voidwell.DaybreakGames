@@ -8,7 +8,7 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
 {
     public void Configure(EntityTypeBuilder<Character> builder)
     {
-        builder.ToTable("Character");
+        builder.ToTable("character");
 
         builder.HasKey(a => a.Id);
 

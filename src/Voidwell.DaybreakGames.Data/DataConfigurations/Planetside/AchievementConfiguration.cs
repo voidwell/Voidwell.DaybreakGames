@@ -8,7 +8,7 @@ public class AchievementConfiguration : IEntityTypeConfiguration<Achievement>
 {
     public void Configure(EntityTypeBuilder<Achievement> builder)
     {
-        builder.ToTable("Achievement");
+        builder.ToTable("achievement");
 
         builder.HasKey(a => a.Id);
 

@@ -7,7 +7,7 @@ public class EventDeathConfiguration : IEntityTypeConfiguration<Models.Planetsid
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.Death> builder)
     {
-        builder.ToTable("EventDeath");
+        builder.ToTable("event_death");
 
         builder.HasKey(a => new { a.Timestamp, a.AttackerCharacterId, a.CharacterId });
 

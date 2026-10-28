@@ -8,7 +8,7 @@ public class WeaponAggregateConfiguration : IEntityTypeConfiguration<WeaponAggre
 {
     public void Configure(EntityTypeBuilder<WeaponAggregate> builder)
     {
-        builder.ToTable("WeaponAggregate");
+        builder.ToTable("weapon_aggregate");
 
         builder.HasKey(a => new { a.ItemId, a.VehicleId });
     }

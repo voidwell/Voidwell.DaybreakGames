@@ -8,7 +8,7 @@ public class CharacterTimeConfiguration : IEntityTypeConfiguration<CharacterTime
 {
     public void Configure(EntityTypeBuilder<CharacterTime> builder)
     {
-        builder.ToTable("CharacterTime");
+        builder.ToTable("character_time");
 
         builder.HasKey(a => a.CharacterId);
 

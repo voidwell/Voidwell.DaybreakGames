@@ -8,7 +8,7 @@ public class RewardSetToRewardGroupConfiguration : IEntityTypeConfiguration<Rewa
 {
     public void Configure(EntityTypeBuilder<RewardSetToRewardGroup> builder)
     {
-        builder.ToTable("RewardSetToRewardGroup");
+        builder.ToTable("reward_set_to_reward_group");
 
         builder.HasKey(a => new { a.RewardSetId, a.RewardGroupId });
 

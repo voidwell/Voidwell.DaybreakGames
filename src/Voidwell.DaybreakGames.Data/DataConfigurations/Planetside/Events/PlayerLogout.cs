@@ -7,7 +7,7 @@ public class PlayerLogout : IEntityTypeConfiguration<Models.Planetside.Events.Pl
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.PlayerLogout> builder)
     {
-        builder.ToTable("EventPlayerLogout");
+        builder.ToTable("event_player_logout");
 
         builder.HasKey(a => new { a.Timestamp, a.CharacterId });
 

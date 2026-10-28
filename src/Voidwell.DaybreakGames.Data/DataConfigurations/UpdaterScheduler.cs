@@ -7,7 +7,7 @@ public class UpdaterScheduler : IEntityTypeConfiguration<Models.UpdaterScheduler
 {
     public void Configure(EntityTypeBuilder<Models.UpdaterScheduler> builder)
     {
-        builder.ToTable("UpdaterScheduler");
+        builder.ToTable("updater_scheduler");
 
         builder.HasKey(a => a.Id);
     }

@@ -8,7 +8,7 @@ public class ProfileConfiguration : IEntityTypeConfiguration<Profile>
 {
     public void Configure(EntityTypeBuilder<Profile> builder)
     {
-        builder.ToTable("Profile");
+        builder.ToTable("profile");
 
         builder.HasKey(a => a.Id);
 

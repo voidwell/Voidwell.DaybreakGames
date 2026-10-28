@@ -8,7 +8,7 @@ public class FacilityLinkConfiguration : IEntityTypeConfiguration<FacilityLink>
 {
     public void Configure(EntityTypeBuilder<FacilityLink> builder)
     {
-        builder.ToTable("FacilityLink");
+        builder.ToTable("facility_link");
 
         builder.HasKey(a => new { a.FacilityIdA, a.FacilityIdB });
     }

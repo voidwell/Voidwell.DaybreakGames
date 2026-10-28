@@ -8,7 +8,7 @@ public class ObjectiveConfiguration : IEntityTypeConfiguration<Objective>
 {
     public void Configure(EntityTypeBuilder<Objective> builder)
     {
-        builder.ToTable("Objective");
+        builder.ToTable("objective");
 
         builder.HasKey(a => a.Id);
 

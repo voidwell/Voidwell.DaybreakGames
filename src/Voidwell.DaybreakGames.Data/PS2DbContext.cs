@@ -1,6 +1,5 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using Voidwell.DaybreakGames.Data.Extensions;
 using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
@@ -107,6 +106,7 @@ public class PS2DbContext : DbContext
                 b.CommandTimeout(options.CommandTimeout);
             }
         })
+        .UseSnakeCaseNamingConvention()
         .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 
@@ -115,6 +115,5 @@ public class PS2DbContext : DbContext
         base.OnModelCreating(builder);
 
         builder.ApplyConfigurationsFromAssembly(typeof(PS2DbContext).Assembly);
-        builder.ConvertToSnakeCaseConvention();
     }
 }

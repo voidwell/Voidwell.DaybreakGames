@@ -8,7 +8,7 @@ public class RewardGroupToRewardConfiguration : IEntityTypeConfiguration<RewardG
 {
     public void Configure(EntityTypeBuilder<RewardGroupToReward> builder)
     {
-        builder.ToTable("RewardGroupToReward");
+        builder.ToTable("reward_group_to_reward");
 
         builder.HasKey(a => new { a.RewardGroupId, a.RewardId });
 

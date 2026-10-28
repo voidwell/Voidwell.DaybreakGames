@@ -8,7 +8,7 @@ public class FactionConfiguration : IEntityTypeConfiguration<Faction>
 {
     public void Configure(EntityTypeBuilder<Faction> builder)
     {
-        builder.ToTable("Faction");
+        builder.ToTable("faction");
 
         builder.HasKey(a => a.Id);
 

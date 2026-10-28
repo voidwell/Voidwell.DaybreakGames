@@ -8,7 +8,7 @@ public class MetagameEventStateConfiguration : IEntityTypeConfiguration<Metagame
 {
     public void Configure(EntityTypeBuilder<MetagameEventState> builder)
     {
-        builder.ToTable("MetagameEventState");
+        builder.ToTable("metagame_event_state");
 
         builder.HasKey(a => a.Id);
 

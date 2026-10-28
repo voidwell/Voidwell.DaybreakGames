@@ -8,7 +8,7 @@ public class CharacterDirectiveTreeConfiguration : IEntityTypeConfiguration<Char
 {
     public void Configure(EntityTypeBuilder<CharacterDirectiveTree> builder)
     {
-        builder.ToTable("CharacterDirectiveTree");
+        builder.ToTable("character_directive_tree");
 
         builder.HasKey(a => new { a.CharacterId, a.DirectiveTreeId });
 

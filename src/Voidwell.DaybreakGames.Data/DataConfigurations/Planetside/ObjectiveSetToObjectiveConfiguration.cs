@@ -8,7 +8,7 @@ public class ObjectiveSetToObjectiveConfiguration : IEntityTypeConfiguration<Obj
 {
     public void Configure(EntityTypeBuilder<ObjectiveSetToObjective> builder)
     {
-        builder.ToTable("ObjectiveSetToObjective");
+        builder.ToTable("objective_set_to_objective");
 
         builder.HasKey(a => a.ObjectiveSetId);
 

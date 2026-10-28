@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Voidwell.DaybreakGames.Data.Models.Planetside;
 
-[Table("CharacterUpdateQueue")]
+[Table("character_update_queue")]
 public class CharacterUpdateQueue
 {
     [Key]

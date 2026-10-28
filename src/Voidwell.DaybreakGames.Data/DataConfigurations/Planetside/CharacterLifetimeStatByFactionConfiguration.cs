@@ -8,7 +8,7 @@ public class CharacterLifetimeStatByFactionConfiguration : IEntityTypeConfigurat
 {
     public void Configure(EntityTypeBuilder<CharacterLifetimeStatByFaction> builder)
     {
-        builder.ToTable("CharacterLifetimeStatByFaction");
+        builder.ToTable("character_lifetime_stat_by_faction");
 
         builder.HasKey(a => a.CharacterId);
 

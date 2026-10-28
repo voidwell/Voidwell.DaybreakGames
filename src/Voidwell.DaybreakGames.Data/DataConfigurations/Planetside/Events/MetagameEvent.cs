@@ -7,7 +7,7 @@ public class MetagameEvent : IEntityTypeConfiguration<Models.Planetside.Events.M
 {
     public void Configure(EntityTypeBuilder<Models.Planetside.Events.MetagameEvent> builder)
     {
-        builder.ToTable("EventMetagameEvent");
+        builder.ToTable("event_metagame_event");
 
         builder.HasKey(a => a.MetagameId);
 

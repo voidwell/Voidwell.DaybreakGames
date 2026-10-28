@@ -17,7 +17,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -57,7 +57,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("reward_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_achievement");
+                        .HasName("pk_achievement");
 
                     b.ToTable("achievement", (string)null);
                 });
@@ -121,7 +121,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("WorldId", "MetagameInstanceId")
-                        .HasName("p_k_alert");
+                        .HasName("pk_alert");
 
                     b.ToTable("alert", (string)null);
                 });
@@ -168,10 +168,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("world_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_character");
+                        .HasName("pk_character");
 
                     b.HasIndex("Name")
-                        .HasDatabaseName("i_x_character_name");
+                        .HasDatabaseName("ix_character_name");
 
                     b.ToTable("character", (string)null);
                 });
@@ -199,7 +199,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("start_date");
 
                     b.HasKey("CharacterId", "AchievementId")
-                        .HasName("p_k_character_achievement");
+                        .HasName("pk_character_achievement");
 
                     b.ToTable("character_achievement", (string)null);
                 });
@@ -223,7 +223,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("directive_tree_id");
 
                     b.HasKey("CharacterId", "DirectiveId")
-                        .HasName("p_k_character_directive");
+                        .HasName("pk_character_directive");
 
                     b.ToTable("character_directive", (string)null);
                 });
@@ -255,7 +255,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("status");
 
                     b.HasKey("CharacterId", "DirectiveId", "ObjectiveId")
-                        .HasName("p_k_character_directive_objective");
+                        .HasName("pk_character_directive_objective");
 
                     b.ToTable("character_directive_objective", (string)null);
                 });
@@ -279,7 +279,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("completion_time_date");
 
                     b.HasKey("CharacterId", "DirectiveTreeId", "DirectiveTierId")
-                        .HasName("p_k_character_directive_tier");
+                        .HasName("pk_character_directive_tier");
 
                     b.ToTable("character_directive_tier", (string)null);
                 });
@@ -307,7 +307,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("current_level");
 
                     b.HasKey("CharacterId", "DirectiveTreeId")
-                        .HasName("p_k_character_directive_tree");
+                        .HasName("pk_character_directive_tree");
 
                     b.ToTable("character_directive_tree", (string)null);
                 });
@@ -427,7 +427,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("weapon_vehicle_kills");
 
                     b.HasKey("CharacterId")
-                        .HasName("p_k_character_lifetime_stat");
+                        .HasName("pk_character_lifetime_stat");
 
                     b.ToTable("character_lifetime_stat", (string)null);
                 });
@@ -601,7 +601,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("weapon_vehicle_kills_vs");
 
                     b.HasKey("CharacterId")
-                        .HasName("p_k_character_lifetime_stat_by_faction");
+                        .HasName("pk_character_lifetime_stat_by_faction");
 
                     b.ToTable("character_lifetime_stat_by_faction", (string)null);
                 });
@@ -625,10 +625,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("volatility");
 
                     b.HasKey("CharacterId")
-                        .HasName("p_k_character_rating");
+                        .HasName("pk_character_rating");
 
                     b.HasIndex("Rating")
-                        .HasDatabaseName("i_x_character_rating_rating");
+                        .HasDatabaseName("ix_character_rating_rating");
 
                     b.ToTable("character_rating", (string)null);
                 });
@@ -686,7 +686,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("score");
 
                     b.HasKey("CharacterId", "ProfileId")
-                        .HasName("p_k_character_stat");
+                        .HasName("pk_character_stat");
 
                     b.ToTable("character_stat", (string)null);
                 });
@@ -738,7 +738,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("kills_vs");
 
                     b.HasKey("CharacterId", "ProfileId")
-                        .HasName("p_k_character_stat_by_faction");
+                        .HasName("pk_character_stat_by_faction");
 
                     b.ToTable("character_stat_by_faction", (string)null);
                 });
@@ -774,7 +774,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("week");
 
                     b.HasKey("CharacterId", "StatName")
-                        .HasName("p_k_character_stat_history");
+                        .HasName("pk_character_stat_history");
 
                     b.ToTable("character_stat_history", (string)null);
                 });
@@ -802,7 +802,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("minutes_played");
 
                     b.HasKey("CharacterId")
-                        .HasName("p_k_character_time");
+                        .HasName("pk_character_time");
 
                     b.ToTable("character_time", (string)null);
                 });
@@ -818,9 +818,9 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("timestamp");
 
                     b.HasKey("CharacterId")
-                        .HasName("p_k_character_update_queue");
+                        .HasName("pk_character_update_queue");
 
-                    b.ToTable("character_update_queue");
+                    b.ToTable("character_update_queue", (string)null);
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterWeaponStat", b =>
@@ -904,10 +904,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("vehicle_kills");
 
                     b.HasKey("CharacterId", "ItemId", "VehicleId")
-                        .HasName("p_k_character_weapon_stat");
+                        .HasName("pk_character_weapon_stat");
 
                     b.HasIndex("ItemId", "Kills")
-                        .HasDatabaseName("i_x_character_weapon_stat_item_id_kills");
+                        .HasDatabaseName("ix_character_weapon_stat_item_id_kills");
 
                     b.ToTable("character_weapon_stat", (string)null);
                 });
@@ -1035,7 +1035,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("vehicle_kills_vs");
 
                     b.HasKey("CharacterId", "ItemId", "VehicleId")
-                        .HasName("p_k_character_weapon_stat_by_faction");
+                        .HasName("pk_character_weapon_stat_by_faction");
 
                     b.ToTable("character_weapon_stat_by_faction", (string)null);
                 });
@@ -1087,7 +1087,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("vs_count");
 
                     b.HasKey("Date", "WorldId")
-                        .HasName("p_k_daily_population");
+                        .HasName("pk_daily_population");
 
                     b.ToTable("daily_population", (string)null);
                 });
@@ -1167,7 +1167,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("vehicle_kpu");
 
                     b.HasKey("WeaponId", "Date")
-                        .HasName("p_k_daily_weapon_stats");
+                        .HasName("pk_daily_weapon_stats");
 
                     b.ToTable("daily_weapon_stats", (string)null);
                 });
@@ -1211,7 +1211,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("qualify_requirement_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_directive");
+                        .HasName("pk_directive");
 
                     b.ToTable("directive", (string)null);
                 });
@@ -1251,7 +1251,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("reward_set_id");
 
                     b.HasKey("DirectiveTreeId", "DirectiveTierId")
-                        .HasName("p_k_directive_tier");
+                        .HasName("pk_directive_tier");
 
                     b.ToTable("directive_tier", (string)null);
                 });
@@ -1283,7 +1283,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_directive_tree");
+                        .HasName("pk_directive_tree");
 
                     b.ToTable("directive_tree", (string)null);
                 });
@@ -1299,7 +1299,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_directive_tree_category");
+                        .HasName("pk_directive_tree_category");
 
                     b.ToTable("directive_tree_category", (string)null);
                 });
@@ -1327,7 +1327,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("CharacterId", "Timestamp")
-                        .HasName("p_k_event_achievement_earned");
+                        .HasName("pk_event_achievement_earned");
 
                     b.ToTable("event_achievement_earned", (string)null);
                 });
@@ -1355,7 +1355,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("CharacterId", "Timestamp", "BattleRank")
-                        .HasName("p_k_event_battlerank_up");
+                        .HasName("pk_event_battlerank_up");
 
                     b.ToTable("event_battlerank_up", (string)null);
                 });
@@ -1395,7 +1395,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("triggering_faction");
 
                     b.HasKey("Timestamp", "WorldId", "ZoneId")
-                        .HasName("p_k_event_continent_lock");
+                        .HasName("pk_event_continent_lock");
 
                     b.ToTable("event_continent_lock", (string)null);
                 });
@@ -1423,7 +1423,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("triggering_faction");
 
                     b.HasKey("Timestamp", "WorldId", "ZoneId")
-                        .HasName("p_k_event_continent_unlock");
+                        .HasName("pk_event_continent_unlock");
 
                     b.ToTable("event_continent_unlock", (string)null);
                 });
@@ -1483,7 +1483,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId")
-                        .HasName("p_k_event_death");
+                        .HasName("pk_event_death");
 
                     b.ToTable("event_death", (string)null);
                 });
@@ -1555,7 +1555,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_population_vs");
 
                     b.HasKey("Timestamp", "WorldId", "FacilityId", "NewFactionId")
-                        .HasName("p_k_event_facility_control");
+                        .HasName("pk_event_facility_control");
 
                     b.ToTable("event_facility_control", (string)null);
                 });
@@ -1610,7 +1610,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("MetagameId")
-                        .HasName("p_k_event_metagame_event");
+                        .HasName("pk_event_metagame_event");
 
                     b.ToTable("event_metagame_event", (string)null);
                 });
@@ -1642,7 +1642,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("Timestamp", "CharacterId", "FacilityId")
-                        .HasName("p_k_event_player_facility_capture");
+                        .HasName("pk_event_player_facility_capture");
 
                     b.ToTable("event_player_facility_capture", (string)null);
                 });
@@ -1674,7 +1674,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("Timestamp", "CharacterId", "FacilityId")
-                        .HasName("p_k_event_player_facility_defend");
+                        .HasName("pk_event_player_facility_defend");
 
                     b.ToTable("event_player_facility_defend", (string)null);
                 });
@@ -1694,10 +1694,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("world_id");
 
                     b.HasKey("Timestamp", "CharacterId")
-                        .HasName("p_k_event_player_login");
+                        .HasName("pk_event_player_login");
 
                     b.HasIndex("Timestamp", "WorldId")
-                        .HasDatabaseName("i_x_event_player_login_timestamp_world_id");
+                        .HasDatabaseName("ix_event_player_login_timestamp_world_id");
 
                     b.ToTable("event_player_login", (string)null);
                 });
@@ -1717,10 +1717,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("world_id");
 
                     b.HasKey("Timestamp", "CharacterId")
-                        .HasName("p_k_event_player_logout");
+                        .HasName("pk_event_player_logout");
 
                     b.HasIndex("Timestamp", "WorldId")
-                        .HasDatabaseName("i_x_event_player_logout_timestamp_world_id");
+                        .HasDatabaseName("ix_event_player_logout_timestamp_world_id");
 
                     b.ToTable("event_player_logout", (string)null);
                 });
@@ -1772,7 +1772,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("Timestamp", "AttackerCharacterId", "CharacterId", "AttackerVehicleId", "VehicleId")
-                        .HasName("p_k_event_vehicle_destroy");
+                        .HasName("pk_event_vehicle_destroy");
 
                     b.ToTable("event_vehicle_destroy", (string)null);
                 });
@@ -1796,7 +1796,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("FacilityIdA", "FacilityIdB")
-                        .HasName("p_k_facility_link");
+                        .HasName("pk_facility_link");
 
                     b.ToTable("facility_link", (string)null);
                 });
@@ -1824,7 +1824,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("user_selectable");
 
                     b.HasKey("Id")
-                        .HasName("p_k_faction");
+                        .HasName("pk_faction");
 
                     b.ToTable("faction", (string)null);
                 });
@@ -1852,7 +1852,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("type_description");
 
                     b.HasKey("Id", "TypeId")
-                        .HasName("p_k_image_set");
+                        .HasName("pk_image_set");
 
                     b.ToTable("image_set", (string)null);
                 });
@@ -1896,7 +1896,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_item");
+                        .HasName("pk_item");
 
                     b.ToTable("item", (string)null);
                 });
@@ -1912,7 +1912,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_item_category");
+                        .HasName("pk_item_category");
 
                     b.ToTable("item_category", (string)null);
                 });
@@ -1936,7 +1936,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("profile_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_loadout");
+                        .HasName("pk_loadout");
 
                     b.ToTable("loadout", (string)null);
                 });
@@ -1968,7 +1968,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("type_name");
 
                     b.HasKey("MapRegionId", "XPos", "YPos", "ZoneId")
-                        .HasName("p_k_map_hex");
+                        .HasName("pk_map_hex");
 
                     b.ToTable("map_hex", (string)null);
                 });
@@ -2012,7 +2012,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_map_region");
+                        .HasName("pk_map_region");
 
                     b.ToTable("map_region", (string)null);
                 });
@@ -2040,7 +2040,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("type");
 
                     b.HasKey("Id")
-                        .HasName("p_k_metagame_event_category");
+                        .HasName("pk_metagame_event_category");
 
                     b.ToTable("metagame_event_category", (string)null);
                 });
@@ -2056,7 +2056,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("zone_id");
 
                     b.HasKey("MetagameEventCategoryId")
-                        .HasName("p_k_metagame_event_category_zone");
+                        .HasName("pk_metagame_event_category_zone");
 
                     b.ToTable("metagame_event_category_zone", (string)null);
                 });
@@ -2072,7 +2072,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_metagame_event_state");
+                        .HasName("pk_metagame_event_state");
 
                     b.ToTable("metagame_event_state", (string)null);
                 });
@@ -2128,7 +2128,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("param9");
 
                     b.HasKey("Id")
-                        .HasName("p_k_objective");
+                        .HasName("pk_objective");
 
                     b.ToTable("objective", (string)null);
                 });
@@ -2144,7 +2144,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("objective_group_id");
 
                     b.HasKey("ObjectiveSetId")
-                        .HasName("p_k_objective_set_to_objective");
+                        .HasName("pk_objective_set_to_objective");
 
                     b.ToTable("objective_set_to_objective", (string)null);
                 });
@@ -2184,7 +2184,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("world_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_outfit");
+                        .HasName("pk_outfit");
 
                     b.ToTable("outfit", (string)null);
                 });
@@ -2212,7 +2212,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("rank_ordinal");
 
                     b.HasKey("CharacterId")
-                        .HasName("p_k_outfit_member");
+                        .HasName("pk_outfit_member");
 
                     b.ToTable("outfit_member", (string)null);
                 });
@@ -2243,10 +2243,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("logout_date");
 
                     b.HasKey("Id")
-                        .HasName("p_k_player_session");
+                        .HasName("pk_player_session");
 
                     b.HasIndex("CharacterId", "LoginDate", "LogoutDate")
-                        .HasDatabaseName("i_x_player_session_character_id_login_date_logout_date");
+                        .HasDatabaseName("ix_player_session_character_id_login_date_logout_date");
 
                     b.ToTable("player_session", (string)null);
                 });
@@ -2274,7 +2274,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("profile_type_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_profile");
+                        .HasName("pk_profile");
 
                     b.ToTable("profile", (string)null);
                 });
@@ -2318,7 +2318,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("reward_type_id");
 
                     b.HasKey("Id")
-                        .HasName("p_k_reward");
+                        .HasName("pk_reward");
 
                     b.ToTable("reward", (string)null);
                 });
@@ -2334,7 +2334,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("reward_id");
 
                     b.HasKey("RewardGroupId", "RewardId")
-                        .HasName("p_k_reward_group_to_reward");
+                        .HasName("pk_reward_group_to_reward");
 
                     b.ToTable("reward_group_to_reward", (string)null);
                 });
@@ -2350,7 +2350,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("reward_group_id");
 
                     b.HasKey("RewardSetId", "RewardGroupId")
-                        .HasName("p_k_reward_set_to_reward_group");
+                        .HasName("pk_reward_set_to_reward_group");
 
                     b.ToTable("reward_set_to_reward_group", (string)null);
                 });
@@ -2370,7 +2370,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("type");
 
                     b.HasKey("Id")
-                        .HasName("p_k_sanctioned_weapon");
+                        .HasName("pk_sanctioned_weapon");
 
                     b.ToTable("sanctioned_weapon", (string)null);
                 });
@@ -2386,7 +2386,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_title");
+                        .HasName("pk_title");
 
                     b.ToTable("title", (string)null);
                 });
@@ -2418,7 +2418,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_vehicle");
+                        .HasName("pk_vehicle");
 
                     b.ToTable("vehicle", (string)null);
                 });
@@ -2434,7 +2434,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("faction_id");
 
                     b.HasKey("VehicleId", "FactionId")
-                        .HasName("p_k_vehicle_faction");
+                        .HasName("pk_vehicle_faction");
 
                     b.ToTable("vehicle_faction", (string)null);
                 });
@@ -2586,7 +2586,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("sum_vehicle_kills");
 
                     b.HasKey("ItemId", "VehicleId")
-                        .HasName("p_k_weapon_aggregate");
+                        .HasName("pk_weapon_aggregate");
 
                     b.ToTable("weapon_aggregate", (string)null);
                 });
@@ -2608,7 +2608,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_world");
+                        .HasName("pk_world");
 
                     b.ToTable("world", (string)null);
                 });
@@ -2636,7 +2636,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("p_k_zone");
+                        .HasName("pk_zone");
 
                     b.ToTable("zone", (string)null);
                 });
@@ -2668,10 +2668,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("metagame_instance_id");
 
                     b.HasKey("Timestamp", "WorldId", "ZoneId", "RegionId")
-                        .HasName("p_k_zone_ownership_snapshot");
+                        .HasName("pk_zone_ownership_snapshot");
 
                     b.HasIndex("WorldId", "MetagameInstanceId")
-                        .HasDatabaseName("i_x_zone_ownership_snapshot_world_id_metagame_instance_id");
+                        .HasDatabaseName("ix_zone_ownership_snapshot_world_id_metagame_instance_id");
 
                     b.ToTable("zone_ownership_snapshot", (string)null);
                 });
@@ -2687,7 +2687,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnName("last_update_date");
 
                     b.HasKey("Id")
-                        .HasName("p_k_updater_scheduler");
+                        .HasName("pk_updater_scheduler");
 
                     b.ToTable("updater_scheduler", (string)null);
                 });
@@ -2699,7 +2699,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_directive_character_character_id");
+                        .HasConstraintName("fk_character_directive_character_character_id");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterDirectiveObjective", b =>
@@ -2709,7 +2709,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_directive_objective_character_character_id");
+                        .HasConstraintName("fk_character_directive_objective_character_character_id");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterDirectiveTier", b =>
@@ -2719,7 +2719,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_directive_tier_character_character_id");
+                        .HasConstraintName("fk_character_directive_tier_character_character_id");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterDirectiveTree", b =>
@@ -2729,7 +2729,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_directive_tree_character_character_id");
+                        .HasConstraintName("fk_character_directive_tree_character_character_id");
                 });
 
             modelBuilder.Entity("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterLifetimeStat", b =>
@@ -2739,7 +2739,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterLifetimeStat", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_lifetime_stat_character_character_id");
+                        .HasConstraintName("fk_character_lifetime_stat_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2751,7 +2751,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterLifetimeStatByFaction", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_lifetime_stat_by_faction_character_character_id");
+                        .HasConstraintName("fk_character_lifetime_stat_by_faction_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2763,7 +2763,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterRating", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_rating_character_character_id");
+                        .HasConstraintName("fk_character_rating_characters_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2775,7 +2775,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_stat_character_character_id");
+                        .HasConstraintName("fk_character_stat_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2787,7 +2787,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_stat_by_faction_character_character_id");
+                        .HasConstraintName("fk_character_stat_by_faction_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2799,7 +2799,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_stat_history_character_character_id");
+                        .HasConstraintName("fk_character_stat_history_characters_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2811,7 +2811,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.CharacterTime", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_time_character_character_id");
+                        .HasConstraintName("fk_character_time_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2823,7 +2823,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_weapon_stat_character_character_id");
+                        .HasConstraintName("fk_character_weapon_stat_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2835,7 +2835,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_character_weapon_stat_by_faction_character_character_id");
+                        .HasConstraintName("fk_character_weapon_stat_by_faction_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2847,7 +2847,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("Voidwell.DaybreakGames.Data.Models.Planetside.OutfitMember", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_outfit_member_character_character_id");
+                        .HasConstraintName("fk_outfit_member_character_character_id");
 
                     b.Navigation("Character");
                 });
@@ -2859,7 +2859,7 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("f_k_vehicle_faction_vehicle_vehicle_id");
+                        .HasConstraintName("fk_vehicle_faction_vehicle_vehicle_id");
 
                     b.Navigation("Vehicle");
                 });
