@@ -14,24 +14,18 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     private readonly ICensusStreamClient _client;
     private readonly IWebsocketEventHandler _handler;
     private readonly IWorldMonitor _worldMonitor;
-    private readonly IWebsocketHealthMonitor _healthMonitor;
     private readonly LiveOptions _options;
-    private readonly HostedServiceState<WebsocketMonitor> _state;
     private readonly ILogger<WebsocketMonitor> _logger;
 
     private CensusState? _lastStateChange;
-    private Timer? _timer;
 
     public WebsocketMonitor(ICensusStreamClient streamClient, IWebsocketEventHandler handler,
-        IWorldMonitor worldMonitor, IWebsocketHealthMonitor healthMonitor, IOptions<LiveOptions> options,
-        HostedServiceState<WebsocketMonitor> state, ILogger<WebsocketMonitor> logger)
+        IWorldMonitor worldMonitor, IOptions<LiveOptions> options, ILogger<WebsocketMonitor> logger)
     {
         _client = streamClient;
         _handler = handler;
         _worldMonitor = worldMonitor;
-        _healthMonitor = healthMonitor;
         _options = options.Value;
-        _state = state;
         _logger = logger;
 
         _client.OnConnect(OnConnect)
@@ -67,8 +61,6 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
         _logger.LogInformation("Starting census stream monitor");
 
         await _client.ConnectAsync();
-
-        _timer = new Timer(CheckDataHealthAsync, null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -80,9 +72,7 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
             return;
         }
 
-        _timer?.Dispose();
         await _client?.DisconnectAsync()!;
-        _healthMonitor.ClearAllWorlds();
     }
 
     public Task OnApplicationStartup(CancellationToken cancellationToken)
@@ -143,7 +133,6 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     {
         UpdateStateDetails(info.Exception?.Message ?? info.Type.ToString());
         await _worldMonitor.ClearAllWorldStates();
-        _healthMonitor.ClearAllWorlds();
     }
 
     private void UpdateStateDetails(object contents)
@@ -155,36 +144,9 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
         };
     }
 
-    private async void CheckDataHealthAsync(object? state)
-    {
-        if (!_state.IsRunning)
-        {
-            _healthMonitor.ClearAllWorlds();
-            _timer?.Dispose();
-            return;
-        }
-
-        if (!_healthMonitor.IsHealthy())
-        {
-            _logger.LogError(45234, "Census stream has failed health checks. Attempting resetting connection.");
-
-            try
-            {
-                await _client?.ReconnectAsync()!;
-            }
-            catch (Exception ex)
-            {
-                UpdateStateDetails(ex.Message);
-
-                _logger.LogError(45235, ex, "Failed to reestablish connection to Census");
-            }
-        }
-    }
-
     public void Dispose()
     {
         _client?.Dispose();
-        _timer?.Dispose();
         GC.SuppressFinalize(this);
     }
 }
