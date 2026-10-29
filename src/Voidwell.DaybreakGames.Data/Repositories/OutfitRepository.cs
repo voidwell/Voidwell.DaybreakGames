@@ -14,12 +14,13 @@ public class OutfitRepository : IOutfitRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<long?> GetOutfitIdByAlias(string outfitAlias)
+    public async Task<long?> GetOutfitIdByAlias(string outfitAlias, IEnumerable<int>? worldIds = null)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         var outfit = await dbContext.Outfits
             .OrderByDescending(a => a.CreatedDate)
             .Where(a => a.Alias != null)
+            .WhereWorldIn(worldIds)
             .FirstOrDefaultAsync(a => a.Alias!.ToLower() == outfitAlias.ToLower());
 
         return outfit?.Id;
@@ -78,19 +79,21 @@ public class OutfitRepository : IOutfitRepository
             .ToListAsync();
     }
 
-    public async Task<Outfit?> GetOutfitByAliasAsync(string alias)
+    public async Task<Outfit?> GetOutfitByAliasAsync(string alias, IEnumerable<int>? worldIds = null)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.Outfits
             .OrderByDescending(a => a.CreatedDate)
+            .WhereWorldIn(worldIds)
             .FirstOrDefaultAsync(o => o.Alias!.ToLower() == alias.ToLower());
     }
 
-    public async Task<IEnumerable<Outfit>> GetOutfitsByNameAsync(string name, int limit)
+    public async Task<IEnumerable<Outfit>> GetOutfitsByNameAsync(string name, int limit, IEnumerable<int>? worldIds = null)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
         return await dbContext.Outfits
             .OrderByDescending(a => a.CreatedDate)
+            .WhereWorldIn(worldIds)
             .Where(o => o.Name!.StartsWith(name))
             .Take(limit)
             .ToListAsync();

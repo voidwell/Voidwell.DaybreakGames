@@ -8,7 +8,10 @@ using Voidwell.Common.Logging;
 using Voidwell.Common.Swagger;
 using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Api.Extensions;
+using Voidwell.DaybreakGames.Api.Middleware;
 using Voidwell.DaybreakGames.Api.Options;
+using Voidwell.DaybreakGames.Census;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Live;
@@ -73,11 +76,11 @@ services.AddCors(options =>
     });
 });
 
-services.AddCensusServices(options =>
+services.AddCensusPlatforms(options =>
 {
     options.CensusServiceId = configuration.GetValue<string>("CensusServiceKey")!;
-    options.CensusServiceNamespace = configuration.GetValue<string>("CensusServiceNamespace")!;
     options.UserAgent = "Voidwell";
+    options.Platforms = configuration.GetCensusPlatforms();
 });
 
 services.AddStatefulServiceDependencies();
@@ -98,6 +101,8 @@ app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<CensusPlatformMiddleware>();
 
 app.MapControllers();
 

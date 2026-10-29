@@ -4,13 +4,18 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
+using Voidwell.DaybreakGames.Utils;
 using Voidwell.DaybreakGames.Utils.HostedService;
 using Websocket.Client;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream;
 
+/// <summary>
+/// Streams the events of one platform. One monitor runs per enabled platform.
+/// </summary>
 public class WebsocketMonitor : IStatefulHostedService, IDisposable
 {
+    private readonly Platform _platform;
     private readonly ICensusStreamClient _client;
     private readonly IWebsocketEventHandler _handler;
     private readonly IWorldMonitor _worldMonitor;
@@ -19,9 +24,10 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
 
     private CensusState? _lastStateChange;
 
-    public WebsocketMonitor(ICensusStreamClient streamClient, IWebsocketEventHandler handler,
+    public WebsocketMonitor(Platform platform, ICensusStreamClient streamClient, IWebsocketEventHandler handler,
         IWorldMonitor worldMonitor, IOptions<LiveOptions> options, ILogger<WebsocketMonitor> logger)
     {
+        _platform = platform;
         _client = streamClient;
         _handler = handler;
         _worldMonitor = worldMonitor;
@@ -54,18 +60,18 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     {
         if (_options.DisableCensusMonitor)
         {
-            _logger.LogInformation("Census monitor is disabled");
+            _logger.LogInformation("Census monitor is disabled for {Platform}", _platform);
             return;
         }
 
-        _logger.LogInformation("Starting census stream monitor");
+        _logger.LogInformation("Starting census stream monitor for {Platform}", _platform);
 
         await _client.ConnectAsync();
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Stopping census stream monitor");
+        _logger.LogInformation("Stopping census stream monitor for {Platform}", _platform);
 
         if (_client == null)
         {
@@ -123,7 +129,7 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
 
         Task.Run(() =>
         {
-            _handler.Process(msg);
+            _handler.Process(_platform, msg);
         });
 
         return Task.CompletedTask;
@@ -132,7 +138,7 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
     private async Task OnDisconnectAsync(DisconnectionInfo info)
     {
         UpdateStateDetails(info.Exception?.Message ?? info.Type.ToString());
-        await _worldMonitor.ClearAllWorldStates();
+        await _worldMonitor.ClearAllWorldStates(_platform);
     }
 
     private void UpdateStateDetails(object contents)

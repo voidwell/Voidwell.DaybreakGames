@@ -4,4 +4,8 @@
     <ProjectReference Include="..\..\src\Voidwell.DaybreakGames.Census\Voidwell.DaybreakGames.Census.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Shared\Census\FakeCensus.cs" Link="Shared\Census\FakeCensus.cs" />
+  </ItemGroup>
+
 </Project>

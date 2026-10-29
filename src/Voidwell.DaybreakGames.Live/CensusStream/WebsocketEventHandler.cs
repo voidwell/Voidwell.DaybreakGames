@@ -2,10 +2,12 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using DaybreakGames.Census;
 using Microsoft.Extensions.Logging;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
+using Voidwell.DaybreakGames.Utils;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream;
 
@@ -15,22 +17,28 @@ public class WebsocketEventHandler : IWebsocketEventHandler
     private readonly IWorldMonitor _worldMonitor;
     private readonly IAlertService _alertService;
     private readonly IMetagameEventService _metagameEventService;
+    private readonly ICensusContext _censusContext;
     private readonly ILogger<WebsocketEventHandler> _logger;
 
     private const string _regServer = @"EventServerEndpoint_(.*)_(.*)";
 
     public WebsocketEventHandler(IEventProcessorHandler processorHandler, IWorldMonitor worldMonitor,
-        IAlertService alertService, IMetagameEventService metagameEventService, ILogger<WebsocketEventHandler> logger)
+        IAlertService alertService, IMetagameEventService metagameEventService, ICensusContext censusContext,
+        ILogger<WebsocketEventHandler> logger)
     {
         _processorHandler = processorHandler;
         _worldMonitor = worldMonitor;
         _alertService = alertService;
         _metagameEventService = metagameEventService;
+        _censusContext = censusContext;
         _logger = logger;
     }
 
-    public async Task Process(JsonElement message)
+    public async Task Process(Platform platform, JsonElement message)
     {
+        // Everything the message triggers, down to character and map lookups, queries the platform it came from
+        using var platformScope = _censusContext.Use(platform);
+
         if (message.TryGetString("type") == "serviceStateChanged")
         {
             try
@@ -45,7 +53,7 @@ public class WebsocketEventHandler : IWebsocketEventHandler
             return;
         }
 
-        await ProcessServiceEventAsync(message);
+        await ProcessServiceEventAsync(platform, message);
     }
 
     private async Task ProcessServiceStateChangedAsync(JsonElement message)
@@ -79,7 +87,7 @@ public class WebsocketEventHandler : IWebsocketEventHandler
         }
     }
 
-    private async Task ProcessServiceEventAsync(JsonElement message)
+    private async Task ProcessServiceEventAsync(Platform platform, JsonElement message)
     {
         var jPayload = message.GetProperty("payload");
 

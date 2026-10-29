@@ -1,5 +1,6 @@
 using System.Globalization;
 using Voidwell.Common.Cache;
+using Voidwell.DaybreakGames.Census.Platforms;
 using Voidwell.DaybreakGames.Domain.Models;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
@@ -11,21 +12,25 @@ public class SearchService : ISearchService
     private readonly IOutfitService _outfitService;
     private readonly IItemService _itemService;
     private readonly ICache _cache;
+    private readonly ICensusContext _censusContext;
 
     private const string _cacheKeyPrefix = "ps2.search";
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(5);
 
-    public SearchService(ICharacterService characterService, IOutfitService outfitService, IItemService itemService, ICache cache)
+    public SearchService(ICharacterService characterService, IOutfitService outfitService, IItemService itemService, ICache cache,
+        ICensusContext censusContext)
     {
         _characterService = characterService;
         _outfitService = outfitService;
         _itemService = itemService;
         _cache = cache;
+        _censusContext = censusContext;
     }
 
     public async Task<IEnumerable<SearchResult>> SearchPlanetside(string category, string query)
     {
-        var cacheKey = $"{_cacheKeyPrefix}_{category}_{query}";
+        // Results depend on the platform the request is scoped to, if any
+        var cacheKey = $"{_cacheKeyPrefix}_{_censusContext.Platform}_{category}_{query}";
 
         return await _cache.GetOrSetAsync<List<SearchResult>>(cacheKey, async ct =>
         {

@@ -2,6 +2,8 @@ using AsyncKeyedLock;
 using DaybreakGames.Census.Exceptions;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.Census.Models;
+using Voidwell.DaybreakGames.Census.Platforms;
+using Voidwell.DaybreakGames.CensusStore.Platforms;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -18,6 +20,8 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
     private readonly CharactersDirectiveTreeCollection _charactersDirectiveTreeCollection;
     private readonly ICharacterStore _characterStore;
     private readonly IStoreUpdaterHelper _storeUpdaterHelper;
+    private readonly IPlatformResolver _platformResolver;
+    private readonly ICensusContext _censusContext;
 
     private readonly AsyncKeyedLocker<long> _characterLock = new();
 
@@ -28,7 +32,9 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
         CharactersDirectiveTierCollection charactersDirectiveTierCollection,
         CharactersDirectiveTreeCollection charactersDirectiveTreeCollection,
         ICharacterStore characterStore,
-        IStoreUpdaterHelper storeUpdaterHelper)
+        IStoreUpdaterHelper storeUpdaterHelper,
+        IPlatformResolver platformResolver,
+        ICensusContext censusContext)
     {
         _repository = repository;
         _charactersDirectiveCollection = charactersDirectiveCollection;
@@ -37,6 +43,8 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
         _charactersDirectiveTreeCollection = charactersDirectiveTreeCollection;
         _characterStore = characterStore;
         _storeUpdaterHelper = storeUpdaterHelper;
+        _platformResolver = platformResolver;
+        _censusContext = censusContext;
     }
 
     public async Task<IEnumerable<CharacterDirectiveTree>?> GetCharacterDirectivesAsync(long characterId)
@@ -89,6 +97,9 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
 
     public async Task UpdateCharacterDirectiveDataAsync(long characterId)
     {
+        var platform = await _platformResolver.GetCharacterPlatformAsync(characterId);
+        using var platformScope = _censusContext.Use(platform);
+
         await Task.WhenAll(
             _storeUpdaterHelper.UpdateAsync<CensusCharacterDirectiveModel, CharacterDirective>(
                 () => _charactersDirectiveCollection.GetCharacterDirectivesAsync(characterId)),

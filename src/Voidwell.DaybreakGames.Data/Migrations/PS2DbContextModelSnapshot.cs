@@ -2607,6 +2607,14 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasDefaultValue("PC")
+                        .HasColumnName("platform");
+
                     b.HasKey("Id")
                         .HasName("pk_world");
 
