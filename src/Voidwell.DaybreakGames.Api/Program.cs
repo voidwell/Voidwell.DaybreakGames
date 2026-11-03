@@ -9,7 +9,7 @@ using Voidwell.Common.Swagger;
 using Voidwell.DaybreakGames.Api;
 using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Api.Extensions;
-using Voidwell.DaybreakGames.Api.Middleware;
+using Voidwell.DaybreakGames.Api.Filters;
 using Voidwell.DaybreakGames.Api.Options;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Data;
@@ -24,7 +24,7 @@ builder.AddApplicationLogging();
 var configuration = builder.Configuration;
 var services = builder.Services;
 
-services.AddControllers()
+services.AddControllers(options => options.Filters.Add<ClientAbortExceptionFilter>())
     .AddApiJsonOptions();
 
 services.AddApiSwagger(configuration);
@@ -101,7 +101,6 @@ app.InitializeDatabases();
 app.UseForwardedHeaders(GetForwardedHeaderOptions());
 
 app.UseApplicationRequestLogging();
-app.UseClientAbortHandling();
 
 app.UseApiSwagger();
 
