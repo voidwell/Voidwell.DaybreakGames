@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside;
@@ -14,6 +15,8 @@ public class ProfileController : Controller
     }
 
     [HttpGet]
+    [OutputCache(PolicyName = CachePolicies.ReferenceData)]
+    [ResponseCache(Duration = CachePolicies.ReferenceDataClientSeconds, Location = ResponseCacheLocation.Any)]
     public async Task<ActionResult> GetAllProfilesAsync()
     {
         var result = await _profileService.GetAllProfiles();
