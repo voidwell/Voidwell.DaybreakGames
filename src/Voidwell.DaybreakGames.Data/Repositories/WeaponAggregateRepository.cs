@@ -13,10 +13,10 @@ public class WeaponAggregateRepository : IWeaponAggregateRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<WeaponAggregate?> GetWeaponAggregateByItemId(int itemId)
+    public async Task<IEnumerable<WeaponAggregate>> GetWeaponAggregatesByItemIds(params int[] itemIds)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
-        return await dbContext.WeaponAggregates.FirstOrDefaultAsync(a => a.ItemId == itemId);
+        return await dbContext.WeaponAggregates.Where(a => itemIds.Contains(a.ItemId)).ToListAsync();
     }
 
     public async Task<WeaponAggregate?> GetWeaponAggregateByVehicleId(int vehicleId)

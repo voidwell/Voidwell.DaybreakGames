@@ -4,6 +4,6 @@ namespace Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 
 public interface IWeaponAggregateRepository
 {
-    Task<WeaponAggregate?> GetWeaponAggregateByItemId(int itemId);
+    Task<IEnumerable<WeaponAggregate>> GetWeaponAggregatesByItemIds(params int[] itemIds);
     Task<WeaponAggregate?> GetWeaponAggregateByVehicleId(int vehicleId);
 }

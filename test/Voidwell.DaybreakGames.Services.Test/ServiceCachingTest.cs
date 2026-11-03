@@ -56,7 +56,8 @@ public class ServiceCachingTest
     public async Task WeaponAggregateService_CachesFoundAggregatePerItem()
     {
         var repository = new Mock<IWeaponAggregateRepository>();
-        repository.Setup(a => a.GetWeaponAggregateByItemId(It.IsAny<int>())).ReturnsAsync((int id) => new WeaponAggregate { ItemId = id });
+        repository.Setup(a => a.GetWeaponAggregatesByItemIds(It.IsAny<int[]>()))
+            .ReturnsAsync((int[] ids) => ids.Select(id => new WeaponAggregate { ItemId = id }).ToList().AsEnumerable());
         var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
 
         var first = await sut.GetAggregateForItem(80);
@@ -64,30 +65,32 @@ public class ServiceCachingTest
         await sut.GetAggregateForItem(81);
 
         Assert.Same(first, second);
-        repository.Verify(a => a.GetWeaponAggregateByItemId(80), Times.Once);
-        repository.Verify(a => a.GetWeaponAggregateByItemId(81), Times.Once);
+        repository.Verify(a => a.GetWeaponAggregatesByItemIds(80), Times.Once);
+        repository.Verify(a => a.GetWeaponAggregatesByItemIds(81), Times.Once);
     }
 
     [Fact]
     public async Task WeaponAggregateService_DoesNotCacheMissingAggregate()
     {
         var repository = new Mock<IWeaponAggregateRepository>();
-        repository.Setup(a => a.GetWeaponAggregateByItemId(It.IsAny<int>())).ReturnsAsync((WeaponAggregate)null);
+        repository.Setup(a => a.GetWeaponAggregatesByItemIds(It.IsAny<int[]>())).ReturnsAsync(Enumerable.Empty<WeaponAggregate>());
         var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
 
         Assert.Null((await sut.GetAggregateForItem(80)));
         await sut.GetAggregateForItem(80);
 
-        repository.Verify(a => a.GetWeaponAggregateByItemId(80), Times.Exactly(2));
+        repository.Verify(a => a.GetWeaponAggregatesByItemIds(80), Times.Exactly(2));
     }
 
     [Fact]
     public async Task WeaponAggregateService_GetAggregates_KeysByItemAndVehicleAndSkipsMissing()
     {
         var repository = new Mock<IWeaponAggregateRepository>();
-        repository.Setup(a => a.GetWeaponAggregateByItemId(80)).ReturnsAsync(new WeaponAggregate { ItemId = 80, VehicleId = 0 });
-        repository.Setup(a => a.GetWeaponAggregateByItemId(81)).ReturnsAsync(new WeaponAggregate { ItemId = 81, VehicleId = 5 });
-        repository.Setup(a => a.GetWeaponAggregateByItemId(82)).ReturnsAsync((WeaponAggregate)null);
+        repository.Setup(a => a.GetWeaponAggregatesByItemIds(It.IsAny<int[]>())).ReturnsAsync(new[]
+        {
+            new WeaponAggregate { ItemId = 80, VehicleId = 0 },
+            new WeaponAggregate { ItemId = 81, VehicleId = 5 }
+        });
         var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
 
         var result = await sut.GetAggregates(new[] { 80, 81, 82, 80 });

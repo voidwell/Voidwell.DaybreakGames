@@ -9,87 +9,98 @@ namespace Voidwell.DaybreakGames.Services.Test;
 
 public class WeaponAggregateServiceTest
 {
-    [Fact]
-    public async Task GetAggregates_LimitsConcurrentDatabaseLookups()
+    private readonly Mock<IWeaponAggregateRepository> _repository = new();
+    private readonly List<int[]> _queries = [];
+
+    private WeaponAggregateService CreateSut(Func<int, WeaponAggregate> aggregateFor = null)
     {
-        // Every cache miss opens a database connection, so unbounded fan-out can exhaust the connection pool.
-        var concurrent = 0;
-        var maxConcurrent = 0;
+        aggregateFor ??= itemId => new WeaponAggregate { ItemId = itemId, VehicleId = 0 };
 
-        var repository = new Mock<IWeaponAggregateRepository>();
-        repository.Setup(a => a.GetWeaponAggregateByItemId(It.IsAny<int>())).Returns(async (int itemId) =>
+        _repository.Setup(a => a.GetWeaponAggregatesByItemIds(It.IsAny<int[]>())).ReturnsAsync((int[] itemIds) =>
         {
-            var current = Interlocked.Increment(ref concurrent);
-            InterlockedMax(ref maxConcurrent, current);
-
-            await Task.Delay(20);
-
-            Interlocked.Decrement(ref concurrent);
-            return new WeaponAggregate { ItemId = itemId, VehicleId = 0 };
+            _queries.Add(itemIds);
+            return itemIds.Select(aggregateFor).Where(a => a != null).ToList().AsEnumerable();
         });
 
-        var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
+        return new WeaponAggregateService(_repository.Object, TestCache.Create());
+    }
+
+    [Fact]
+    public async Task GetAggregates_LoadsEveryItemInASingleQuery()
+    {
+        var sut = CreateSut();
 
         var result = await sut.GetAggregates(Enumerable.Range(1, 60));
 
         Assert.Equal(60, result.Count);
-        Assert.True(maxConcurrent <= 8, $"Expected at most 8 concurrent lookups but saw {maxConcurrent}");
+        var query = Assert.Single(_queries);
+        Assert.Equal(60, query.Length);
     }
 
     [Fact]
-    public async Task GetAggregates_LimitsConcurrentDatabaseLookups_AcrossSimultaneousCalls()
+    public async Task GetAggregates_OnlyQueriesItemsThatAreNotCached()
     {
-        // The service is a singleton shared by every request, so the limit has to hold across calls, not just within one.
-        var concurrent = 0;
-        var maxConcurrent = 0;
+        var sut = CreateSut();
 
-        var repository = new Mock<IWeaponAggregateRepository>();
-        repository.Setup(a => a.GetWeaponAggregateByItemId(It.IsAny<int>())).Returns(async (int itemId) =>
+        await sut.GetAggregates([1, 2, 3]);
+        var result = await sut.GetAggregates([2, 3, 4]);
+
+        Assert.Equal(3, result.Count);
+        Assert.Equal(2, _queries.Count);
+        Assert.Equal([4], _queries[1]);
+    }
+
+    [Fact]
+    public async Task GetAggregates_WhenEverythingIsCached_DoesNotQuery()
+    {
+        var sut = CreateSut();
+
+        await sut.GetAggregates([1, 2]);
+        await sut.GetAggregates([1, 2]);
+
+        Assert.Single(_queries);
+    }
+
+    [Fact]
+    public async Task GetAggregates_KeysByItemAndVehicle_AndSkipsItemsWithoutAnAggregate()
+    {
+        var sut = CreateSut(itemId => itemId switch
         {
-            var current = Interlocked.Increment(ref concurrent);
-            InterlockedMax(ref maxConcurrent, current);
-
-            await Task.Delay(20);
-
-            Interlocked.Decrement(ref concurrent);
-            return new WeaponAggregate { ItemId = itemId, VehicleId = 0 };
+            80 => new WeaponAggregate { ItemId = 80, VehicleId = 0 },
+            81 => new WeaponAggregate { ItemId = 81, VehicleId = 5 },
+            _ => null
         });
 
-        var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
+        var result = await sut.GetAggregates([80, 81, 82, 80]);
 
-        var calls = Enumerable.Range(0, 10).Select(call => sut.GetAggregates(Enumerable.Range(call * 20, 20)));
-        var results = await Task.WhenAll(calls);
-
-        Assert.All(results, result => Assert.Equal(20, result.Count));
-        Assert.True(maxConcurrent <= 8, $"Expected at most 8 concurrent lookups but saw {maxConcurrent}");
+        Assert.Equivalent(new[] { "80-0", "81-5" }, result.Keys);
+        Assert.Equal([80, 81, 82], _queries.Single().Order());
     }
 
     [Fact]
-    public async Task GetAggregates_SkipsItemsWithoutAnAggregate_AndKeysByItemAndVehicle()
+    public async Task GetAggregates_DoesNotCacheItemsWithoutAnAggregate()
     {
-        var repository = new Mock<IWeaponAggregateRepository>();
-        repository.Setup(a => a.GetWeaponAggregateByItemId(1)).ReturnsAsync(new WeaponAggregate { ItemId = 1, VehicleId = 5 });
-        repository.Setup(a => a.GetWeaponAggregateByItemId(2)).ReturnsAsync((WeaponAggregate)null);
+        var sut = CreateSut(itemId => null);
 
-        var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
+        await sut.GetAggregates([82]);
+        await sut.GetAggregates([82]);
 
-        var result = await sut.GetAggregates([1, 2, 1]);
-
-        var aggregate = Assert.Single(result);
-        Assert.Equal("1-5", aggregate.Key);
+        Assert.Equal(2, _queries.Count);
     }
 
-    private static void InterlockedMax(ref int location, int value)
+    [Fact]
+    public async Task GetAggregates_WithSeveralRowsForAnItem_UsesOneOfThem()
     {
-        int initial;
-        do
+        // weapon_aggregate is keyed by (ItemId, VehicleId); the service has always used a single row per item.
+        _repository.Setup(a => a.GetWeaponAggregatesByItemIds(It.IsAny<int[]>())).ReturnsAsync(new[]
         {
-            initial = location;
-            if (value <= initial)
-            {
-                return;
-            }
-        }
-        while (Interlocked.CompareExchange(ref location, value, initial) != initial);
+            new WeaponAggregate { ItemId = 7, VehicleId = 0 },
+            new WeaponAggregate { ItemId = 7, VehicleId = 3 }
+        });
+        var sut = new WeaponAggregateService(_repository.Object, TestCache.Create());
+
+        var result = await sut.GetAggregates([7]);
+
+        Assert.Single(result);
     }
 }
