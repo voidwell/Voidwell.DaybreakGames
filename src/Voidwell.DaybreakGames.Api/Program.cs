@@ -6,6 +6,7 @@ using Voidwell.Common.Cache;
 using Voidwell.Common.Configuration;
 using Voidwell.Common.Logging;
 using Voidwell.Common.Swagger;
+using Voidwell.DaybreakGames.Api;
 using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Api.Extensions;
 using Voidwell.DaybreakGames.Api.Options;
@@ -26,6 +27,13 @@ services.AddControllers()
     .AddApiJsonOptions();
 
 services.AddApiSwagger(configuration);
+
+services.AddOutputCache(options =>
+{
+    options.AddPolicy(CachePolicies.ReferenceData, policy => policy
+        .Expire(TimeSpan.FromMinutes(10))
+        .SetVaryByHeader("Origin"));
+});
 
 services.AddEntityFrameworkContext(configuration);
 
@@ -91,6 +99,8 @@ app.InitializeDatabases();
 
 app.UseForwardedHeaders(GetForwardedHeaderOptions());
 
+app.UseApplicationRequestLogging();
+
 app.UseApiSwagger();
 
 app.UseRouting();
@@ -98,6 +108,7 @@ app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseOutputCache();
 
 app.MapControllers();
 

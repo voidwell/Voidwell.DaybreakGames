@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 
 namespace Voidwell.DaybreakGames.Api.Controllers.Planetside;
@@ -14,6 +15,8 @@ public class ZoneController : Controller
     }
 
     [HttpGet]
+    [OutputCache(PolicyName = CachePolicies.ReferenceData)]
+    [ResponseCache(Duration = CachePolicies.ReferenceDataClientSeconds, Location = ResponseCacheLocation.Any)]
     public async Task<ActionResult> GetAllZonesAsync()
     {
         var result = await _zoneStore.GetAllZones();
