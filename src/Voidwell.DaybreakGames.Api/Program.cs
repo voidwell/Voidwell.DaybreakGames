@@ -9,6 +9,7 @@ using Voidwell.Common.Swagger;
 using Voidwell.DaybreakGames.Api;
 using Voidwell.DaybreakGames.Api.Authentication;
 using Voidwell.DaybreakGames.Api.Extensions;
+using Voidwell.DaybreakGames.Api.Middleware;
 using Voidwell.DaybreakGames.Api.Options;
 using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Data;
@@ -100,6 +101,7 @@ app.InitializeDatabases();
 app.UseForwardedHeaders(GetForwardedHeaderOptions());
 
 app.UseApplicationRequestLogging();
+app.UseClientAbortHandling();
 
 app.UseApiSwagger();
 
