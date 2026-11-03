@@ -141,7 +141,7 @@ public class CharacterService : ICharacterService
         var details = DomainMapper.MapCharacterDetails(character);
 
         details.WeaponStats = CalculateCharacterWeaponStats(character.WeaponStats!, aggregates).ToList();
-        details.InfantryStats = CalculateInfantryStats(details.WeaponStats, details.LifetimeStats!, sanctionedWeaponIds);
+        details.InfantryStats = CalculateInfantryStats(details.WeaponStats, details.LifetimeStats, sanctionedWeaponIds);
 
         return details;
     }
@@ -184,7 +184,7 @@ public class CharacterService : ICharacterService
         }
     }
 
-    private static InfantryStats? CalculateInfantryStats(IEnumerable<CharacterDetailsWeaponStat> weaponStats, CharacterDetailsLifetimeStats lifetimeStats, IEnumerable<int> sanctionedWeaponIds)
+    private static InfantryStats? CalculateInfantryStats(IEnumerable<CharacterDetailsWeaponStat> weaponStats, CharacterDetailsLifetimeStats? lifetimeStats, IEnumerable<int> sanctionedWeaponIds)
     {
         if (sanctionedWeaponIds == null)
         {
@@ -221,7 +221,8 @@ public class CharacterService : ICharacterService
 
         infantryStats.IVIScore = (int)Math.Round(infantryStats.HeadshotRatio.GetValueOrDefault() * infantryStats.Accuracy.GetValueOrDefault() * 10000, 0);
 
-        if (lifetimeStats.Deaths > 0)
+        // Lifetime stats are missing until they have been stored for the character
+        if (lifetimeStats?.Deaths > 0)
         {
             infantryStats.KDRPadding = lifetimeStats.Kills / (double)lifetimeStats.Deaths - infantryStats.KillDeathRatio.GetValueOrDefault();
         }

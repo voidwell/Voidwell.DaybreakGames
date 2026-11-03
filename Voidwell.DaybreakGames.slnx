@@ -22,6 +22,7 @@
     <Project Path="src/Voidwell.DaybreakGames.Utils/Voidwell.DaybreakGames.Utils.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <Project Path="test/Voidwell.DaybreakGames.Api.Test/Voidwell.DaybreakGames.Api.Test.csproj" />
     <Project Path="test/Voidwell.DaybreakGames.Census.Test/Voidwell.DaybreakGames.Census.Test.csproj" />
     <Project Path="test/Voidwell.DaybreakGames.CensusStore.Test/Voidwell.DaybreakGames.CensusStore.Test.csproj" />
     <Project Path="test/Voidwell.DaybreakGames.Domain.Test/Voidwell.DaybreakGames.Domain.Test.csproj" />

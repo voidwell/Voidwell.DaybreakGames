@@ -58,6 +58,12 @@ public class CharacterDirectiveStore : ICharacterDirectiveStore
             {
                 return null;
             }
+            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+            {
+                // Census did not respond within the HttpClient timeout. Treat it like an unreachable Census rather than
+                // failing the request.
+                return null;
+            }
         }
     }
 
