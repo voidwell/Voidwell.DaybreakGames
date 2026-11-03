@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Voidwell.Common.Cache;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
@@ -13,7 +12,7 @@ public class WeaponAggregateService : IWeaponAggregateService
 
     private const string _cacheKey = "ps2.weaponAggregates";
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(8);
-    private const int _maxConcurrentLookups = 8;
+    private readonly SemaphoreSlim _lookupSemaphore = new(8);
 
     public WeaponAggregateService(IWeaponAggregateRepository weaponAggregateRepository, ICache cache)
     {
@@ -25,25 +24,26 @@ public class WeaponAggregateService : IWeaponAggregateService
     {
         var cacheKey = $"{_cacheKey}_{itemId}";
 
-        return await _cache.GetOrSetIfNotNullAsync<WeaponAggregate>(cacheKey, ct => _weaponAggregateRepository.GetWeaponAggregateByItemId(itemId), _cacheExpiration);
+        return await _cache.GetOrSetIfNotNullAsync<WeaponAggregate>(cacheKey, async ct =>
+        {
+            // Each cache miss holds a database connection. This service is a singleton, so the semaphore bounds the
+            // lookups across all requests and keeps a character with many weapons from exhausting the connection pool.
+            await _lookupSemaphore.WaitAsync(ct);
+            try
+            {
+                return await _weaponAggregateRepository.GetWeaponAggregateByItemId(itemId);
+            }
+            finally
+            {
+                _lookupSemaphore.Release();
+            }
+        }, _cacheExpiration);
     }
 
     public async Task<Dictionary<string, WeaponAggregate>> GetAggregates(IEnumerable<int> itemIds)
     {
-        var aggregates = new ConcurrentBag<WeaponAggregate>();
+        var aggregates = await Task.WhenAll(itemIds.Distinct().Select(GetAggregateForItem));
 
-        // Every cache miss opens a database connection. Looking up all of a character's weapons at once can exhaust
-        // the connection pool, so limit how many run at a time.
-        var options = new ParallelOptions { MaxDegreeOfParallelism = _maxConcurrentLookups };
-        await Parallel.ForEachAsync(itemIds.Distinct(), options, async (itemId, _) =>
-        {
-            var aggregate = await GetAggregateForItem(itemId);
-            if (aggregate != null)
-            {
-                aggregates.Add(aggregate);
-            }
-        });
-
-        return aggregates.ToDictionary(a => $"{a.ItemId}-{a.VehicleId}", a => a);
+        return aggregates.Where(a => a != null).ToDictionary(a => $"{a!.ItemId}-{a.VehicleId}", a => a)!;
     }
 }

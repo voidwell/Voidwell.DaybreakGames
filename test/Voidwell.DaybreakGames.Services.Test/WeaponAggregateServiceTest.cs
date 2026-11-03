@@ -37,6 +37,34 @@ public class WeaponAggregateServiceTest
     }
 
     [Fact]
+    public async Task GetAggregates_LimitsConcurrentDatabaseLookups_AcrossSimultaneousCalls()
+    {
+        // The service is a singleton shared by every request, so the limit has to hold across calls, not just within one.
+        var concurrent = 0;
+        var maxConcurrent = 0;
+
+        var repository = new Mock<IWeaponAggregateRepository>();
+        repository.Setup(a => a.GetWeaponAggregateByItemId(It.IsAny<int>())).Returns(async (int itemId) =>
+        {
+            var current = Interlocked.Increment(ref concurrent);
+            InterlockedMax(ref maxConcurrent, current);
+
+            await Task.Delay(20);
+
+            Interlocked.Decrement(ref concurrent);
+            return new WeaponAggregate { ItemId = itemId, VehicleId = 0 };
+        });
+
+        var sut = new WeaponAggregateService(repository.Object, TestCache.Create());
+
+        var calls = Enumerable.Range(0, 10).Select(call => sut.GetAggregates(Enumerable.Range(call * 20, 20)));
+        var results = await Task.WhenAll(calls);
+
+        Assert.All(results, result => Assert.Equal(20, result.Count));
+        Assert.True(maxConcurrent <= 8, $"Expected at most 8 concurrent lookups but saw {maxConcurrent}");
+    }
+
+    [Fact]
     public async Task GetAggregates_SkipsItemsWithoutAnAggregate_AndKeysByItemAndVehicle()
     {
         var repository = new Mock<IWeaponAggregateRepository>();
