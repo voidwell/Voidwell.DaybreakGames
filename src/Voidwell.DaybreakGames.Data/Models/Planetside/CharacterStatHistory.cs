@@ -13,5 +13,8 @@ public class CharacterStatHistory
     public string? Month { get; set; }
     public string? Week { get; set; }
 
+    // The UTC date the history counts back from: Day[0] is this day, Week[0] its week and Month[0] its month.
+    public DateTime? LastSaveDate { get; set; }
+
     public Character? Character { get; set; }
 }

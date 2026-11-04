@@ -130,6 +130,15 @@ public class DomainMapperTest
     }
 
     [Fact]
+    public void StatsHistory_MapsLastSaveDate()
+    {
+        var saved = new DateTime(2026, 11, 3, 16, 18, 17);
+
+        Assert.Equal(saved, DomainMapper.MapStatsHistory(new CharacterStatHistory { Day = "[]", Week = "[]", Month = "[]", LastSaveDate = saved }).LastSaveDate);
+        Assert.Null(DomainMapper.MapStatsHistory(new CharacterStatHistory { Day = "[]", Week = "[]", Month = "[]" }).LastSaveDate);
+    }
+
+    [Fact]
     public void StatsHistory_ParsesLegacyIndentedJson()
     {
         var history = new CharacterStatHistory { Day = "[\n  1,\n  2\n]", Week = "[]", Month = "[]" };

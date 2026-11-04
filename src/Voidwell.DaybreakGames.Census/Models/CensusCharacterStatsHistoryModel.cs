@@ -11,6 +11,7 @@ public class CensusCharacterStatsHistoryModel
     public StatHistoryDay? Day { get; set; }
     public StatHistoryWeek? Week { get; set; }
     public StatHistoryMonth? Month { get; set; }
+    public DateTime? LastSaveDate { get; set; }
 }
 
 public class StatHistoryDay
