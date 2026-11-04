@@ -108,6 +108,15 @@ public class CensusWeaponInfoModelExtensionsTest
     }
 
     [Fact]
+    public void Damage_NoFireModesOrDatasheet_ReturnsNull()
+    {
+        var model = new CensusWeaponInfoModel();
+
+        Assert.Null(model.GetMinDamage());
+        Assert.Null(model.GetMaxDamage());
+    }
+
+    [Fact]
     public void DamageRange_UsesExtremesAcrossFireModes()
     {
         var model = Weapon(

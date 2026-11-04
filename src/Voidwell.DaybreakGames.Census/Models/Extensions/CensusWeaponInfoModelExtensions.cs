@@ -45,14 +45,14 @@ public static class CensusWeaponInfoModelExtensions
     {
         return model.FireMode?.Min(m => m.DamageMin)
             ?? model.Datasheet?.DamageMin
-            ?? model.FireMode!.Min(m => m.Damage);
+            ?? model.FireMode?.Min(m => m.Damage);
     }
 
     public static int? GetMaxDamage(this CensusWeaponInfoModel model)
     {
         return model.FireMode?.Max(m => m.DamageMax)
             ?? model.Datasheet?.DamageMax
-            ?? model.FireMode!.Max(m => m.Damage);
+            ?? model.FireMode?.Max(m => m.Damage);
     }
 
     public static int? GetMinDamageRange(this CensusWeaponInfoModel model)
