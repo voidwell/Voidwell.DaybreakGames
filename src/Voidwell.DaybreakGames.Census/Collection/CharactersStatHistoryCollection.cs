@@ -19,7 +19,7 @@ public class CharactersStatHistoryCollection : ICensusCollection<CensusCharacter
     {
         var query = _client.CreateQuery(CollectionName)
             .SetLimit(5000)
-            .ShowFields("character_id", "stat_name", "all_time", "one_life_max", "day", "month", "week")
+            .ShowFields("character_id", "stat_name", "all_time", "one_life_max", "day", "month", "week", "last_save_date")
             .Where("character_id", a => a.Equals(characterId));
 
         if (lastLogin != null)

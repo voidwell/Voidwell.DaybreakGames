@@ -761,6 +761,10 @@ namespace Voidwell.DaybreakGames.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("day");
 
+                    b.Property<DateTime?>("LastSaveDate")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("last_save_date");
+
                     b.Property<string>("Month")
                         .HasColumnType("text")
                         .HasColumnName("month");

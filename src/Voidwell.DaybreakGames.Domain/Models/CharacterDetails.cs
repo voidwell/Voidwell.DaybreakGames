@@ -53,6 +53,7 @@ public class CharacterDetailsStatsHistory
     public IEnumerable<int>? Day { get; set; }
     public IEnumerable<int>? Month { get; set; }
     public IEnumerable<int>? Week { get; set; }
+    public DateTime? LastSaveDate { get; set; }
 }
 
 public class CharacterDetailsLifetimeStats

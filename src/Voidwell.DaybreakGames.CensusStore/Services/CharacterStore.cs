@@ -483,7 +483,8 @@ public class CharacterStore : ICharacterStore
                 OneLifeMax = a.OneLifeMax,
                 Day = JsonSerializer.Serialize(day),
                 Week = JsonSerializer.Serialize(week),
-                Month = JsonSerializer.Serialize(month)
+                Month = JsonSerializer.Serialize(month),
+                LastSaveDate = a.LastSaveDate
             };
         });
 
