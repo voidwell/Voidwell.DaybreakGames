@@ -7,6 +7,15 @@ public class CombatReportStats
     public IEnumerable<CombatReportWeaponStats>? Weapons { get; set; }
     public IEnumerable<CombatReportVehicleStats>? Vehicles { get; set; }
     public IEnumerable<CombatReportClassStats>? Classes { get; set; }
+    public IEnumerable<CombatReportFactionKills>? FactionKills { get; set; }
+}
+
+/// <summary>Kills by players of one faction on players of another; the same faction on both sides is team kills.</summary>
+public class CombatReportFactionKills
+{
+    public int AttackerFactionId { get; set; }
+    public int VictimFactionId { get; set; }
+    public int Kills { get; set; }
 }
 
 public class CombatReportParticipantStats

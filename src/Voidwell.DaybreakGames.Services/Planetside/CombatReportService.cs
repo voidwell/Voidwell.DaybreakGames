@@ -80,8 +80,27 @@ public class CombatReportService : ICombatReportService
             Outfits = outfitHash.Values.ToArray(),
             Weapons = weaponHash.Values.ToArray(),
             Vehicles = vehicleHash.Values.ToArray(),
-            Classes = loadoutHash.Values.ToArray()
+            Classes = loadoutHash.Values.ToArray(),
+            FactionKills = CountFactionKills(deaths, participantHash)
         };
+    }
+
+    /// <summary>
+    /// Counts kills by attacker and victim faction. Suicides and deaths where either side's faction is unknown are left out.
+    /// </summary>
+    public static CombatReportFactionKills[] CountFactionKills(IEnumerable<Death> deaths, IReadOnlyDictionary<long, CombatReportParticipantStats> participants)
+    {
+        int? factionOf(long characterId) =>
+            participants.TryGetValue(characterId, out var participant) && participant.Character?.FactionId > 0 ? participant.Character.FactionId : null;
+
+        return deaths
+            .Where(d => d.AttackerCharacterId != 0 && d.AttackerCharacterId != d.CharacterId)
+            .Select(d => (Attacker: factionOf(d.AttackerCharacterId), Victim: factionOf(d.CharacterId)))
+            .Where(f => f.Attacker != null && f.Victim != null)
+            .GroupBy(f => f)
+            .Select(g => new CombatReportFactionKills { AttackerFactionId = g.Key.Attacker!.Value, VictimFactionId = g.Key.Victim!.Value, Kills = g.Count() })
+            .OrderBy(f => f.AttackerFactionId).ThenBy(f => f.VictimFactionId)
+            .ToArray();
     }
 
     private static void PreLoadCombatStatTrackers(IEnumerable<Death> deaths, IEnumerable<VehicleDestroy> vehicleDeaths, Dictionary<long, CombatReportParticipantStats> participantHash,
