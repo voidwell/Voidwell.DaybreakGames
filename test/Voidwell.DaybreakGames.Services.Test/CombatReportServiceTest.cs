@@ -21,7 +21,10 @@ public class CombatReportServiceTest
     {
         var players = new Dictionary<long, CombatReportParticipantStats>
         {
-            [1] = Player(1, 1), [2] = Player(2, 2), [3] = Player(3, 3), [4] = Player(4, 1)
+            [1] = Player(1, 1),
+            [2] = Player(2, 2),
+            [3] = Player(3, 3),
+            [4] = Player(4, 1)
         };
         var deaths = new[] { Kill(1, 2), Kill(1, 2), Kill(4, 3), Kill(2, 1), Kill(1, 4) };
 
@@ -36,7 +39,9 @@ public class CombatReportServiceTest
     {
         var players = new Dictionary<long, CombatReportParticipantStats>
         {
-            [1] = Player(1, 1), [2] = Player(2, null), [3] = Player(3, 0)
+            [1] = Player(1, 1),
+            [2] = Player(2, null),
+            [3] = Player(3, 0)
         };
         var deaths = new[] { Kill(1, 1), Kill(0, 1), Kill(1, 2), Kill(3, 1), Kill(1, 99) };
 
