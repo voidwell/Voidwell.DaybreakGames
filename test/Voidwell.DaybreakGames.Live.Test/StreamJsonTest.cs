@@ -53,6 +53,27 @@ public class StreamJsonTest
         Assert.Equal(DateTimeKind.Utc, result.Kind);
     }
 
+    // These must hold whatever the machine's time zone; run with TZ set (e.g. TZ=America/New_York) to check.
+    [Theory]
+    [InlineData("\"2024-03-05T10:20:30Z\"")]
+    [InlineData("\"2024-03-05T05:20:30-05:00\"")]
+    [InlineData("\"2024-03-05 10:20:30.0\"")]
+    public void DateTimeJsonConverter_ReadsStringsWithOrWithoutAZoneAsUtc(string json)
+    {
+        var result = JsonSerializer.Deserialize<DateTime>(json, _converterOptions);
+
+        Assert.Equal(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Utc), result);
+        Assert.Equal(DateTimeKind.Utc, result.Kind);
+    }
+
+    [Fact]
+    public void DateTimeJsonConverter_WritesUnspecifiedAsUtc()
+    {
+        var json = JsonSerializer.Serialize(new DateTime(2024, 3, 5, 10, 20, 30, DateTimeKind.Unspecified), _converterOptions);
+
+        Assert.Equal("\"2024-03-05T10:20:30Z\"", json);
+    }
+
     [Fact]
     public void DateTimeJsonConverter_WritesUtcIsoString()
     {
