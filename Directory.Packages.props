@@ -20,6 +20,6 @@
     <PackageVersion Include="Voidwell.Common.Cache" Version="1.0.7" />
     <PackageVersion Include="Voidwell.Common.Logging" Version="1.0.7" />
     <PackageVersion Include="Voidwell.Common.Swagger" Version="1.0.7" />
-    <PackageVersion Include="xunit.v3" Version="4.0.2" />
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
   </ItemGroup>
 </Project>
