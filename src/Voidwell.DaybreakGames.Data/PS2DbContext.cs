@@ -1,12 +1,13 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Voidwell.Common.Configuration.EntityFramework;
 using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Models.Planetside.Events;
 
 namespace Voidwell.DaybreakGames.Data;
 
-public class PS2DbContext : DbContext
+public class PS2DbContext : DbContext, IApplicationConfigurationDbContext
 {
     static PS2DbContext()
     {
@@ -86,6 +87,8 @@ public class PS2DbContext : DbContext
 
     public DbSet<UpdaterScheduler> UpdaterScheduler => Set<UpdaterScheduler>();
 
+    public DbSet<ApplicationConfigurationEntity> ApplicationConfiguration => Set<ApplicationConfigurationEntity>();
+
     internal static DbContextOptions<PS2DbContext> CreateDefaultDbContextOptions(DatabaseOptions options)
     {
         var builder = new DbContextOptionsBuilder<PS2DbContext>();
@@ -115,5 +118,7 @@ public class PS2DbContext : DbContext
         base.OnModelCreating(builder);
 
         builder.ApplyConfigurationsFromAssembly(typeof(PS2DbContext).Assembly);
+
+        builder.ApplyApplicationConfiguration();
     }
 }

@@ -3,16 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Voidwell.Common.State;
 using Voidwell.DaybreakGames.Census.Collection.Abstract;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Data.Extensions;
 using Voidwell.DaybreakGames.Data.Models;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
-using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 
-public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedService
+public class StoreUpdaterScheduler : StatefulHostedService, IStoreUpdaterService
 {
     private readonly IUpdaterSchedulerRepository _updaterSchedulerRepository;
     private readonly IDbContextFactory<PS2DbContext> _dbContextFactory;
@@ -38,7 +38,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         _mapper = mapper;
     }
 
-    public async Task OnApplicationStartup(CancellationToken cancellationToken)
+    public override async Task OnApplicationStartup(CancellationToken cancellationToken)
     {
         foreach (var updateConfig in _options.Collections)
         {
@@ -48,20 +48,8 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         }
     }
 
-    public Task OnApplicationShutdown(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
-        _updaterTimers.Clear();
-
-        return Task.CompletedTask;
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        if (!_options.Enabled)
-        {
-            return Task.CompletedTask;
-        }
-
         foreach (var collectionType in _collectionLog.Keys)
         {
             RegisterUpdaterTimer(collectionType);
@@ -70,7 +58,7 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public override Task StopAsync(CancellationToken cancellationToken)
     {
         _updaterTimers.ToList().ForEach(a => a.Value?.Dispose());
         _updaterTimers.Clear();
@@ -83,9 +71,9 @@ public class StoreUpdaterScheduler : IStoreUpdaterService, IStatefulHostedServic
         return _collectionLog.Values.OrderBy(a => a.StoreName).ToList();
     }
 
-    public Task<object> GetStatusAsync(CancellationToken cancellationToken)
+    public override Task<object?> GetStatusAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult<object>($"Tracking {_collectionLog.Count} updatable collections");
+        return Task.FromResult<object?>($"Tracking {_collectionLog.Count} updatable collections");
     }
 
     public async Task<LastStoreUpdate?> UpdateStoreAsync(string storeName)
