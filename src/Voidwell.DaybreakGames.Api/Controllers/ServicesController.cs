@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Voidwell.Common.Configuration;
+using Voidwell.Common.State;
 using Voidwell.DaybreakGames.Api.Authentication;
-using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Api.Controllers;
 
@@ -37,29 +38,34 @@ public class ServicesController : Controller
     }
 
     [HttpPost("{serviceName}/enable")]
-    public async Task<ActionResult> PostEnableServiceAsync(string serviceName)
+    public Task<ActionResult> PostEnableServiceAsync(string serviceName)
     {
-        if (!_serviceManager.VerifyServiceExists(serviceName))
-        {
-            return NotFound();
-        }
-
-        await _serviceManager.StartServiceAsync(serviceName, CancellationToken.None);
-
-        var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
-
-        return Ok(status);
+        return ChangeServiceStateAsync(serviceName, _serviceManager.StartServiceAsync);
     }
 
     [HttpPost("{serviceName}/disable")]
-    public async Task<ActionResult> PostDisableServiceAsync(string serviceName)
+    public Task<ActionResult> PostDisableServiceAsync(string serviceName)
+    {
+        return ChangeServiceStateAsync(serviceName, _serviceManager.StopServiceAsync);
+    }
+
+    private async Task<ActionResult> ChangeServiceStateAsync(string serviceName,
+        Func<string, string?, CancellationToken, Task> changeState)
     {
         if (!_serviceManager.VerifyServiceExists(serviceName))
         {
             return NotFound();
         }
 
-        await _serviceManager.StopServiceAsync(serviceName, CancellationToken.None);
+        try
+        {
+            await changeState(serviceName, User.FindFirst(AuthConstants.Claims.Subject)?.Value, CancellationToken.None);
+        }
+        catch (ApplicationConfigurationLockedException ex)
+        {
+            // Appsettings or an environment variable sets this service's state, so it can't be changed at runtime
+            return Conflict(new { message = ex.Message, lockedBy = ex.LockedBy });
+        }
 
         var status = await _serviceManager.GetServiceStatusAsync(serviceName, CancellationToken.None);
 

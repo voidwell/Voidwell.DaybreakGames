@@ -1,10 +1,10 @@
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Voidwell.Common.Authentication;
 using Voidwell.Common.Cache;
 using Voidwell.Common.Configuration;
 using Voidwell.Common.Logging;
+using Voidwell.Common.State;
 using Voidwell.Common.Swagger;
 using Voidwell.DaybreakGames.Api;
 using Voidwell.DaybreakGames.Api.Authentication;
@@ -15,7 +15,6 @@ using Voidwell.DaybreakGames.CensusStore;
 using Voidwell.DaybreakGames.Data;
 using Voidwell.DaybreakGames.Live;
 using Voidwell.DaybreakGames.Services;
-using Voidwell.DaybreakGames.Utils.HostedService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +36,7 @@ services.AddOutputCache(options =>
 });
 
 services.AddEntityFrameworkContext(configuration);
+builder.AddApplicationConfigurationStore();
 
 services.AddCache(options =>
 {
@@ -63,7 +63,7 @@ services.AddAuthorizationBuilder()
     .AddPolicy(AuthConstants.Policies.Mutterblack, policy =>
     {
         policy.RequireAuthenticatedUser();
-        policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
+        policy.RequireClaim(AuthConstants.Claims.ClientId, "mutterblack");
     })
     .AddPolicy(AuthConstants.Policies.PlanetsideBattlesOrganizer, policy =>
     {

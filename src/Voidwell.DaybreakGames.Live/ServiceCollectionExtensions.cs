@@ -2,10 +2,10 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Voidwell.Common.State;
 using Voidwell.DaybreakGames.Live.CensusStream;
 using Voidwell.DaybreakGames.Live.CensusStream.EventProcessors;
 using Voidwell.DaybreakGames.Live.GameState;
-using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Live;
 

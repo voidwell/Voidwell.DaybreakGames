@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Voidwell.Common.State;
 using Voidwell.DaybreakGames.Census;
 using Voidwell.DaybreakGames.Census.Collection;
 using Voidwell.DaybreakGames.CensusStore.Services;
 using Voidwell.DaybreakGames.CensusStore.Services.Abstractions;
 using Voidwell.DaybreakGames.CensusStore.StoreUpdater;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
-using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.CensusStore;
 
@@ -15,7 +15,6 @@ public static class CensusStoreExtensions
     public static IServiceCollection AddCensusStores(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions();
-        services.Configure<StoreOptions>(configuration);
 
         services.AddCensusCollections();
 
@@ -40,8 +39,6 @@ public static class CensusStoreExtensions
         services.AddSingleton<IZoneStore, ZoneStore>();
 
         services.AddStatefulHostedService<IStoreUpdaterService, StoreUpdaterScheduler>();
-
-        services.Configure<StaticStoreUpdaterConfiguration>(o => o.Enabled = !configuration.GetValue<bool>("DisableUpdater"));
 
         services.AddUpdaterStaticStore<AchievementCollection, Achievement>();
         services.AddUpdaterStaticStore<DirectiveCollection, Directive>()
