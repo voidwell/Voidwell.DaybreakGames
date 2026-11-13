@@ -1,4 +1,3 @@
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Voidwell.Common.Authentication;
@@ -64,7 +63,7 @@ services.AddAuthorizationBuilder()
     .AddPolicy(AuthConstants.Policies.Mutterblack, policy =>
     {
         policy.RequireAuthenticatedUser();
-        policy.RequireClaim(JwtClaimTypes.ClientId, "mutterblack");
+        policy.RequireClaim(AuthConstants.Claims.ClientId, "mutterblack");
     })
     .AddPolicy(AuthConstants.Policies.PlanetsideBattlesOrganizer, policy =>
     {

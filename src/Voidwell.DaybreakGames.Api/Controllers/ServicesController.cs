@@ -1,4 +1,3 @@
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Voidwell.Common.Configuration;
@@ -60,7 +59,7 @@ public class ServicesController : Controller
 
         try
         {
-            await changeState(serviceName, User.FindFirst(JwtClaimTypes.Subject)?.Value, CancellationToken.None);
+            await changeState(serviceName, User.FindFirst(AuthConstants.Claims.Subject)?.Value, CancellationToken.None);
         }
         catch (ApplicationConfigurationLockedException ex)
         {
