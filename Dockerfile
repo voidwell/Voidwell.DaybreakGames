@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet publish -c Release -o /app/publish ./src/Voidwell.DaybreakGames.Api/Voidwell.DaybreakGames.Api.csproj
 
 # --- Runtime ---
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:11.0
 WORKDIR /app
 
 COPY --from=build /app/publish ./
