@@ -1,20 +1,17 @@
 using DaybreakGames.Census.Exceptions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Voidwell.Common.State;
 using Voidwell.DaybreakGames.Data.Models.Planetside;
 using Voidwell.DaybreakGames.Data.Repositories.Abstractions;
 using Voidwell.DaybreakGames.Services.Planetside.Abstractions;
-using Voidwell.DaybreakGames.Utils.HostedService;
 
 namespace Voidwell.DaybreakGames.Live;
 
-public class CharacterUpdaterService : ICharacterUpdaterService
+public class CharacterUpdaterService : StatefulHostedService, ICharacterUpdaterService
 {
     private readonly ICharacterUpdaterRepository _characterUpdaterRepository;
     private readonly ICharacterService _characterService;
     private readonly ICharacterDirectiveService _characterDirectiveService;
-    private readonly HostedServiceState<ICharacterUpdaterService> _state;
-    private readonly LiveOptions _options;
     private readonly ILogger _logger;
 
     private Timer? _timer;
@@ -22,18 +19,16 @@ public class CharacterUpdaterService : ICharacterUpdaterService
     private readonly TimeSpan _updateDelay = TimeSpan.FromHours(1);
     private const int _maxParallelUpdates = 1;
     private bool _isWorking;
+    private volatile bool _isRunning;
     private bool _waitError;
     private SemaphoreSlim? _parallelSemaphore;
 
     public CharacterUpdaterService(ICharacterUpdaterRepository characterUpdaterRepository, ICharacterService characterService,
-        ICharacterDirectiveService characterDirectiveService, HostedServiceState<ICharacterUpdaterService> state,
-        IOptions<LiveOptions> options, ILogger<CharacterUpdaterService> logger)
+        ICharacterDirectiveService characterDirectiveService, ILogger<CharacterUpdaterService> logger)
     {
         _characterUpdaterRepository = characterUpdaterRepository;
         _characterService = characterService;
         _characterDirectiveService = characterDirectiveService;
-        _state = state;
-        _options = options.Value;
         _logger = logger;
 
         _isWorking = false;
@@ -56,15 +51,10 @@ public class CharacterUpdaterService : ICharacterUpdaterService
         }
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
         _timer?.Dispose();
-
-        if (_options.DisableCharacterUpdater)
-        {
-            _logger.LogInformation("Character updater is disabled");
-            return Task.CompletedTask;
-        }
+        _isRunning = true;
 
         _logger.LogInformation("Character updater started");
 
@@ -73,8 +63,10 @@ public class CharacterUpdaterService : ICharacterUpdaterService
         return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public override Task StopAsync(CancellationToken cancellationToken)
     {
+        // Stops queued updates from starting; one already in progress finishes
+        _isRunning = false;
         _timer?.Dispose();
 
         _logger.LogInformation("Character updater stopped");
@@ -82,7 +74,7 @@ public class CharacterUpdaterService : ICharacterUpdaterService
         return Task.CompletedTask;
     }
 
-    public async Task<object> GetStatusAsync(CancellationToken cancellationToken)
+    public override async Task<object?> GetStatusAsync(CancellationToken cancellationToken)
     {
         var totalCountTask = _characterUpdaterRepository.GetQueueLengthAsync();
         var activeCountTask = _characterUpdaterRepository.GetQueueLengthAsync(_updateDelay);
@@ -114,7 +106,7 @@ public class CharacterUpdaterService : ICharacterUpdaterService
 
         try
         {
-            if (!_state.IsRunning || _waitError)
+            if (!_isRunning || _waitError)
             {
                 return;
             }
@@ -145,15 +137,5 @@ public class CharacterUpdaterService : ICharacterUpdaterService
         {
             _parallelSemaphore.Release();
         }
-    }
-
-    public Task OnApplicationStartup(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task OnApplicationShutdown(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
     }
 }

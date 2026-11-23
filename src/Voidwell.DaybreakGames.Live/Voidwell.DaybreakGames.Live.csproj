@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" />
     <PackageReference Include="Riok.Mapperly" />
+    <PackageReference Include="Voidwell.Common.State" />
   </ItemGroup>
 
   <ItemGroup>

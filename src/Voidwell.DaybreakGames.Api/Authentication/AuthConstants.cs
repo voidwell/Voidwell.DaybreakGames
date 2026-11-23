@@ -13,4 +13,13 @@ public static class AuthConstants
         public const string Administrator = "Administrator";
         public const string PlanetsideBattlesOrganizer = "PSB";
     }
+
+    /// <summary>
+    /// Token claim names. Inbound claim mapping is off, so claims keep the names the token gives them.
+    /// </summary>
+    public static class Claims
+    {
+        public const string Subject = "sub";
+        public const string ClientId = "client_id";
+    }
 }

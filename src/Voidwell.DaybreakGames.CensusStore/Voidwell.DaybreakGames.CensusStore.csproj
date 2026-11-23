@@ -4,6 +4,7 @@
     <PackageReference Include="AsyncKeyedLock" />
     <PackageReference Include="Riok.Mapperly" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Voidwell.Common.State" />
   </ItemGroup>
 
   <ItemGroup>

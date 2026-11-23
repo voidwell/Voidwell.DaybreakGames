@@ -38,9 +38,7 @@ Settings are read from `appsettings.json`, then `appsettings.{Environment}.json`
 | `OriginAddress` | No | Extra allowed CORS origin (`http://localhost:4200` is always allowed) |
 | `CensusWebsocketServices` | No | Comma-separated event names to subscribe to (e.g. `Death, FacilityControl, PlayerLogin`). Defaults are in `appsettings.json`. Empty disables event processing |
 | `CensusWebsocketWorlds` / `CensusWebsocketCharacters` | No | Worlds and characters to stream; `all` by default |
-| `DisableUpdater` | No | `true` disables the scheduled Census store updater |
-| `DisableCharacterUpdater` | No | `true` disables the background character updater |
-| `DisableCensusMonitor` | No | `true` disables the Census websocket monitor |
+| `HostedServices:{Name}:Enabled` | No | Turns a background service on or off and locks it; see [Background services](#background-services) |
 | `Serilog` | No | Standard Serilog configuration section (minimum level and per-namespace overrides); defaults are in `appsettings.json` |
 
 Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Api/`; it is gitignored, so keep real secrets there):
@@ -56,12 +54,36 @@ Example `appsettings.Development.json` (placed in `src/Voidwell.DaybreakGames.Ap
     "ClientSecret": "dev-secret"
   },
   "RedisConfiguration": "localhost:6379",
-  "CensusWebsocketServices": "",
-  "DisableUpdater": true
+  "CensusWebsocketServices": ""
 }
 ```
 
 The EF design-time factory reads `ConnectionString` from `appsettings.json` and `appsettings.{Environment}.json` (default `Development`) in the working directory of the Data project, then environment variables, so migration commands need an `appsettings.Development.json` in `src/Voidwell.DaybreakGames.Data/` too.
+
+### Background services
+
+`StoreUpdaterScheduler` (the scheduled Census store updater), `CharacterUpdaterService` and `WebsocketMonitor` (the
+Census websocket monitor) are stateful hosted services from
+[Voidwell.Common.State](https://github.com/voidwell/voidwell.common/tree/main/src/State). Each one is **off** until it
+is enabled.
+
+Administrators enable and disable them through the API, and the choice is saved in the `application_configuration`
+table, so it survives restarts and applies to every instance:
+
+```
+GET  /ps2/services/status
+POST /ps2/services/{name}/enable
+POST /ps2/services/{name}/disable
+```
+
+A service's state is the configuration key `HostedServices:{Name}:Enabled`. The table is the lowest priority source,
+so setting the key in appsettings or an environment variable overrides it and **locks** the service: its status
+reports `isLocked` and `lockedBy`, and enable or disable requests return `409 Conflict`. For example, to keep the
+websocket monitor off in one deployment:
+
+```
+HostedServices__WebsocketMonitor__Enabled=false
+```
 
 ### Logging
 
@@ -109,7 +131,7 @@ docker run -p 5000:5000 -e ConnectionString=... -e CensusServiceKey=... voidwell
 | `Voidwell.DaybreakGames.Census` | Census API collections and models |
 | `Voidwell.DaybreakGames.Data` | EF Core context, repositories, migrations |
 | `Voidwell.DaybreakGames.Domain` | Domain models |
-| `Voidwell.DaybreakGames.Utils` | Shared helpers and hosted-service management |
+| `Voidwell.DaybreakGames.Utils` | Shared helpers |
 
 ## License
 

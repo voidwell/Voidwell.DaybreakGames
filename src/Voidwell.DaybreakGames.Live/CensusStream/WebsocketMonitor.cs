@@ -2,14 +2,14 @@ using System.Text.Json;
 using DaybreakGames.Census.Stream;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Voidwell.Common.State;
 using Voidwell.DaybreakGames.Live.CensusStream.Models;
 using Voidwell.DaybreakGames.Live.GameState;
-using Voidwell.DaybreakGames.Utils.HostedService;
 using Websocket.Client;
 
 namespace Voidwell.DaybreakGames.Live.CensusStream;
 
-public class WebsocketMonitor : IStatefulHostedService, IDisposable
+public class WebsocketMonitor : StatefulHostedService, IDisposable
 {
     private readonly ICensusStreamClient _client;
     private readonly IWebsocketEventHandler _handler;
@@ -50,20 +50,14 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
         };
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (_options.DisableCensusMonitor)
-        {
-            _logger.LogInformation("Census monitor is disabled");
-            return;
-        }
-
         _logger.LogInformation("Starting census stream monitor");
 
         await _client.ConnectAsync();
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Stopping census stream monitor");
 
@@ -75,19 +69,9 @@ public class WebsocketMonitor : IStatefulHostedService, IDisposable
         await _client?.DisconnectAsync()!;
     }
 
-    public Task OnApplicationStartup(CancellationToken cancellationToken)
+    public override Task<object?> GetStatusAsync(CancellationToken cancellationToken)
     {
-        return Task.CompletedTask;
-    }
-
-    public async Task OnApplicationShutdown(CancellationToken cancellationToken)
-    {
-        await _client?.DisconnectAsync()!;
-    }
-
-    public Task<object> GetStatusAsync(CancellationToken cancellationToken)
-    {
-        return Task.FromResult((object)_lastStateChange!)!;
+        return Task.FromResult<object?>(_lastStateChange);
     }
 
     private Task OnConnect(ReconnectionType type)
